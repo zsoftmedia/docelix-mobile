@@ -276,7 +276,11 @@ class _LandScreenState extends State<LandScreen> {
                       icon: Icons.account_box_outlined,
                       title: "Clients",
                       onTap: () {
-                        Navigator.pop(context);
+                        //Navigator.pop(context);
+
+                        Get.offNamed(
+                          '/ClientsScreen',
+                          arguments: 'Clients Screen',);
 
                         setState(() {
                           _selectedIndex = 3;
