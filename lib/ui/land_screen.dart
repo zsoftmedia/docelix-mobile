@@ -248,7 +248,7 @@ class _LandScreenState extends State<LandScreen> {
                       title: "Invoices",
                       onTap: () {
 
-                        Get.offNamed(
+                        Get.toNamed(
                           '/InvoicesScreen',
                           arguments: 'Invoices Screen',);
 
@@ -278,7 +278,7 @@ class _LandScreenState extends State<LandScreen> {
                       onTap: () {
                         //Navigator.pop(context);
 
-                        Get.offNamed(
+                        Get.toNamed(
                           '/ClientsScreen',
                           arguments: 'Clients Screen',);
 

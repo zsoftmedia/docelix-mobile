@@ -4,12 +4,12 @@ import 'package:docelix_mobileapp/utils/string_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AddInvoicesScreen extends StatefulWidget {
+class CreateInvoicesScreen extends StatefulWidget {
   @override
-  State<AddInvoicesScreen> createState() => _AddInvoicesScreenState();
+  State<CreateInvoicesScreen> createState() => _CreateInvoicesScreenState();
 }
 
-class _AddInvoicesScreenState extends State<AddInvoicesScreen> {
+class _CreateInvoicesScreenState extends State<CreateInvoicesScreen> {
   // var loginPage_Controller = Get.put(LoginPage_Ctrl());
   // final _formKey = GlobalKey<FormState>(); // GlobalKey to manage form state
 

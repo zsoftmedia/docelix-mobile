@@ -494,7 +494,7 @@ class _LoginPageState extends State<LoginScreen> {
 
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  Get.offNamed(
+                                  Get.toNamed(
                                     '/RegisterScreen',
                                     arguments: 'Register Screen',
                                   );

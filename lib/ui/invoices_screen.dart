@@ -221,6 +221,10 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           // OPEN ADD INVOICE PAGE
           // ----------------------------------------------------------
 
+          Get.toNamed(
+            '/CreateInvoicesScreen',
+            arguments: 'Create Invoices Screen',);
+
           // Get.to(
           //   () => const AddInvoiceScreen(),
           // );

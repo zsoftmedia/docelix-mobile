@@ -237,6 +237,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
           // OPEN ADD CLIENT PAGE
           // ----------------------------------------------------------
 
+          Get.toNamed(
+            '/AddClientScreen',
+            arguments: 'Add Client Screen',);
+
           // Get.to(
           //   () => const AddClientScreen(),
           // );

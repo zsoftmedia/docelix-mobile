@@ -1,5 +1,7 @@
 import 'package:docelix_mobileapp/introPages/Intro_screen.dart';
+import 'package:docelix_mobileapp/ui/add_client_screen.dart';
 import 'package:docelix_mobileapp/ui/clients_screen.dart';
+import 'package:docelix_mobileapp/ui/create_invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/land_screen.dart';
@@ -54,7 +56,9 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/LandScreen', page: () => LandScreen(),),
         GetPage(name: '/DashboardScreen', page: () => DashboardScreen(),),
         GetPage(name: '/InvoicesScreen', page: () => InvoicesScreen(),),
+        GetPage(name: '/CreateInvoicesScreen', page: () => CreateInvoicesScreen(),),
         GetPage(name: '/ClientsScreen', page: () => ClientsScreen(),),
+        GetPage(name: '/AddClientScreen', page: () => AddClientScreen(),),
       ],
     );
   }
