@@ -1,7 +1,9 @@
 import 'package:docelix_mobileapp/introPages/Intro_screen.dart';
+import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
+import 'package:docelix_mobileapp/ui/invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/land_screen.dart';
-import 'package:docelix_mobileapp/ui/login_screen.dart';
-import 'package:docelix_mobileapp/ui/signup_screen.dart';
+import 'package:docelix_mobileapp/ui/ui_auth/login_screen.dart';
+import 'package:docelix_mobileapp/ui/ui_auth/signup_screen.dart';
 import 'package:docelix_mobileapp/ui/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
@@ -48,6 +50,9 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/SplashScreen', page: () => const splashScreen(),),
         GetPage(name: '/LoginScreen', page: () => LoginScreen(),),
         GetPage(name: '/RegisterScreen', page: () => SignUpScreen(),),
+        GetPage(name: '/LandScreen', page: () => LandScreen(),),
+        GetPage(name: '/DashboardScreen', page: () => DashboardScreen(),),
+        GetPage(name: '/InvoicesScreen', page: () => InvoicesScreen(),),
       ],
     );
   }

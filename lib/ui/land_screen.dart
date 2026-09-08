@@ -1,286 +1,542 @@
-
-import 'package:docelix_mobileapp/utils/colors_list.dart';
-import 'package:docelix_mobileapp/utils/constants.dart';
-import 'package:docelix_mobileapp/utils/string_list.dart';
+import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 class LandScreen extends StatefulWidget {
+  const LandScreen({super.key});
+
   @override
   State<LandScreen> createState() => _LandScreenState();
 }
 
 class _LandScreenState extends State<LandScreen> {
-  // var loginPage_Controller = Get.put(LoginPage_Ctrl());
-  // final _formKey = GlobalKey<FormState>(); // GlobalKey to manage form state
 
   bool checkLoginProgressbar = false;
-  bool _obscureText = true;
+
+  // Bottom navigation selected index
+  int _selectedIndex = 0;
+
+  // Bottom navigation pages
+  final List<Widget> _pages = [
+    /*const Center(
+      child: Text(
+        "Dashboard",
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),*/
+
+    const DashboardScreen(),
+
+    const Center(
+      child: Text(
+        "Services",
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+
+    const Center(
+      child: Text(
+        "Notifications",
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+
+    const Center(
+      child: Text(
+        "Profile",
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+  ];
+
+  // Bottom navigation change
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
+
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,  // Prevent the form from moving up when the keyboard appears
-      body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              top: 0,
-              right: 0,
-              left: 0,
-              child: Container(
-                height: height / 2.5,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      colorsList.colorFireOpal_1100,
-                      colorsList.colorFireOpal_1100,
-                      colorsList.colorFireOpal_1100,
-                      colorsList.colorFireOpal_1100,
-                      colorsList.colorFireOpal_1100,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+
+      // ============================================================
+      // APP BAR
+      // ============================================================
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: Icon(
+                Icons.menu_rounded,
+                color: const Color(0xFF0A2342),
+                size: width * 0.065,
+              ),
+
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
+
+        title: Image.asset(
+          'assets/main_logo.png',
+          width: width * 0.26,
+          height: height * 0.5,
+          fit: BoxFit.contain,
+        ),
+
+        centerTitle: false,
+
+        actions: [
+
+          IconButton(
+            onPressed: () {
+              // Notification action
+            },
+
+            icon: Icon(
+              Icons.notifications_none_rounded,
+              color: const Color(0xFF0A2342),
+              size: width * 0.065,
+            ),
+          ),
+
+          SizedBox(width: width * 0.02),
+        ],
+      ),
+
+      // ============================================================
+      // NAVIGATION DRAWER
+      // ============================================================
+      drawer: Drawer(
+        backgroundColor: Colors.white,
+
+        child: SafeArea(
+          child: Column(
+            children: [
+
+              // ==========================================================
+              // DRAWER HEADER
+              // ==========================================================
+              Container(
+                width: double.infinity,
+
+                padding: EdgeInsets.symmetric(
+                  horizontal: width * 0.06,
+                  vertical: height * 0.025,
+                ),
+
+                decoration: const BoxDecoration(
+                  color: Color(0xFF063C70),
+
                   borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(height / 20),
-                    bottomLeft: Radius.circular(height / 20),
+                    bottomRight: Radius.circular(30),
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              top: height / 9,
-              left: width / 7.5,
-              child: SvgPicture.asset(
-                'assets/main_logo.svg',
-                width: width / 1.4,
-                // height: height / 12,
-                colorFilter: const ColorFilter.mode(
-                  Colors.white,
-                  BlendMode.srcIn,
+
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                  children: [
+
+                    // Logo
+                    Image.asset(
+                      'assets/lightlogo.png',
+                      width: width * 0.45,
+                      height: height * 0.07,
+                      fit: BoxFit.contain,
+                    ),
+
+                    SizedBox(height: height * 0.015),
+
+                    Text(
+                      "Welcome back",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: width * 0.055,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.005),
+
+                    Text(
+                      "Manage your account",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: width * 0.037,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            /*Align(
-              alignment: Alignment.center,
-              child: Obx(() {
-                // Show loading animation when checkLoginProgressbar is true
-                return loginPage_Controller.checkLoginProgressbar.value
-                    ? LoadingAnimationWidget.staggeredDotsWave(
-                  color: Colors.blue,
-                  size: 50,
-                )
-                    : SizedBox.shrink(); // Return an empty widget if not loading
-              }),
-            ),*/
+              SizedBox(height: height * 0.01),
 
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: height / 1.4,
-                padding: EdgeInsets.all(width / 40),
-                margin: EdgeInsets.symmetric(horizontal: width / 30),
+              // ==========================================================
+              // SCROLLABLE MENU
+              // ==========================================================
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+
+                  children: [
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.home_outlined,
+                      title: "Dashboard",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _selectedIndex = 0;
+                        });
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.supervised_user_circle_sharp,
+                      title: "Team & Access",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _selectedIndex = 1;
+                        });
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.watch_later_outlined,
+                      title: "Activity Log",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _selectedIndex = 2;
+                        });
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.file_copy_outlined,
+                      title: "Invoices",
+                      onTap: () {
+
+                        Get.offNamed(
+                          '/InvoicesScreen',
+                          arguments: 'Invoices Screen',);
+
+                        setState(() {
+                          _selectedIndex = 3;
+                        });
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.dashboard_outlined,
+                      title: "Items",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _selectedIndex = 3;
+                        });
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.account_box_outlined,
+                      title: "Clients",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _selectedIndex = 3;
+                        });
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.upcoming_rounded,
+                      title: "Incoming",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _selectedIndex = 3;
+                        });
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.star_outline_sharp,
+                      title: "Docelix AI",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _selectedIndex = 3;
+                        });
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.mail_outline_outlined,
+                      title: "Mail",
+                      onTap: () {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _selectedIndex = 3;
+                        });
+                      },
+                    ),
+
+                    const Divider(
+                      indent: 20,
+                      endIndent: 20,
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.web_asset_sharp,
+                      title: "Assets",
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.account_balance,
+                      title: "Finance",
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.percent,
+                      title: "Taxes",
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+
+                    _drawerItem(
+                      context: context,
+                      icon: Icons.file_copy_outlined,
+                      title: "Reports",
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+
+                    // Extra bottom padding
+                    SizedBox(height: height * 0.02),
+                  ],
+                ),
+              ),
+
+              // ==========================================================
+              // LOGOUT - ALWAYS AT BOTTOM
+              // ==========================================================
+              Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(width / 12),
-                    bottom: Radius.circular(width / 12),
-                  ),
+
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
                 ),
 
-                child: Form(
-                  //  key: _formKey,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: width / 20),
-                    child: ListView(
-                      //crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: height / 70),
-                        Text(
-                          StringsList.txtLogin,
-                          style: TextStyle(
-                              fontSize: fontSize_25,
-                              fontWeight: FontWeight.bold,
-                              color: colorsList.colorBlue_1050),
-                        ),
-                        // SizedBox(height: height / 100),
-                        Text(
-                          StringsList.txtSignin_desc,
-                          style: TextStyle(
-                              fontSize: fontSize_14,
-                              color: colorsList.colorGray_350),
-                        ),
+                child: _drawerItem(
+                  context: context,
+                  icon: Icons.logout_rounded,
+                  title: "Logout",
+                  iconColor: Colors.red,
+                  textColor: Colors.red,
+                  onTap: () {
+                    Navigator.pop(context);
 
-                        SizedBox(height: height / 70),
-                        /*Center(
-                          child: Obx (() => Text(loginPage_Controller.errorText.value,
-                            style: TextStyle(color: colorsList.colorRed),),
-                          ),
-                        ),*/
-                        SizedBox(height: height / 70),
-                        Text(
-                          StringsList.txtUsername,
-                          style: TextStyle(
-                              fontSize: fontSize_14,
-                              color: colorsList.colorGray_350),
-                        ),
-                        TextFormField(
-                          //  controller: loginPage_Controller.identityController,
-                          decoration: InputDecoration(
-                            hintText: "e.g. anees.irshad@berrinex.com",
-                            hintStyle: TextStyle(
-                                color: colorsList.colorGray_350, fontSize: 14),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(width / 25),
-                              borderSide: BorderSide.none,
-                            ),
-                            fillColor: colorsList.colorGray_400.withOpacity(0.1),
-                            filled: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your username';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: height / 70),
-                        Text(
-                          StringsList.txtPassword,
-                          style: TextStyle(
-                              fontSize: fontSize_14,
-                              color: colorsList.colorGray_350),
-                        ),
-                        TextFormField(
-                          //  controller: loginPage_Controller.passwordController,
-                          decoration: InputDecoration(
-                            hintText: "********",
-                            hintStyle: TextStyle(
-                                color: colorsList.colorGray_450,
-                                fontSize: fontSize_14),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(width / 25),
-                              borderSide: BorderSide.none,
-                            ),
-                            fillColor: colorsList.colorGray_400.withOpacity(0.1),
-                            filled: true,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: colorsList.colorGray_400,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
-                            ),
-                          ),
-                          obscureText: _obscureText,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            if (value.length < 6) {
-                              return 'Password must be at least 6 characters long';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: height / 40),
-                        InkWell(
-                          onTap: () async {
-                            /*if (_formKey.currentState!.validate()) {
-                              await loginPage_Controller.checkInternetConnection();
-
-                              if (loginPage_Controller.isConnected.value) {
-                                loginPage_Controller.checkLoginProgressbar.value =
-                                true; // Show progress bar
-                                await loginPage_Controller.loginFunction(); // Perform login
-                                loginPage_Controller.checkLoginProgressbar.value =
-                                false; // Hide progress bar
-                              } else {
-                                loginPage_Controller.checkLoginProgressbar.value =
-                                false; // Hide progress bar if no internet
-                              }
-                            }*/
-                          },
-                          child: Container(
-                            height: height * 0.07,  // Adjust height as needed
-                            width: width * 0.9,     // Adjust width as needed
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [
-                                  colorsList.colorGray_1100,
-                                  colorsList.colorGray_1100,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(width / 25),
-                            ),
-                            child: Center(
-                              child: Text(
-                                StringsList.txtbtnLogin,
-                                style: TextStyle(
-                                  fontSize: fontSize_16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                          /*child: Obx(() {
-                            return Container(
-                              height: height * 0.07,  // Adjust height as needed
-                              width: width * 0.9,     // Adjust width as needed
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [
-                                    colorsList.colorMediumTealBlue,
-                                    colorsList.colorMediumTealBlue,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(width / 25),
-                              ),
-                              child: Center(
-                                child: loginPage_Controller.checkLoginProgressbar.value
-                                    ? LoadingAnimationWidget.staggeredDotsWave( // Show loading animation
-                                  color: Colors.white,
-                                  size: 24,
-                                )
-                                    : Text(
-                                  StringsList.txtbtnLogin,
-                                  style: TextStyle(
-                                    fontSize: fontSize_16,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),*/
-                        ),
-
-                        SizedBox(height: height / 4.6),
-
-                      ],
-                    ),
-                  ),
+                    // Logout logic
+                  },
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+
+      // ============================================================
+      // BODY
+      // ============================================================
+      body: SafeArea(
+        child: _pages[_selectedIndex],
+      ),
+
+      // ============================================================
+      // BOTTOM NAVIGATION BAR
+      // ============================================================
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 15,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+
+        child: BottomNavigationBar(
+
+          currentIndex: _selectedIndex,
+
+          onTap: _onItemTapped,
+
+          type: BottomNavigationBarType.fixed,
+
+          backgroundColor: Colors.white,
+
+          elevation: 0,
+
+          selectedItemColor: const Color(0xFF063C70),
+
+          unselectedItemColor: const Color(0xFF71829A),
+
+          selectedFontSize: 12,
+
+          unselectedFontSize: 12,
+
+          showUnselectedLabels: true,
+
+          items: const [
+
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.home_outlined,
+              ),
+              activeIcon: Icon(
+                Icons.home_rounded,
+              ),
+              label: "Home",
+            ),
+
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.miscellaneous_services_outlined,
+              ),
+              activeIcon: Icon(
+                Icons.miscellaneous_services_rounded,
+              ),
+              label: "Services",
+            ),
+
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.notifications_none_rounded,
+              ),
+              activeIcon: Icon(
+                Icons.notifications_rounded,
+              ),
+              label: "Notifications",
+            ),
+
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.person_outline_rounded,
+              ),
+              activeIcon: Icon(
+                Icons.person_rounded,
+              ),
+              label: "Profile",
             ),
           ],
         ),
       ),
+    );
+  }
+
+  // ==============================================================
+  // DRAWER ITEM WIDGET
+  // ==============================================================
+
+  Widget _drawerItem({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color iconColor = const Color(0xFF344E6F),
+    Color textColor = const Color(0xFF172A46),
+  }) {
+
+    final width = MediaQuery.of(context).size.width;
+
+    return ListTile(
+
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: width * 0.06,
+      ),
+
+      leading: Icon(
+        icon,
+        color: iconColor,
+        size: width * 0.060,
+      ),
+
+      title: Text(
+        title,
+        style: TextStyle(
+          color: textColor,
+          fontSize: width * 0.040,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      onTap: onTap,
     );
   }
 }
