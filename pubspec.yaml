@@ -40,6 +40,14 @@ dependencies:
   get: ^4.7.3
   get_storage: ^2.1.1
   toast: ^0.3.0
+  http: ^1.6.0
+  intl:
+  nb_utils: ^7.3.5
+  flutter_dotenv: ^6.0.1
+  dio: ^5.11.1
+  supabase_flutter: ^2.17.2
+  snackbar: ^1.0.2
+
 
 dev_dependencies:
   flutter_test:

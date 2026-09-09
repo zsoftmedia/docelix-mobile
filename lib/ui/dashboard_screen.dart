@@ -2,6 +2,7 @@
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -18,6 +19,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     "Transactions",
   ];
 
+  // ================================================================
+  // LIGHT THEME COLORS
+  // ================================================================
+
+  static const Color backgroundColor = Color(0xFFF7F9FC);
+  static const Color cardColor = Colors.white;
+
+  static const Color primaryText = Color(0xFF0A2342);
+  static const Color secondaryText = Color(0xFF71829A);
+  static const Color lightText = Color(0xFF52657D);
+
+  static const Color borderColor = Color(0xFFE1E7EF);
+  static const Color progressBackground = Color(0xFFE9EEF4);
+
+  static const Color primaryBlue = Color(0xFF0B4380);
+  static const Color lightBlue = Color(0xFFEAF3FB);
+
+  static const Color green = Color(0xFF12B886);
+  static const Color red = Color(0xFFE5484D);
+  static const Color blue = Color(0xFF4E9FFF);
+  static const Color cyan = Color(0xFF25BEEB);
+  static const Color purple = Color(0xFF9B5DE5);
+  static const Color orange = Color(0xFFFFB52E);
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -25,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final height = size.height;
 
     return Container(
-      color: colorsList.colorGray_50,
+      color: backgroundColor,
       child: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -44,7 +69,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +77,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           "SEP 2026  ·  FINANCIAL",
                           style: TextStyle(
-                            color: colorsList.colorGray_1100,
+                            color: secondaryText,
                             fontSize: width * 0.027,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.2,
@@ -65,7 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           "Overview",
                           style: TextStyle(
-                            color: colorsList.colorGray_1100,
+                            color: primaryText,
                             fontSize: width * 0.065,
                             fontWeight: FontWeight.w800,
                           ),
@@ -73,45 +97,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   ),
-
-                  // Notification
-                 /* Container(
-                    width: width * 0.10,
-                    height: width * 0.10,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF151B27),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFF293344),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.notifications_none_rounded,
-                      color: const Color(0xFF8D9AAF),
-                      size: width * 0.05,
-                    ),
-                  ),
-
-                  SizedBox(width: width * 0.025),
-
-                  // Profile
-                  Container(
-                    width: width * 0.105,
-                    height: width * 0.105,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF20C4DD),
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      "AC",
-                      style: TextStyle(
-                        color: const Color(0xFF071018),
-                        fontSize: width * 0.035,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),*/
                 ],
               ),
 
@@ -125,11 +110,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 width: double.infinity,
                 padding: EdgeInsets.all(width * 0.055),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF171D29),
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: const Color(0xFF2B3547),
+                    color: borderColor,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Stack(
                   children: [
@@ -141,8 +133,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Container(
                         width: width * 0.34,
                         height: width * 0.34,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1D2A3F),
+                        decoration: const BoxDecoration(
+                          color: lightBlue,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -155,7 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           "NET PROFIT - SEP 2026",
                           style: TextStyle(
-                            color: const Color(0xFF71839D),
+                            color: secondaryText,
                             fontSize: width * 0.027,
                             letterSpacing: 1.2,
                           ),
@@ -170,7 +162,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               "\$59,600",
                               style: TextStyle(
-                                color: Colors.white,
+                                color: primaryText,
                                 fontSize: width * 0.085,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -184,13 +176,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 vertical: height * 0.006,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF193B5A),
+                                color: const Color(0xFFE7F8F3),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 "+44.4%",
                                 style: TextStyle(
-                                  color: const Color(0xFF40BFFF),
+                                  color: green,
                                   fontSize: width * 0.028,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -204,7 +196,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           "44.4% profit margin · best quarter on record",
                           style: TextStyle(
-                            color: const Color(0xFF71839D),
+                            color: secondaryText,
                             fontSize: width * 0.028,
                           ),
                         ),
@@ -212,13 +204,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         SizedBox(height: height * 0.025),
 
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
                           children: [
 
                             Text(
                               "Rev  \$134.2k",
                               style: TextStyle(
-                                color: const Color(0xFF12D5B1),
+                                color: green,
                                 fontSize: width * 0.029,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -227,7 +220,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               "Exp  \$74.6k",
                               style: TextStyle(
-                                color: const Color(0xFFFF4D68),
+                                color: red,
                                 fontSize: width * 0.029,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -244,7 +237,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               height: 5,
                               width: double.infinity,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF292F3C),
+                                color: progressBackground,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
@@ -254,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: Container(
                                 height: 5,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF25BEEB),
+                                  color: cyan,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
@@ -273,7 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // TABS
               // =========================================================
 
-              Container(
+              SizedBox(
                 height: height * 0.045,
                 child: Row(
                   children: List.generate(
@@ -297,7 +290,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF12D5B1)
+                                ? green
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -305,8 +298,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             tabs[index],
                             style: TextStyle(
                               color: isSelected
-                                  ? const Color(0xFF071018)
-                                  : const Color(0xFF77869B),
+                                  ? Colors.white
+                                  : secondaryText,
                               fontSize: width * 0.028,
                               fontWeight: isSelected
                                   ? FontWeight.w700
@@ -338,7 +331,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       percentage: "+23.2%",
                       subtitle: "vs last month",
                       icon: Icons.attach_money_rounded,
-                      iconColor: const Color(0xFF10D8B0),
+                      iconColor: green,
                     ),
                   ),
 
@@ -353,7 +346,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       percentage: "+4.8%",
                       subtitle: "vs last month",
                       icon: Icons.account_balance_wallet_outlined,
-                      iconColor: const Color(0xFFFF4E6A),
+                      iconColor: red,
                     ),
                   ),
                 ],
@@ -377,7 +370,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       percentage: "+44.4%",
                       subtitle: "44.4% margin",
                       icon: Icons.trending_up_rounded,
-                      iconColor: const Color(0xFF4E9FFF),
+                      iconColor: blue,
                     ),
                   ),
 
@@ -392,7 +385,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       percentage: "+21.6%",
                       subtitle: "all accounts",
                       icon: Icons.account_balance_wallet_outlined,
-                      iconColor: const Color(0xFFFFB52E),
+                      iconColor: orange,
                     ),
                   ),
                 ],
@@ -408,11 +401,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 width: double.infinity,
                 padding: EdgeInsets.all(width * 0.045),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF171923),
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF403652),
+                    color: const Color(0xFFE5DDF0),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -424,12 +424,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           width: width * 0.11,
                           height: width * 0.11,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF302344),
+                            color: const Color(0xFFF2EAFF),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
                             Icons.shield_outlined,
-                            color: const Color(0xFFA95CFF),
+                            color: purple,
                             size: width * 0.055,
                           ),
                         ),
@@ -445,7 +445,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               Text(
                                 "TAX RETURN",
                                 style: TextStyle(
-                                  color: const Color(0xFF77849A),
+                                  color: secondaryText,
                                   fontSize: width * 0.026,
                                   letterSpacing: 1.2,
                                 ),
@@ -456,7 +456,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               Text(
                                 "\$14,320",
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: primaryText,
                                   fontSize: width * 0.055,
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -476,13 +476,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 vertical: height * 0.005,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF302344),
+                                color: const Color(0xFFF2EAFF),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 "FY 2025",
                                 style: TextStyle(
-                                  color: const Color(0xFFB35EFF),
+                                  color: purple,
                                   fontSize: width * 0.027,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -494,7 +494,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               "refund pending",
                               style: TextStyle(
-                                color: const Color(0xFF718097),
+                                color: secondaryText,
                                 fontSize: width * 0.024,
                               ),
                             ),
@@ -513,7 +513,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           "Filing status",
                           style: TextStyle(
-                            color: const Color(0xFF758399),
+                            color: secondaryText,
                             fontSize: width * 0.026,
                           ),
                         ),
@@ -521,7 +521,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           "72% processed",
                           style: TextStyle(
-                            color: const Color(0xFFB65EFF),
+                            color: purple,
                             fontSize: width * 0.027,
                             fontWeight: FontWeight.w700,
                           ),
@@ -535,7 +535,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: 4,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF302D3A),
+                        color: progressBackground,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: FractionallySizedBox(
@@ -543,7 +543,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         widthFactor: 0.72,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFB45EFF),
+                            color: purple,
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
@@ -563,20 +563,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 width: double.infinity,
                 padding: EdgeInsets.all(width * 0.045),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF131822),
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF293345),
+                    color: borderColor,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
                   children: [
 
                     Text(
                       "MONTH SUMMARY",
                       style: TextStyle(
-                        color: const Color(0xFF74839A),
+                        color: secondaryText,
                         fontSize: width * 0.026,
                         letterSpacing: 1.2,
                       ),
@@ -592,7 +600,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           "Gross Revenue",
                           style: TextStyle(
-                            color: const Color(0xFF8A96A8),
+                            color: lightText,
                             fontSize: width * 0.029,
                           ),
                         ),
@@ -600,7 +608,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           "\$134,200",
                           style: TextStyle(
-                            color: Colors.white,
+                            color: primaryText,
                             fontSize: width * 0.030,
                             fontWeight: FontWeight.w700,
                           ),
@@ -614,7 +622,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       height: 4,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF26303B),
+                        color: progressBackground,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: FractionallySizedBox(
@@ -622,8 +630,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         widthFactor: 0.95,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFF12D5B1),
-                            borderRadius: BorderRadius.circular(10),
+                            color: green,
+                            borderRadius:
+                            BorderRadius.circular(10),
                           ),
                         ),
                       ),
@@ -657,24 +666,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Container(
       padding: EdgeInsets.all(width * 0.04),
       decoration: BoxDecoration(
-        color: const Color(0xFF151A24),
+        color: cardColor,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: const Color(0xFF2B3546),
+          color: borderColor,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: [
 
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
             children: [
 
               Text(
                 title,
                 style: TextStyle(
-                  color: const Color(0xFF718097),
+                  color: secondaryText,
                   fontSize: width * 0.024,
                   letterSpacing: 0.8,
                 ),
@@ -701,7 +719,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Text(
             value,
             style: TextStyle(
-              color: Colors.white,
+              color: primaryText,
               fontSize: width * 0.043,
               fontWeight: FontWeight.w800,
             ),
@@ -728,7 +746,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   subtitle,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: const Color(0xFF66758A),
+                    color: secondaryText,
                     fontSize: width * 0.023,
                   ),
                 ),

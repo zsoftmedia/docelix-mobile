@@ -1,4 +1,7 @@
 
+import 'dart:math';
+
+import 'package:docelix_mobileapp/controllers/controller_auth/login_controller.dart';
 import 'package:docelix_mobileapp/ui/ui_custom/topCurveClipper.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/constants.dart';
@@ -14,8 +17,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginScreen> {
- // var loginPage_Controller = Get.put(LoginPage_Ctrl());
- // final _formKey = GlobalKey<FormState>(); // GlobalKey to manage form state
+
+  final LoginController loginController = Get.put(LoginController());
 
   bool checkLoginProgressbar = false;
   bool _obscureText = true;
@@ -111,8 +114,8 @@ class _LoginPageState extends State<LoginScreen> {
                     // EMAIL
                     // --------------------------------------------------
                     TextFormField(
-                      // controller:
-                      // loginPage_Controller.identityController,
+                       controller:
+                       loginController.emailController,
 
                       keyboardType: TextInputType.emailAddress,
 
@@ -182,8 +185,8 @@ class _LoginPageState extends State<LoginScreen> {
                     // PASSWORD
                     // --------------------------------------------------
                     TextFormField(
-                      // controller:
-                      // loginPage_Controller.passwordController,
+                       controller:
+                       loginController.passwordController,
 
                       obscureText: _obscureText,
 
@@ -341,10 +344,12 @@ class _LoginPageState extends State<LoginScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
 
+                          loginController.login();
+
                           // Your existing login code goes here.
-                          Get.offNamed(
+                          /*Get.offNamed(
                               '/LandScreen',
-                              arguments: 'Land Screen',);
+                              arguments: 'Land Screen',);*/
 
                         },
 

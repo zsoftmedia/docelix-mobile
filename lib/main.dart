@@ -12,9 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+    anonKey: "sb_publishable_Ti3w86g2K9d6QVCu6ioxjA_DP1u-VMW",
+    url: "https://owytoejxgqxvevjsrfjj.supabase.co",
+  );
 
   await GetStorage.init();
 

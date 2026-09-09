@@ -1,7 +1,7 @@
 
 /********************** URL Links *************************/
 //const Base_URL = 'https://pcfms.pndkp.gov.pk:9002/api/';
-//const Base_URL = 'http://192.168.1.17:8091/api/';
+const Base_URL = 'https://main.docelix.at/api';
 
 /********************** Strings *************************/
 String INTROPAGECHECK = 'intro_page_chk';
