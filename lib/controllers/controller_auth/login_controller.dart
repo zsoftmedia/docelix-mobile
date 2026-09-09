@@ -1,6 +1,6 @@
+import 'package:docelix_mobileapp/config/api_constants.dart';
 import 'package:docelix_mobileapp/services/auth_services.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
-import 'package:docelix_mobileapp/services/supabase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -19,7 +19,7 @@ class LoginController extends GetxController {
 
   void login () async {
 
-    final email = emailController.text.trim();
+    final email = emailController.text.trim().toLowerCase();
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
@@ -64,7 +64,10 @@ class LoginController extends GetxController {
       debugPrint('Access Token: $accessToken');
       debugPrint('================================');
 
-
+      Get.offNamed(
+        '/LandScreen',
+        arguments: 'Land Screen',
+      );
     }on AuthException catch (e) {
 
       // Supabase authentication error
@@ -72,10 +75,22 @@ class LoginController extends GetxController {
 
       debugPrint('Supabase Auth Error: ${e.message}');
 
-      Get.snackbar('Login Failed', e.message,);
+      final isInvalidCredentials = e.code == 'invalid_credentials';
+
+      Get.snackbar(
+        'Login Failed',
+        isInvalidCredentials
+            ? 'Invalid credentials on ${Uri.parse(ApiConstants.supabaseUrl).host}. '
+                'The user must exist in THAT project, and the email must be confirmed '
+                '(Confirm email is ON). Create the account in this app first, or confirm the user in the dashboard.'
+            : e.message,
+        duration: const Duration(seconds: 8),
+      );
 
       debugPrint('================================');
       debugPrint('SUPABASE AUTH ERROR');
+      debugPrint('Project URL: ${Supabase.instance.client.rest.url}');
+      debugPrint('Email: $email');
       debugPrint('Message: ${e.message}');
       debugPrint('Status Code: ${e.statusCode}');
       debugPrint('Code: ${e.code}');

@@ -8,6 +8,7 @@ import 'package:docelix_mobileapp/ui/land_screen.dart';
 import 'package:docelix_mobileapp/ui/ui_auth/login_screen.dart';
 import 'package:docelix_mobileapp/ui/ui_auth/signup_screen.dart';
 import 'package:docelix_mobileapp/ui/splash_screen.dart';
+import 'package:docelix_mobileapp/config/api_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
@@ -17,8 +18,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
-    anonKey: "sb_publishable_Ti3w86g2K9d6QVCu6ioxjA_DP1u-VMW",
-    url: "https://owytoejxgqxvevjsrfjj.supabase.co",
+    url: ApiConstants.supabaseUrl,
+    anonKey: ApiConstants.supabaseAnonKey,
   );
 
   await GetStorage.init();

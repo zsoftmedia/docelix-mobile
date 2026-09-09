@@ -1,4 +1,5 @@
 
+import 'package:docelix_mobileapp/controllers/controller_auth/signup_controller.dart';
 import 'package:docelix_mobileapp/ui/ui_custom/topCurveClipper.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/constants.dart';
@@ -13,8 +14,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  // var loginPage_Controller = Get.put(LoginPage_Ctrl());
-  // final _formKey = GlobalKey<FormState>(); // GlobalKey to manage form state
+  final SignupController signupController = Get.put(SignupController());
 
   bool checkLoginProgressbar = false;
   bool _obscureText = true;
@@ -142,8 +142,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     // EMAIL
                     // --------------------------------------------------
                     TextFormField(
-                      // controller:
-                      // loginPage_Controller.identityController,
+                      controller: signupController.emailController,
 
                       keyboardType: TextInputType.emailAddress,
 
@@ -213,8 +212,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     // PASSWORD
                     // --------------------------------------------------
                     TextFormField(
-                      // controller:
-                      // loginPage_Controller.passwordController,
+                      controller: signupController.passwordController,
 
                       obscureText: _obscureText,
 
@@ -419,9 +417,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                       child: ElevatedButton(
                         onPressed: () async {
-
-                          // Your existing login code goes here.
-
+                          await signupController.signUp();
                         },
 
                         style: ElevatedButton.styleFrom(
