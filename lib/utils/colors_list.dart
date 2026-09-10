@@ -95,4 +95,29 @@ class colorsList {
   static Color colorMediumSeaGreen_300 = Color(0xFF38C1A6);
   static Color colorMediumSeaGreen_200 = Color(0xFF39C3A7);
   static Color colorMediumSeaGreen_100 = Color(0xFF3DC8AC);
+
+
+  // ================================================================
+  // LIGHT THEME COLORS
+  // ================================================================
+
+  static const Color backgroundColor = Color(0xFFF7F9FC);
+  static const Color cardColor = Colors.white;
+
+  static const Color primaryText = Color(0xFF0A2342);
+  static const Color secondaryText = Color(0xFF71829A);
+  static const Color lightText = Color(0xFF52657D);
+
+  static const Color borderColor = Color(0xFFE1E7EF);
+  static const Color progressBackground = Color(0xFFE9EEF4);
+
+  static const Color primaryBlue = Color(0xFF0B4380);
+  static const Color lightBlue = Color(0xFFEAF3FB);
+
+  static const Color green = Color(0xFF12B886);
+  static const Color red = Color(0xFFE5484D);
+  static const Color blue = Color(0xFF4E9FFF);
+  static const Color cyan = Color(0xFF25BEEB);
+  static const Color purple = Color(0xFF9B5DE5);
+  static const Color orange = Color(0xFFFFB52E);
 }

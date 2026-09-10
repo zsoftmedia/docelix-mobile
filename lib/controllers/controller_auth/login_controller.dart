@@ -1,6 +1,8 @@
 import 'package:docelix_mobileapp/config/api_constants.dart';
+import 'package:docelix_mobileapp/models/user_model.dart';
 import 'package:docelix_mobileapp/services/auth_services.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,6 +12,7 @@ class LoginController extends GetxController {
 
   final authService = AuthServices();
   final dioClient = DioClient();
+  final sessionManager = SessionManager();
 
   final isLoading = false.obs;
 
@@ -72,6 +75,42 @@ class LoginController extends GetxController {
       final meResponse = await dioClient.getMe('/me',accessToken);
 
       if (meResponse.statusCode == 200) {
+
+        UserModel user = UserModel.fromJson(meResponse.data);
+
+        print(user.id);
+        print(user.email);
+        print(user.username);
+
+        print(user.role?.name);
+
+        print(user.companies?.first.id);
+        print(user.companies?.first.name);
+
+        print(user.companies?.first.currencyCode);
+        print(user.companies?.first.myRole);
+
+        print(user.companies?.first.myPlanFeatures?.hasFinance);
+        print(user.companies?.first.myPlanFeatures?.hasAI);
+
+        final company = user.companies?.isNotEmpty == true
+            ? user.companies!.first
+            : null;
+
+        if (company != null) {
+          print("Company ID: ${company.id}");
+          print("Company Name: ${company.name}");
+          print("Currency: ${company.currencyCode}");
+          print("Role: ${company.myRole}");
+        }
+
+        // Save token
+        await SessionManager.saveAccessToken(accessToken);
+        await SessionManager.saveCompanyid(company?.id ?? 0);
+        await SessionManager.saveCompanyname(company?.name ?? '');
+        await SessionManager.saveCorrencycode(company?.currencyCode ?? '');
+        await SessionManager.saveRole(company?.myRole ?? '');
+
 
         Get.offNamed(
           '/LandScreen',
