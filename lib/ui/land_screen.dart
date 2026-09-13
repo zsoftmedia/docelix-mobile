@@ -116,7 +116,7 @@ class _LandScreenState extends State<LandScreen> {
             },
 
             icon: Icon(
-              Icons.notifications_none_rounded,
+              Icons.search,
               color: const Color(0xFF0A2342),
               size: width * 0.065,
             ),

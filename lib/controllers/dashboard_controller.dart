@@ -44,6 +44,8 @@ class DashboardController extends GetxController {
       );
       if (response.statusCode == 200) {
         dashboardData.value = DashboardModel.fromJson(response.data);
+        final dateString = dashboardData.value?.period?.from;
+
         print("Dashboard loaded successfully");
         print( "Revenue: " "${dashboardData.value?.kpis?.revenue?.value}", );
         print( "Expenses: " "${dashboardData.value?.kpis?.expenses?.value}", );

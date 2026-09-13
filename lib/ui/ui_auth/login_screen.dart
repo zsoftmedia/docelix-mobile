@@ -474,12 +474,13 @@ class _LoginPageState extends State<LoginScreen> {
                     SizedBox(height: height * 0.030),
 
                     // --------------------------------------------------
-                    // CREATE ACCOUNT
+                    // REQUEST FOR DEMO
                     // --------------------------------------------------
+
                     Center(
                       child: RichText(
                         text: TextSpan(
-                          text: "Don’t have an account? ",
+                          text: "Request for ",
 
                           style: TextStyle(
                             fontSize: width * 0.038,
@@ -489,7 +490,7 @@ class _LoginPageState extends State<LoginScreen> {
                           children: [
 
                             TextSpan(
-                              text: "Create account",
+                              text: "Demo",
 
                               style: TextStyle(
                                 fontSize: width * 0.038,

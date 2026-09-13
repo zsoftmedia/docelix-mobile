@@ -1,4 +1,5 @@
-
+import 'dart:io';
+import 'package:docelix_mobileapp/controllers/ocr_controller.dart';
 import 'package:docelix_mobileapp/ui/ui_custom/topCurveClipper.dart';
 import 'package:docelix_mobileapp/utils/string_list.dart';
 import 'package:flutter/material.dart';
@@ -13,24 +14,10 @@ class _CreateInvoicesScreenState extends State<CreateInvoicesScreen> {
   // var loginPage_Controller = Get.put(LoginPage_Ctrl());
   // final _formKey = GlobalKey<FormState>(); // GlobalKey to manage form state
 
+  final OcrController controller = Get.put(OcrController());
+
   bool checkLoginProgressbar = false;
   bool _obscureText = true;
-
-  static const List<String> registerAs = [
-    'Accountant',
-    'Tax Adviser',
-    'Chief Financial Officer (CFO)',
-    'Controller',
-    'Accounting Manager',
-    'Senior Accountant',
-    'Financial Analyst',
-    'Financial Consultant',
-    'Bookkeeper',
-    'Accounts Payable (AP) Clerk',
-    'Accounts Receivable (AR) Clerk',
-    'Payroll Administrator',
-    'Tax Specialist',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +26,7 @@ class _CreateInvoicesScreenState extends State<CreateInvoicesScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
 
       body: SafeArea(
         child: Stack(
@@ -64,387 +51,277 @@ class _CreateInvoicesScreenState extends State<CreateInvoicesScreen> {
             // ----------------------------------------------------------
             // MAIN CONTENT
             // ----------------------------------------------------------
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-
-              child: Padding(
+            Obx(
+                  () => SingleChildScrollView(
                 padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.11,
+                  horizontal: width * 0.06,
+                  vertical: 20,
                 ),
-
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
 
-                    // --------------------------------------------------
-                    // BACK BUTTON
-                    // --------------------------------------------------
+                    // ----------------------------------------------------
+                    // TITLE
+                    // ----------------------------------------------------
+                    const SizedBox(height: 15),
 
-                    GestureDetector(
-                      onTap: () {
-                        Get.back();
-                      },
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: const Color(0xFF0A2342),
-                        size: width * 0.045,
-                      ),
-
-                    ),
-
-                    SizedBox(height: height * 0.065),
-
-                    // --------------------------------------------------
-                    // LOGO
-                    // --------------------------------------------------
-                    Center(
-                      child: Image.asset(
-                        'assets/main_logo.png',
-                        width: width * 0.68,
-                        fit: BoxFit.contain,
-
-                        // IMPORTANT:
-                        // Don't use white ColorFilter here.
-                      ),
-                    ),
-
-                    SizedBox(height: height * 0.075),
-
-                    // --------------------------------------------------
-                    // REGISTER NOW
-                    // --------------------------------------------------
-                    Text(
-                      StringsList.txtbtnRegister,
+                    const Text(
+                      'Scan Document',
                       style: TextStyle(
-                        fontSize: width * 0.075,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0A2342),
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1D2939),
                       ),
                     ),
 
-                    SizedBox(height: height * 0.001),
+                    const SizedBox(height: 8),
 
-                    Text(
-                      StringsList.txtRegister_desc,
+                    const Text(
+                      'Take a photo or select an image to extract text.',
                       style: TextStyle(
-                        fontSize: width * 0.043,
-                        color: const Color(0xFF60728D),
-                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        color: Color(0xFF667085),
+                        height: 1.4,
                       ),
                     ),
 
-                    SizedBox(height: height * 0.025),
+                    const SizedBox(height: 25),
 
-                    // --------------------------------------------------
-                    // EMAIL
-                    // --------------------------------------------------
-                    TextFormField(
-                      // controller:
-                      // loginPage_Controller.identityController,
-
-                      keyboardType: TextInputType.emailAddress,
-
-                      decoration: InputDecoration(
-                        hintText: "Email address",
-                        hintStyle: TextStyle(
-                          color: const Color(0xFF71829A),
-                          fontSize: width * 0.043,
+                    // ----------------------------------------------------
+                    // IMAGE PREVIEW
+                    // ----------------------------------------------------
+                    if (controller.imagePath.value.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        constraints: BoxConstraints(
+                          maxHeight: height * 0.38,
                         ),
-
-                        prefixIcon: Icon(
-                          Icons.mail_outline_rounded,
-                          color: const Color(0xFF344E6F),
-                          size: width * 0.065,
-                        ),
-
-                        filled: true,
-                        fillColor: Colors.white,
-
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: height * 0.021,
-                          horizontal: width * 0.04,
-                        ),
-
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
-                            width: 1.3,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFE4E7EC),
                           ),
                         ),
-
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
-                            width: 1.3,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.file(
+                            File(controller.imagePath.value),
+                            width: double.infinity,
+                            fit: BoxFit.contain,
                           ),
                         ),
-
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF0B4380),
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    SizedBox(height: height * 0.021),
-
-                    // --------------------------------------------------
-                    // PASSWORD
-                    // --------------------------------------------------
-                    TextFormField(
-                      // controller:
-                      // loginPage_Controller.passwordController,
-
-                      obscureText: _obscureText,
-
-                      decoration: InputDecoration(
-                        hintText: "Password",
-
-                        hintStyle: TextStyle(
-                          color: const Color(0xFF71829A),
-                          fontSize: width * 0.043,
-                        ),
-
-                        prefixIcon: Icon(
-                          Icons.lock_outline_rounded,
-                          color: const Color(0xFF344E6F),
-                          size: width * 0.065,
-                        ),
-
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _obscureText = !_obscureText;
-                            });
-                          },
-
-                          icon: Icon(
-                            _obscureText
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-
-                            color: const Color(0xFF344E6F),
-                            size: width * 0.065,
+                      )
+                    else
+                      Container(
+                        width: double.infinity,
+                        height: height * 0.28,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFE4E7EC),
                           ),
                         ),
-
-                        filled: true,
-                        fillColor: Colors.white,
-
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: height * 0.021,
-                          horizontal: width * 0.04,
-                        ),
-
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
-                            width: 1.3,
-                          ),
-                        ),
-
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
-                            width: 1.3,
-                          ),
-                        ),
-
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF0B4380),
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters long';
-                        }
-
-                        return null;
-                      },
-                    ),
-
-                    SizedBox(height: height * 0.010),
-
-                    DropdownButtonFormField<String>(
-                      value: null,
-
-                      isExpanded: true,
-
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: const Color(0xFF344E6F),
-                        size: width * 0.065,
-                      ),
-
-                      hint: Text(
-                        "Select Country",
-                        style: TextStyle(
-                          color: const Color(0xFF71829A),
-                          fontSize: width * 0.043,
-                        ),
-                      ),
-
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: height * 0.021,
-                          horizontal: width * 0.04,
-                        ),
-
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
-                            width: 1.3,
-                          ),
-                        ),
-
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
-                            width: 1.3,
-                          ),
-                        ),
-
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF0B4380),
-                            width: 1.5,
-                          ),
-                        ),
-
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Colors.red,
-                            width: 1.3,
-                          ),
-                        ),
-
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            width * 0.04,
-                          ),
-                          borderSide: const BorderSide(
-                            color: Colors.red,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-
-                      items: registerAs.map((country) {
-                        return DropdownMenuItem<String>(
-                          value: country,
-
-                          child: Text(
-                            country,
-                            style: TextStyle(
-                              color: const Color(0xFF172A46),
-                              fontSize: width * 0.043,
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.document_scanner_outlined,
+                              size: 60,
+                              color: Color(0xFF98A2B3),
                             ),
-                          ),
-                        );
-                      }).toList(),
+                            SizedBox(height: 12),
+                            Text(
+                              'No document selected',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Color(0xFF667085),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
-                      onChanged: (value) {
-                        // Handle selected country
-                      },
+                    const SizedBox(height: 20),
 
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please select a country';
-                        }
+                    // ----------------------------------------------------
+                    // CAMERA & GALLERY BUTTONS
+                    // ----------------------------------------------------
+                    Row(
+                      children: [
 
-                        return null;
-                      },
-                    ),
-
-                    SizedBox(height: height * 0.010),
-                    // --------------------------------------------------
-                    // REGISTER BUTTON
-                    // --------------------------------------------------
-                    SizedBox(
-                      width: double.infinity,
-                      height: height * 0.070,
-
-                      child: ElevatedButton(
-                        onPressed: () async {
-
-                          // Your existing login code goes here.
-
-                        },
-
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF063C70),
-                          foregroundColor: Colors.white,
-
-                          elevation: 0,
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              width * 0.035,
+                        Expanded(
+                          child: SizedBox(
+                            height: 52,
+                            child: ElevatedButton.icon(
+                              onPressed: controller.isLoading.value
+                                  ? null
+                                  : controller.captureFromCamera,
+                              icon: const Icon(
+                                Icons.camera_alt_outlined,
+                                size: 21,
+                              ),
+                              label: const Text(
+                                'Camera',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1976D2),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                             ),
                           ),
                         ),
 
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: SizedBox(
+                            height: 52,
+                            child: OutlinedButton.icon(
+                              onPressed: controller.isLoading.value
+                                  ? null
+                                  : controller.pickFromGallery,
+                              icon: const Icon(
+                                Icons.photo_library_outlined,
+                                size: 21,
+                              ),
+                              label: const Text(
+                                'Gallery',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF1976D2),
+                                side: const BorderSide(
+                                  color: Color(0xFF1976D2),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // ----------------------------------------------------
+                    // LOADING
+                    // ----------------------------------------------------
+                    if (controller.isLoading.value)
+                      Container(
+                        padding: const EdgeInsets.all(25),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Column(
+                          children: [
+                            SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                              ),
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              'Extracting text...',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF667085),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // ----------------------------------------------------
+                    // OCR RESULT
+                    // ----------------------------------------------------
+                    if (!controller.isLoading.value &&
+                        controller.extractedText.value.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFE4E7EC),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+
+                            const Row(
+                              children: [
+                                Icon(
+                                  Icons.text_snippet_outlined,
+                                  size: 20,
+                                  color: Color(0xFF1976D2),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Extracted Text',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1D2939),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            SelectableText(
+                              controller.extractedText.value,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                height: 1.5,
+                                color: Color(0xFF344054),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // ----------------------------------------------------
+                    // EMPTY STATE
+                    // ----------------------------------------------------
+                    if (!controller.isLoading.value &&
+                        controller.imagePath.value.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(
+                          top: 20,
+                          bottom: 30,
+                        ),
                         child: Text(
-                          StringsList.txtRegister,
+                          'Choose Camera or Gallery to start OCR.',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: width * 0.045,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Color(0xFF98A2B3),
                           ),
                         ),
                       ),
-                    ),
 
-                    SizedBox(height: height * 0.050),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
