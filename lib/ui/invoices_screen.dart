@@ -1,3 +1,5 @@
+import 'package:docelix_mobileapp/controllers/invoices_controller.dart';
+import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,54 +12,7 @@ class InvoicesScreen extends StatefulWidget {
 
 class _InvoicesScreenState extends State<InvoicesScreen> {
 
-  // ============================================================
-  // DUMMY INVOICE DATA
-  // ============================================================
-
-  final List<Map<String, dynamic>> invoices = [
-    {
-      "invoiceNo": "INV-2026-001",
-      "customer": "ABC Trading Company",
-      "date": "08 Sep 2026",
-      "amount": "€2,450.00",
-      "status": "Paid",
-    },
-    {
-      "invoiceNo": "INV-2026-002",
-      "customer": "Global Solutions Ltd.",
-      "date": "07 Sep 2026",
-      "amount": "€1,850.00",
-      "status": "Pending",
-    },
-    {
-      "invoiceNo": "INV-2026-003",
-      "customer": "Tech World GmbH",
-      "date": "05 Sep 2026",
-      "amount": "€3,200.00",
-      "status": "Paid",
-    },
-    {
-      "invoiceNo": "INV-2026-004",
-      "customer": "Modern Business Ltd.",
-      "date": "03 Sep 2026",
-      "amount": "€980.00",
-      "status": "Overdue",
-    },
-    {
-      "invoiceNo": "INV-2026-005",
-      "customer": "Smart Solutions",
-      "date": "01 Sep 2026",
-      "amount": "€1,250.00",
-      "status": "Pending",
-    },
-    {
-      "invoiceNo": "INV-2026-006",
-      "customer": "Digital Services GmbH",
-      "date": "30 Aug 2026",
-      "amount": "€4,100.00",
-      "status": "Paid",
-    },
-  ];
+  final InvoicesController invoicesController = Get.put(InvoicesController());
 
   @override
   Widget build(BuildContext context) {
@@ -159,14 +114,15 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
 
-                    child: Text(
-                      "${invoices.length} Invoices",
+                    child:Obx((){
+                      return Text(
+                      "${invoicesController.invoices.length} Invoices",
                       style: TextStyle(
                         color: const Color(0xFF063C70),
                         fontSize: width * 0.032,
                         fontWeight: FontWeight.w600,
                       ),
-                    ),
+                    );})
                   ),
                 ],
               ),
@@ -177,31 +133,61 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             // --------------------------------------------------------
 
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.only(
-                  left: width * 0.04,
-                  right: width * 0.04,
-
-                  // Space for FloatingActionButton
-                  bottom: height * 0.12,
-                ),
-
-                physics: const BouncingScrollPhysics(),
-
-                itemCount: invoices.length,
-
-                itemBuilder: (context, index) {
-
-                  final invoice = invoices[index];
-
-                  return _invoiceCard(
-                    context: context,
-                    invoice: invoice,
-                    width: width,
-                    height: height,
+              child: Obx(() {
+                // Loading
+                if (invoicesController.isLoading.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
-                },
-              ),
+                }
+
+                // Empty
+                if (invoicesController.invoices.isEmpty) {
+                  return RefreshIndicator(
+                    onRefresh: invoicesController.refreshInvoices,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 150),
+                        Center(
+                          child: Text(
+                            'No invoices found.',
+                            style: TextStyle(
+                              color: Color(0xFF667085),
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Invoice list
+                return RefreshIndicator(
+                  onRefresh: invoicesController.refreshInvoices,
+                  child: ListView.builder(
+                    padding: EdgeInsets.only(
+                      left: width * 0.04,
+                      right: width * 0.04,
+                      bottom: height * 0.12,
+                    ),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: invoicesController.invoices.length,
+                    itemBuilder: (context, index) {
+                      final invoice =
+                      invoicesController.invoices[index];
+
+                      return _invoiceCard(
+                        context: context,
+                        invoice: invoice,
+                        width: width,
+                        height: height,
+                      );
+                    },
+                  ),
+                );
+              }),
             ),
           ],
         ),
@@ -264,46 +250,53 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   // INVOICE CARD
   // ================================================================
 
+
   Widget _invoiceCard({
     required BuildContext context,
-    required Map<String, dynamic> invoice,
+    required IncomingInvoicesModel invoice,
     required double width,
     required double height,
   }) {
 
-    final String status = invoice["status"];
+    // ----------------------------------------------------------
+    // STATUS
+    // ----------------------------------------------------------
+
+    final String status = invoice.status.toLowerCase();
 
     Color statusColor;
 
-    if (status == "Paid") {
+    if (status == "paid") {
       statusColor = const Color(0xFF00B894);
-    } else if (status == "Pending") {
+    } else if (status == "pending" || status == "unpaid") {
       statusColor = const Color(0xFFF39C12);
-    } else {
+    } else if (status == "overdue") {
       statusColor = Colors.red;
+    } else {
+      statusColor = const Color(0xFF71829A);
     }
+
+    // Display status with first letter uppercase
+    final String displayStatus = status.isNotEmpty
+        ? status[0].toUpperCase() + status.substring(1)
+        : "Unknown";
 
     return Container(
       margin: EdgeInsets.only(
         bottom: height * 0.015,
       ),
-
       padding: EdgeInsets.all(
         width * 0.045,
       ),
-
       decoration: BoxDecoration(
         color: Colors.white,
-
         borderRadius: BorderRadius.circular(
           width * 0.045,
         ),
-
         border: Border.all(
           color: const Color(0xFFE1E7EF),
           width: 1,
         ),
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -312,31 +305,25 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           ),
         ],
       ),
-
       child: Column(
         children: [
-
           // ----------------------------------------------------------
           // TOP ROW
           // ----------------------------------------------------------
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
-
               // Invoice Icon
               Container(
                 width: width * 0.115,
                 height: width * 0.115,
-
                 decoration: BoxDecoration(
                   color: const Color(0xFFEAF3FB),
                   borderRadius: BorderRadius.circular(
                     width * 0.03,
                   ),
                 ),
-
                 child: Icon(
                   Icons.receipt_long_rounded,
                   color: const Color(0xFF063C70),
@@ -348,15 +335,18 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 width: width * 0.035,
               ),
 
-              // Invoice information
+              // ----------------------------------------------------------
+              // INVOICE INFORMATION
+              // ----------------------------------------------------------
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-
                   children: [
-
                     Text(
-                      invoice["invoiceNo"],
+                      invoice.invoiceNumber ?? 'No Invoice Number',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: const Color(0xFF0A2342),
                         fontSize: width * 0.04,
@@ -369,10 +359,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     ),
 
                     Text(
-                      invoice["customer"],
+                      invoice.supplierName ?? 'Unknown Supplier',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-
                       style: TextStyle(
                         color: const Color(0xFF60728D),
                         fontSize: width * 0.035,
@@ -383,20 +372,25 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 ),
               ),
 
-              // Status
+              SizedBox(
+                width: width * 0.02,
+              ),
+
+              // ----------------------------------------------------------
+              // STATUS
+              // ----------------------------------------------------------
+
               Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: width * 0.025,
                   vertical: height * 0.006,
                 ),
-
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(20),
                 ),
-
                 child: Text(
-                  status,
+                  displayStatus,
                   style: TextStyle(
                     color: statusColor,
                     fontSize: width * 0.03,
@@ -426,13 +420,13 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
             children: [
+              // ----------------------------------------------------------
+              // DATE
+              // ----------------------------------------------------------
 
-              // Date
               Row(
                 children: [
-
                   Icon(
                     Icons.calendar_today_outlined,
                     color: const Color(0xFF71829A),
@@ -444,7 +438,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   ),
 
                   Text(
-                    invoice["date"],
+                    invoice.invoiceDate ?? 'N/A',
                     style: TextStyle(
                       color: const Color(0xFF71829A),
                       fontSize: width * 0.033,
@@ -453,9 +447,12 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 ],
               ),
 
-              // Amount
+              // ----------------------------------------------------------
+              // AMOUNT
+              // ----------------------------------------------------------
+
               Text(
-                invoice["amount"],
+                '${invoice.currency ?? ''} ${invoice.totalAmount ?? 0}',
                 style: TextStyle(
                   color: const Color(0xFF0A2342),
                   fontSize: width * 0.043,
@@ -468,4 +465,5 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       ),
     );
   }
+
 }

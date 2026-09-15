@@ -52,4 +52,61 @@ class DioClient {
     );
   }
 
+// ==============================
+// UPLOAD INCOMING INVOICE
+// ==============================
+
+  Future<Response> uploadIncomingInvoice({
+    required int companyId,
+    required String filePath,
+    required String fileName,
+    required String accessToken,
+    String expenseCategory = 'other',
+  }) async {
+    final formData = FormData.fromMap({
+      'company_id': companyId,
+      'file': await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+      ),
+      'expense_category': expenseCategory,
+    });
+
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/incoming-invoices/upload',
+      data: formData,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+        contentType: 'multipart/form-data',
+      ),
+    );
+  }
+
+  // ==============================
+  // GET INCOMING INVOICES
+  // ==============================
+
+  Future<Response> getIncomingInvoices({
+    required int companyId,
+    required int page,
+    required int limit,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/incoming-invoices',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'limit': limit,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
 }
