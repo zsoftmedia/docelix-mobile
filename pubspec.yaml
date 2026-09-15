@@ -50,6 +50,7 @@ dependencies:
   google_mlkit_text_recognition: ^0.17.1
   image_picker: ^1.2.3
   file_picker: ^13.0.0
+  syncfusion_flutter_pdfviewer: ^34.2.8
 
 
 dev_dependencies:

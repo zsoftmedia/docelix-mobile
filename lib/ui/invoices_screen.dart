@@ -178,12 +178,23 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       final invoice =
                       invoicesController.invoices[index];
 
-                      return _invoiceCard(
-                        context: context,
-                        invoice: invoice,
-                        width: width,
-                        height: height,
+                      // Invoice Card Clickable
+                      return InkWell(
+                        onTap: () {
+                          print('Invoice ID: ${invoice.id}');
+                          print('Invoice Number: ${invoice.invoiceNumber}');
+
+                          // Navigate to details
+                          Get.toNamed('/InvoicesDetailsScreen', arguments: invoice,);
+                        },
+                        child: _invoiceCard(
+                          context: context,
+                          invoice: invoice,
+                          width: width,
+                          height: height,
+                        ),
                       );
+
                     },
                   ),
                 );
