@@ -7,7 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 
-class CreateInvoiceController extends GetxController {
+class CreateIncomingInvoiceController extends GetxController {
   final ImagePicker _imagePicker = ImagePicker();
 
   final dioClient = DioClient();

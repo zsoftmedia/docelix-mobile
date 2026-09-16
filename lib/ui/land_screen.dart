@@ -293,7 +293,11 @@ class _LandScreenState extends State<LandScreen> {
                       icon: Icons.upcoming_rounded,
                       title: "Incoming",
                       onTap: () {
-                        Navigator.pop(context);
+                       // Navigator.pop(context);
+
+                        Get.toNamed(
+                          '/IncomingInvoicesScreen',
+                          arguments: 'Incoming Invoices Screen',);
 
                         setState(() {
                           _selectedIndex = 3;

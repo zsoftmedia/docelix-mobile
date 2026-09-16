@@ -109,4 +109,27 @@ class DioClient {
       ),
     );
   }
+
+
+  // ==============================
+  // GET INVOICES
+  // ==============================
+
+  Future<Response> getInvoices({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/invoices',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
 }

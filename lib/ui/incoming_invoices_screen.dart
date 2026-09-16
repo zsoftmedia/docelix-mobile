@@ -1,18 +1,18 @@
-import 'package:docelix_mobileapp/controllers/invoices_controller.dart';
-import 'package:docelix_mobileapp/models/invoices_model.dart';
+import 'package:docelix_mobileapp/controllers/incoming_invoices_controller.dart';
+import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class InvoicesScreen extends StatefulWidget {
-  const InvoicesScreen({super.key});
+class IncomingInvoicesScreen extends StatefulWidget {
+  const IncomingInvoicesScreen({super.key});
 
   @override
-  State<InvoicesScreen> createState() => _InvoicesScreenState();
+  State<IncomingInvoicesScreen> createState() => _IncomingInvoicesScreenState();
 }
 
-class _InvoicesScreenState extends State<InvoicesScreen> {
+class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
 
-  final InvoicesController invoicesController = Get.put(InvoicesController());
+  final IncomingInvoicesController incomingInvoicesController = Get.put(IncomingInvoicesController());
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         ),
 
         title: Text(
-          "Invoices",
+          "Incoming Invoices",
           style: TextStyle(
             color: const Color(0xFF0A2342),
             fontSize: width * 0.055,
@@ -104,25 +104,25 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   ),
 
                   Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: width * 0.035,
-                        vertical: height * 0.008,
-                      ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: width * 0.035,
+                      vertical: height * 0.008,
+                    ),
 
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEAF3FB),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF3FB),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
 
-                      child:Obx((){
-                        return Text(
-                          "${invoicesController.invoices.length} Invoices",
-                          style: TextStyle(
-                            color: const Color(0xFF063C70),
-                            fontSize: width * 0.032,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );})
+                    child:Obx((){
+                      return Text(
+                      "${incomingInvoicesController.invoices.length} Invoices",
+                      style: TextStyle(
+                        color: const Color(0xFF063C70),
+                        fontSize: width * 0.032,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    );})
                   ),
                 ],
               ),
@@ -135,16 +135,16 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             Expanded(
               child: Obx(() {
                 // Loading
-                if (invoicesController.isLoading.value) {
+                if (incomingInvoicesController.isLoading.value) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
 
                 // Empty
-                if (invoicesController.invoices.isEmpty) {
+                if (incomingInvoicesController.invoices.isEmpty) {
                   return RefreshIndicator(
-                    onRefresh: invoicesController.refreshInvoices,
+                    onRefresh: incomingInvoicesController.refreshInvoices,
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: const [
@@ -165,7 +165,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
                 // Invoice list
                 return RefreshIndicator(
-                  onRefresh: invoicesController.refreshInvoices,
+                  onRefresh: incomingInvoicesController.refreshInvoices,
                   child: ListView.builder(
                     padding: EdgeInsets.only(
                       left: width * 0.04,
@@ -173,10 +173,10 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       bottom: height * 0.12,
                     ),
                     physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: invoicesController.invoices.length,
+                    itemCount: incomingInvoicesController.invoices.length,
                     itemBuilder: (context, index) {
                       final invoice =
-                      invoicesController.invoices[index];
+                      incomingInvoicesController.invoices[index];
 
                       // Invoice Card Clickable
                       return InkWell(
@@ -185,7 +185,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                           print('Invoice Number: ${invoice.invoiceNumber}');
 
                           // Navigate to details
-                          Get.toNamed('/InvoicesDetailsScreen', arguments: invoice,);
+                          Get.toNamed('/IncomingInvoicesDetailsScreen', arguments: invoice,);
                         },
                         child: _invoiceCard(
                           context: context,
@@ -219,7 +219,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           // ----------------------------------------------------------
 
           Get.toNamed(
-            '/CreateInvoicesScreen',
+            '/CreateIncomingInvoicesScreen',
             arguments: 'Create Incoming Invoices Screen',);
 
           // Get.to(
@@ -264,7 +264,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
   Widget _invoiceCard({
     required BuildContext context,
-    required InvoicesModel invoice,
+    required IncomingInvoicesModel invoice,
     required double width,
     required double height,
   }) {
@@ -370,7 +370,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     ),
 
                     Text(
-                      invoice.invoiceNumber ?? 'Unknown Client',
+                      invoice.supplierName ?? 'Unknown Supplier',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -449,7 +449,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   ),
 
                   Text(
-                    invoice.issueDate ?? 'N/A',
+                    invoice.invoiceDate ?? 'N/A',
                     style: TextStyle(
                       color: const Color(0xFF71829A),
                       fontSize: width * 0.033,
@@ -463,7 +463,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               // ----------------------------------------------------------
 
               Text(
-                '${invoice.currencyCode ?? ''} ${invoice.paidAmount ?? 0}',
+                '${invoice.currency ?? ''} ${invoice.totalAmount ?? 0}',
                 style: TextStyle(
                   color: const Color(0xFF0A2342),
                   fontSize: width * 0.043,

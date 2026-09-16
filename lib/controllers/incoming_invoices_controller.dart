@@ -1,20 +1,22 @@
+
+
 import 'package:dio/dio.dart';
-import 'package:docelix_mobileapp/models/invoices_model.dart';
+import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:get/get.dart';
 
-class InvoicesController extends GetxController {
+class IncomingInvoicesController extends GetxController {
   final dioClient = DioClient();
   final sessionManager = SessionManager();
 
   final RxBool isLoading = false.obs;
 
   /// Invoice list
-  final RxList<InvoicesModel> invoices =
-      <InvoicesModel>[].obs;
+  final RxList<IncomingInvoicesModel> invoices =
+      <IncomingInvoicesModel>[].obs;
 
-  /// Total invoices
+  /// Total invoices from API
   final RxInt totalInvoices = 0.obs;
 
   /// Pagination
@@ -25,23 +27,19 @@ class InvoicesController extends GetxController {
   void onInit() {
     super.onInit();
 
-    getInvoices();
+    getIncomingInvoices();
   }
 
   // ============================================================
-  // GET INVOICES
+  // GET INCOMING INVOICES
   // ============================================================
 
-  Future<void> getInvoices() async {
+  Future<void> getIncomingInvoices() async {
     try {
       isLoading.value = true;
 
       final accessToken = SessionManager.accessToken;
       final companyId = SessionManager.accessCompanyid;
-
-      // ----------------------------------------------------------
-      // CHECK ACCESS TOKEN
-      // ----------------------------------------------------------
 
       if (accessToken == null || accessToken.isEmpty) {
         Get.snackbar(
@@ -52,10 +50,6 @@ class InvoicesController extends GetxController {
         return;
       }
 
-      // ----------------------------------------------------------
-      // CHECK COMPANY ID
-      // ----------------------------------------------------------
-
       if (companyId == null) {
         Get.snackbar(
           'Error',
@@ -65,51 +59,40 @@ class InvoicesController extends GetxController {
         return;
       }
 
-      final int parsedCompanyId =
-      int.parse(companyId.toString());
-
-      // ----------------------------------------------------------
-      // API CALL
-      // ----------------------------------------------------------
-
-      final response = await dioClient.getInvoices(
-        companyId: parsedCompanyId,
+      final response =
+      await dioClient.getIncomingInvoices(
+        companyId: int.parse(
+          companyId.toString(),
+        ),
+        page: currentPage.value,
+        limit: limit.value,
         accessToken: accessToken,
       );
 
-      // ----------------------------------------------------------
-      // HANDLE RESPONSE
-      // ----------------------------------------------------------
-
-      if (response.statusCode == 200 &&
-          response.data != null) {
+      if (response.data != null) {
         final data = response.data;
 
-        if (data is List) {
-          invoices.value = data
-              .map(
-                (item) => InvoicesModel.fromJson(
-              Map<String, dynamic>.from(item),
-            ),
-          )
-              .toList();
+        final List<dynamic> items =
+            data['items'] ?? [];
 
-          totalInvoices.value = invoices.length;
+        totalInvoices.value =
+            data['total'] ?? 0;
 
-          print('================================');
-          print('INVOICES LOADED');
-          print('Total: ${totalInvoices.value}');
-          print('Items: ${invoices.length}');
-          print('================================');
-        } else {
-          invoices.clear();
-          totalInvoices.value = 0;
+        invoices.value = items
+            .map(
+              (item) =>
+                  IncomingInvoicesModel.fromJson(
+                Map<String, dynamic>.from(item),
+              ),
+        )
+            .toList();
 
-          print('================================');
-          print('INVALID INVOICES RESPONSE');
-          print('Response: $data');
-          print('================================');
-        }
+        print('================================');
+        print('INVOICES LOADED');
+        print('Total: ${totalInvoices.value}');
+        print('Current Page: ${currentPage.value}');
+        print('Items: ${invoices.length}');
+        print('================================');
       }
     } on DioException catch (e) {
       print('================================');
@@ -127,11 +110,6 @@ class InvoicesController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (e) {
-      print('================================');
-      print('GET INVOICES EXCEPTION');
-      print(e);
-      print('================================');
-
       Get.snackbar(
         'Error',
         e.toString(),
@@ -148,6 +126,6 @@ class InvoicesController extends GetxController {
 
   Future<void> refreshInvoices() async {
     currentPage.value = 1;
-    await getInvoices();
+    await getIncomingInvoices();
   }
 }

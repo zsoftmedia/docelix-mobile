@@ -1,1134 +1,1267 @@
 import 'package:docelix_mobileapp/controllers/invoices_details_controller.dart';
-import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-class InvoicesDetailsScreen extends StatefulWidget {
-  final IncomingInvoicesModel invoice;
-  // const InvoicesDetailsScreen({super.key});
+class InvoicesDetailsScreen extends StatelessWidget {
+  InvoicesDetailsScreen({super.key});
 
-  const InvoicesDetailsScreen({
-    super.key,
-    required this.invoice,
-  });
-
-  @override
-  State<InvoicesDetailsScreen> createState() =>
-      _InvoicesDetailsScreenState();
-}
-
-class _InvoicesDetailsScreenState extends State<InvoicesDetailsScreen> {
-
-  late InvoicesDetailsController controller;
-
-  @override
-  void initState() {
-    super.initState();
-
-    controller = Get.put(
-      InvoicesDetailsController(),
-    );
-
-    controller.initialize(widget.invoice);
-  }
+  final InvoicesDetailsController controller =
+  Get.put(InvoicesDetailsController());
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: const Color(0xFFF6F8FB),
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // APP BAR
-      // ----------------------------------------------------------
+      // ==========================================================
 
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        surfaceTintColor: Colors.white,
+        scrolledUnderElevation: 0,
 
         leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Get.back(),
           icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0A2342),
+            Icons.arrow_back_ios_new,
             size: 20,
+            color: Color(0xFF172033),
           ),
         ),
 
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Invoice Details',
-              style: TextStyle(
-                color: const Color(0xFF0A2342),
-                fontSize: width * 0.045,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-
-            Text(
-              '#${controller.invoiceNumberController.text}',
-              style: TextStyle(
-                color: const Color(0xFF71829A),
-                fontSize: width * 0.030,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ],
+        title: const Text(
+          'Invoice Details',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF172033),
+          ),
         ),
+
+        centerTitle: false,
 
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              // TODO: More options
+            },
             icon: const Icon(
-              Icons.more_vert_rounded,
-              color: Color(0xFF0A2342),
+              Icons.more_vert,
+              color: Color(0xFF172033),
             ),
           ),
         ],
       ),
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // BODY
-      // ----------------------------------------------------------
+      // ==========================================================
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
+      body: Obx(() {
 
-                padding: EdgeInsets.fromLTRB(
-                  width * 0.045,
-                  height * 0.02,
-                  width * 0.045,
-                  height * 0.12,
+        if (controller.isLoading.value &&
+            controller.invoice.value == null) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (controller.invoice.value == null) {
+          return const Center(
+            child: Text(
+              'Invoice not found.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          );
+        }
+
+        final invoice = controller.invoice.value!;
+
+        return RefreshIndicator(
+          onRefresh: controller.refreshInvoice,
+
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              12,
+              16,
+              110,
+            ),
+
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+
+                // ==================================================
+                // INVOICE HEADER CARD
+                // ==================================================
+
+                _invoiceHeader(
+                  invoice.invoiceNumber,
+                  invoice.status,
+                  invoice.currencyCode,
+                  invoice.paidAmount,
                 ),
 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 16),
+
+                // ==================================================
+                // INVOICE INFORMATION
+                // ==================================================
+
+                _sectionTitle('Invoice Information'),
+
+                const SizedBox(height: 10),
+
+                Row(
                   children: [
-                    // ------------------------------------------------
-                    // STATUS + AMOUNT CARD
-                    // ------------------------------------------------
-
-                    Obx(
-                          () => Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: width * 0.03,
-                          vertical: height * 0.008,
-                        ),
-                        decoration: BoxDecoration(
-                          color: controller.statusColor.withOpacity(0.10),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                color: controller.statusColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-
-                            SizedBox(
-                              width: width * 0.015,
-                            ),
-
-                            Text(
-                              controller.displayStatus,
-                              style: TextStyle(
-                                color: controller.statusColor,
-                                fontSize: width * 0.032,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.022,
-                    ),
-
-                    // ------------------------------------------------
-                    // INVOICE DETAILS
-                    // ------------------------------------------------
-
-                    _sectionTitle(
-                      'Invoice Details',
-                      width,
-                    ),
-
-                    SizedBox(
-                      height: height * 0.012,
-                    ),
-
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(
-                        width * 0.045,
-                      ),
-
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          width * 0.04,
-                        ),
-                        border: Border.all(
-                          color: const Color(0xFFE4EAF1),
-                        ),
-                      ),
-
-                      child: Column(
-                        children: [
-                          _invoiceTextField(
-                            label: 'Invoice Number',
-                            controller: controller.invoiceNumberController,
-                            icon: Icons.numbers_rounded,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Invoice Date',
-                            controller: controller.dateController,
-                            icon: Icons.calendar_today_outlined,
-                            onTap: controller.selectInvoiceDate,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Currency',
-                            controller: controller.currencyController,
-                            icon: Icons.currency_exchange_rounded,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Total Amount',
-                            controller: controller.totalController,
-                            icon: Icons.payments_outlined,
-                            width: width,
-                            keyboardType: TextInputType.number,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'VAT %',
-                            controller: controller.vatController,
-                            icon: Icons.percent_rounded,
-                            width: width,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.022,
-                    ),
-
-                    // ------------------------------------------------
-                    // SUPPLIER
-                    // ------------------------------------------------
-
-                    _sectionTitle(
-                      'Supplier',
-                      width,
-                    ),
-
-                    SizedBox(
-                      height: height * 0.012,
-                    ),
-
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(
-                        width * 0.045,
-                      ),
-
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          width * 0.04,
-                        ),
-                        border: Border.all(
-                          color: const Color(0xFFE4EAF1),
-                        ),
-                      ),
-
-                      child: Column(
-                        children: [
-                          _invoiceTextField(
-                            label: 'Supplier',
-                            controller: controller.supplierController,
-                            icon: Icons.business_outlined,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Supplier Email',
-                            controller: controller.supplierEmailController,
-                            icon: Icons.email_outlined,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Supplier Phone',
-                            controller: controller.supplierPhoneController,
-                            icon: Icons.phone_outlined,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Supplier Address',
-                            controller: controller.supplierAddressController,
-                            icon: Icons.location_on_outlined,
-                            width: width,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.022,
-                    ),
-
-                    // ------------------------------------------------
-                    // CATEGORY
-                    // ------------------------------------------------
-
-                    _sectionTitle(
-                      'Payment & Category',
-                      width,
-                    ),
-
-                    SizedBox(
-                      height: height * 0.012,
-                    ),
-
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(
-                        width * 0.045,
-                      ),
-
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          width * 0.04,
-                        ),
-                        border: Border.all(
-                          color: const Color(0xFFE4EAF1),
-                        ),
-                      ),
-
-                      child: Obx(
-                            () => Row(
-                          children: [
-                            Expanded(
-                              child: _smallInfo(
-                                'Payment Status',
-                                controller.displayStatus,
-                                Icons.payments_outlined,
-                                width,
-                              ),
-                            ),
-
-                            Container(
-                              height: width * 0.12,
-                              width: 1,
-                              color: const Color(0xFFE5EAF0),
-                            ),
-
-                            Expanded(
-                              child: _smallInfo(
-                                'Category',
-                                controller.displayCategory,
-                                Icons.category_outlined,
-                                width,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ),
-
-                    SizedBox(
-                      height: height * 0.022,
-                    ),
-
-                    // ------------------------------------------------
-                    // DOCUMENT
-                    // ------------------------------------------------
-
-                    _sectionTitle(
-                      'Invoice Document',
-                      width,
-                    ),
-
-                    SizedBox(
-                      height: height * 0.012,
-                    ),
-
-                    GestureDetector(
-                      onTap: () {
-                        // Open full document
-
-                        final previewUrl = controller.invoice.previewUrl;
-
-                        if (previewUrl == null || previewUrl.isEmpty) {
-                          Get.snackbar(
-                            'Document',
-                            'Document preview is not available.',
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                          return;
-                        }
-
-                        showInvoiceDocumentDialog(
-                          context: context,
-                          fileUrl: previewUrl,
-                          fileType: controller.invoice.fileType,
-                          mimeType: controller.invoice.mimeType,
-                        );
-                      },
-
-                      child: Container(
-                        width: double.infinity,
-                        height: height * 0.24,
-
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF3F7),
-                          borderRadius:
-                          BorderRadius.circular(
-                            width * 0.04,
-                          ),
-
-                          border: Border.all(
-                            color: const Color(0xFFE0E6ED),
-                          ),
-                        ),
-
-                        child: Stack(
-                          children: [
-                            Center(
-                              child: Icon(
-                                Icons.picture_as_pdf_rounded,
-                                color: const Color(0xFFD64545),
-                                size: width * 0.15,
-                              ),
-                            ),
-
-                            Positioned(
-                              bottom: width * 0.035,
-                              left: width * 0.04,
-                              right: width * 0.04,
-
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment
-                                    .spaceBetween,
-
-                                children: [
-                                  Text(
-                                    'Invoice Document',
-                                    style: TextStyle(
-                                      color: const Color(
-                                        0xFF0A2342,
-                                      ),
-                                      fontSize:
-                                      width * 0.034,
-                                      fontWeight:
-                                      FontWeight.w600,
-                                    ),
-                                  ),
-
-                                  Container(
-                                    padding:
-                                    EdgeInsets.symmetric(
-                                      horizontal:
-                                      width * 0.025,
-                                      vertical:
-                                      height * 0.006,
-                                    ),
-                                    decoration:
-                                    BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                        20,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'View',
-                                      style: TextStyle(
-                                        color: const Color(
-                                          0xFF063C70,
-                                        ),
-                                        fontSize:
-                                        width * 0.03,
-                                        fontWeight:
-                                        FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // --------------------------------------------------------
-                    // SAVE CHANGES BUTTON
-                    // --------------------------------------------------------
-
-                    SizedBox(
-                      height: height * 0.025,
-                    ),
-
-                    Center(
-                      child: SizedBox(
-                        width: width * 0.55,
-                        height: height * 0.058,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            // Save functionality will be implemented later.
-                          },
-
-                          icon: Icon(
-                            Icons.save_outlined,
-                            size: width * 0.05,
-                          ),
-
-                          label: Text(
-                            'Save Changes',
-                            style: TextStyle(
-                              fontSize: width * 0.035,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF063C70),
-                            foregroundColor: Colors.white,
-                            elevation: 2,
-
-                            shadowColor: const Color(0xFF063C70)
-                                .withOpacity(0.25),
-
-                            padding: EdgeInsets.symmetric(
-                              horizontal: width * 0.04,
-                            ),
-
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                width * 0.035,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    /*Center(
-                      child: SizedBox(
-                        width: width * 0.55,
-                        height: height * 0.058,
-                        child: Obx(
-                              () => ElevatedButton.icon(
-                            onPressed: controller.isLoading.value
-                                ? null
-                                : () {
-                              controller.saveChanges();
-                            },
-
-                            icon: controller.isLoading.value
-                                ? SizedBox(
-                              width: width * 0.045,
-                              height: width * 0.045,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                                : Icon(
-                              Icons.save_outlined,
-                              size: width * 0.05,
-                            ),
-
-                                label: Text (''),
-
-                            *//*label: Text(
-                              controller.isLoading.value
-                                  ? 'Saving...'
-                                  : 'Save Changes',
-                              style: TextStyle(
-                                fontSize: width * 0.035,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),*//*
-
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF063C70),
-                              disabledBackgroundColor: const Color(0xFF9AAFC2),
-                              foregroundColor: Colors.white,
-                              disabledForegroundColor: Colors.white,
-                              elevation: 2,
-
-                              shadowColor: const Color(0xFF063C70)
-                                  .withOpacity(0.25),
-
-                              padding: EdgeInsets.symmetric(
-                                horizontal: width * 0.04,
-                              ),
-
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  width * 0.035,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),*/
-
-                    SizedBox(
-                      height: height * 0.025,
-                    ),
-
-                  ],
-                ),
-              ),
-            ),
-
-            // --------------------------------------------------------
-            // BOTTOM ACTIONS
-            // --------------------------------------------------------
-
-            Container(
-              padding: EdgeInsets.fromLTRB(
-                width * 0.04,
-                height * 0.015,
-                width * 0.04,
-                height * 0.02,
-              ),
-
-              decoration: BoxDecoration(
-                color: Colors.white,
-
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 15,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.delete_outline_rounded,
-                      ),
-                      label: const Text('Delete'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor:
-                        const Color(0xFFD64545),
-                        side: const BorderSide(
-                          color: Color(0xFFD64545),
-                        ),
-                        minimumSize: Size(
-                          0,
-                          height * 0.055,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(
-                    width: width * 0.03,
-                  ),
-
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.check_circle_outline_rounded,
-                      ),
-                      label: const Text('Mark Paid'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        const Color(0xFF12A150),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        minimumSize: Size(
-                          0,
-                          height * 0.055,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ================================================================
-  // SECTION TITLE
-  // ================================================================
-
-  Widget _sectionTitle(
-      String title,
-      double width,
-      ) {
-    return Text(
-      title,
-      style: TextStyle(
-        color: const Color(0xFF0A2342),
-        fontSize: width * 0.038,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-  }
-
-
-  // ================================================================
-  // SMALL INFO
-  // ================================================================
-
-  Widget _smallInfo(
-      String title,
-      String value,
-      IconData icon,
-      double width,
-      ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: width * 0.025,
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: const Color(0xFF063C70),
-            size: width * 0.055,
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: const Color(0xFF71829A),
-              fontSize: width * 0.027,
-            ),
-          ),
-
-          const SizedBox(height: 3),
-
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: const Color(0xFF0A2342),
-              fontSize: width * 0.031,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _invoiceTextField({
-    required String label,
-    required TextEditingController controller,
-    required IconData icon,
-    required double width,
-    bool readOnly = true,
-    TextInputType keyboardType = TextInputType.text,
-    VoidCallback? onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: const Color(0xFF60728D),
-            fontSize: width * 0.030,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-
-        SizedBox(
-          height: width * 0.018,
-        ),
-
-        TextFormField(
-          controller: controller,
-          onTap: onTap,
-          keyboardType: keyboardType,
-
-          style: TextStyle(
-            color: const Color(0xFF0A2342),
-            fontSize: width * 0.034,
-            fontWeight: FontWeight.w600,
-          ),
-
-          decoration: InputDecoration(
-            prefixIcon: Icon(
-              icon,
-              color: const Color(0xFF71829A),
-              size: width * 0.050,
-            ),
-            filled: true,
-            fillColor: const Color(0xFFF9FAFC),
-
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: width * 0.035,
-              vertical: width * 0.035,
-            ),
-
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                width * 0.03,
-              ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE1E7EF),
-              ),
-            ),
-
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                width * 0.03,
-              ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE1E7EF),
-              ),
-            ),
-
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                width * 0.03,
-              ),
-              borderSide: const BorderSide(
-                color: Color(0xFF063C70),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-void showInvoiceDocumentDialog({
-  required BuildContext context,
-  required String fileUrl,
-  required String fileType,
-  required String mimeType,
-}) {
-
-  final Size screenSize = MediaQuery.of(context).size;
-
-  final double width = screenSize.width;
-  final double height = screenSize.height;
-
-  final bool isPdf =
-      fileType.toLowerCase() == 'pdf' ||
-          mimeType.toLowerCase() == 'application/pdf';
-
-  final bool isImage =
-      mimeType.toLowerCase().startsWith('image/') ||
-          [
-            'jpg',
-            'jpeg',
-            'png',
-            'webp',
-          ].contains(fileType.toLowerCase());
-
-  showDialog(
-    context: context,
-    barrierDismissible: true,
-    barrierColor: Colors.black.withOpacity(0.70),
-
-    builder: (context) {
-      return Dialog(
-        backgroundColor: Colors.white,
-        insetPadding: EdgeInsets.symmetric(
-          horizontal: width * 0.04,
-          vertical: height * 0.06,
-        ),
-
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-
-        child: SizedBox(
-          height: height * 0.82,
-          child: Column(
-            children: [
-
-              // ------------------------------------------------
-              // HEADER
-              // ------------------------------------------------
-
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.04,
-                  vertical: height * 0.018,
-                ),
-
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Color(0xFFE5EAF0),
-                    ),
-                  ),
-                ),
-
-                child: Row(
-                  children: [
-
-                    Container(
-                      width: width * 0.10,
-                      height: width * 0.10,
-
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFF4F9),
-                        borderRadius:
-                        BorderRadius.circular(12),
-                      ),
-
-                      child: Icon(
-                        isPdf
-                            ? Icons.picture_as_pdf_rounded
-                            : Icons.image_outlined,
-                        color: isPdf
-                            ? const Color(0xFFD64545)
-                            : const Color(0xFF063C70),
-                        size: width * 0.055,
-                      ),
-                    ),
-
-                    SizedBox(
-                      width: width * 0.03,
-                    ),
 
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Invoice Document',
-                            style: TextStyle(
-                              color:
-                              const Color(0xFF0A2342),
-                              fontSize: width * 0.040,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-
-                          SizedBox(
-                            height: height * 0.004,
-                          ),
-
-                          Text(
-                            isPdf
-                                ? 'PDF Document'
-                                : 'Image Document',
-                            style: TextStyle(
-                              color:
-                              const Color(0xFF71829A),
-                              fontSize: width * 0.028,
-                            ),
-                          ),
-                        ],
+                      child: _infoCard(
+                        icon: Icons.calendar_today_outlined,
+                        title: 'Issue Date',
+                        value: _formatDate(
+                          invoice.issueDate,
+                        ),
                       ),
                     ),
 
-                    // ------------------------------------------------
-                    // CLOSE BUTTON
-                    // ------------------------------------------------
+                    const SizedBox(width: 10),
 
-                    Material(
-                      color: const Color(0xFFF3F5F8),
-                      shape: const CircleBorder(),
-
-                      child: InkWell(
-                        customBorder:
-                        const CircleBorder(),
-
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-
-                        child: Padding(
-                          padding: EdgeInsets.all(
-                            width * 0.022,
-                          ),
-
-                          child: Icon(
-                            Icons.close_rounded,
-                            color:
-                            const Color(0xFF52657A),
-                            size: width * 0.055,
-                          ),
+                    Expanded(
+                      child: _infoCard(
+                        icon: Icons.event_outlined,
+                        title: 'Due Date',
+                        value: invoice.dueDate == null ||
+                            invoice.dueDate!.isEmpty
+                            ? '—'
+                            : _formatDate(
+                          invoice.dueDate!,
                         ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+
+                    Expanded(
+                      child: _infoCard(
+                        icon: Icons.person_outline,
+                        title: 'Client ID',
+                        value: invoice.clientId.toString(),
+                      ),
+                    ),
+
+                    const SizedBox(width: 10),
+
+                    Expanded(
+                      child: _infoCard(
+                        icon: Icons.payments_outlined,
+                        title: 'Currency',
+                        value: invoice.currencyCode,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // ==================================================
+                // CLIENT
+                // ==================================================
+
+                _sectionTitle('Client'),
+
+                const SizedBox(height: 10),
+
+                _clientCard(
+                  clientId: invoice.clientId.toString(),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ==================================================
+                // ITEMS
+                // ==================================================
+
+                _sectionTitle('Items'),
+
+                const SizedBox(height: 10),
+
+                _itemsCard(),
+
+                const SizedBox(height: 20),
+
+                // ==================================================
+                // PAYMENT SUMMARY
+                // ==================================================
+
+                _sectionTitle('Payment Summary'),
+
+                const SizedBox(height: 10),
+
+                _paymentSummary(
+                  currency: invoice.currencyCode,
+                  total: invoice.paidAmount,
+                  paidAmount: invoice.paidAmount,
+                  remainingAmount:
+                  invoice.remainingAmount,
+                ),
+
+                const SizedBox(height: 20),
+
+                // ==================================================
+                // NOTES
+                // ==================================================
+
+                if ((invoice.notes ?? '').isNotEmpty)
+                  _notesCard(invoice.notes!),
+              ],
+            ),
+          ),
+        );
+      }),
+
+      // ==========================================================
+      // BOTTOM ACTION BAR
+      // ==========================================================
+
+      bottomNavigationBar: Obx(() {
+
+        if (controller.invoice.value == null) {
+          return const SizedBox.shrink();
+        }
+
+        return _bottomActions();
+      }),
+    );
+  }
+
+  // ==============================================================
+  // INVOICE HEADER
+  // ==============================================================
+
+  Widget _invoiceHeader(
+      String invoiceNumber,
+      String status,
+      String currency,
+      double amount,
+      ) {
+    final bool isPaid =
+        status.toLowerCase() == 'paid';
+
+    return Container(
+      width: double.infinity,
+
+      padding: const EdgeInsets.all(18),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius: BorderRadius.circular(18),
+
+        border: Border.all(
+          color: const Color(0xFFE3E8EF),
+        ),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
+        children: [
+
+          Row(
+            children: [
+
+              Container(
+                width: 46,
+                height: 46,
+
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+
+                child: const Icon(
+                  Icons.receipt_long_outlined,
+                  color: Color(0xFF2563EB),
+                  size: 24,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+
+                  children: [
+
+                    const Text(
+                      'Invoice',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+
+                    const SizedBox(height: 3),
+
+                    Text(
+                      invoiceNumber,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF172033),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // ------------------------------------------------
-              // DOCUMENT CONTENT
-              // ------------------------------------------------
+              _statusBadge(status),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          const Divider(
+            height: 1,
+            color: Color(0xFFE8ECF1),
+          ),
+
+          const SizedBox(height: 18),
+
+          const Text(
+            'Total Amount',
+            style: TextStyle(
+              fontSize: 13,
+              color: Color(0xFF64748B),
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            _amount(currency, amount),
+
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF172033),
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            isPaid
+                ? 'Payment completed'
+                : 'Payment pending',
+
+            style: TextStyle(
+              fontSize: 13,
+              color: isPaid
+                  ? const Color(0xFF16A34A)
+                  : const Color(0xFFF59E0B),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==============================================================
+  // SECTION TITLE
+  // ==============================================================
+
+  Widget _sectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w700,
+        color: Color(0xFF172033),
+      ),
+    );
+  }
+
+  // ==============================================================
+  // INFO CARD
+  // ==============================================================
+
+  Widget _infoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Container(
+      height: 86,
+
+      padding: const EdgeInsets.all(12),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius: BorderRadius.circular(14),
+
+        border: Border.all(
+          color: const Color(0xFFE3E8EF),
+        ),
+      ),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
+        children: [
+
+          Row(
+            children: [
+
+              Icon(
+                icon,
+                size: 16,
+                color: const Color(0xFF64748B),
+              ),
+
+              const SizedBox(width: 6),
 
               Expanded(
-                child: Container(
-                  width: double.infinity,
-                  color: const Color(0xFFF5F7FA),
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
 
-                  child: _buildDocumentPreview(
-                    fileUrl: fileUrl,
-                    isPdf: isPdf,
-                    isImage: isImage,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      );
-    },
-  );
-}
 
-Widget _buildDocumentPreview({
-  required String fileUrl,
-  required bool isPdf,
-  required bool isImage,
-}) {
-  if (isPdf) {
-    return SfPdfViewer.network(
-      fileUrl,
+          const Spacer(),
+
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF172033),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  if (isImage) {
-    return InteractiveViewer(
-      minScale: 0.5,
-      maxScale: 4.0,
+  // ==============================================================
+  // CLIENT CARD
+  // ==============================================================
 
-      child: Center(
-        child: Image.network(
-          fileUrl,
-          fit: BoxFit.contain,
+  Widget _clientCard({
+    required String clientId,
+  }) {
+    return Container(
+      width: double.infinity,
 
-          loadingBuilder: (
-              context,
-              child,
-              loadingProgress,
-              ) {
-            if (loadingProgress == null) {
-              return child;
-            }
+      padding: const EdgeInsets.all(16),
 
-            return const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF063C70),
-              ),
-            );
-          },
+      decoration: BoxDecoration(
+        color: Colors.white,
 
-          errorBuilder: (
-              context,
-              error,
-              stackTrace,
-              ) {
-            return const Column(
-              mainAxisAlignment:
-              MainAxisAlignment.center,
+        borderRadius: BorderRadius.circular(16),
+
+        border: Border.all(
+          color: const Color(0xFFE3E8EF),
+        ),
+      ),
+
+      child: Row(
+        children: [
+
+          Container(
+            width: 46,
+            height: 46,
+
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              shape: BoxShape.circle,
+            ),
+
+            child: const Icon(
+              Icons.person_outline,
+              color: Color(0xFF475569),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+
               children: [
-                Icon(
-                  Icons.broken_image_outlined,
-                  size: 50,
-                  color: Color(0xFF9AA6B2),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  'Unable to load document.',
+
+                const Text(
+                  'Client',
                   style: TextStyle(
-                    color: Color(0xFF667085),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF172033),
+                  ),
+                ),
+
+                const SizedBox(height: 3),
+
+                Text(
+                  'Client ID: $clientId',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+
+                const SizedBox(height: 3),
+
+                const Text(
+                  'Client information will appear here',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF94A3B8),
                   ),
                 ),
               ],
-            );
-          },
+            ),
+          ),
+
+          IconButton(
+            onPressed: () {
+              // TODO: Open client
+            },
+            icon: const Icon(
+              Icons.chevron_right,
+              color: Color(0xFF94A3B8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==============================================================
+  // ITEMS CARD
+  // ==============================================================
+
+  Widget _itemsCard() {
+    return Container(
+      width: double.infinity,
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius: BorderRadius.circular(16),
+
+        border: Border.all(
+          color: const Color(0xFFE3E8EF),
+        ),
+      ),
+
+      child: Column(
+        children: [
+
+          // --------------------------------------------------------
+          // ITEM
+          // --------------------------------------------------------
+
+          _itemRow(
+            description: 'Invoice item',
+            quantity: '1',
+            unit: '€ 0.00',
+            total: '€ 0.00',
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==============================================================
+  // ITEM ROW
+  // ==============================================================
+
+  Widget _itemRow({
+    required String description,
+    required String quantity,
+    required String unit,
+    required String total,
+    required bool isLast,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(15),
+
+      decoration: BoxDecoration(
+        border: isLast
+            ? null
+            : const Border(
+          bottom: BorderSide(
+            color: Color(0xFFE8ECF1),
+          ),
+        ),
+      ),
+
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+
+        children: [
+
+          Row(
+            children: [
+
+              Expanded(
+                child: Text(
+                  description,
+
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF172033),
+                  ),
+                ),
+              ),
+
+              Text(
+                total,
+
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF172033),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          Row(
+            children: [
+
+              _itemDetail(
+                'Qty',
+                quantity,
+              ),
+
+              const SizedBox(width: 25),
+
+              _itemDetail(
+                'Unit',
+                unit,
+              ),
+
+              const Spacer(),
+
+              const Text(
+                'VAT 20%',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==============================================================
+  // ITEM DETAIL
+  // ==============================================================
+
+  Widget _itemDetail(
+      String title,
+      String value,
+      ) {
+    return Column(
+      crossAxisAlignment:
+      CrossAxisAlignment.start,
+
+      children: [
+
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 11,
+            color: Color(0xFF94A3B8),
+          ),
+        ),
+
+        const SizedBox(height: 2),
+
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF475569),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==============================================================
+  // PAYMENT SUMMARY
+  // ==============================================================
+
+  Widget _paymentSummary({
+    required String currency,
+    required double total,
+    required double paidAmount,
+    required double? remainingAmount,
+  }) {
+    return Container(
+      width: double.infinity,
+
+      padding: const EdgeInsets.all(16),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius: BorderRadius.circular(16),
+
+        border: Border.all(
+          color: const Color(0xFFE3E8EF),
+        ),
+      ),
+
+      child: Column(
+        children: [
+
+          _summaryRow(
+            'Invoice Total',
+            _amount(currency, total),
+          ),
+
+          const SizedBox(height: 12),
+
+          _summaryRow(
+            'Paid Amount',
+            _amount(currency, paidAmount),
+          ),
+
+          const SizedBox(height: 12),
+
+          const Divider(
+            color: Color(0xFFE8ECF1),
+          ),
+
+          const SizedBox(height: 12),
+
+          _summaryRow(
+            'Remaining',
+            remainingAmount == null
+                ? '—'
+                : _amount(
+              currency,
+              remainingAmount,
+            ),
+            bold: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==============================================================
+  // SUMMARY ROW
+  // ==============================================================
+
+  Widget _summaryRow(
+      String title,
+      String value, {
+        bool bold = false,
+      }) {
+    return Row(
+      children: [
+
+        Expanded(
+          child: Text(
+            title,
+
+            style: TextStyle(
+              fontSize: 14,
+              color: const Color(0xFF64748B),
+              fontWeight: bold
+                  ? FontWeight.w600
+                  : FontWeight.normal,
+            ),
+          ),
+        ),
+
+        Text(
+          value,
+
+          style: TextStyle(
+            fontSize: bold ? 17 : 14,
+            color: const Color(0xFF172033),
+            fontWeight: bold
+                ? FontWeight.w700
+                : FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==============================================================
+  // NOTES
+  // ==============================================================
+
+  Widget _notesCard(String notes) {
+    return Container(
+      width: double.infinity,
+
+      padding: const EdgeInsets.all(16),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius: BorderRadius.circular(16),
+
+        border: Border.all(
+          color: const Color(0xFFE3E8EF),
+        ),
+      ),
+
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+
+        children: [
+
+          const Text(
+            'Notes',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF172033),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            notes,
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: Color(0xFF64748B),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==============================================================
+  // STATUS BADGE
+  // ==============================================================
+
+  Widget _statusBadge(String status) {
+    final bool isPaid =
+        status.toLowerCase() == 'paid';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 6,
+      ),
+
+      decoration: BoxDecoration(
+        color: isPaid
+            ? const Color(0xFFE8F7EE)
+            : const Color(0xFFFFF7E6),
+
+        borderRadius: BorderRadius.circular(20),
+      ),
+
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+
+        children: [
+
+          Container(
+            width: 6,
+            height: 6,
+
+            decoration: BoxDecoration(
+              color: isPaid
+                  ? const Color(0xFF16A34A)
+                  : const Color(0xFFF59E0B),
+              shape: BoxShape.circle,
+            ),
+          ),
+
+          const SizedBox(width: 5),
+
+          Text(
+            status.isEmpty
+                ? 'Pending'
+                : status.capitalizeFirst ?? status,
+
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isPaid
+                  ? const Color(0xFF15803D)
+                  : const Color(0xFFD97706),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==============================================================
+  // BOTTOM ACTIONS
+  // ==============================================================
+
+  Widget _bottomActions() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        16,
+        10,
+        16,
+        12,
+      ),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+
+      child: SafeArea(
+        top: false,
+
+        child: Row(
+          children: [
+
+            // ------------------------------------------------------
+            // DOWNLOAD
+            // ------------------------------------------------------
+
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  // TODO: Download
+                },
+
+                icon: const Icon(
+                  Icons.download_outlined,
+                  size: 19,
+                ),
+
+                label: const Text(
+                  'Download',
+                ),
+
+                style: OutlinedButton.styleFrom(
+                  foregroundColor:
+                  const Color(0xFF475569),
+
+                  side: const BorderSide(
+                    color: Color(0xFFD5DCE5),
+                  ),
+
+                  minimumSize:
+                  const Size(0, 48),
+
+                  shape:
+                  RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            // ------------------------------------------------------
+            // SEND
+            // ------------------------------------------------------
+
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // TODO: Send invoice
+                },
+
+                icon: const Icon(
+                  Icons.send_outlined,
+                  size: 18,
+                ),
+
+                label: const Text(
+                  'Send',
+                ),
+
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                  const Color(0xFF2563EB),
+
+                  foregroundColor:
+                  Colors.white,
+
+                  elevation: 0,
+
+                  minimumSize:
+                  const Size(0, 48),
+
+                  shape:
+                  RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            // ------------------------------------------------------
+            // MORE
+            // ------------------------------------------------------
+
+            SizedBox(
+              width: 48,
+              height: 48,
+
+              child: OutlinedButton(
+                onPressed: () {
+                  _showMoreActions();
+                },
+
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+
+                  side: const BorderSide(
+                    color: Color(0xFFD5DCE5),
+                  ),
+
+                  shape:
+                  RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(12),
+                  ),
+                ),
+
+                child: const Icon(
+                  Icons.more_horiz,
+                  color: Color(0xFF475569),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  return const Center(
-    child: Text(
-      'Unsupported document format.',
-      style: TextStyle(
-        color: Color(0xFF667085),
+  // ==============================================================
+  // MORE ACTIONS
+  // ==============================================================
+
+  void _showMoreActions() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          12,
+          20,
+          25,
+        ),
+
+        decoration: const BoxDecoration(
+          color: Colors.white,
+
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(22),
+          ),
+        ),
+
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+
+          children: [
+
+            Container(
+              width: 40,
+              height: 4,
+
+              decoration: BoxDecoration(
+                color: const Color(0xFFD1D5DB),
+                borderRadius:
+                BorderRadius.circular(10),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _bottomSheetAction(
+              icon: Icons.picture_as_pdf_outlined,
+              title: 'Download ZUGFeRD PDF',
+              onTap: () {
+                Get.back();
+              },
+            ),
+
+            _bottomSheetAction(
+              icon: Icons.description_outlined,
+              title: 'Download e-invoice',
+              onTap: () {
+                Get.back();
+              },
+            ),
+
+            _bottomSheetAction(
+              icon: Icons.edit_outlined,
+              title: 'Edit Invoice',
+              onTap: () {
+                Get.back();
+              },
+            ),
+
+            _bottomSheetAction(
+              icon: Icons.delete_outline,
+              title: 'Delete Invoice',
+              color: const Color(0xFFDC2626),
+              onTap: () {
+                Get.back();
+
+                controller.showDeleteConfirmation();
+              },
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+
+  // ==============================================================
+  // BOTTOM SHEET ACTION
+  // ==============================================================
+
+  Widget _bottomSheetAction({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color color = const Color(0xFF172033),
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+
+      leading: Container(
+        width: 40,
+        height: 40,
+
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F7FA),
+          borderRadius: BorderRadius.circular(10),
+        ),
+
+        child: Icon(
+          icon,
+          color: color,
+          size: 20,
+        ),
+      ),
+
+      title: Text(
+        title,
+
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          color: color,
+        ),
+      ),
+
+      onTap: onTap,
+    );
+  }
+
+  // ==============================================================
+  // DATE
+  // ==============================================================
+
+  String _formatDate(String date) {
+    if (date.isEmpty) {
+      return '—';
+    }
+
+    try {
+      final parsed = DateTime.parse(date);
+
+      return '${parsed.day.toString().padLeft(2, '0')}.'
+          '${parsed.month.toString().padLeft(2, '0')}.'
+          '${parsed.year}';
+    } catch (_) {
+      return date;
+    }
+  }
+
+  // ==============================================================
+  // AMOUNT
+  // ==============================================================
+
+  String _amount(
+      String currency,
+      double amount,
+      ) {
+    return '$currency ${amount.toStringAsFixed(2)}';
+  }
 }
