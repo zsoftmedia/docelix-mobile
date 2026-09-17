@@ -99,7 +99,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     style: TextStyle(
                       color: const Color(0xFF172A46),
                       fontSize: width * 0.045,
-                      fontWeight: FontWeight.w700,
+                    //  fontWeight: FontWeight.w700,
                     ),
                   ),
 
@@ -120,7 +120,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                           style: TextStyle(
                             color: const Color(0xFF063C70),
                             fontSize: width * 0.032,
-                            fontWeight: FontWeight.w600,
+                          //  fontWeight: FontWeight.w600,
                           ),
                         );})
                   ),
@@ -168,33 +168,41 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   onRefresh: invoicesController.refreshInvoices,
                   child: ListView.builder(
                     padding: EdgeInsets.only(
-                      left: width * 0.04,
-                      right: width * 0.04,
+                      top: height * 0.005,
                       bottom: height * 0.12,
                     ),
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: invoicesController.invoices.length,
                     itemBuilder: (context, index) {
-                      final invoice =
-                      invoicesController.invoices[index];
+                      final invoice = invoicesController.invoices[index];
 
-                      // Invoice Card Clickable
                       return InkWell(
                         onTap: () {
-                          print('Invoice ID: ${invoice.id}');
-                          print('Invoice Number: ${invoice.invoiceNumber}');
-
-                          // Navigate to details
-                          Get.toNamed('/InvoicesDetailsScreen', arguments: invoice,);
+                          Get.toNamed(
+                            '/InvoicesDetailsScreen',
+                            arguments: invoice,
+                          );
                         },
-                        child: _invoiceCard(
-                          context: context,
-                          invoice: invoice,
-                          width: width,
-                          height: height,
+                        child: Column(
+                          children: [
+                            _invoiceCard(
+                              context: context,
+                              invoice: invoice,
+                              width: width,
+                              height: height,
+                            ),
+
+                            // Thin divider — no card border
+                            const Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: Color(0xFFE9EDF3),
+                              indent: 0,
+                              endIndent: 0,
+                            ),
+                          ],
                         ),
                       );
-
                     },
                   ),
                 );
@@ -261,13 +269,135 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   // INVOICE CARD
   // ================================================================
 
-
   Widget _invoiceCard({
     required BuildContext context,
     required InvoicesModel invoice,
     required double width,
     required double height,
   }) {
+    final String status = invoice.status.toLowerCase();
+
+    Color statusColor;
+
+    if (status == "paid") {
+      statusColor = const Color(0xFF00B894);
+    } else if (status == "pending" || status == "unpaid") {
+      statusColor = const Color(0xFFF39C12);
+    } else if (status == "overdue") {
+      statusColor = Colors.red;
+    } else {
+      statusColor = const Color(0xFF71829A);
+    }
+
+    final String displayStatus = status.isNotEmpty
+        ? status[0].toUpperCase() + status.substring(1)
+        : "Unknown";
+
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(
+        horizontal: width * 0.045,
+        vertical: height * 0.018,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Invoice icon
+          Container(
+            width: width * 0.115,
+            height: width * 0.115,
+            decoration: BoxDecoration(
+            //  color: const Color(0xFFEAF3FB),
+              borderRadius: BorderRadius.circular(width * 0.03),
+            ),
+            child: Icon(
+              Icons.receipt_long_rounded,
+              color: const Color(0xFF063C70),
+              size: width * 0.09,
+            ),
+          ),
+
+          SizedBox(width: width * 0.035),
+
+          // Invoice information
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  invoice.invoiceNumber ?? 'No Invoice Number',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: const Color(0xFF172A46),
+                    fontSize: width * 0.04,
+                   // fontWeight: FontWeight.w700, // Bold
+                  ),
+                ),
+
+                SizedBox(height: height * 0.006),
+
+                Text(
+                  invoice.issueDate ?? 'N/A',
+                  style: TextStyle(
+                    color: const Color(0xFF71829A),
+                    fontSize: width * 0.033,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(width: width * 0.02),
+
+          // Right side: status + amount
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: width * 0.025,
+                  vertical: height * 0.005,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  displayStatus,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: width * 0.03,
+                   // fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+
+              SizedBox(height: height * 0.006),
+
+              Text(
+                '${invoice.currencyCode ?? ''} ${invoice.paidAmount ?? 0}',
+                style: TextStyle(
+                  color: const Color(0xFF172A46),
+                  fontSize: width * 0.043,
+                  //fontWeight: FontWeight.w800, // Bold amount
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /*Widget _invoiceCard({
+    required BuildContext context,
+    required InvoicesModel invoice,
+    required double width,
+    required double height,
+  })
+  {
 
     // ----------------------------------------------------------
     // STATUS
@@ -475,6 +605,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         ],
       ),
     );
-  }
+  }*/
 
 }

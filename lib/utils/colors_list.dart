@@ -104,15 +104,22 @@ class colorsList {
   static const Color backgroundColor = Color(0xFFF7F9FC);
   static const Color cardColor = Colors.white;
 
+  static const Color textColor = Color(0xFF172033);
+  static const Color primaryColor = Color(0xFF0A2342);
+  static const Color secondaryTextColor = Color(0xFF64748B);
+
   static const Color primaryText = Color(0xFF0A2342);
   static const Color secondaryText = Color(0xFF71829A);
   static const Color lightText = Color(0xFF52657D);
 
-  static const Color borderColor = Color(0xFFE1E7EF);
+  static const Color borderColor = Color(0xFFE8EDF3);
   static const Color progressBackground = Color(0xFFE9EEF4);
 
   static const Color primaryBlue = Color(0xFF0B4380);
   static const Color lightBlue = Color(0xFFEAF3FB);
+
+  static const Color iconBackgroundColor = Color(0xFFF1F5F9);
+  static const Color mutedTextColor = Color(0xFF94A3B8);
 
   static const Color green = Color(0xFF12B886);
   static const Color red = Color(0xFFE5484D);

@@ -1,6 +1,7 @@
 import 'package:docelix_mobileapp/introPages/Intro_screen.dart';
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:docelix_mobileapp/ui/add_client_screen.dart';
+import 'package:docelix_mobileapp/ui/client_details_screen.dart';
 import 'package:docelix_mobileapp/ui/clients_screen.dart';
 import 'package:docelix_mobileapp/ui/create_incoming_invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
@@ -69,6 +70,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/IncomingInvoicesScreen', page: () => IncomingInvoicesScreen(),),
         GetPage(name: '/CreateIncomingInvoicesScreen', page: () => CreateIncomingInvoicesScreen(),),
         GetPage(name: '/ClientsScreen', page: () => ClientsScreen(),),
+        GetPage(name: '/ClientDetailsScreen', page: () => ClientDetailsScreen(),),
         GetPage(name: '/AddClientScreen', page: () => AddClientScreen(),),
         GetPage(name: '/IncomingInvoicesDetailsScreen', page: () => IncomingInvoicesDetailsScreen(invoice: Get.arguments as IncomingInvoicesModel),),
         GetPage(name: '/InvoicesScreen', page: () => InvoicesScreen(),),

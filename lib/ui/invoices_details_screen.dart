@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/invoices_details_controller.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,7 +12,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
+      backgroundColor: colorsList.colorWhite,
 
       // ==========================================================
       // APP BAR
@@ -127,7 +128,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     Expanded(
                       child: _infoCard(
                         icon: Icons.calendar_today_outlined,
-                        title: 'Issue Date',
+                        title: 'Issue Date: ',
                         value: _formatDate(
                           invoice.issueDate,
                         ),
@@ -158,9 +159,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                     Expanded(
                       child: _infoCard(
-                        icon: Icons.person_outline,
-                        title: 'Client ID',
-                        value: invoice.clientId.toString(),
+                        icon: Icons.euro,
+                        title: 'Total',
+                        value: controller.client.value?.totalInvoicedAmount.toStringAsFixed(2) ?? '0.00',
                       ),
                     ),
 
@@ -186,9 +187,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                _clientCard(
-                  clientId: invoice.clientId.toString(),
-                ),
+                _clientCard(),
 
                 const SizedBox(height: 20),
 
@@ -201,24 +200,6 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 _itemsCard(),
-
-                const SizedBox(height: 20),
-
-                // ==================================================
-                // PAYMENT SUMMARY
-                // ==================================================
-
-                _sectionTitle('Payment Summary'),
-
-                const SizedBox(height: 10),
-
-                _paymentSummary(
-                  currency: invoice.currencyCode,
-                  total: invoice.paidAmount,
-                  paidAmount: invoice.paidAmount,
-                  remainingAmount:
-                  invoice.remainingAmount,
-                ),
 
                 const SizedBox(height: 20),
 
@@ -259,140 +240,86 @@ class InvoicesDetailsScreen extends StatelessWidget {
       String currency,
       double amount,
       ) {
-    final bool isPaid =
-        status.toLowerCase() == 'paid';
+    final bool isPaid = status.toLowerCase() == 'paid';
 
-    return Container(
-      width: double.infinity,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.receipt_long_outlined,
+              size: 22,
+              color: Color(0xFF2563EB),
+            ),
 
-      padding: const EdgeInsets.all(18),
+            const SizedBox(width: 10),
 
-      decoration: BoxDecoration(
-        color: Colors.white,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Invoice',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
 
-        borderRadius: BorderRadius.circular(18),
+                  const SizedBox(height: 2),
 
-        border: Border.all(
-          color: const Color(0xFFE3E8EF),
+                  Text(
+                    invoiceNumber,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      //fontWeight: FontWeight.w700,
+                      color: Color(0xFF172033),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            _statusBadge(status),
+          ],
         ),
 
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+        const SizedBox(height: 14),
 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-
-          Row(
-            children: [
-
-              Container(
-                width: 46,
-                height: 46,
-
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(13),
-                ),
-
-                child: const Icon(
-                  Icons.receipt_long_outlined,
-                  color: Color(0xFF2563EB),
-                  size: 24,
-                ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            const Text(
+              'Total Amount',
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF64748B),
               ),
+            ),
 
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
-
-                  children: [
-
-                    const Text(
-                      'Invoice',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF64748B),
-                      ),
-                    ),
-
-                    const SizedBox(height: 3),
-
-                    Text(
-                      invoiceNumber,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF172033),
-                      ),
-                    ),
-                  ],
-                ),
+            Text(
+              _amount(currency, amount),
+              style: const TextStyle(
+                fontSize: 22,
+               // fontWeight: FontWeight.w800,
+                color: Color(0xFF172033),
               ),
-
-              _statusBadge(status),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          const Divider(
-            height: 1,
-            color: Color(0xFFE8ECF1),
-          ),
-
-          const SizedBox(height: 18),
-
-          const Text(
-            'Total Amount',
-            style: TextStyle(
-              fontSize: 13,
-              color: Color(0xFF64748B),
             ),
-          ),
+          ],
+        ),
 
-          const SizedBox(height: 4),
+        const SizedBox(height: 12),
 
-          Text(
-            _amount(currency, amount),
-
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF172033),
-            ),
-          ),
-
-          const SizedBox(height: 4),
-
-          Text(
-            isPaid
-                ? 'Payment completed'
-                : 'Payment pending',
-
-            style: TextStyle(
-              fontSize: 13,
-              color: isPaid
-                  ? const Color(0xFF16A34A)
-                  : const Color(0xFFF59E0B),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+        const Divider(
+          height: 1,
+          color: Color(0xFFE5E7EB),
+        ),
+      ],
     );
   }
 
@@ -420,62 +347,37 @@ class InvoicesDetailsScreen extends StatelessWidget {
     required String title,
     required String value,
   }) {
-    return Container(
-      height: 86,
-
-      padding: const EdgeInsets.all(12),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(14),
-
-        border: Border.all(
-          color: const Color(0xFFE3E8EF),
-        ),
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 9),
+      child: Row(
         children: [
-
-          Row(
-            children: [
-
-              Icon(
-                icon,
-                size: 16,
-                color: const Color(0xFF64748B),
-              ),
-
-              const SizedBox(width: 6),
-
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            ],
+          Icon(
+            icon,
+            size: 18,
+            color: const Color(0xFF64748B),
           ),
 
-          const Spacer(),
+          const SizedBox(width: 10),
+
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF64748B),
+               // fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
 
           Text(
             value,
+            textAlign: TextAlign.right,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-
             style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
+              fontSize: 14,
+             // fontWeight: FontWeight.w700,
               color: Color(0xFF172033),
             ),
           ),
@@ -488,98 +390,168 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // CLIENT CARD
   // ==============================================================
 
-  Widget _clientCard({
-    required String clientId,
-  }) {
-    return Container(
-      width: double.infinity,
+  Widget _clientCard() {
+    return Obx(() {
+      if (controller.client.value == null &&
+          controller.isLoading.value) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Center(
+            child: SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            ),
+          ),
+        );
+      }
 
-      padding: const EdgeInsets.all(16),
+      if (controller.client.value == null) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.person_outline,
+                size: 20,
+                color: Color(0xFF64748B),
+              ),
 
-      decoration: BoxDecoration(
-        color: Colors.white,
+              const SizedBox(width: 10),
 
-        borderRadius: BorderRadius.circular(16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Client',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF172033),
+                      ),
+                    ),
 
-        border: Border.all(
-          color: const Color(0xFFE3E8EF),
-        ),
-      ),
+                    const SizedBox(height: 3),
 
-      child: Row(
+                    Text(
+                      'Client ID: ${controller.invoice.value?.clientId ?? '—'}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      final client = controller.client.value!;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.person_outline,
+                size: 20,
+                color: Color(0xFF2563EB),
+              ),
 
-          Container(
-            width: 46,
-            height: 46,
+              const SizedBox(width: 10),
 
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              shape: BoxShape.circle,
-            ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      client.name.isEmpty
+                          ? 'Client'
+                          : client.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                     //   fontWeight: FontWeight.w700,
+                        color: Color(0xFF172033),
+                      ),
+                    ),
 
-            child: const Icon(
-              Icons.person_outline,
-              color: Color(0xFF475569),
-            ),
+                    if ((client.email ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        client.email!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+
+                    if ((client.phone ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        client.phone!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+
+                    if ((client.addressLine1 ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        client.addressLine1!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+
+                    if ((client.city ?? '').isNotEmpty ||
+                        (client.country ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          if ((client.city ?? '').isNotEmpty)
+                            client.city!,
+                          if ((client.country ?? '').isNotEmpty)
+                            client.country!,
+                        ].join(', '),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(height: 12),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-
-              children: [
-
-                const Text(
-                  'Client',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF172033),
-                  ),
-                ),
-
-                const SizedBox(height: 3),
-
-                Text(
-                  'Client ID: $clientId',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-
-                const SizedBox(height: 3),
-
-                const Text(
-                  'Client information will appear here',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF94A3B8),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          IconButton(
-            onPressed: () {
-              // TODO: Open client
-            },
-            icon: const Icon(
-              Icons.chevron_right,
-              color: Color(0xFF94A3B8),
-            ),
+          const Divider(
+            height: 1,
+            color: Color(0xFFE5E7EB),
           ),
         ],
-      ),
-    );
+      );
+    });
   }
 
   // ==============================================================
@@ -587,36 +559,191 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // ==============================================================
 
   Widget _itemsCard() {
-    return Container(
-      width: double.infinity,
+    return Obx(() {
 
-      decoration: BoxDecoration(
-        color: Colors.white,
+      // ==========================================================
+      // LOADING
+      // ==========================================================
 
-        borderRadius: BorderRadius.circular(16),
+      if (controller.isLoading.value &&
+          controller.invoiceItems.isEmpty) {
+        return Container(
+          width: double.infinity,
 
-        border: Border.all(
-          color: const Color(0xFFE3E8EF),
-        ),
-      ),
+          padding: const EdgeInsets.all(30),
 
-      child: Column(
-        children: [
+          decoration: BoxDecoration(
+            color: Colors.white,
 
-          // --------------------------------------------------------
-          // ITEM
-          // --------------------------------------------------------
+            borderRadius: BorderRadius.circular(16),
 
-          _itemRow(
-            description: 'Invoice item',
-            quantity: '1',
-            unit: '€ 0.00',
-            total: '€ 0.00',
-            isLast: true,
+            border: Border.all(
+              color: const Color(0xFFE3E8EF),
+            ),
           ),
-        ],
-      ),
-    );
+
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // ==========================================================
+      // EMPTY
+      // ==========================================================
+
+      if (controller.invoiceItems.isEmpty) {
+        return Container(
+          width: double.infinity,
+
+          padding: const EdgeInsets.all(24),
+
+          decoration: BoxDecoration(
+            color: Colors.white,
+
+            borderRadius: BorderRadius.circular(16),
+
+            border: Border.all(
+              color: const Color(0xFFE3E8EF),
+            ),
+          ),
+
+          child: Column(
+            children: const [
+
+              Icon(
+                Icons.inventory_2_outlined,
+                size: 36,
+                color: Color(0xFF94A3B8),
+              ),
+
+              SizedBox(height: 10),
+
+              Text(
+                'No items found',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF475569),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // ==========================================================
+      // ITEMS
+      // ==========================================================
+
+      final items = controller.invoiceItems;
+
+      // Calculate total from items
+      final double itemsTotal = items.fold(
+        0.0,
+            (sum, item) => sum + item.grossAmount,
+      );
+
+      return Container(
+        width: double.infinity,
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+
+          borderRadius: BorderRadius.circular(16),
+
+          border: Border.all(
+            color: colorsList.colorWhite,
+          ),
+        ),
+
+        child: Column(
+          children: [
+
+            // ------------------------------------------------------
+            // ITEM LIST
+            // ------------------------------------------------------
+
+            ...List.generate(
+              items.length,
+                  (index) {
+
+                final item = items[index];
+
+                return _itemRow(
+                  description: item.itemDesc,
+                  quantity: _formatNumber(item.quantity),
+                  unit: _amount(
+                    controller.invoice.value!.currencyCode,
+                    item.unitPrice,
+                  ),
+                  vat: '${_formatNumber(item.vatRate)}%',
+                  total: _amount(
+                    controller.invoice.value!.currencyCode,
+                    item.grossAmount,
+                  ),
+                  isLast: false,
+                );
+              },
+            ),
+
+            // ------------------------------------------------------
+            // TOTAL
+            // ------------------------------------------------------
+
+            Container(
+              width: double.infinity,
+
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 15,
+              ),
+
+              decoration: const BoxDecoration(
+                color: Color(0xFFF8FAFC),
+
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+              ),
+
+              child: Row(
+                mainAxisAlignment:
+                MainAxisAlignment.end,
+
+                children: [
+
+                  const Text(
+                    'Total',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF475569),
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  Text(
+                    _amount(
+                      controller.invoice.value!.currencyCode,
+                      itemsTotal,
+                    ),
+
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF172033),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   // ==============================================================
@@ -627,83 +754,80 @@ class InvoicesDetailsScreen extends StatelessWidget {
     required String description,
     required String quantity,
     required String unit,
+    required String vat,
     required String total,
     required bool isLast,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-
-      decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : const Border(
-          bottom: BorderSide(
-            color: Color(0xFFE8ECF1),
-          ),
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 4,
       ),
-
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-
         children: [
-
-          Row(
-            children: [
-
-              Expanded(
-                child: Text(
-                  description,
-
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF172033),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 13,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Item description
+                Expanded(
+                  flex: 5,
+                  child: Text(
+                    description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      //fontWeight: FontWeight.w500,
+                      color: Color(0xFF172033),
+                    ),
                   ),
                 ),
-              ),
 
-              Text(
-                total,
+                const SizedBox(width: 16),
 
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF172033),
+                // Quantity
+                SizedBox(
+                  width: 36,
+                  child: Text(
+                    quantity,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+
+                const SizedBox(width: 16),
+
+                // Total
+                SizedBox(
+                  width: 82,
+                  child: Text(
+                    total,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontSize: 14,
+                  //    fontWeight: FontWeight.w600,
+                      color: Color(0xFF172033),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 10),
-
-          Row(
-            children: [
-
-              _itemDetail(
-                'Qty',
-                quantity,
-              ),
-
-              const SizedBox(width: 25),
-
-              _itemDetail(
-                'Unit',
-                unit,
-              ),
-
-              const Spacer(),
-
-              const Text(
-                'VAT 20%',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF64748B),
-                ),
-              ),
-            ],
-          ),
+          if (!isLast)
+            const Divider(
+              height: 1,
+              thickness: 1,
+              indent: 0,
+              endIndent: 0,
+              color: Color(0xFFE5E7EB),
+            ),
         ],
       ),
     );
@@ -854,48 +978,36 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // ==============================================================
 
   Widget _notesCard(String notes) {
-    return Container(
-      width: double.infinity,
-
-      padding: const EdgeInsets.all(16),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(16),
-
-        border: Border.all(
-          color: const Color(0xFFE3E8EF),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Notes',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF172033),
+          ),
         ),
-      ),
 
-      child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        const SizedBox(height: 7),
 
-        children: [
-
-          const Text(
-            'Notes',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF172033),
-            ),
+        Text(
+          notes,
+          style: const TextStyle(
+            fontSize: 13,
+            height: 1.4,
+            color: Color(0xFF64748B),
           ),
+        ),
 
-          const SizedBox(height: 8),
+        const SizedBox(height: 12),
 
-          Text(
-            notes,
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.5,
-              color: Color(0xFF64748B),
-            ),
-          ),
-        ],
-      ),
+        const Divider(
+          height: 1,
+          color: Color(0xFFE5E7EB),
+        ),
+      ],
     );
   }
 
@@ -904,56 +1016,30 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // ==============================================================
 
   Widget _statusBadge(String status) {
-    final bool isPaid =
-        status.toLowerCase() == 'paid';
+    final bool isPaid = status.toLowerCase() == 'paid';
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
+        horizontal: 8,
+        vertical: 4,
       ),
-
       decoration: BoxDecoration(
         color: isPaid
             ? const Color(0xFFE8F7EE)
             : const Color(0xFFFFF7E6),
-
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
-
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-
-        children: [
-
-          Container(
-            width: 6,
-            height: 6,
-
-            decoration: BoxDecoration(
-              color: isPaid
-                  ? const Color(0xFF16A34A)
-                  : const Color(0xFFF59E0B),
-              shape: BoxShape.circle,
-            ),
-          ),
-
-          const SizedBox(width: 5),
-
-          Text(
-            status.isEmpty
-                ? 'Pending'
-                : status.capitalizeFirst ?? status,
-
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: isPaid
-                  ? const Color(0xFF15803D)
-                  : const Color(0xFFD97706),
-            ),
-          ),
-        ],
+      child: Text(
+        status.isEmpty
+            ? 'Pending'
+            : status.capitalizeFirst ?? status,
+        style: TextStyle(
+          fontSize: 11,
+        //  fontWeight: FontWeight.w600,
+          color: isPaid
+              ? const Color(0xFF15803D)
+              : const Color(0xFFD97706),
+        ),
       ),
     );
   }
@@ -1264,4 +1350,16 @@ class InvoicesDetailsScreen extends StatelessWidget {
       ) {
     return '$currency ${amount.toStringAsFixed(2)}';
   }
+}
+
+// ==============================================================
+// NUMBER FORMAT
+// ==============================================================
+
+String _formatNumber(double value) {
+  if (value == value.roundToDouble()) {
+    return value.toInt().toString();
+  }
+
+  return value.toStringAsFixed(2);
 }

@@ -21,9 +21,9 @@ class DioClient {
     );
   }
 
-// ==============================
-// GET DASHBOARD ACCOUNTING
-// ==============================
+  // ==============================
+  // GET DASHBOARD ACCOUNTING
+  // ==============================
 
   Future<Response> getDashboardAccounting({
     required int companyId,
@@ -123,6 +123,73 @@ class DioClient {
       '${ApiConstants.baseUrl}/invoices',
       queryParameters: {
         'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // GET INVOICE ITEMS
+  // ==============================
+
+  Future<Response> getInvoiceItems({
+    required int invoiceId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/invoices/$invoiceId/items',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+    // ==============================
+    // GET CLIENTS
+    // ==============================
+
+  Future<Response> getClients({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/clients',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // GET CLIENTS FOR CLIENTS SCREEN
+  // ==============================
+
+  Future<Response> getClientsScreen({
+    required int companyId,
+    required String accessToken,
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/clients',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'pageSize': pageSize,
       },
       options: Options(
         headers: {

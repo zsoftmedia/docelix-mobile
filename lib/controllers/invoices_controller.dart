@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/models/invoice_item_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -13,6 +14,7 @@ class InvoicesController extends GetxController {
   /// Invoice list
   final RxList<InvoicesModel> invoices =
       <InvoicesModel>[].obs;
+
 
   /// Total invoices
   final RxInt totalInvoices = 0.obs;

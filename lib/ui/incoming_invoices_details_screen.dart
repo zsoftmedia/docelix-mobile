@@ -67,7 +67,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Invoice Details',
+              'Incoming Invoice Details',
               style: TextStyle(
                 color: const Color(0xFF0A2342),
                 fontSize: width * 0.045,
@@ -153,7 +153,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                               style: TextStyle(
                                 color: controller.statusColor,
                                 fontSize: width * 0.032,
-                                fontWeight: FontWeight.w700,
+                                //fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],
@@ -560,69 +560,6 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                       ),
                     ),
 
-                    /*Center(
-                      child: SizedBox(
-                        width: width * 0.55,
-                        height: height * 0.058,
-                        child: Obx(
-                              () => ElevatedButton.icon(
-                            onPressed: controller.isLoading.value
-                                ? null
-                                : () {
-                              controller.saveChanges();
-                            },
-
-                            icon: controller.isLoading.value
-                                ? SizedBox(
-                              width: width * 0.045,
-                              height: width * 0.045,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                                : Icon(
-                              Icons.save_outlined,
-                              size: width * 0.05,
-                            ),
-
-                                label: Text (''),
-
-                            *//*label: Text(
-                              controller.isLoading.value
-                                  ? 'Saving...'
-                                  : 'Save Changes',
-                              style: TextStyle(
-                                fontSize: width * 0.035,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),*//*
-
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF063C70),
-                              disabledBackgroundColor: const Color(0xFF9AAFC2),
-                              foregroundColor: Colors.white,
-                              disabledForegroundColor: Colors.white,
-                              elevation: 2,
-
-                              shadowColor: const Color(0xFF063C70)
-                                  .withOpacity(0.25),
-
-                              padding: EdgeInsets.symmetric(
-                                horizontal: width * 0.04,
-                              ),
-
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  width * 0.035,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),*/
-
                     SizedBox(
                       height: height * 0.025,
                     ),
@@ -726,7 +663,8 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
   Widget _sectionTitle(
       String title,
       double width,
-      ) {
+      )
+  {
     return Text(
       title,
       style: TextStyle(
@@ -737,7 +675,6 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
     );
   }
 
-
   // ================================================================
   // SMALL INFO
   // ================================================================
@@ -747,7 +684,8 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
       String value,
       IconData icon,
       double width,
-      ) {
+      )
+  {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: width * 0.025,
@@ -797,7 +735,8 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
     bool readOnly = true,
     TextInputType keyboardType = TextInputType.text,
     VoidCallback? onTap,
-  }) {
+  })
+  {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -806,7 +745,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           style: TextStyle(
             color: const Color(0xFF60728D),
             fontSize: width * 0.030,
-            fontWeight: FontWeight.w500,
+           // fontWeight: FontWeight.w500,
           ),
         ),
 
@@ -822,7 +761,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           style: TextStyle(
             color: const Color(0xFF0A2342),
             fontSize: width * 0.034,
-            fontWeight: FontWeight.w600,
+           // fontWeight: FontWeight.w600,
           ),
 
           decoration: InputDecoration(
@@ -877,7 +816,8 @@ void showInvoiceDocumentDialog({
   required String fileUrl,
   required String fileType,
   required String mimeType,
-}) {
+})
+{
 
   final Size screenSize = MediaQuery.of(context).size;
 
@@ -1061,7 +1001,8 @@ Widget _buildDocumentPreview({
   required String fileUrl,
   required bool isPdf,
   required bool isImage,
-}) {
+})
+{
   if (isPdf) {
     return SfPdfViewer.network(
       fileUrl,
