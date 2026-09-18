@@ -199,4 +199,29 @@ class DioClient {
       ),
     );
   }
+
+  // ==============================
+  // GET CATALOG LIST
+  // ==============================
+  Future<Response> getCatalog({
+    required int companyId,
+    required String accessToken,
+    required int page,
+    required int pageSize,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/catalog',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'pageSize': pageSize,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      ),
+    );
+  }
+
 }

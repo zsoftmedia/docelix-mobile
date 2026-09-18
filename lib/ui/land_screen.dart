@@ -263,7 +263,12 @@ class _LandScreenState extends State<LandScreen> {
                       icon: Icons.dashboard_outlined,
                       title: "Items",
                       onTap: () {
-                        Navigator.pop(context);
+                       // Navigator.pop(context);
+
+                        // Items List Page ==> Cataloge
+                        Get.toNamed(
+                          '/CatalogsScreen',
+                          arguments: 'Catalogs Screen',);
 
                         setState(() {
                           _selectedIndex = 3;
