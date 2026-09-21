@@ -596,25 +596,42 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.delete_outline_rounded,
-                      ),
-                      label: const Text('Delete'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor:
-                        const Color(0xFFD64545),
-                        side: const BorderSide(
-                          color: Color(0xFFD64545),
+                    child: Obx(
+                          () => OutlinedButton.icon(
+                        onPressed: controller.isDeleting.value
+                            ? null
+                            : controller.deleteInvoice,
+                        icon: controller.isDeleting.value
+                            ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFFD64545),
+                          ),
+                        )
+                            : const Icon(
+                          Icons.delete_outline_rounded,
                         ),
-                        minimumSize: Size(
-                          0,
-                          height * 0.055,
+                        label: Text(
+                          controller.isDeleting.value
+                              ? 'Deleting...'
+                              : 'Delete',
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(12),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFD64545),
+                          disabledForegroundColor:
+                          const Color(0xFFD64545),
+                          side: const BorderSide(
+                            color: Color(0xFFD64545),
+                          ),
+                          minimumSize: Size(
+                            0,
+                            height * 0.055,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),

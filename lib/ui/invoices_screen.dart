@@ -227,8 +227,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           // ----------------------------------------------------------
 
           Get.toNamed(
-            '/CreateInvoicesScreen',
-            arguments: 'Create Incoming Invoices Screen',);
+            '/VoiceRecognitionScreen',
+            arguments: 'Voice Recognition Invoices Screen',);
 
           // Get.to(
           //   () => const AddInvoiceScreen(),

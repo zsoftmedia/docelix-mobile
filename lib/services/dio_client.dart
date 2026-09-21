@@ -224,4 +224,47 @@ class DioClient {
     );
   }
 
+    // ==============================
+    // DELETE INCOMING INVOICE
+    // ==============================
+
+  Future<Response> deleteIncomingInvoice({
+    required int invoiceId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/incoming-invoices/$invoiceId',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // DELETE INVOICE
+  // ==============================
+  Future<Response> deleteInvoiceJournalEntries({
+    required int companyId,
+    required int sourceId,
+    required String sourceType,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/ledger/journal-entries',
+      queryParameters: {
+        'company_id': companyId,
+        'source_id': sourceId,
+        'source_type': sourceType,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      ),
+    );
+  }
+
 }

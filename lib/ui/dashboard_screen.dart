@@ -80,7 +80,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             style: TextStyle(
                               color: colorsList.primaryText,
                               fontSize: width * 0.065,
-                              fontWeight: FontWeight.w800,
+                            //  fontWeight: FontWeight.w800,
                             ),
                           ),
                         ],
@@ -153,7 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 style: TextStyle(
                                   color: colorsList.primaryText,
                                   fontSize: width * 0.085,
-                                  fontWeight: FontWeight.w800,
+                               //   fontWeight: FontWeight.w800,
                                 ),
                               ),
 
@@ -173,7 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   style: TextStyle(
                                     color: colorsList.green,
                                     fontSize: width * 0.028,
-                                    fontWeight: FontWeight.w700,
+                                  //  fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
@@ -202,7 +202,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 style: TextStyle(
                                   color: colorsList.green,
                                   fontSize: width * 0.029,
-                                  fontWeight: FontWeight.w600,
+                              //    fontWeight: FontWeight.w600,
                                 ),
                               ),
 
@@ -211,7 +211,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 style: TextStyle(
                                   color: colorsList.red,
                                   fontSize: width * 0.029,
-                                  fontWeight: FontWeight.w600,
+                                 // fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -445,7 +445,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   style: TextStyle(
                                     color: colorsList.primaryText,
                                     fontSize: width * 0.055,
-                                    fontWeight: FontWeight.w800,
+                                //    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ],
@@ -471,7 +471,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   style: TextStyle(
                                     color: colorsList.purple,
                                     fontSize: width * 0.027,
-                                    fontWeight: FontWeight.w700,
+                                   // fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
@@ -510,7 +510,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             style: TextStyle(
                               color: colorsList.purple,
                               fontSize: width * 0.027,
-                              fontWeight: FontWeight.w700,
+                             // fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -710,7 +710,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: TextStyle(
               color: colorsList.primaryText,
               fontSize: width * 0.043,
-              fontWeight: FontWeight.w800,
+           //   fontWeight: FontWeight.w800,
             ),
           ),
 
@@ -724,7 +724,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(
                   color: iconColor,
                   fontSize: width * 0.025,
-                  fontWeight: FontWeight.w700,
+               //   fontWeight: FontWeight.w700,
                 ),
               ),
 

@@ -1,4 +1,5 @@
 
+import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/models/client_model.dart';
 import 'package:docelix_mobileapp/models/invoice_item_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
@@ -267,9 +268,9 @@ class InvoicesDetailsController extends GetxController {
     await getInvoiceItems();
   }
 
-  // ============================================================
-  // DELETE INVOICE
-  // ============================================================
+  // ==============================================================
+// DELETE INVOICE
+// ==============================================================
 
   Future<void> deleteInvoice() async {
     if (invoice.value == null) return;
@@ -280,6 +281,10 @@ class InvoicesDetailsController extends GetxController {
       final accessToken = SessionManager.accessToken;
       final companyId = SessionManager.accessCompanyid;
 
+      // ----------------------------------------------------------
+      // ACCESS TOKEN
+      // ----------------------------------------------------------
+
       if (accessToken == null || accessToken.isEmpty) {
         Get.snackbar(
           'Error',
@@ -288,6 +293,10 @@ class InvoicesDetailsController extends GetxController {
         );
         return;
       }
+
+      // ----------------------------------------------------------
+      // COMPANY ID
+      // ----------------------------------------------------------
 
       if (companyId == null) {
         Get.snackbar(
@@ -298,22 +307,122 @@ class InvoicesDetailsController extends GetxController {
         return;
       }
 
-      // TODO:
-      // Add delete API in DioClient.
+      final int companyIdInt = int.parse(companyId.toString());
 
-      Get.back();
+      // ----------------------------------------------------------
+      // INVOICE ID
+      // ----------------------------------------------------------
+
+      final int invoiceId = invoice.value!.id;
+
+      print('Deleting Invoice ID: $invoiceId');
+      print('Company ID: $companyIdInt');
+
+      // ==========================================================
+      // STEP 1: DELETE LEDGER JOURNAL ENTRIES
+      // ==========================================================
+
+      print('Deleting invoice journal entries...');
+
+      final ledgerResponse =
+      await dioClient.deleteInvoiceJournalEntries(
+        companyId: companyIdInt,
+        sourceId: invoiceId,
+        sourceType: 'invoice_issue',
+        accessToken: accessToken,
+      );
+
+      print(
+        'Ledger Delete Response: ${ledgerResponse.data}',
+      );
+
+      if (ledgerResponse.statusCode != 200) {
+        Get.snackbar(
+          'Delete Failed',
+          'Unable to delete invoice ledger entries.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      // ==========================================================
+      // STEP 2: DELETE INVOICE
+      // ==========================================================
+
+      print('Deleting invoice...');
+
+      final invoiceResponse =
+      await dioClient.deleteIncomingInvoice(
+        invoiceId: invoiceId,
+        accessToken: accessToken,
+      );
+
+      print(
+        'Invoice Delete Response: ${invoiceResponse.data}',
+      );
+
+      if (invoiceResponse.statusCode != 200) {
+        Get.snackbar(
+          'Delete Failed',
+          'Unable to delete invoice.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      // ==========================================================
+      // SUCCESS
+      // ==========================================================
 
       Get.snackbar(
         'Success',
         'Invoice deleted successfully.',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF12A150),
+        colorText: Colors.white,
       );
+
+      // ----------------------------------------------------------
+      // Return to Invoice List
+      // ----------------------------------------------------------
+
+      isLoading.value = false;
+
+      Get.back(result: true);
+      return;
+
+    } on DioException catch (e) {
+      print('Delete Invoice Dio Error: ${e.message}');
+      print('Response: ${e.response?.data}');
+
+      String message = 'Unable to delete invoice.';
+
+      if (e.response?.data is Map) {
+        message =
+            e.response?.data['message'] ??
+                e.response?.data['error'] ??
+                message;
+      }
+
+      Get.snackbar(
+        'Delete Failed',
+        message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+
     } catch (e) {
+      print('Delete Invoice Error: $e');
+
       Get.snackbar(
         'Error',
-        e.toString(),
+        'Something went wrong while deleting the invoice.',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
+
     } finally {
       isLoading.value = false;
     }

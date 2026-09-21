@@ -15,6 +15,7 @@ import 'package:docelix_mobileapp/ui/ui_auth/login_screen.dart';
 import 'package:docelix_mobileapp/ui/ui_auth/signup_screen.dart';
 import 'package:docelix_mobileapp/ui/splash_screen.dart';
 import 'package:docelix_mobileapp/config/api_constants.dart';
+import 'package:docelix_mobileapp/ui/voice_recognition_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
@@ -76,6 +77,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/IncomingInvoicesDetailsScreen', page: () => IncomingInvoicesDetailsScreen(invoice: Get.arguments as IncomingInvoicesModel),),
         GetPage(name: '/InvoicesScreen', page: () => InvoicesScreen(),),
         GetPage(name: '/InvoicesDetailsScreen', page: () => InvoicesDetailsScreen(),),
+        GetPage(name: '/VoiceRecognitionScreen', page: () => VoiceRecognitionScreen(),),
         // Items List Screen ==> Catalogs Screen
         GetPage(name: '/CatalogsScreen', page: () => CatalogsScreen(),),
       ],

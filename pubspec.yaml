@@ -51,6 +51,7 @@ dependencies:
   image_picker: ^1.2.3
   file_picker: ^13.0.0
   syncfusion_flutter_pdfviewer: ^34.2.8
+  speech_to_text: ^7.5.0
 
 
 dev_dependencies:

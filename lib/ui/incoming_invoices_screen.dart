@@ -179,14 +179,27 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                       incomingInvoicesController.invoices[index];
 
                       return InkWell(
-                        onTap: () {
+                        onTap: () async {
                           print('Invoice ID: ${invoice.id}');
                           print('Invoice Number: ${invoice.invoiceNumber}');
 
-                          Get.toNamed(
+                          final result = await Get.toNamed(
                             '/IncomingInvoicesDetailsScreen',
                             arguments: invoice,
                           );
+
+                          // ----------------------------------------------------------
+                          // REFRESH LIST AFTER SUCCESSFUL DELETE
+                          // ----------------------------------------------------------
+
+                          if (result == true) {
+                            await incomingInvoicesController.refreshInvoices();
+                          }
+
+                          /*Get.toNamed(
+                            '/IncomingInvoicesDetailsScreen',
+                            arguments: invoice,
+                          );*/
                         },
                         child: Column(
                           children: [
@@ -395,221 +408,5 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
       ),
     );
   }
-
-  /*Widget _invoiceCard({
-    required BuildContext context,
-    required IncomingInvoicesModel invoice,
-    required double width,
-    required double height,
-  })
-  {
-
-    // ----------------------------------------------------------
-    // STATUS
-    // ----------------------------------------------------------
-
-    final String status = invoice.status.toLowerCase();
-
-    Color statusColor;
-
-    if (status == "paid") {
-      statusColor = const Color(0xFF00B894);
-    } else if (status == "pending" || status == "unpaid") {
-      statusColor = const Color(0xFFF39C12);
-    } else if (status == "overdue") {
-      statusColor = Colors.red;
-    } else {
-      statusColor = const Color(0xFF71829A);
-    }
-
-    // Display status with first letter uppercase
-    final String displayStatus = status.isNotEmpty
-        ? status[0].toUpperCase() + status.substring(1)
-        : "Unknown";
-
-    return Container(
-      margin: EdgeInsets.only(
-        bottom: height * 0.015,
-      ),
-      padding: EdgeInsets.all(
-        width * 0.045,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(
-          width * 0.045,
-        ),
-        border: Border.all(
-          color: const Color(0xFFE1E7EF),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // ----------------------------------------------------------
-          // TOP ROW
-          // ----------------------------------------------------------
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Invoice Icon
-              Container(
-                width: width * 0.115,
-                height: width * 0.115,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF3FB),
-                  borderRadius: BorderRadius.circular(
-                    width * 0.03,
-                  ),
-                ),
-                child: Icon(
-                  Icons.receipt_long_rounded,
-                  color: const Color(0xFF063C70),
-                  size: width * 0.06,
-                ),
-              ),
-
-              SizedBox(
-                width: width * 0.035,
-              ),
-
-              // ----------------------------------------------------------
-              // INVOICE INFORMATION
-              // ----------------------------------------------------------
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      invoice.invoiceNumber ?? 'No Invoice Number',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: const Color(0xFF0A2342),
-                        fontSize: width * 0.04,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.005,
-                    ),
-
-                    Text(
-                      invoice.supplierName ?? 'Unknown Supplier',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: const Color(0xFF60728D),
-                        fontSize: width * 0.035,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(
-                width: width * 0.02,
-              ),
-
-              // ----------------------------------------------------------
-              // STATUS
-              // ----------------------------------------------------------
-
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.025,
-                  vertical: height * 0.006,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  displayStatus,
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: width * 0.03,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(
-            height: height * 0.018,
-          ),
-
-          const Divider(
-            height: 1,
-            color: Color(0xFFE9EDF3),
-          ),
-
-          SizedBox(
-            height: height * 0.015,
-          ),
-
-          // ----------------------------------------------------------
-          // BOTTOM ROW
-          // ----------------------------------------------------------
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // ----------------------------------------------------------
-              // DATE
-              // ----------------------------------------------------------
-
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    color: const Color(0xFF71829A),
-                    size: width * 0.04,
-                  ),
-
-                  SizedBox(
-                    width: width * 0.018,
-                  ),
-
-                  Text(
-                    invoice.invoiceDate ?? 'N/A',
-                    style: TextStyle(
-                      color: const Color(0xFF71829A),
-                      fontSize: width * 0.033,
-                    ),
-                  ),
-                ],
-              ),
-
-              // ----------------------------------------------------------
-              // AMOUNT
-              // ----------------------------------------------------------
-
-              Text(
-                '${invoice.currency ?? ''} ${invoice.totalAmount ?? 0}',
-                style: TextStyle(
-                  color: const Color(0xFF0A2342),
-                  fontSize: width * 0.043,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }*/
 
 }

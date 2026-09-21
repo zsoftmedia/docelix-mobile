@@ -1,4 +1,6 @@
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -99,12 +101,18 @@ class _LandScreenState extends State<LandScreen> {
           },
         ),
 
-        title: Image.asset(
+        /*title: Image.asset(
           'assets/main_logo.png',
           width: width * 0.26,
           height: height * 0.5,
           fit: BoxFit.contain,
-        ),
+        ),*/
+
+        title: Text('${SessionManager.accessCompanyname}',
+          style: TextStyle(
+          color: colorsList.colorGray_800,
+          fontSize: width * 0.057,
+        ),),
 
         centerTitle: false,
 
