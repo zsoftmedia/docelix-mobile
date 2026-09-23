@@ -33,6 +33,11 @@ class LoginController extends GetxController {
       return;
     }
 
+    // Prevent multiple login requests
+    if (isLoading.value) {
+      return;
+    }
+
     try{
       isLoading.value = true;
       // await authService.signInWithEmailPassword(email, password);
@@ -111,6 +116,8 @@ class LoginController extends GetxController {
         await SessionManager.saveCorrencycode(company?.currencyCode ?? '');
         await SessionManager.saveRole(company?.myRole ?? '');
 
+        // whether login succeeds or fails
+        isLoading.value = false;
 
         Get.offNamed(
           '/LandScreen',
@@ -118,6 +125,9 @@ class LoginController extends GetxController {
         );
 
       } else {
+
+        // whether login succeeds or fails
+        isLoading.value = false;
 
         Get.snackbar(
           'Login Failed',

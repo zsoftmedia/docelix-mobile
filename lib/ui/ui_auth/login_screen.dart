@@ -1,14 +1,9 @@
-
-import 'dart:math';
-
+import 'package:docelix_mobileapp/components/app_button.dart';
+import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/controller_auth/login_controller.dart';
-import 'package:docelix_mobileapp/ui/ui_custom/topCurveClipper.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
-import 'package:docelix_mobileapp/utils/constants.dart';
-import 'package:docelix_mobileapp/utils/string_list.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -109,7 +104,7 @@ class _LoginPageState extends State<LoginScreen> {
                 // EMAIL
                 // ======================================================
 
-                TextFormField(
+                /*TextFormField(
                   controller: loginController.emailController,
 
                   keyboardType: TextInputType.emailAddress,
@@ -167,6 +162,20 @@ class _LoginPageState extends State<LoginScreen> {
 
                     return null;
                   },
+                ),*/
+
+                AppTextField(
+                  controller: loginController.emailController,
+                  hintText: 'Email address',
+                  keyboardType: TextInputType.emailAddress,
+
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+
+                    return null;
+                  },
                 ),
 
                 // ======================================================
@@ -174,7 +183,7 @@ class _LoginPageState extends State<LoginScreen> {
                 // ======================================================
 
                 SizedBox(
-                  height: height * 0.032,
+                  height: height * 0.022,
                 ),
 
                 Text(
@@ -194,81 +203,15 @@ class _LoginPageState extends State<LoginScreen> {
                 // PASSWORD
                 // ======================================================
 
-                TextFormField(
+                AppTextField(
                   controller: loginController.passwordController,
-
-                  obscureText: _obscureText,
-
-                  style: TextStyle(
-                    fontSize: width * 0.043,
-                    color: const Color(0xFF222222),
-                  ),
-
-                  decoration: InputDecoration(
-                    hintText: "Password",
-
-                    hintStyle: TextStyle(
-                      color: const Color(0xFF9A9A9A),
-                      fontSize: width * 0.043,
-                    ),
-
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: width * 0.045,
-                      vertical: height * 0.020,
-                    ),
-
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _obscureText = !_obscureText;
-                        });
-                      },
-
-                      icon: Icon(
-                        _obscureText
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-
-                        color: const Color(0xFF333333),
-                        size: width * 0.060,
-                      ),
-                    ),
-
-                    filled: true,
-                    fillColor: Colors.white,
-
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFBDBDBD),
-                        width: 1.2,
-                      ),
-                    ),
-
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFBDBDBD),
-                        width: 1.2,
-                      ),
-                    ),
-
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF222222),
-                        width: 1.8,
-                      ),
-                    ),
-                  ),
+                  hintText: 'Password',
+                  obscureText: true,
+                  keyboardType: TextInputType.visiblePassword,
 
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
-                    }
-
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters long';
                     }
 
                     return null;
@@ -358,33 +301,29 @@ class _LoginPageState extends State<LoginScreen> {
                   height: height * 0.035,
                 ),
 
-                SizedBox(
-                  width: double.infinity,
-                  height: height * 0.070,
+                Obx(
+                      () => AppButton(
+                    text: 'Sign in',
 
-                  child: ElevatedButton(
-                    onPressed: () async {
+                    isLoading: loginController.isLoading.value,
+
+                    onPressed: () {
                       loginController.login();
                     },
 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorsList.primaryBlue,
-                      foregroundColor: Colors.white,
+                    width: double.infinity,
+                    height: height * 0.070,
 
-                      elevation: 0,
+                    backgroundColor: colorsList.primaryBlue,
+                    disabledBackgroundColor: colorsList.primaryBlue,
 
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                    foregroundColor: Colors.white,
+                    loadingColor: Colors.white,
 
-                    child: Text(
-                      "Sign in",
-                      style: TextStyle(
-                        fontSize: width * 0.043,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    borderRadius: 4,
+
+                    fontSize: width * 0.043,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
 

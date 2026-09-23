@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
+import 'package:docelix_mobileapp/ui/profile_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class _LandScreenState extends State<LandScreen> {
 
   // Bottom navigation pages
   final List<Widget> _pages = [
+
     /*const Center(
       child: Text(
         "Dashboard",
@@ -52,7 +54,7 @@ class _LandScreenState extends State<LandScreen> {
       ),
     ),
 
-    const Center(
+    /*const Center(
       child: Text(
         "Profile",
         style: TextStyle(
@@ -60,7 +62,9 @@ class _LandScreenState extends State<LandScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
-    ),
+    ),*/
+
+    ProfileScreen(),
   ];
 
   // Bottom navigation change
@@ -224,7 +228,7 @@ class _LandScreenState extends State<LandScreen> {
                       },
                     ),
 
-                    _drawerItem(
+                    /*_drawerItem(
                       context: context,
                       icon: Icons.supervised_user_circle_sharp,
                       title: "Team & Access",
@@ -235,9 +239,12 @@ class _LandScreenState extends State<LandScreen> {
                           _selectedIndex = 1;
                         });
                       },
-                    ),
+                    ),*/
 
-                    _drawerItem(
+
+
+
+                    /*_drawerItem(
                       context: context,
                       icon: Icons.watch_later_outlined,
                       title: "Activity Log",
@@ -248,7 +255,7 @@ class _LandScreenState extends State<LandScreen> {
                           _selectedIndex = 2;
                         });
                       },
-                    ),
+                    ),*/
 
                     _drawerItem(
                       context: context,
@@ -318,7 +325,7 @@ class _LandScreenState extends State<LandScreen> {
                       },
                     ),
 
-                    _drawerItem(
+                    /*_drawerItem(
                       context: context,
                       icon: Icons.star_outline_sharp,
                       title: "Docelix AI",
@@ -383,7 +390,7 @@ class _LandScreenState extends State<LandScreen> {
                       onTap: () {
                         Navigator.pop(context);
                       },
-                    ),
+                    ),*/
 
                     // Extra bottom padding
                     SizedBox(height: height * 0.02),
