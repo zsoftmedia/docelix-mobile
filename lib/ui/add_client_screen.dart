@@ -1,89 +1,14 @@
 import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
+import 'package:docelix_mobileapp/controllers/add_client_controller.dart';
 import 'package:docelix_mobileapp/ui/ui_custom/topCurveClipper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AddClientScreen extends StatefulWidget {
-  const AddClientScreen({super.key});
+class AddClientScreen extends StatelessWidget {
+  AddClientScreen({super.key});
 
-  @override
-  State<AddClientScreen> createState() => _AddClientScreenState();
-}
-
-class _AddClientScreenState extends State<AddClientScreen> {
-  // ============================================================
-  // CONTROLLERS
-  // ============================================================
-
-  final nameController = TextEditingController();
-  final vatIdController = TextEditingController();
-  final endpointIdController = TextEditingController();
-
-  final ibanController = TextEditingController();
-  final accountHolderController = TextEditingController();
-
-  final emailController = TextEditingController();
-  final phoneController = TextEditingController();
-
-  final address1Controller = TextEditingController();
-  final address2Controller = TextEditingController();
-  final zipController = TextEditingController();
-  final cityController = TextEditingController();
-
-  // ============================================================
-  // DROPDOWN
-  // ============================================================
-
-  String? selectedSchemeId;
-  String? selectedCountry;
-
-  static const schemeIds = [
-    '0088 - GLN',
-    '0096 - DUNS',
-    '9914 - Austrian VAT',
-    '9915 - Austrian tax number',
-    '9930 - Austrian business register',
-    '9948 - VAT identification number',
-  ];
-
-  static const countries = [
-    'Austria',
-    'Germany',
-    'Switzerland',
-    'France',
-    'Italy',
-    'Netherlands',
-    'Belgium',
-    'United Kingdom',
-    'United States',
-    'Pakistan',
-  ];
-
-  // ============================================================
-  // DISPOSE
-  // ============================================================
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    vatIdController.dispose();
-    endpointIdController.dispose();
-    ibanController.dispose();
-    accountHolderController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    address1Controller.dispose();
-    address2Controller.dispose();
-    zipController.dispose();
-    cityController.dispose();
-
-    super.dispose();
-  }
-
-  // ============================================================
-  // BUILD
-  // ============================================================
+  final AddClientController controller = Get.put(AddClientController());
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +87,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: nameController,
+              controller: controller.nameController,
               hintText: 'Client name',
               prefixIcon: Icons.business_outlined,
             ),
@@ -174,7 +99,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: vatIdController,
+              controller: controller.vatIdController,
               hintText: 'e.g. ATU12345678',
               prefixIcon: Icons.receipt_long_outlined,
             ),
@@ -196,17 +121,15 @@ class _AddClientScreenState extends State<AddClientScreen> {
 
             const SizedBox(height: 8),
 
-            AppTextField(
-              isDropdown: true,
-              hintText: 'Select Scheme ID',
-              prefixIcon: Icons.tag_outlined,
-              dropdownItems: schemeIds,
-              selectedValue: selectedSchemeId,
-              onDropdownChanged: (value) {
-                setState(() {
-                  selectedSchemeId = value;
-                });
-              },
+            Obx(
+                  () => AppTextField(
+                isDropdown: true,
+                hintText: 'Select Scheme ID',
+                prefixIcon: Icons.tag_outlined,
+                dropdownItems: controller.schemeIds,
+                selectedValue: controller.selectedSchemeId.value,
+                onDropdownChanged: controller.selectSchemeId,
+              ),
             ),
 
             const SizedBox(height: 18),
@@ -216,7 +139,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: endpointIdController,
+              controller: controller.endpointIdController,
               hintText: 'Enter Endpoint ID',
               prefixIcon: Icons.fingerprint_rounded,
             ),
@@ -239,7 +162,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: ibanController,
+              controller: controller.ibanController,
               hintText: 'Enter IBAN',
               prefixIcon: Icons.account_balance_outlined,
             ),
@@ -251,7 +174,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: accountHolderController,
+              controller: controller.accountHolderController,
               hintText: 'Account holder name',
               prefixIcon: Icons.person_outline_rounded,
             ),
@@ -274,7 +197,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: emailController,
+              controller: controller.emailController,
               hintText: 'client@example.com',
               prefixIcon: Icons.mail_outline_rounded,
               keyboardType: TextInputType.emailAddress,
@@ -287,7 +210,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: phoneController,
+              controller: controller.phoneController,
               hintText: 'Phone number',
               prefixIcon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
@@ -311,7 +234,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: address1Controller,
+              controller: controller.address1Controller,
               hintText: 'Street and house number',
               prefixIcon: Icons.location_on_outlined,
             ),
@@ -323,7 +246,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: address2Controller,
+              controller: controller.address2Controller,
               hintText: 'Apartment, floor, etc. (optional)',
               prefixIcon: Icons.location_city_outlined,
             ),
@@ -335,7 +258,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: zipController,
+              controller: controller.zipController,
               hintText: 'ZIP / Postal code',
               prefixIcon: Icons.markunread_mailbox_outlined,
               keyboardType: TextInputType.number,
@@ -348,7 +271,7 @@ class _AddClientScreenState extends State<AddClientScreen> {
             const SizedBox(height: 8),
 
             AppTextField(
-              controller: cityController,
+              controller: controller.cityController,
               hintText: 'City',
               prefixIcon: Icons.location_city_outlined,
             ),
@@ -359,17 +282,15 @@ class _AddClientScreenState extends State<AddClientScreen> {
 
             const SizedBox(height: 8),
 
-            AppTextField(
-              isDropdown: true,
-              hintText: 'Select Country',
-              prefixIcon: Icons.public_outlined,
-              dropdownItems: countries,
-              selectedValue: selectedCountry,
-              onDropdownChanged: (value) {
-                setState(() {
-                  selectedCountry = value;
-                });
-              },
+            Obx(
+                  () => AppTextField(
+                isDropdown: true,
+                hintText: 'Select Country',
+                prefixIcon: Icons.public_outlined,
+                dropdownItems: controller.countries,
+                selectedValue: controller.selectedCountry.value,
+                onDropdownChanged: controller.selectCountry,
+              ),
             ),
 
             const SizedBox(height: 35),
@@ -378,22 +299,16 @@ class _AddClientScreenState extends State<AddClientScreen> {
             // SAVE BUTTON
             // ====================================================
 
-            AppButton(
-              text: 'Save Client',
-
-              icon: Icons.person_add_alt_1_rounded,
-
-              height: 52,
-
-              backgroundColor: const Color(0xFF063C70),
-
-              foregroundColor: Colors.white,
-
-              onPressed: () {
-                // TODO: Save client through API
-
-                Get.back();
-              },
+            Obx(
+                  () => AppButton(
+                text: 'Save Client',
+                icon: Icons.person_add_alt_1_rounded,
+                height: 52,
+                backgroundColor: const Color(0xFF063C70),
+                foregroundColor: Colors.white,
+                isLoading: controller.isLoading.value,
+                onPressed: controller.saveClient,
+              ),
             ),
 
             const SizedBox(height: 30),
