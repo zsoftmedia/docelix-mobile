@@ -2,6 +2,7 @@ import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/add_client_controller.dart';
 import 'package:docelix_mobileapp/ui/ui_custom/topCurveClipper.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -304,7 +305,7 @@ class AddClientScreen extends StatelessWidget {
                 text: 'Save Client',
                 icon: Icons.person_add_alt_1_rounded,
                 height: 52,
-                backgroundColor: const Color(0xFF063C70),
+                backgroundColor: colorsList.colorGray_1100,
                 foregroundColor: Colors.white,
                 isLoading: controller.isLoading.value,
                 onPressed: controller.saveClient,
@@ -330,7 +331,7 @@ class AddClientScreen extends StatelessWidget {
       children: [
         Icon(
           icon,
-          color: const Color(0xFF063C70),
+          color: colorsList.colorGray_1100,
           size: 22,
         ),
 
@@ -338,10 +339,10 @@ class AddClientScreen extends StatelessWidget {
 
         Text(
           title,
-          style: const TextStyle(
-            color: Color(0xFF0A2342),
+          style: TextStyle(
+            color: colorsList.colorGray_1100,
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+           // fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -355,10 +356,10 @@ class AddClientScreen extends StatelessWidget {
   Widget _label(String text) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Color(0xFF172A46),
+      style: TextStyle(
+        color: colorsList.colorGray_1100,
         fontSize: 14,
-        fontWeight: FontWeight.w600,
+       // fontWeight: FontWeight.w600,
       ),
     );
   }
