@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';

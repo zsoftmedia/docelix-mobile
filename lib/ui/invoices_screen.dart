@@ -226,23 +226,26 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           // OPEN ADD INVOICE PAGE
           // ----------------------------------------------------------
 
-          Get.toNamed(
+          /*Get.toNamed(
             '/VoiceRecognitionScreen',
-            arguments: 'Voice Recognition Invoices Screen',);
+            arguments: 'Voice Recognition Invoices Screen',);*/
+          Get.toNamed(
+            '/CreateInvoiceScreen',
+            arguments: 'Create Invoices Screen',);
 
           // Get.to(
           //   () => const AddInvoiceScreen(),
           // );
 
           // Temporary action
-          Get.snackbar(
+          /*Get.snackbar(
             "Add Invoice",
             "Add Invoice page will open here.",
             snackPosition: SnackPosition.BOTTOM,
             margin: const EdgeInsets.all(15),
             backgroundColor: const Color(0xFF063C70),
             colorText: Colors.white,
-          );
+          );*/
         },
 
         backgroundColor: const Color(0xFF063C70),
