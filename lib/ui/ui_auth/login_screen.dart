@@ -100,70 +100,6 @@ class _LoginPageState extends State<LoginScreen> {
                   height: height * 0.012,
                 ),
 
-                // ======================================================
-                // EMAIL
-                // ======================================================
-
-                /*TextFormField(
-                  controller: loginController.emailController,
-
-                  keyboardType: TextInputType.emailAddress,
-
-                  style: TextStyle(
-                    fontSize: width * 0.043,
-                    color: const Color(0xFF222222),
-                  ),
-
-                  decoration: InputDecoration(
-                    hintText: "Email address",
-
-                    hintStyle: TextStyle(
-                      color: const Color(0xFF9A9A9A),
-                      fontSize: width * 0.043,
-                    ),
-
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: width * 0.045,
-                      vertical: height * 0.020,
-                    ),
-
-                    filled: true,
-                    fillColor: Colors.white,
-
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF333333),
-                        width: 1.2,
-                      ),
-                    ),
-
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF333333),
-                        width: 1.2,
-                      ),
-                    ),
-
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF222222),
-                        width: 1.8,
-                      ),
-                    ),
-                  ),
-
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-
-                    return null;
-                  },
-                ),*/
-
                 AppTextField(
                   controller: loginController.emailController,
                   hintText: 'Email address',
@@ -376,7 +312,7 @@ class _LoginPageState extends State<LoginScreen> {
                   height: height * 0.025,
                 ),
 
-                SizedBox(
+                /*SizedBox(
                   width: double.infinity,
                   height: height * 0.070,
 
@@ -424,15 +360,15 @@ class _LoginPageState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                ),
+                ),*/
 
                 // ======================================================
                 // REQUEST DEMO
                 // ======================================================
 
-                SizedBox(
+                /*SizedBox(
                   height: height * 0.035,
-                ),
+                ),*/
 
                 Center(
                   child: RichText(

@@ -1,3 +1,6 @@
+import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/services/dio_client.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -95,11 +98,35 @@ class AddClientController extends GetxController {
       return;
     }
 
-    if (emailController.text.trim().isNotEmpty &&
-        !GetUtils.isEmail(emailController.text.trim())) {
+    final email = emailController.text.trim();
+
+    if (email.isNotEmpty && !GetUtils.isEmail(email)) {
       Get.snackbar(
         'Validation',
         'Please enter a valid email address.',
+      );
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // GET SESSION DATA
+    // ----------------------------------------------------------
+
+    final accessToken = SessionManager.accessToken;
+    final companyId = SessionManager.accessCompanyid;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Authentication token not found.',
+      );
+      return;
+    }
+
+    if (companyId == null) {
+      Get.snackbar(
+        'Error',
+        'Company ID not found.',
       );
       return;
     }
@@ -112,61 +139,84 @@ class AddClientController extends GetxController {
 
     try {
       // --------------------------------------------------------
-      // PREPARE DATA
+      // PREPARE API DATA
       // --------------------------------------------------------
 
       final Map<String, dynamic> clientData = {
         'name': nameController.text.trim(),
-        'vat_id': vatIdController.text.trim(),
 
-        'scheme_id': selectedSchemeId.value,
-        'endpoint_id': endpointIdController.text.trim(),
+        'email': email.isEmpty ? null : email,
 
-        'iban': ibanController.text.trim(),
-        'account_holder': accountHolderController.text.trim(),
+        'phone': phoneController.text.trim().isEmpty
+            ? null
+            : phoneController.text.trim(),
 
-        'email': emailController.text.trim(),
-        'phone': phoneController.text.trim(),
+        'address_line1': address1Controller.text.trim().isEmpty
+            ? null
+            : address1Controller.text.trim(),
 
-        'address1': address1Controller.text.trim(),
-        'address2': address2Controller.text.trim(),
-        'zip': zipController.text.trim(),
-        'city': cityController.text.trim(),
+        'address_line2': address2Controller.text.trim().isEmpty
+            ? null
+            : address2Controller.text.trim(),
+
+        'postal_code': zipController.text.trim().isEmpty
+            ? null
+            : zipController.text.trim(),
+
+        'city': cityController.text.trim().isEmpty
+            ? null
+            : cityController.text.trim(),
+
         'country': selectedCountry.value,
+
+        'vat_id': vatIdController.text.trim().isEmpty
+            ? null
+            : vatIdController.text.trim(),
       };
 
-      debugPrint('CLIENT DATA: $clientData');
+      debugPrint('CREATE CLIENT DATA: $clientData');
 
       // --------------------------------------------------------
-      // TODO:
-      // CALL YOUR API HERE
+      // CALL API
       // --------------------------------------------------------
 
-      /*
-      final response = await clientRepository.createClient(
-        clientData,
+      final response = await DioClient().createClient(
+        companyId: companyId,
+        accessToken: accessToken,
+        data: clientData,
       );
-      */
-
-      // Temporary delay for testing
-      await Future.delayed(const Duration(seconds: 1));
 
       // --------------------------------------------------------
       // SUCCESS
       // --------------------------------------------------------
 
+      if (response.statusCode == 200 ||
+          response.statusCode == 201) {
+        debugPrint('CREATE CLIENT RESPONSE: ${response.data}');
+
+        Get.snackbar(
+          'Success',
+          'Client created successfully.',
+        );
+
+        Get.back(result: true);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Unable to create client.',
+        );
+      }
+    } on DioException catch (e) {
+      debugPrint('CREATE CLIENT ERROR: ${e.response?.data}');
+      debugPrint('STATUS CODE: ${e.response?.statusCode}');
+
       Get.snackbar(
-        'Success',
-        'Client created successfully.',
+        'Error',
+        e.response?.data?['detail']?.toString() ??
+            'Unable to create client. Please try again.',
       );
-
-      Get.back(result: true);
     } catch (e) {
-      // --------------------------------------------------------
-      // ERROR
-      // --------------------------------------------------------
-
-      debugPrint('Save Client Error: $e');
+      debugPrint('CREATE CLIENT ERROR: $e');
 
       Get.snackbar(
         'Error',

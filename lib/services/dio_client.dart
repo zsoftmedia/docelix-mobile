@@ -267,4 +267,27 @@ class DioClient {
     );
   }
 
+  // ==============================
+// CREATE CLIENT
+// ==============================
+  Future<Response> createClient({
+    required int companyId,
+    required String accessToken,
+    required Map<String, dynamic> data,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/clients',
+      data: {
+        'company_id': companyId,
+        ...data,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
 }
