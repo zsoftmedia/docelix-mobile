@@ -60,11 +60,11 @@ class MyApp extends StatelessWidget {
       // First time → Intro
       // Already completed → Splash
       home: introCompleted
-          ? const splashScreen()
+          ? const SplashScreen()
           : const IntroScreen(),
 
       getPages: [
-        GetPage(name: '/SplashScreen', page: () => const splashScreen(),),
+        GetPage(name: '/SplashScreen', page: () => const SplashScreen(),),
         GetPage(name: '/LoginScreen', page: () => LoginScreen(),),
         GetPage(name: '/RegisterScreen', page: () => SignUpScreen(),),
         GetPage(name: '/LandScreen', page: () => LandScreen(),),
