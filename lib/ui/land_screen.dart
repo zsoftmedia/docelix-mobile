@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/profile_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
@@ -125,10 +126,14 @@ class _LandScreenState extends State<LandScreen> {
           IconButton(
             onPressed: () {
               // Notification action
+
+              AppSnackbar.info(
+                  title: 'Coming Soon',
+                  message: 'Coming Soon, List of Companies');
             },
 
             icon: Icon(
-              Icons.search,
+              Icons.factory_outlined,
               color: const Color(0xFF0A2342),
               size: width * 0.065,
             ),
