@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:file_picker/file_picker.dart';
@@ -80,11 +81,12 @@ class CreateIncomingInvoiceController extends GetxController {
       final PlatformFile selectedFile = result.first;
 
       if (selectedFile.path == null) {
-        Get.snackbar(
-          'Error',
-          'Unable to access selected file.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Unable to access selected file.',
         );
+
         return;
       }
 
@@ -104,11 +106,12 @@ class CreateIncomingInvoiceController extends GetxController {
       await uploadInvoice();
 
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
+
+      AppSnackbar.error(
+        title: 'Error',
+        message:'${e.toString()}',
       );
+
     }
   }
 
@@ -118,11 +121,12 @@ class CreateIncomingInvoiceController extends GetxController {
 
   Future<void> uploadInvoice() async {
     if (filePath.value.isEmpty) {
-      Get.snackbar(
-        'File Required',
-        'Please select or capture an invoice first.',
-        snackPosition: SnackPosition.BOTTOM,
+
+      AppSnackbar.info(
+        title: 'File Required',
+        message:'Please select or capture an invoice first.',
       );
+
       return;
     }
 
@@ -133,11 +137,12 @@ class CreateIncomingInvoiceController extends GetxController {
       final companyId = SessionManager.accessCompanyid;
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Access token is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Access token is not available.',
         );
+
         return;
       }
 

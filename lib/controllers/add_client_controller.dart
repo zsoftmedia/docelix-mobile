@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
@@ -194,33 +195,37 @@ class AddClientController extends GetxController {
           response.statusCode == 201) {
         debugPrint('CREATE CLIENT RESPONSE: ${response.data}');
 
-        Get.snackbar(
-          'Success',
-          'Client created successfully.',
+        Get.back();
+
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Client created successfully.',
         );
 
         Get.back(result: true);
       } else {
-        Get.snackbar(
-          'Error',
-          'Unable to create client.',
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Unable to create client.',
         );
+
       }
     } on DioException catch (e) {
       debugPrint('CREATE CLIENT ERROR: ${e.response?.data}');
       debugPrint('STATUS CODE: ${e.response?.statusCode}');
 
-      Get.snackbar(
-        'Error',
-        e.response?.data?['detail']?.toString() ??
+      AppSnackbar.success(
+        title: 'Erro',
+        message: e.response?.data?['detail']?.toString() ??
             'Unable to create client. Please try again.',
       );
+
     } catch (e) {
       debugPrint('CREATE CLIENT ERROR: $e');
 
-      Get.snackbar(
-        'Error',
-        'Unable to create client. Please try again.',
+      AppSnackbar.error(
+        title: 'Error',
+        message:'Unable to create client. Please try again.',
       );
     } finally {
       isLoading.value = false;

@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -52,11 +53,11 @@ class CatalogController extends GetxController {
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token is not available.';
 
-        Get.snackbar(
-          'Error',
-          'Access token is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Access token is not available.',
         );
+
 
         return;
       }
@@ -68,11 +69,11 @@ class CatalogController extends GetxController {
       if (companyId == null) {
         errorMessage.value = 'Company ID is not available.';
 
-        Get.snackbar(
-          'Error',
-          'Company ID is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Company ID is not available.',
         );
+
 
         return;
       }
@@ -126,10 +127,9 @@ class CatalogController extends GetxController {
 
         errorMessage.value = 'Unable to load items.';
 
-        Get.snackbar(
-          'Error',
-          'Unable to load items.',
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Unable to load items.',
         );
       }
     } catch (e, stackTrace) {
@@ -142,11 +142,11 @@ class CatalogController extends GetxController {
       print('Stack Trace: $stackTrace');
       print('======================================');
 
-      Get.snackbar(
-        'Error',
-        'Unable to load items.',
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Error',
+        message:'Unable to load items.',
       );
+
     } finally {
       isLoading.value = false;
     }

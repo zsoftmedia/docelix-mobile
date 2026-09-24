@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/client_model.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
@@ -48,11 +49,12 @@ class ClientsController extends GetxController {
       // ----------------------------------------------------------
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Access token is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Access token is not available.',
         );
+
         return;
       }
 
@@ -61,11 +63,12 @@ class ClientsController extends GetxController {
       // ----------------------------------------------------------
 
       if (companyId == null) {
-        Get.snackbar(
-          'Error',
-          'Company ID is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Company ID is not available.',
         );
+
         return;
       }
 
@@ -113,22 +116,22 @@ class ClientsController extends GetxController {
       } else {
         clients.clear();
 
-        Get.snackbar(
-          'Error',
-          'Unable to load clients.',
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Unable to load clients.',
         );
+
       }
     } catch (e) {
       clients.clear();
 
       print('Get Clients Error: $e');
 
-      Get.snackbar(
-        'Error',
-        'Unable to load clients.',
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Error',
+        message:'Unable to load clients.',
       );
+
     } finally {
       isLoading.value = false;
     }

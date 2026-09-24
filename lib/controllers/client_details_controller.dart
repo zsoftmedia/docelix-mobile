@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
 import 'package:get/get.dart';
 
@@ -15,11 +16,11 @@ class ClientDetailsController extends GetxController {
     } else {
       Get.back();
 
-      Get.snackbar(
-        'Error',
-        'Client information is not available.',
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Error',
+        message:'Client information is not available.',
       );
+
     }
   }
 }

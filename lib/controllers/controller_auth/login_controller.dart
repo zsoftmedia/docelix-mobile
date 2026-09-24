@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/config/api_constants.dart';
 import 'package:docelix_mobileapp/models/user_model.dart';
 import 'package:docelix_mobileapp/services/auth_services.dart';
@@ -26,10 +27,12 @@ class LoginController extends GetxController {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      Get.snackbar(
-        'Validation',
-        'Please enter email and password.',
+
+      AppSnackbar.error(
+        title: 'Validation',
+        message: 'Please enter email and password.',
       );
+
       return;
     }
 
@@ -51,9 +54,9 @@ class LoginController extends GetxController {
 
       if (session == null) {
 
-        Get.snackbar(
-          'Login Failed',
-          'Unable to create a session.',
+        AppSnackbar.error(
+          title: 'Login Failed',
+          message: 'Unable to create a session.',
         );
 
         return;
@@ -81,6 +84,11 @@ class LoginController extends GetxController {
 
       if (meResponse.statusCode == 200) {
 
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Congratulation, You have successfully login',
+        );
+
         UserModel user = UserModel.fromJson(meResponse.data);
 
         print(user.id);
@@ -102,12 +110,12 @@ class LoginController extends GetxController {
             ? user.companies!.first
             : null;
 
-        if (company != null) {
+        /*if (company != null) {
           print("Company ID: ${company.id}");
           print("Company Name: ${company.name}");
           print("Currency: ${company.currencyCode}");
           print("Role: ${company.myRole}");
-        }
+        }*/
 
         // Save token
         await SessionManager.saveAccessToken(accessToken);
@@ -129,10 +137,11 @@ class LoginController extends GetxController {
         // whether login succeeds or fails
         isLoading.value = false;
 
-        Get.snackbar(
-          'Login Failed',
-          'Unable to load user information.',
+        AppSnackbar.error(
+          title: 'Login Failed',
+          message: 'Unable to load user information.',
         );
+
       }
 
       /*Get.offNamed(
@@ -148,15 +157,15 @@ class LoginController extends GetxController {
 
       final isInvalidCredentials = e.code == 'invalid_credentials';
 
-      Get.snackbar(
-        'Login Failed',
-        isInvalidCredentials
+      AppSnackbar.error(
+        title: 'Login Failed',
+        message: isInvalidCredentials
             ? 'Invalid credentials on ${Uri.parse(ApiConstants.supabaseUrl).host}. '
-                'The user must exist in THAT project, and the email must be confirmed '
-                '(Confirm email is ON). Create the account in this app first, or confirm the user in the dashboard.'
+            'The user must exist in THAT project, and the email must be confirmed '
+            '(Confirm email is ON). Create the account in this app first, or confirm the user in the dashboard.'
             : e.message,
-        duration: const Duration(seconds: 8),
       );
+
 
       debugPrint('================================');
       debugPrint('SUPABASE AUTH ERROR');
@@ -171,10 +180,11 @@ class LoginController extends GetxController {
 
       isLoading.value = false;
 
-      Get.snackbar(
-        'Failed',
-        'Something went wrong $e',
+      AppSnackbar.error(
+        title: 'Failed',
+        message: 'Something went wrong $e',
       );
+
 
     } finally {
 
