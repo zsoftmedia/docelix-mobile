@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/services/ocr_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,11 +25,12 @@ class OcrController extends GetxController {
 
       await processImage(image.path);
     } catch (e) {
-      Get.snackbar(
-        'OCR Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
+
+      AppSnackbar.error(
+        title: 'OCR Error',
+        message: '${e.toString()}',
       );
+
     }
   }
 
@@ -44,11 +46,12 @@ class OcrController extends GetxController {
 
       await processImage(image.path);
     } catch (e) {
-      Get.snackbar(
-        'OCR Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
+
+      AppSnackbar.error(
+        title: 'OCR Error',
+        message: '${e.toString()}',
       );
+
     }
   }
 
@@ -64,11 +67,11 @@ class OcrController extends GetxController {
     } catch (e) {
       extractedText.value = '';
 
-      Get.snackbar(
-        'OCR Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'OCR Error',
+        message: '${e.toString()}',
       );
+      
     } finally {
       isLoading.value = false;
     }

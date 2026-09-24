@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
@@ -54,13 +55,31 @@ class DashboardController extends GetxController {
         );
       }
     } on DioException catch (e) {
+
+      AppSnackbar.error(
+        title: 'Error',
+        message:e.toString(),
+      );
+
       print("Dashboard API Error: ${e.message}");
       if (e.response != null) {
         print("Status Code: ${e.response?.statusCode}");
         print("Response: ${e.response?.data}");
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'${e.response?.data}',
+        );
+
       }
     } catch (e) {
       print("Dashboard Error: $e");
+
+      AppSnackbar.error(
+        title: 'Error',
+        message:'${e}',
+      );
+
     } finally {
       isLoading.value = false;
     }

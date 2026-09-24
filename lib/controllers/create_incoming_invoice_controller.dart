@@ -147,11 +147,12 @@ class CreateIncomingInvoiceController extends GetxController {
       }
 
       if (companyId == null) {
-        Get.snackbar(
-          'Error',
-          'Company ID is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Company ID is not available.',
         );
+
         return;
       }
 
@@ -166,7 +167,7 @@ class CreateIncomingInvoiceController extends GetxController {
       if (response.data['ok'] == true) {
         final data = response.data['data'];
 
-        print('================================');
+        /*print('================================');
         print('INVOICE UPLOAD SUCCESS');
         print('Invoice ID: ${data['id']}');
         print('Company ID: ${data['companyId']}');
@@ -176,41 +177,43 @@ class CreateIncomingInvoiceController extends GetxController {
         print('Invoice Date: ${data['extracted']?['invoiceDate']}');
         print('Currency: ${data['extracted']?['currency']}');
         print('Total: ${data['extracted']?['totalAmount']}');
-        print('================================');
+        print('================================');*/
 
-        Get.snackbar(
-          'Success',
-          'Invoice uploaded successfully.',
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.success(
+          title: 'Success',
+          message:'Invoice uploaded successfully.',
         );
+
       } else {
-        Get.snackbar(
-          'Error',
-          'Invoice upload failed.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.success(
+          title: 'Error',
+          message:'Invoice upload failed.',
         );
+
       }
     } on DioException catch (e) {
-      print('================================');
+      /*print('================================');
       print('INVOICE UPLOAD ERROR');
       print('Status Code: ${e.response?.statusCode}');
       print('Response: ${e.response?.data}');
       print('Message: ${e.message}');
-      print('================================');
+      print('================================');*/
 
-      Get.snackbar(
-        'Upload Error',
-        e.response?.data?['message']?.toString() ??
+      AppSnackbar.error(
+        title: 'Upload Error',
+        message:e.response?.data?['message']?.toString() ??
             e.message ??
             'Unable to upload invoice.',
-        snackPosition: SnackPosition.BOTTOM,
       );
+
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
+
+      AppSnackbar.error(
+        title: 'Error',
+        message:e.toString(),
       );
+
     } finally {
       isLoading.value = false;
     }

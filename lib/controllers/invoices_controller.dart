@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/invoice_item_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
@@ -46,11 +47,12 @@ class InvoicesController extends GetxController {
       // ----------------------------------------------------------
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Access token is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Access token is not available.',
         );
+
         return;
       }
 
@@ -59,11 +61,12 @@ class InvoicesController extends GetxController {
       // ----------------------------------------------------------
 
       if (companyId == null) {
-        Get.snackbar(
-          'Error',
-          'Company ID is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Company ID is not available.',
         );
+
         return;
       }
 
@@ -98,47 +101,47 @@ class InvoicesController extends GetxController {
 
           totalInvoices.value = invoices.length;
 
-          print('================================');
+          /*print('================================');
           print('INVOICES LOADED');
           print('Total: ${totalInvoices.value}');
           print('Items: ${invoices.length}');
-          print('================================');
+          print('================================');*/
         } else {
           invoices.clear();
           totalInvoices.value = 0;
 
-          print('================================');
+          /*print('================================');
           print('INVALID INVOICES RESPONSE');
           print('Response: $data');
-          print('================================');
+          print('================================');*/
         }
       }
     } on DioException catch (e) {
-      print('================================');
+      /*print('================================');
       print('GET INVOICES ERROR');
       print('Status Code: ${e.response?.statusCode}');
       print('Response: ${e.response?.data}');
       print('Message: ${e.message}');
-      print('================================');
+      print('================================');*/
 
-      Get.snackbar(
-        'Error',
-        e.response?.data?['message']?.toString() ??
+      AppSnackbar.error(
+        title: 'Error',
+        message:  e.response?.data?['message']?.toString() ??
             e.message ??
             'Unable to load invoices.',
-        snackPosition: SnackPosition.BOTTOM,
       );
+
     } catch (e) {
-      print('================================');
+     /* print('================================');
       print('GET INVOICES EXCEPTION');
       print(e);
-      print('================================');
+      print('================================');*/
 
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Error',
+        message:  e.toString(),
       );
+
     } finally {
       isLoading.value = false;
     }

@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -49,7 +50,12 @@ class VoiceRecognitionController extends GetxController {
           }
         },
         onError: (error) {
-          debugPrint('Speech Error: ${error.errorMsg}');
+
+          AppSnackbar.error(
+            title: 'Speech Error',
+            message: '${error.errorMsg}',
+          );
+
           isListening.value = false;
         },
       );
@@ -73,11 +79,12 @@ class VoiceRecognitionController extends GetxController {
     }
 
     if (!isAvailable.value) {
-      Get.snackbar(
-        'Voice Recognition',
-        'Speech recognition is not available.',
-        snackPosition: SnackPosition.BOTTOM,
+
+      AppSnackbar.error(
+        title: 'Voice Recognition',
+        message: 'Speech recognition is not available.',
       );
+
       return;
     }
 

@@ -1,5 +1,6 @@
 
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/client_model.dart';
 import 'package:docelix_mobileapp/models/invoice_item_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
@@ -73,11 +74,12 @@ class InvoicesDetailsController extends GetxController {
       // ----------------------------------------------------------
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Access token is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:  'Access token is not available.',
         );
+
         return;
       }
 
@@ -86,11 +88,12 @@ class InvoicesDetailsController extends GetxController {
       // ----------------------------------------------------------
 
       if (companyId == null) {
-        Get.snackbar(
-          'Error',
-          'Company ID is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Company ID is not available.',
         );
+
         return;
       }
 
@@ -155,22 +158,22 @@ class InvoicesDetailsController extends GetxController {
       } else {
         client.value = null;
 
-        Get.snackbar(
-          'Error',
-          'Unable to load client information.',
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Unable to load client information.',
         );
+
       }
     } catch (e) {
       client.value = null;
 
       print('Get Client Error: $e');
 
-      Get.snackbar(
-        'Error',
-        'Unable to load client information.',
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Unable to load client information.',
       );
+
     } finally {
       isLoading.value = false;
     }
@@ -191,11 +194,12 @@ class InvoicesDetailsController extends GetxController {
       final accessToken = SessionManager.accessToken;
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Access token is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Access token is not available.',
         );
+
         return;
       }
 
@@ -239,22 +243,22 @@ class InvoicesDetailsController extends GetxController {
       } else {
         invoiceItems.clear();
 
-        Get.snackbar(
-          'Error',
-          'Unable to load invoice items.',
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Unable to load invoice items.',
         );
+
       }
     } catch (e) {
       invoiceItems.clear();
 
       print('Get Invoice Items Error: $e');
 
-      Get.snackbar(
-        'Error',
-        'Unable to load invoice items.',
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Unable to load invoice items.',
       );
+
     } finally {
       isLoading.value = false;
     }
@@ -286,11 +290,12 @@ class InvoicesDetailsController extends GetxController {
       // ----------------------------------------------------------
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Access token is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Access token is not available.',
         );
+
         return;
       }
 
@@ -299,11 +304,12 @@ class InvoicesDetailsController extends GetxController {
       // ----------------------------------------------------------
 
       if (companyId == null) {
-        Get.snackbar(
-          'Error',
-          'Company ID is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Company ID is not available.',
         );
+
         return;
       }
 
@@ -337,11 +343,12 @@ class InvoicesDetailsController extends GetxController {
       );
 
       if (ledgerResponse.statusCode != 200) {
-        Get.snackbar(
-          'Delete Failed',
-          'Unable to delete invoice ledger entries.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Delete Failed',
+          message: 'Unable to delete invoice ledger entries.',
         );
+
         return;
       }
 
@@ -362,11 +369,12 @@ class InvoicesDetailsController extends GetxController {
       );
 
       if (invoiceResponse.statusCode != 200) {
-        Get.snackbar(
-          'Delete Failed',
-          'Unable to delete invoice.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Delete Failed',
+          message: 'Unable to delete invoice.',
         );
+
         return;
       }
 
@@ -374,12 +382,9 @@ class InvoicesDetailsController extends GetxController {
       // SUCCESS
       // ==========================================================
 
-      Get.snackbar(
-        'Success',
-        'Invoice deleted successfully.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF12A150),
-        colorText: Colors.white,
+      AppSnackbar.success(
+        title: 'Success',
+        message: 'Invoice deleted successfully.',
       );
 
       // ----------------------------------------------------------
@@ -404,23 +409,18 @@ class InvoicesDetailsController extends GetxController {
                 message;
       }
 
-      Get.snackbar(
-        'Delete Failed',
-        message,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      AppSnackbar.error(
+        title: 'Error',
+        message: '$message',
       );
+
 
     } catch (e) {
       print('Delete Invoice Error: $e');
 
-      Get.snackbar(
-        'Error',
-        'Something went wrong while deleting the invoice.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Something went wrong while deleting the invoice.',
       );
 
     } finally {

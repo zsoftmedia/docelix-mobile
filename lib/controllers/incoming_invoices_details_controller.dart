@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -220,13 +221,12 @@ class IncomingInvoicesDetailsController extends GetxController {
       final accessToken = SessionManager.accessToken;
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Authentication token is missing.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Authentication token is missing.',
         );
+
         return;
       }
 
@@ -238,27 +238,20 @@ class IncomingInvoicesDetailsController extends GetxController {
       if (response.statusCode == 200) {
         final data = response.data;
 
-        Get.snackbar(
-          'Success',
-          data['message'] ?? 'Invoice deleted successfully.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF12A150),
-          colorText: Colors.white,
+        AppSnackbar.success(
+          title: 'Success',
+          message: data['message'] ?? 'Invoice deleted successfully.',
         );
 
-        //isDeleting.value = false;
-        // Close invoice details screen
-       // Get.back(result: true);
         Get.back();
 
       } else {
-        Get.snackbar(
-          'Error',
-          'Unable to delete invoice.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+
+        AppSnackbar.error(
+          title: 'Success',
+          message: 'Unable to delete invoice.',
         );
+
       }
     } on DioException catch (e) {
       String message = 'Unable to delete invoice.';
@@ -270,21 +263,18 @@ class IncomingInvoicesDetailsController extends GetxController {
                 message;
       }
 
-      Get.snackbar(
-        'Delete Failed',
-        message,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      AppSnackbar.error(
+        title: 'Delete Failed',
+        message: '$message',
       );
+
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Something went wrong while deleting the invoice.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Something went wrong while deleting the invoice.',
       );
+
     } finally {
       isDeleting.value = false;
     }

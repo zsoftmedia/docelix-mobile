@@ -1,6 +1,7 @@
 
 
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -42,20 +43,22 @@ class IncomingInvoicesController extends GetxController {
       final companyId = SessionManager.accessCompanyid;
 
       if (accessToken == null || accessToken.isEmpty) {
-        Get.snackbar(
-          'Error',
-          'Access token is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Access token is not available.',
         );
+
         return;
       }
 
       if (companyId == null) {
-        Get.snackbar(
-          'Error',
-          'Company ID is not available.',
-          snackPosition: SnackPosition.BOTTOM,
+
+        AppSnackbar.error(
+          title: 'Error',
+          message:'Company ID is not available.',
         );
+
         return;
       }
 
@@ -102,19 +105,20 @@ class IncomingInvoicesController extends GetxController {
       print('Message: ${e.message}');
       print('================================');
 
-      Get.snackbar(
-        'Error',
-        e.response?.data?['message']?.toString() ??
+      AppSnackbar.error(
+        title: 'Error',
+        message:e.response?.data?['message']?.toString() ??
             e.message ??
             'Unable to load invoices.',
-        snackPosition: SnackPosition.BOTTOM,
       );
+
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
+
+      AppSnackbar.error(
+        title: 'Error',
+        message:e.toString(),
       );
+
     } finally {
       isLoading.value = false;
     }
