@@ -226,8 +226,8 @@ class DashboardController extends GetxController {
         print( "Revenue: " "${dashboardData.value?.kpis?.revenue?.value}", );
         print( "Expenses: " "${dashboardData.value?.kpis?.expenses?.value}", );
         print( "Net Result: " "${dashboardData.value?.kpis?.netResult?.value}", );
-        print( "Cash Balance: " "${dashboardData.value?.kpis?.cashBalance?.value}",
-        );
+        print( "Cash Balance: " "${dashboardData.value?.kpis?.cashBalance?.value}",);
+
       }
     } on DioException catch (e) {
 

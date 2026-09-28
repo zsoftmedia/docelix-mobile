@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/create_incoming_invoice_controller.dart';
 import 'package:docelix_mobileapp/controllers/dashboard_controller.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
@@ -432,7 +433,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildNetProfitMainCard({
     required double width,
     required double height,
-  }) {
+  })
+  {
     final netProfit =
         dashboardController.dashboardData.value?.kpis?.netResult?.value ?? 0;
 
@@ -579,7 +581,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildProfitChart({
     required double width,
     required double height,
-  }) {
+  })
+  {
     return Column(
       children: [
         Expanded(
@@ -612,7 +615,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _chartMonth(
       String text,
       double width,
-      ) {
+      )
+  {
     return Text(
       text,
       style: TextStyle(
@@ -630,7 +634,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildTabs({
     required double width,
     required double height,
-  }) {
+  })
+  {
     return Container(
       height: width * 0.105,
       padding: EdgeInsets.all(width * 0.010),
@@ -692,7 +697,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildSelectedTab({
     required double width,
     required double height,
-  }) {
+  })
+  {
     switch (selectedTab) {
       case 0:
         return _buildOverviewTab(
@@ -722,7 +728,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildOverviewTab({
     required double width,
     required double height,
-  }) {
+  })
+  {
     final revenue =
         dashboardController.dashboardData.value?.kpis?.revenue?.value ?? 0;
     final revenuePercent =
@@ -845,10 +852,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         SizedBox(height: height * 0.018),
 
         // ==========================================================
-        // ATTENTION REQUIRED
+        // RECENT TRANSACTION
         // ==========================================================
 
-        _buildAttentionRequired(
+        /*_buildAttentionRequired(
+          width: width,
+          height: height,
+        ),*/
+
+        _buildRecentTransactions(
           width: width,
           height: height,
         ),
@@ -881,7 +893,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String subtitle,
     required IconData icon,
     required Color iconColor,
-  }) {
+  })
+  {
     return Container(
       constraints: BoxConstraints(
         minHeight: width * 0.225,
@@ -1006,7 +1019,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildQuickActions({
     required double width,
     required double height,
-  }) {
+  })
+  {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(width * 0.030),
@@ -1110,6 +1124,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   iconColor: colorsList.purple,
                   onTap: () {
                     // Get.toNamed('/AddExpenseScreen');
+                    AppSnackbar.info(
+                        title: 'Coming Soon',
+                        message: 'Add Expenses coming soon.');
                   },
                 ),
               ),
@@ -1179,7 +1196,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildOutStandingAmount({
     required double width,
     required double height,
-  }) {
+  })
+  {
     final dashboard = dashboardController.dashboardData.value;
 
     final overdueInvoices =
@@ -1311,86 +1329,101 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
 // ================================================================
-// ATTENTION REQUIRED
+// RECENT TRANSACTIONS
 // ================================================================
 
-  Widget _buildAttentionRequired({
+  Widget _buildRecentTransactions({
     required double width,
     required double height,
   }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: colorsList.cardColor,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: colorsList.borderColor,
-        ),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              width * 0.030,
-              width * 0.030,
-              width * 0.020,
-              width * 0.020,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    "Attention required",
-                    style: TextStyle(
-                      color: colorsList.primaryText,
-                      fontSize: width * 0.037,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+    return Obx(() {
+      final transactions =
+          dashboardController.dashboardData.value?.recentTransactions ?? [];
 
-                Row(
-                  children: [
-                    Text(
-                      "See all",
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: colorsList.cardColor,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: colorsList.borderColor,
+          ),
+        ),
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                width * 0.030,
+                width * 0.030,
+                width * 0.020,
+                width * 0.020,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      "Recent transactions",
                       style: TextStyle(
-                        color: colorsList.green,
-                        fontSize: width * 0.023,
+                        color: colorsList.primaryText,
+                        fontSize: width * 0.037,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                  ),
 
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: colorsList.green,
-                      size: width * 0.045,
-                    ),
-                  ],
-                ),
-              ],
+                  Row(
+                    children: [
+                      Text(
+                        "See all",
+                        style: TextStyle(
+                          color: colorsList.green,
+                          fontSize: width * 0.023,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: colorsList.green,
+                        size: width * 0.045,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          _attentionItem(
-            width: width,
-            icon: Icons.priority_high_rounded,
-            iconColor: colorsList.red,
-            title: "3 overdue invoices",
-            subtitle: "Total amount € 1,200.00",
-            showDivider: true,
-          ),
+            // Transactions
+            if (transactions.isEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: width * 0.06,
+                ),
+                child: Text(
+                  "No recent transactions",
+                  style: TextStyle(
+                    color: colorsList.secondaryText,
+                    fontSize: width * 0.024,
+                  ),
+                ),
+              )
+            else
+              ...List.generate(
+                transactions.length,
+                    (index) {
+                  final transaction = transactions[index];
 
-          _attentionItem(
-            width: width,
-            icon: Icons.description_outlined,
-            iconColor: colorsList.orange,
-            title: "2 documents need review",
-            subtitle: "Please check and confirm",
-            showDivider: false,
-          ),
-        ],
-      ),
-    );
+                  return _recentTransactionItem(
+                    width: width,
+                    transaction: transaction,
+                    showDivider: index != transactions.length - 1,
+                  );
+                },
+              ),
+          ],
+        ),
+      );
+    });
   }
 
 
@@ -1405,7 +1438,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String title,
     required String subtitle,
     required bool showDivider,
-  }) {
+  })
+  {
     return Column(
       children: [
         Padding(
@@ -1476,6 +1510,116 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // ================================================================
+// RECENT TRANSACTION ITEM
+// ================================================================
+
+  Widget _recentTransactionItem({
+    required double width,
+    required RecentTransactionModel transaction,
+    required bool showDivider,
+  }) {
+    final type = transaction.type?.toLowerCase() ?? '';
+
+    final bool isIncome =
+        type == 'income' ||
+            type == 'credit' ||
+            type == 'received';
+
+    final icon = isIncome
+        ? Icons.arrow_downward_rounded
+        : Icons.arrow_upward_rounded;
+
+    final iconColor = isIncome
+        ? colorsList.green
+        : colorsList.red;
+
+    final amount = transaction.amount ?? 0;
+
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: width * 0.030,
+            vertical: width * 0.025,
+          ),
+          child: Row(
+            children: [
+              // Icon
+              Container(
+                width: width * 0.085,
+                height: width * 0.085,
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: width * 0.045,
+                ),
+              ),
+
+              SizedBox(width: width * 0.025),
+
+              // Description + account
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.description?.trim().isNotEmpty == true
+                          ? transaction.description!
+                          : "Transaction",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: colorsList.primaryText,
+                        fontSize: width * 0.026,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    SizedBox(height: width * 0.006),
+
+                    Text(
+                      _recentTransactionSubtitle(transaction),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: colorsList.secondaryText,
+                        fontSize: width * 0.022,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(width: width * 0.015),
+
+              // Amount
+              Text(
+                "${isIncome ? '+' : '-'} € ${amount.abs().toStringAsFixed(2)}",
+                style: TextStyle(
+                  color: iconColor,
+                  fontSize: width * 0.024,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Divider
+        if (showDivider)
+          Divider(
+            height: 1,
+            color: colorsList.borderColor,
+            indent: width * 0.14,
+          ),
+      ],
+    );
+  }
 
 // ================================================================
 // AI INSIGHT
@@ -1484,7 +1628,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildAiInsight({
     required double width,
     required double height,
-  }) {
+  })
+  {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
@@ -1583,7 +1728,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildTaxReturn({
     required double width,
     required double height,
-  }) {
+  }) 
+  {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(
@@ -2169,6 +2315,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     return Icons.receipt_long_outlined;
+  }
+
+  String _recentTransactionSubtitle(
+      RecentTransactionModel transaction,
+      ) {
+    final parts = <String>[];
+
+    if (transaction.date?.trim().isNotEmpty == true) {
+      parts.add(transaction.date!.trim());
+    }
+
+    if (transaction.account?.trim().isNotEmpty == true) {
+      parts.add(transaction.account!.trim());
+    }
+
+    if (transaction.status?.trim().isNotEmpty == true) {
+      parts.add(transaction.status!.trim());
+    }
+
+    return parts.isEmpty
+        ? "Recent transaction"
+        : parts.join(" • ");
   }
 }
 

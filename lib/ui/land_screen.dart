@@ -225,7 +225,7 @@ class _LandScreenState extends State<LandScreen> {
                   },
                 ),
 
-                _moreMenuItem(
+                /*_moreMenuItem(
                   icon: Icons.factory_outlined,
                   title: "Company",
                   subtitle: "Manage company information",
@@ -238,8 +238,7 @@ class _LandScreenState extends State<LandScreen> {
                       message: 'Company management coming soon',
                     );
                   },
-                ),
-
+                ),*/
 
                 _moreMenuItem(
                   icon: Icons.person_outline_rounded,
@@ -252,21 +251,6 @@ class _LandScreenState extends State<LandScreen> {
                       '/ProfileScreen',
                       arguments: 'Profile Screen',
                     );
-
-                    /*GetPage(
-                      name: '/ProfileScreen',
-                      page: () => const ProfileScreen(),
-                      binding: BindingsBuilder(() {
-                        Get.lazyPut<ProfileController>(
-                              () => ProfileController(),
-                        );
-                      }),
-                    );*/
-
-                    /*AppSnackbar.info(
-                      title: 'Profile',
-                      message: 'Profile management coming soon',
-                    );*/
                   },
                 ),
 
@@ -418,52 +402,6 @@ class _LandScreenState extends State<LandScreen> {
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-
-      // ============================================================
-      // APP BAR
-      // ============================================================
-
-      /*appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-
-        // ----------------------------------------------------------
-        // NO DRAWER / NO HAMBURGER
-        // ----------------------------------------------------------
-
-        automaticallyImplyLeading: false,
-
-        title: Text(
-          '${SessionManager.accessCompanyname}',
-          style: TextStyle(
-            color: colorsList.colorGray_800,
-            fontSize: width * 0.050,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-
-        centerTitle: false,
-
-        actions: [
-          IconButton(
-            onPressed: () {
-              AppSnackbar.info(
-                title: 'Coming Soon',
-                message: 'List of Companies',
-              );
-            },
-            icon: Icon(
-              Icons.factory_outlined,
-              color: const Color(0xFF0A2342),
-              size: width * 0.060,
-            ),
-          ),
-
-          SizedBox(
-            width: width * 0.015,
-          ),
-        ],
-      ),*/
 
       // ============================================================
       // BODY
