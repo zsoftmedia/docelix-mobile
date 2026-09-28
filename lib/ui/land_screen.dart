@@ -274,7 +274,7 @@ class _LandScreenState extends State<LandScreen> {
                   iconColor: Colors.red,
                   textColor: Colors.red,
                   onTap: () {
-                    Navigator.pop(context);
+                   // Navigator.pop(context);
 
                     _logout();
                   },
@@ -386,10 +386,7 @@ class _LandScreenState extends State<LandScreen> {
   void _logout() {
     // Put your existing logout logic here.
 
-    AppSnackbar.info(
-      title: 'Logout',
-      message: 'Logout functionality',
-    );
+    Get.offAllNamed('/LoginScreen');
   }
 
   // ============================================================
