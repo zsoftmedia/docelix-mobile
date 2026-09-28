@@ -1,6 +1,9 @@
 import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
+import 'package:docelix_mobileapp/controllers/profile_controller.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -11,516 +14,579 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController nameController =
-  TextEditingController(text: 'anees.irshad');
-
-  final TextEditingController emailController =
-  TextEditingController(text: 'anees.irshad@berrinex.com');
-
-  final TextEditingController usernameController =
-  TextEditingController(text: 'anees.irshad');
-
-  bool isSaving = false;
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    usernameController.dispose();
-    super.dispose();
-  }
-
-  Future<void> saveChanges() async {
-    setState(() {
-      isSaving = true;
-    });
-
-    // TODO: Call profile update API here
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (!mounted) return;
-
-    setState(() {
-      isSaving = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profile updated successfully'),
-      ),
-    );
-  }
+  final ProfileController profileController =
+  Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: colorsList.backgroundColor,
+      backgroundColor: const Color(0xFFF7F9FC),
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-
-          padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.045,
-            vertical: 20,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        centerTitle: false,
+        title: const Text(
+          'Profile',
+          style: TextStyle(
+            color: Color(0xFF0A2342),
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
           ),
-
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-
-              // ============================================================
-              // PROFILE HEADER
-              // ============================================================
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-
-                  border: Border.all(
-                    color: const Color(0xFFE4E7EC),
-                  ),
-
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-
-                child: Column(
-                  children: [
-
-                    // Avatar
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-
-                        Container(
-                          width: 92,
-                          height: 92,
-
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFE8EEF5),
-
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 4,
-                            ),
-                          ),
-
-                          child: const Icon(
-                            Icons.person_outline,
-                            size: 55,
-                            color: Color(0xFF98A2B3),
-                          ),
-                        ),
-
-                        Container(
-                          width: 30,
-                          height: 30,
-
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1769AA),
-                            shape: BoxShape.circle,
-
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 3,
-                            ),
-                          ),
-
-                          child: const Icon(
-                            Icons.camera_alt_outlined,
-                            color: Colors.white,
-                            size: 15,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    const Text(
-                      'anees.irshad',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF101828),
-                      ),
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    const Text(
-                      'anees.irshad@berrinex.com',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF667085),
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    // Plan + Role
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-
-                        _buildBadge(
-                          icon: Icons.bolt,
-                          text: 'Free',
-                          backgroundColor:
-                          const Color(0xFFF2F4F7),
-                          textColor:
-                          const Color(0xFF344054),
-                        ),
-
-                        const SizedBox(width: 8),
-
-                        _buildBadge(
-                          icon: Icons.verified_user_outlined,
-                          text: 'Owner',
-                          backgroundColor:
-                          const Color(0xFFE8F1FA),
-                          textColor:
-                          const Color(0xFF175A8A),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ============================================================
-              // ACCOUNT INFORMATION
-              // ============================================================
-
-              const Text(
-                'Account Information',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF101828),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-
-                  border: Border.all(
-                    color: const Color(0xFFE4E7EC),
-                  ),
-                ),
-
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    // Name
-                    _buildLabel('Name'),
-
-                    const SizedBox(height: 7),
-
-                    AppTextField(
-                      controller: nameController,
-                      hintText: 'Enter your name',
-                      keyboardType: TextInputType.name,
-
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your name';
-                        }
-
-                        return null;
-                      },
-                    ),
-
-
-                    const SizedBox(height: 18),
-
-                    // Username
-                    _buildLabel('Username'),
-
-                    const SizedBox(height: 7),
-
-                    AppTextField(
-                      controller: usernameController,
-                      hintText: 'Enter your username',
-                      readOnly: true,
-                      keyboardType: TextInputType.emailAddress,
-
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your username';
-                        }
-
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // Email
-                    _buildLabel('Email'),
-
-                    const SizedBox(height: 7),
-
-                    AppTextField(
-                      controller: emailController,
-                      hintText: 'Email address',
-                      keyboardType: TextInputType.emailAddress,
-
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // Plan
-                    _buildLabel('Plan'),
-
-                    const SizedBox(height: 8),
-
-                    _buildInfoValue(
-                      icon: Icons.bolt,
-                      value: 'Free',
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // Role
-                    _buildLabel('Role'),
-
-                    const SizedBox(height: 8),
-
-                    _buildInfoValue(
-                      icon: Icons.verified_user_outlined,
-                      value: 'Owner',
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ============================================================
-              // ACCOUNT DETAILS
-              // ============================================================
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-
-                  border: Border.all(
-                    color: const Color(0xFFE4E7EC),
-                  ),
-                ),
-
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    const Text(
-                      'Account Details',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF101828),
-                      ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    _buildDetailRow(
-                      title: 'Account created',
-                      value: '9 Sep 2026',
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    _buildDetailRow(
-                      title: 'Last login',
-                      value: 'Today',
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // ============================================================
-              // SAVE BUTTON
-              // ============================================================
-
-              /*SizedBox(
-                width: double.infinity,
-                height: 52,
-
-                child: ElevatedButton(
-                  onPressed: isSaving ? null : saveChanges,
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    const Color(0xFF1769AA),
-
-                    disabledBackgroundColor:
-                    const Color(0xFF98A2B3),
-
-                    elevation: 0,
-
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+
+      body: Obx(
+            () {
+          if (profileController.isLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: width * 0.045,
+              vertical: 18,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                // =========================================================
+                // PROFILE HEADER
+                // =========================================================
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFE5E7EB),
                     ),
                   ),
-
-                  child: isSaving
-                      ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor:
-                      AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
-                    ),
-                  )
-                      : const Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.center,
+                  child: Column(
                     children: [
 
-                      Icon(
-                        Icons.check,
-                        size: 20,
+                      // Profile Picture
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+
+                          Obx(
+                                () {
+                              final selectedImage =
+                                  profileController
+                                      .selectedProfileImage
+                                      .value;
+
+                              final imageUrl =
+                                  profileController
+                                      .profileImageUrl
+                                      .value;
+
+                              return Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFFEFF3F7),
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 4,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black
+                                          .withOpacity(0.08),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                  image: selectedImage != null
+                                      ? DecorationImage(
+                                    image: FileImage(
+                                      selectedImage,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
+                                      : imageUrl.isNotEmpty
+                                      ? DecorationImage(
+                                    image: NetworkImage(
+                                      imageUrl,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
+                                      : null,
+                                ),
+                                child: selectedImage == null &&
+                                    imageUrl.isEmpty
+                                    ? const Icon(
+                                  Icons.person_outline,
+                                  size: 55,
+                                  color: Color(0xFF98A2B3),
+                                )
+                                    : null,
+                              );
+                            },
+                          ),
+
+                          // Camera Button
+                          Positioned(
+                            right: -2,
+                            bottom: 0,
+                            child: GestureDetector(
+                              onTap: profileController
+                                  .changeProfilePicture,
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1769AA),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt_outlined,
+                                  color: Colors.white,
+                                  size: 17,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
 
-                      SizedBox(width: 8),
+                      const SizedBox(height: 16),
 
-                      Text(
-                        'Save Changes',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                      // Name
+                      Obx(
+                            () => Text(
+                          profileController
+                              .profileName
+                              .value
+                              .isEmpty
+                              ? 'User'
+                              : profileController
+                              .profileName
+                              .value,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF172033),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 5),
+
+                      // Email
+                      Obx(
+                            () => Text(
+                          profileController
+                              .profileEmail
+                              .value,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF667085),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Badges
+                      Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
+                        children: [
+
+                          // Plan
+                          Obx(
+                                () => _badge(
+                              text: profileController
+                                  .profilePlan
+                                  .value,
+                              backgroundColor:
+                              const Color(0xFFEAF4FF),
+                              textColor:
+                              const Color(0xFF1769AA),
+                            ),
+                          ),
+
+                          const SizedBox(width: 8),
+
+                          // Role
+                          Obx(
+                                () => profileController
+                                .profileRole
+                                .value
+                                .isNotEmpty
+                                ? _badge(
+                              text: profileController
+                                  .profileRole
+                                  .value,
+                              backgroundColor:
+                              const Color(0xFFF2F4F7),
+                              textColor:
+                              const Color(0xFF475467),
+                            )
+                                : const SizedBox(),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Change Picture
+                      GestureDetector(
+                        onTap: profileController
+                            .changeProfilePicture,
+                        child: const Text(
+                          'Change Profile Picture',
+                          style: TextStyle(
+                            color: Color(0xFF1769AA),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),*/
 
-              AppButton(
-                text: 'Save',
+                const SizedBox(height: 20),
 
-               // isLoading: loginController.isLoading.value,
+                // =========================================================
+                // ACCOUNT INFORMATION
+                // =========================================================
 
-                onPressed: () {
-                 // loginController.login();
-                },
+                const Text(
+                  'Account Information',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF172033),
+                  ),
+                ),
 
-                width: double.infinity,
-                height: height * 0.070,
+                const SizedBox(height: 10),
 
-                backgroundColor: colorsList.primaryBlue,
-                disabledBackgroundColor: colorsList.primaryBlue,
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFE5E7EB),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
 
-                foregroundColor: Colors.white,
-                loadingColor: Colors.white,
+                      // Name
+                      _fieldLabel('Name'),
 
-                borderRadius: 4,
+                      const SizedBox(height: 7),
 
-                fontSize: width * 0.043,
-                fontWeight: FontWeight.w700,
-              ),
+                      TextField(
+                        controller:
+                        profileController.nameController,
+                        decoration: _inputDecoration(
+                          hint: 'Enter your name',
+                        ),
+                      ),
 
-              const SizedBox(height: 30),
-            ],
-          ),
-        ),
+                      const SizedBox(height: 16),
+
+                      // Username
+                      _fieldLabel('Username'),
+
+                      const SizedBox(height: 7),
+
+                      TextField(
+                        controller:
+                        profileController
+                            .usernameController,
+                        readOnly: true,
+                        decoration: _inputDecoration(
+                          hint: 'Username',
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Email
+                      _fieldLabel('Email'),
+
+                      const SizedBox(height: 7),
+
+                      TextField(
+                        controller:
+                        profileController.emailController,
+                        keyboardType:
+                        TextInputType.emailAddress,
+                        decoration: _inputDecoration(
+                          hint: 'Enter your email',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // =========================================================
+                // ACCOUNT DETAILS
+                // =========================================================
+
+                const Text(
+                  'Account Details',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF172033),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFE5E7EB),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+
+                      _detailRow(
+                        title: 'Plan',
+                        value: profileController
+                            .profilePlan
+                            .value,
+                      ),
+
+                      _divider(),
+
+                      _detailRow(
+                        title: 'Role',
+                        value: profileController
+                            .profileRole
+                            .value,
+                      ),
+
+                      _divider(),
+
+                      _detailRow(
+                        title: 'Account Created',
+                        value: profileController
+                            .accountCreatedDate
+                            .value,
+                      ),
+
+                      if (profileController
+                          .companyName
+                          .value
+                          .isNotEmpty) ...[
+                        _divider(),
+
+                        _detailRow(
+                          title: 'Company',
+                          value: profileController
+                              .companyName
+                              .value,
+                        ),
+                      ],
+
+                      if (profileController
+                          .companyCurrency
+                          .value
+                          .isNotEmpty) ...[
+                        _divider(),
+
+                        _detailRow(
+                          title: 'Currency',
+                          value: profileController
+                              .companyCurrency
+                              .value,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // =========================================================
+                // SAVE BUTTON
+                // =========================================================
+
+                Obx(
+                      () => AppButton(
+                    text: 'Save',
+                    isLoading:
+                    profileController.isSaving.value,
+                    onPressed:
+                    profileController.saveChanges,
+                    width: double.infinity,
+                    height: height * 0.070,
+                    backgroundColor:
+                    colorsList.primaryBlue,
+                    disabledBackgroundColor:
+                    colorsList.primaryBlue,
+                    foregroundColor: Colors.white,
+                    loadingColor: Colors.white,
+                    borderRadius: 4,
+                    fontSize: width * 0.043,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  // ============================================================
-  // HELPERS
-  // ============================================================
+  // =========================================================
+  // BADGE
+  // =========================================================
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF475467),
-      ),
-    );
-  }
-
-  Widget _buildBadge({
-    required IconData icon,
+  Widget _badge({
     required String text,
     required Color backgroundColor,
     required Color textColor,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 7,
+        horizontal: 10,
+        vertical: 5,
       ),
-
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
       ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
 
+  // =========================================================
+  // FIELD LABEL
+  // =========================================================
+
+  Widget _fieldLabel(String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF344054),
+        ),
+      ),
+    );
+  }
+
+  // =========================================================
+  // INPUT DECORATION
+  // =========================================================
+
+  InputDecoration _inputDecoration({
+    required String hint,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: const Color(0xFFF9FAFB),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 13,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: const BorderSide(
+          color: Color(0xFFD0D5DD),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: const BorderSide(
+          color: Color(0xFFD0D5DD),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: const BorderSide(
+          color: Color(0xFF1769AA),
+          width: 1.2,
+        ),
+      ),
+    );
+  }
+
+  // =========================================================
+  // DETAIL ROW
+  // =========================================================
+
+  Widget _detailRow({
+    required String title,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-
-          Icon(
-            icon,
-            size: 15,
-            color: textColor,
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF667085),
+              ),
+            ),
           ),
 
-          const SizedBox(width: 5),
+          const SizedBox(width: 15),
 
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: textColor,
+          Flexible(
+            child: Text(
+              value.isEmpty ? '-' : value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF172033),
+              ),
             ),
           ),
         ],
@@ -528,104 +594,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoValue({
-    required IconData icon,
-    required String value,
-  }) {
-    return Row(
-      children: [
+  // =========================================================
+  // DIVIDER
+  // =========================================================
 
-        Icon(
-          icon,
-          size: 18,
-          color: const Color(0xFF1769AA),
-        ),
-
-        const SizedBox(width: 8),
-
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF101828),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow({
-    required String title,
-    required String value,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(0xFF667085),
-          ),
-        ),
-
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF344054),
-          ),
-        ),
-      ],
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String hintText,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hintText,
-
-      hintStyle: const TextStyle(
-        fontSize: 14,
-        color: Color(0xFF98A2B3),
-      ),
-
-      filled: true,
-      fillColor: const Color(0xFFF9FAFB),
-
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 14,
-      ),
-
-      suffixIcon: suffixIcon,
-
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(9),
-        borderSide: const BorderSide(
-          color: Color(0xFFD0D5DD),
-        ),
-      ),
-
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(9),
-        borderSide: const BorderSide(
-          color: Color(0xFFD0D5DD),
-        ),
-      ),
-
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(9),
-        borderSide: const BorderSide(
-          color: Color(0xFF1769AA),
-          width: 1.5,
-        ),
-      ),
+  Widget _divider() {
+    return const Divider(
+      height: 1,
+      thickness: 1,
+      color: Color(0xFFE5E7EB),
     );
   }
 }

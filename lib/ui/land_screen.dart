@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/controllers/profile_controller.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/profile_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
@@ -246,12 +247,26 @@ class _LandScreenState extends State<LandScreen> {
                   subtitle: "Manage your profile",
                   iconColor: colorsList.cyan,
                   onTap: () {
-                    Navigator.pop(context);
 
-                    AppSnackbar.info(
+                    Get.toNamed(
+                      '/ProfileScreen',
+                      arguments: 'Profile Screen',
+                    );
+
+                    /*GetPage(
+                      name: '/ProfileScreen',
+                      page: () => const ProfileScreen(),
+                      binding: BindingsBuilder(() {
+                        Get.lazyPut<ProfileController>(
+                              () => ProfileController(),
+                        );
+                      }),
+                    );*/
+
+                    /*AppSnackbar.info(
                       title: 'Profile',
                       message: 'Profile management coming soon',
-                    );
+                    );*/
                   },
                 ),
 

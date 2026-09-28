@@ -75,8 +75,6 @@ class LoginController extends GetxController {
       debugPrint('Access Token: $accessToken');
       debugPrint('================================');
 
-     // String Tokens = 'eyJhbGciOiJFUzI1NiIsImtpZCI6IjE3YWU0MDk5LTJhYzktNDQ1Yy1hZTcwLTQ4ZjNmNzdiODhiNSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3VxaHVmZGV2c25zdGRwY2JnYWNlLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI5NGRmNWQ0MC04ZTI2LTQ3MWUtOWU5YS1hYWY1NjVhZDAxZGYiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzg5MDIxMTE2LCJpYXQiOjE3ODkwMTc1MTYsImVtYWlsIjoicmFtZWV6QGJlcnJpbmV4LmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzg5MDE3NTE2fV0sInNlc3Npb25faWQiOiIwMDU3ZmJlMC00YmEzLTRjNTctYTMyYi01MTY2OWM5YjQ5OTIiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.WAyQACAAhCtahL2PpD0ej58tfHP2jhq9G9lDtUGzW0ki6rHmLy1Z9haTKJ5zcD0AmJRJBjCiPsc3_UX4sZ7YQA';
-
       // ==============================
       // 4. CALL DOCELIX /api/me
       // ==============================
@@ -91,9 +89,14 @@ class LoginController extends GetxController {
 
         UserModel user = UserModel.fromJson(meResponse.data);
 
+        final createdDate = user.createdAt != null
+            ? DateTime.parse(user.createdAt!).toString().split(' ').first
+            : '';
+
         print(user.id);
         print(user.email);
         print(user.username);
+
 
         print(user.role?.name);
 
@@ -123,6 +126,7 @@ class LoginController extends GetxController {
         await SessionManager.saveCompanyname(company?.name ?? '');
         await SessionManager.saveCorrencycode(company?.currencyCode ?? '');
         await SessionManager.saveRole(company?.myRole ?? '');
+        await SessionManager.saveAccCreatedDate(createdDate);
 
         // whether login succeeds or fails
         isLoading.value = false;

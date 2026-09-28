@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/controllers/create_incoming_invoice_controller.dart';
 import 'package:docelix_mobileapp/controllers/dashboard_controller.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
@@ -20,6 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // ============================================================
 
   final DashboardController dashboardController = Get.put(DashboardController());
+  final CreateIncomingInvoiceController incomingInvoiceController = Get.put(CreateIncomingInvoiceController());
 
   // ============================================================
   // TAB
@@ -1082,17 +1084,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Expanded(
                 child: _quickActionItem(
                   width: width,
-                  icon: Icons.document_scanner_outlined,
-                  title: "Scan receipt",
+                  icon: Icons.camera_alt_outlined,
+                  title: "Capture invoice",
                   backgroundColor: colorsList.blue.withOpacity(0.08),
                   iconColor: colorsList.blue,
                   onTap: () {
-                    // Get.toNamed('/ScanReceiptScreen');
 
                     Get.toNamed(
-                      '/scanQrScreen',
-                      arguments: 'Scan QR Screen',
+                      '/CreateIncomingInvoicesScreen',
+                      arguments: 'Create Incoming Invoices Screen',
                     );
+
                   },
                 ),
               ),

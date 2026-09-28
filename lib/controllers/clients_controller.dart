@@ -15,6 +15,7 @@ class ClientsController extends GetxController {
   // ============================================================
 
   final RxList<ClientScreenModel> clients = <ClientScreenModel>[].obs;
+  final Rxn<ClientScreenModel> selectedClient = Rxn<ClientScreenModel>();
 
   // ============================================================
   // PAGINATION
@@ -37,7 +38,8 @@ class ClientsController extends GetxController {
   Future<void> getClients({
     int page = 1,
     int pageSize = 10,
-  }) async {
+  }) async
+  {
     try {
       isLoading.value = true;
 

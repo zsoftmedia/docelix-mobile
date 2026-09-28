@@ -17,6 +17,7 @@ class SessionManager {
   static const String _companynameKey = 'company_name';
   static const String _correncycodeKey = 'corrency_code';
   static const String _userDataKey = 'user_data';
+  static const String _accCreatedDateKey = 'created_at';
 
   // ==============================
   // ACCESS TOKEN
@@ -31,6 +32,21 @@ class SessionManager {
 
   static String? get accessToken {
     return _storage.read<String>(_accessTokenKey);
+  }
+
+  // ==============================
+  // ACCOUNT CREATED DATE
+  // ==============================
+
+  static Future<void> saveAccCreatedDate(String _accCreatedDateKey) async {
+    await _storage.write(
+      _accCreatedDateKey,
+      _accCreatedDateKey,
+    );
+  }
+
+  static String? get accCreatedDate {
+    return _storage.read<String>(_accCreatedDateKey);
   }
 
   // ==============================
