@@ -1,6 +1,7 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/profile_screen.dart';
+import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
@@ -14,36 +15,21 @@ class LandScreen extends StatefulWidget {
 }
 
 class _LandScreenState extends State<LandScreen> {
-
   bool checkLoginProgressbar = false;
 
-  // Bottom navigation selected index
+  // ============================================================
+  // BOTTOM NAVIGATION
+  // ============================================================
+
   int _selectedIndex = 0;
 
-  // Bottom navigation pages
+  // Main bottom navigation pages
   final List<Widget> _pages = [
-
-    /*const Center(
-      child: Text(
-        "Dashboard",
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),*/
-
     const DashboardScreen(),
 
-    const Center(
-      child: Text(
-        "Services",
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
+    const SizedBox(),
+
+    const SizedBox(),
 
     const Center(
       child: Text(
@@ -55,521 +41,674 @@ class _LandScreenState extends State<LandScreen> {
       ),
     ),
 
-    /*const Center(
-      child: Text(
-        "Profile",
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),*/
-
-    ProfileScreen(),
+    const SizedBox(),
   ];
 
-  // Bottom navigation change
+  // ============================================================
+  // BOTTOM NAVIGATION CHANGE
+  // ============================================================
+
   void _onItemTapped(int index) {
+    // MORE
+    if (index == 4) {
+      _showMoreMenu();
+      return;
+    }
+
+    // INVOICES
+    if (index == 1) {
+      Get.toNamed(
+        '/InvoicesScreen',
+        arguments: 'Invoices Screen',
+      );
+      return;
+    }
+
+    // SCAN
+    if (index == 2) {
+      _openScan();
+      return;
+    }
+
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  // ============================================================
+  // SCAN
+  // ============================================================
 
-    final height = MediaQuery.of(context).size.height;
+  void _openScan() async {
+    final result = await Get.to(
+          () => const ScanQrScreen(),
+    );
+
+    if (result == null) {
+      return;
+    }
+
+    final qrData = result.toString();
+
+    debugPrint("QR DATA: $qrData");
+
+    AppSnackbar.success(
+      title: "QR Code Scanned",
+      message: qrData,
+    );
+  }
+
+  // ============================================================
+  // MORE MENU
+  // ============================================================
+
+  void _showMoreMenu() {
     final width = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-
-      // ============================================================
-      // APP BAR
-      // ============================================================
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: Icon(
-                Icons.menu_rounded,
-                color: const Color(0xFF0A2342),
-                size: width * 0.065,
-              ),
-
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
-
-        /*title: Image.asset(
-          'assets/main_logo.png',
-          width: width * 0.26,
-          height: height * 0.5,
-          fit: BoxFit.contain,
-        ),*/
-
-        title: Text('${SessionManager.accessCompanyname}',
-          style: TextStyle(
-          color: colorsList.colorGray_800,
-          fontSize: width * 0.057,
-        ),),
-
-        centerTitle: false,
-
-        actions: [
-
-          IconButton(
-            onPressed: () {
-              // Notification action
-
-              AppSnackbar.info(
-                  title: 'Coming Soon',
-                  message: 'Coming Soon, List of Companies');
-            },
-
-            icon: Icon(
-              Icons.factory_outlined,
-              color: const Color(0xFF0A2342),
-              size: width * 0.065,
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+              width * 0.05,
+              width * 0.025,
+              width * 0.05,
+              width * 0.04,
             ),
-          ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ------------------------------------------------
+                // HANDLE
+                // ------------------------------------------------
 
-          SizedBox(width: width * 0.02),
-        ],
-      ),
-
-      // ============================================================
-      // NAVIGATION DRAWER
-      // ============================================================
-      drawer: Drawer(
-        backgroundColor: Colors.white,
-
-        child: SafeArea(
-          child: Column(
-            children: [
-
-              // ==========================================================
-              // DRAWER HEADER
-              // ==========================================================
-              Container(
-                width: double.infinity,
-
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.06,
-                  vertical: height * 0.025,
-                ),
-
-                decoration: const BoxDecoration(
-                  color: Color(0xFF063C70),
-
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(30),
+                Container(
+                  width: width * 0.10,
+                  height: 4,
+                  margin: EdgeInsets.only(
+                    bottom: width * 0.035,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD7DDE5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                // ------------------------------------------------
+                // TITLE
+                // ------------------------------------------------
 
+                Row(
                   children: [
-
-                    // Logo
-                    Image.asset(
-                      'assets/lightlogo.png',
-                      width: width * 0.45,
-                      height: height * 0.07,
-                      fit: BoxFit.contain,
-                    ),
-
-                    SizedBox(height: height * 0.015),
-
-                    Text(
-                      "Welcome back",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.055,
-                        fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Text(
+                        "More",
+                        style: TextStyle(
+                          color: colorsList.primaryText,
+                          fontSize: width * 0.045,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
 
-                    SizedBox(height: height * 0.005),
-
-                    Text(
-                      "Manage your account",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: width * 0.037,
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: colorsList.secondaryText,
+                        size: width * 0.055,
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              SizedBox(height: height * 0.01),
+                SizedBox(height: width * 0.015),
 
-              // ==========================================================
-              // SCROLLABLE MENU
-              // ==========================================================
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.zero,
+                // ------------------------------------------------
+                // EXTRA MENU
+                // ------------------------------------------------
 
-                  children: [
+                _moreMenuItem(
+                  icon: Icons.dashboard_outlined,
+                  title: "Items",
+                  subtitle: "Manage your products and services",
+                  iconColor: colorsList.blue,
+                  onTap: () {
+                    Navigator.pop(context);
 
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.home_outlined,
-                      title: "Dashboard",
-                      onTap: () {
-                        Navigator.pop(context);
-
-                        setState(() {
-                          _selectedIndex = 0;
-                        });
-                      },
-                    ),
-
-                    /*_drawerItem(
-                      context: context,
-                      icon: Icons.supervised_user_circle_sharp,
-                      title: "Team & Access",
-                      onTap: () {
-                        Navigator.pop(context);
-
-                        setState(() {
-                          _selectedIndex = 1;
-                        });
-                      },
-                    ),*/
-
-
-
-
-                    /*_drawerItem(
-                      context: context,
-                      icon: Icons.watch_later_outlined,
-                      title: "Activity Log",
-                      onTap: () {
-                        Navigator.pop(context);
-
-                        setState(() {
-                          _selectedIndex = 2;
-                        });
-                      },
-                    ),*/
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.file_copy_outlined,
-                      title: "Invoices",
-                      onTap: () {
-
-                        Get.toNamed(
-                          '/InvoicesScreen',
-                          arguments: 'Invoices Screen',);
-
-                        setState(() {
-                          _selectedIndex = 3;
-                        });
-                      },
-                    ),
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.dashboard_outlined,
-                      title: "Items",
-                      onTap: () {
-                       // Navigator.pop(context);
-
-                        // Items List Page ==> Cataloge
-                        Get.toNamed(
-                          '/CatalogsScreen',
-                          arguments: 'Catalogs Screen',);
-
-                        setState(() {
-                          _selectedIndex = 3;
-                        });
-                      },
-                    ),
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.account_box_outlined,
-                      title: "Clients",
-                      onTap: () {
-                        //Navigator.pop(context);
-
-                        Get.toNamed(
-                          '/ClientsScreen',
-                          arguments: 'Clients Screen',);
-
-                        setState(() {
-                          _selectedIndex = 3;
-                        });
-                      },
-                    ),
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.upcoming_rounded,
-                      title: "Incoming",
-                      onTap: () {
-                       // Navigator.pop(context);
-
-                        Get.toNamed(
-                          '/IncomingInvoicesScreen',
-                          arguments: 'Incoming Invoices Screen',);
-
-                        setState(() {
-                          _selectedIndex = 3;
-                        });
-                      },
-                    ),
-
-                    /*_drawerItem(
-                      context: context,
-                      icon: Icons.star_outline_sharp,
-                      title: "Docelix AI",
-                      onTap: () {
-                        Navigator.pop(context);
-
-                        setState(() {
-                          _selectedIndex = 3;
-                        });
-                      },
-                    ),
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.mail_outline_outlined,
-                      title: "Mail",
-                      onTap: () {
-                        Navigator.pop(context);
-
-                        setState(() {
-                          _selectedIndex = 3;
-                        });
-                      },
-                    ),
-
-                    const Divider(
-                      indent: 20,
-                      endIndent: 20,
-                    ),
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.web_asset_sharp,
-                      title: "Assets",
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.account_balance,
-                      title: "Finance",
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.percent,
-                      title: "Taxes",
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-
-                    _drawerItem(
-                      context: context,
-                      icon: Icons.file_copy_outlined,
-                      title: "Reports",
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),*/
-
-                    // Extra bottom padding
-                    SizedBox(height: height * 0.02),
-                  ],
-                ),
-              ),
-
-              // ==========================================================
-              // LOGOUT - ALWAYS AT BOTTOM
-              // ==========================================================
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
+                    Get.toNamed(
+                      '/CatalogsScreen',
+                      arguments: 'Catalogs Screen',
+                    );
+                  },
                 ),
 
-                child: _drawerItem(
-                  context: context,
+                _moreMenuItem(
+                  icon: Icons.people_outline_rounded,
+                  title: "Clients",
+                  subtitle: "Manage your clients",
+                  iconColor: colorsList.green,
+                  onTap: () {
+                    Navigator.pop(context);
+
+                    Get.toNamed(
+                      '/ClientsScreen',
+                      arguments: 'Clients Screen',
+                    );
+                  },
+                ),
+
+                _moreMenuItem(
+                  icon: Icons.upcoming_rounded,
+                  title: "Incoming",
+                  subtitle: "Incoming invoices and documents",
+                  iconColor: colorsList.orange,
+                  onTap: () {
+                    Navigator.pop(context);
+
+                    Get.toNamed(
+                      '/IncomingInvoicesScreen',
+                      arguments: 'Incoming Invoices Screen',
+                    );
+                  },
+                ),
+
+                _moreMenuItem(
+                  icon: Icons.person_outline_rounded,
+                  title: "Profile",
+                  subtitle: "Manage your account",
+                  iconColor: colorsList.purple,
+                  onTap: () {
+                    Navigator.pop(context);
+
+                    setState(() {
+                      _selectedIndex = 3;
+                    });
+
+                    // If you want Profile as a separate route:
+                    // Get.toNamed('/ProfileScreen');
+                  },
+                ),
+
+                _moreMenuItem(
+                  icon: Icons.factory_outlined,
+                  title: "Company",
+                  subtitle: "Manage company information",
+                  iconColor: colorsList.cyan,
+                  onTap: () {
+                    Navigator.pop(context);
+
+                    AppSnackbar.info(
+                      title: 'Company',
+                      message: 'Company management coming soon',
+                    );
+                  },
+                ),
+
+                SizedBox(height: width * 0.015),
+
+                Divider(
+                  color: colorsList.borderColor,
+                  height: 1,
+                ),
+
+                SizedBox(height: width * 0.015),
+
+                // ------------------------------------------------
+                // LOGOUT
+                // ------------------------------------------------
+
+                _moreMenuItem(
                   icon: Icons.logout_rounded,
                   title: "Logout",
+                  subtitle: "Sign out from your account",
                   iconColor: Colors.red,
                   textColor: Colors.red,
                   onTap: () {
                     Navigator.pop(context);
 
-                    // Logout logic
+                    _logout();
                   },
+                ),
+
+                SizedBox(height: width * 0.015),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ============================================================
+  // MORE MENU ITEM
+  // ============================================================
+
+  Widget _moreMenuItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color iconColor,
+    required VoidCallback onTap,
+    Color? textColor,
+  }) {
+    final width = MediaQuery.of(context).size.width;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: width * 0.025,
+          ),
+          child: Row(
+            children: [
+              // ------------------------------------------------
+              // ICON
+              // ------------------------------------------------
+
+              Container(
+                width: width * 0.105,
+                height: width * 0.105,
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: width * 0.050,
+                ),
+              ),
+
+              SizedBox(width: width * 0.030),
+
+              // ------------------------------------------------
+              // TEXT
+              // ------------------------------------------------
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color:
+                        textColor ?? colorsList.primaryText,
+                        fontSize: width * 0.031,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    SizedBox(height: width * 0.006),
+
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: colorsList.secondaryText,
+                        fontSize: width * 0.022,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Icon(
+                Icons.chevron_right_rounded,
+                color: colorsList.secondaryText,
+                size: width * 0.050,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+
+  void _logout() {
+    // Put your existing logout logic here.
+
+    AppSnackbar.info(
+      title: 'Logout',
+      message: 'Logout functionality',
+    );
+  }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      backgroundColor: colorsList.backgroundColor,
+
+      // ============================================================
+      // APP BAR
+      // ============================================================
+
+      /*appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+
+        // ----------------------------------------------------------
+        // NO DRAWER / NO HAMBURGER
+        // ----------------------------------------------------------
+
+        automaticallyImplyLeading: false,
+
+        title: Text(
+          '${SessionManager.accessCompanyname}',
+          style: TextStyle(
+            color: colorsList.colorGray_800,
+            fontSize: width * 0.050,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+
+        centerTitle: false,
+
+        actions: [
+          IconButton(
+            onPressed: () {
+              AppSnackbar.info(
+                title: 'Coming Soon',
+                message: 'List of Companies',
+              );
+            },
+            icon: Icon(
+              Icons.factory_outlined,
+              color: const Color(0xFF0A2342),
+              size: width * 0.060,
+            ),
+          ),
+
+          SizedBox(
+            width: width * 0.015,
+          ),
+        ],
+      ),*/
+
+      // ============================================================
+      // BODY
+      // ============================================================
+
+      body: SafeArea(
+        child: _pages[_selectedIndex],
+      ),
+
+      // ============================================================
+      // BOTTOM NAVIGATION
+      // ============================================================
+
+      bottomNavigationBar: _buildBottomNavigation(
+        width: width,
+      ),
+    );
+  }
+
+  // ============================================================
+  // BOTTOM NAVIGATION
+  // ============================================================
+
+  Widget _buildBottomNavigation({
+    required double width,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: width * 0.18,
+          child: Row(
+            children: [
+              // ==================================================
+              // HOME
+              // ==================================================
+
+              Expanded(
+                child: _bottomNavItem(
+                  index: 0,
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: "Home",
+                ),
+              ),
+
+              // ==================================================
+              // INVOICES
+              // ==================================================
+
+              Expanded(
+                child: _bottomNavItem(
+                  index: 1,
+                  icon: Icons.receipt_long_outlined,
+                  activeIcon: Icons.receipt_long_rounded,
+                  label: "Invoices",
+                ),
+              ),
+
+              // ==================================================
+              // SCAN - CENTER BUTTON
+              // ==================================================
+
+              Expanded(
+                child: _scanBottomButton(),
+              ),
+
+              // ==================================================
+              // NOTIFICATIONS
+              // ==================================================
+
+              Expanded(
+                child: _bottomNavItem(
+                  index: 3,
+                  icon: Icons.notifications_none_rounded,
+                  activeIcon: Icons.notifications_rounded,
+                  label: "Notifications",
+                  showBadge: true,
+                ),
+              ),
+
+              // ==================================================
+              // MORE
+              // ==================================================
+
+              Expanded(
+                child: _bottomNavItem(
+                  index: 4,
+                  icon: Icons.more_horiz_rounded,
+                  activeIcon: Icons.more_horiz_rounded,
+                  label: "More",
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
 
-      // ============================================================
-      // BODY
-      // ============================================================
-      body: SafeArea(
-        child: _pages[_selectedIndex],
-      ),
+  // ============================================================
+  // NORMAL BOTTOM NAV ITEM
+  // ============================================================
 
-      // ============================================================
-      // BOTTOM NAVIGATION BAR
-      // ============================================================
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
+  Widget _bottomNavItem({
+    required int index,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    bool showBadge = false,
+  }) {
+    final width = MediaQuery.of(context).size.width;
 
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 15,
-              offset: const Offset(0, -3),
+    final bool isSelected = _selectedIndex == index;
+
+    return InkWell(
+      onTap: () {
+        _onItemTapped(index);
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Icon(
+                isSelected ? activeIcon : icon,
+                color: isSelected
+                    ? colorsList.green
+                    : const Color(0xFF71829A),
+                size: width * 0.060,
+              ),
+
+              if (showBadge)
+                Positioned(
+                  right: -width * 0.010,
+                  top: -width * 0.015,
+                  child: Container(
+                    width: width * 0.038,
+                    height: width * 0.038,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: colorsList.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      "3",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: width * 0.018,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+
+          SizedBox(
+            height: width * 0.008,
+          ),
+
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected
+                  ? colorsList.green
+                  : const Color(0xFF71829A),
+              fontSize: width * 0.022,
+              fontWeight: isSelected
+                  ? FontWeight.w600
+                  : FontWeight.w400,
             ),
-          ],
-        ),
+          ),
 
-        child: BottomNavigationBar(
-
-          currentIndex: _selectedIndex,
-
-          onTap: _onItemTapped,
-
-          type: BottomNavigationBarType.fixed,
-
-          backgroundColor: Colors.white,
-
-          elevation: 0,
-
-          selectedItemColor: const Color(0xFF063C70),
-
-          unselectedItemColor: const Color(0xFF71829A),
-
-          selectedFontSize: 12,
-
-          unselectedFontSize: 12,
-
-          showUnselectedLabels: true,
-
-          items: const [
-
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home_outlined,
+          if (isSelected)
+            Container(
+              margin: EdgeInsets.only(
+                top: width * 0.008,
               ),
-              activeIcon: Icon(
-                Icons.home_rounded,
+              width: width * 0.065,
+              height: 2,
+              decoration: BoxDecoration(
+                color: colorsList.green,
+                borderRadius: BorderRadius.circular(10),
               ),
-              label: "Home",
             ),
-
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.miscellaneous_services_outlined,
-              ),
-              activeIcon: Icon(
-                Icons.miscellaneous_services_rounded,
-              ),
-              label: "Services",
-            ),
-
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.notifications_none_rounded,
-              ),
-              activeIcon: Icon(
-                Icons.notifications_rounded,
-              ),
-              label: "Notifications",
-            ),
-
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.person_outline_rounded,
-              ),
-              activeIcon: Icon(
-                Icons.person_rounded,
-              ),
-              label: "Profile",
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  // ==============================================================
-  // DRAWER ITEM WIDGET
-  // ==============================================================
+  // ============================================================
+  // CENTER SCAN BUTTON
+  // ============================================================
 
-  Widget _drawerItem({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color iconColor = const Color(0xFF344E6F),
-    Color textColor = const Color(0xFF172A46),
-  }) {
-
+  Widget _scanBottomButton() {
     final width = MediaQuery.of(context).size.width;
 
-    return ListTile(
+    return InkWell(
+      onTap: _openScan,
+      borderRadius: BorderRadius.circular(50),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: width * 0.125,
+            height: width * 0.125,
+            transform: Matrix4.translationValues(
+              0,
+              -width * 0.035,
+              0,
+            ),
+            decoration: BoxDecoration(
+              color: colorsList.green,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: colorsList.green.withOpacity(0.30),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.document_scanner_outlined,
+              color: Colors.white,
+              size: width * 0.060,
+            ),
+          ),
 
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: width * 0.06,
+          Transform.translate(
+            offset: Offset(
+              0,
+              -width * 0.030,
+            ),
+            child: Text(
+              "Scan",
+              style: TextStyle(
+                color: const Color(0xFF71829A),
+                fontSize: width * 0.022,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
       ),
-
-      leading: Icon(
-        icon,
-        color: iconColor,
-        size: width * 0.060,
-      ),
-
-      title: Text(
-        title,
-        style: TextStyle(
-          color: textColor,
-          fontSize: width * 0.040,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-
-      onTap: onTap,
     );
   }
 }
