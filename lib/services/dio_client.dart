@@ -290,4 +290,22 @@ class DioClient {
     );
   }
 
+  // ==============================
+// GET COMPANIES
+// ==============================
+
+  Future<Response> getCompanies({
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/companies',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:get/get.dart';
@@ -11,13 +12,156 @@ class DashboardController extends GetxController {
 
   final dioClient = DioClient();
   final isLoading = false.obs;
+  final isCompaniesLoading = false.obs;
 
   final dashboardData = Rxn<DashboardModel>();
-  @override
+  // Companies
+  final companies = <CompanyModel>[].obs;
+  final selectedCompany = Rxn<CompanyModel>();
+
+  /*@override
   void onInit() {
     super.onInit();
     getDashboard();
+    getCompanies();
+  }*/
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    getCompanies();
   }
+
+
+  // ============================================================
+  // GET COMPANIES
+  // ============================================================
+
+  Future<void> getCompanies() async {
+
+    try {
+
+      isCompaniesLoading.value = true;
+
+      final accessToken = SessionManager.accessToken;
+
+      if (accessToken == null || accessToken.isEmpty) {
+        print("Access token not found");
+        return;
+      }
+
+      final response = await dioClient.getCompanies(
+        accessToken: accessToken,
+      );
+
+      if (response.statusCode == 200) {
+
+        final List<dynamic> data = response.data;
+
+        companies.value = data
+            .map(
+              (json) => CompanyModel.fromJson(
+            json as Map<String, dynamic>,
+          ),
+        )
+            .toList();
+
+        print("Companies loaded: ${companies.length}");
+
+        // --------------------------------------------------------
+        // Select company from SessionManager if available
+        // --------------------------------------------------------
+
+        final sessionCompanyId =
+            SessionManager.accessCompanyid;
+
+        if (sessionCompanyId != null) {
+
+          final company = companies.firstWhereOrNull(
+                (company) => company.id == sessionCompanyId,
+          );
+
+          if (company != null) {
+            selectedCompany.value = company;
+          }
+        }
+
+        // --------------------------------------------------------
+        // If no company is selected, select first company
+        // --------------------------------------------------------
+
+        if (selectedCompany.value == null &&
+            companies.isNotEmpty) {
+
+          selectedCompany.value = companies.first;
+
+          await selectCompany(
+            companies.first,
+            loadDashboard: false,
+          );
+        }
+
+        // --------------------------------------------------------
+        // Load dashboard
+        // --------------------------------------------------------
+
+        await getDashboard();
+      }
+
+    } on DioException catch (e) {
+
+      print("Companies API Error: ${e.message}");
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: e.response?.data?.toString() ??
+            e.message ??
+            'Unable to load companies',
+      );
+
+    } catch (e) {
+
+      print("Companies Error: $e");
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: e.toString(),
+      );
+
+    } finally {
+
+      isCompaniesLoading.value = false;
+    }
+  }
+
+
+  // ============================================================
+  // SELECT COMPANY
+  // ============================================================
+
+  Future<void> selectCompany(
+      CompanyModel company, {
+        bool loadDashboard = true,
+      }) async {
+
+    selectedCompany.value = company;
+
+    // Save selected company ID
+    await SessionManager.saveCompanyid(company.id);
+    //SessionManager.accessCompanyid = company.id;
+
+    print("Selected company: ${company.name}");
+    print("Selected company ID: ${company.id}");
+
+    if (loadDashboard) {
+      await getDashboard();
+    }
+  }
+
+  // ============================================================
+  // GET DASHBOARD
+  // ============================================================
 
   Future<void> getDashboard() async {
     try {

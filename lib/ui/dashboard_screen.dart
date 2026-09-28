@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/dashboard_controller.dart';
+import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -208,11 +209,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         Row(
           children: [
-            Expanded(
+            /*Expanded(
               child: _headerDropdown(
                 width: width,
                 icon: Icons.business_outlined,
                 text: "Berrinex FlexKapG",
+              ),
+            ),*/
+
+            Expanded(
+              child: _companyDropdown(
+                width: width,
               ),
             ),
 
@@ -284,6 +291,119 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     );
+  }
+
+  Widget _companyDropdown({
+    required double width,
+  }) {
+    return Obx(() {
+
+      final controller = dashboardController;
+
+      final selectedCompany =
+          controller.selectedCompany.value;
+
+      return Container(
+        height: width * 0.105,
+        padding: EdgeInsets.symmetric(
+          horizontal: width * 0.030,
+        ),
+        decoration: BoxDecoration(
+          color: colorsList.cardColor,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(
+            color: colorsList.borderColor,
+          ),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<CompanyModel>(
+            value: selectedCompany,
+            isExpanded: true,
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: width * 0.045,
+              color: colorsList.secondaryText,
+            ),
+            dropdownColor: colorsList.cardColor,
+
+            hint: Row(
+              children: [
+                Icon(
+                  Icons.business_outlined,
+                  size: width * 0.045,
+                  color: colorsList.primaryText,
+                ),
+                SizedBox(width: width * 0.025),
+                Text(
+                  "Select company",
+                  style: TextStyle(
+                    color: colorsList.secondaryText,
+                    fontSize: width * 0.027,
+                  ),
+                ),
+              ],
+            ),
+
+            selectedItemBuilder: (context) {
+              return controller.companies.map(
+                    (company) {
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.business_outlined,
+                        size: width * 0.045,
+                        color: colorsList.primaryText,
+                      ),
+
+                      SizedBox(width: width * 0.025),
+
+                      Expanded(
+                        child: Text(
+                          company.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontSize: width * 0.027,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ).toList();
+            },
+
+            items: controller.companies.map(
+                  (company) {
+                return DropdownMenuItem<CompanyModel>(
+                  value: company,
+                  child: Text(
+                    company.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colorsList.primaryText,
+                      fontSize: width * 0.027,
+                    ),
+                  ),
+                );
+              },
+            ).toList(),
+
+            onChanged: controller.isCompaniesLoading.value
+                ? null
+                : (CompanyModel? company) {
+
+              if (company == null) return;
+
+              controller.selectCompany(company);
+            },
+          ),
+        ),
+      );
+    });
   }
 
 
@@ -930,6 +1050,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   iconColor: colorsList.blue,
                   onTap: () {
                     // Get.toNamed('/ScanReceiptScreen');
+
+                    Get.toNamed(
+                      '/scanQrScreen',
+                      arguments: 'Scan QR Screen',
+                    );
                   },
                 ),
               ),
