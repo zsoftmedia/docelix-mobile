@@ -70,6 +70,19 @@ class _LandScreenState extends State<LandScreen> {
       return;
     }
 
+    // ============================================================
+    // INCOMING INVOICES
+    // ============================================================
+
+    if (index == 3) {
+      Get.toNamed(
+        '/IncomingInvoicesScreen',
+        arguments: 'Incoming Invoices Screen',
+      );
+
+      return;
+    }
+
     setState(() {
       _selectedIndex = index;
     });
@@ -212,38 +225,6 @@ class _LandScreenState extends State<LandScreen> {
                 ),
 
                 _moreMenuItem(
-                  icon: Icons.upcoming_rounded,
-                  title: "Incoming",
-                  subtitle: "Incoming invoices and documents",
-                  iconColor: colorsList.orange,
-                  onTap: () {
-                    Navigator.pop(context);
-
-                    Get.toNamed(
-                      '/IncomingInvoicesScreen',
-                      arguments: 'Incoming Invoices Screen',
-                    );
-                  },
-                ),
-
-                _moreMenuItem(
-                  icon: Icons.person_outline_rounded,
-                  title: "Profile",
-                  subtitle: "Manage your account",
-                  iconColor: colorsList.purple,
-                  onTap: () {
-                    Navigator.pop(context);
-
-                    setState(() {
-                      _selectedIndex = 3;
-                    });
-
-                    // If you want Profile as a separate route:
-                    // Get.toNamed('/ProfileScreen');
-                  },
-                ),
-
-                _moreMenuItem(
                   icon: Icons.factory_outlined,
                   title: "Company",
                   subtitle: "Manage company information",
@@ -254,6 +235,22 @@ class _LandScreenState extends State<LandScreen> {
                     AppSnackbar.info(
                       title: 'Company',
                       message: 'Company management coming soon',
+                    );
+                  },
+                ),
+
+
+                _moreMenuItem(
+                  icon: Icons.person_outline_rounded,
+                  title: "Profile",
+                  subtitle: "Manage your profile",
+                  iconColor: colorsList.cyan,
+                  onTap: () {
+                    Navigator.pop(context);
+
+                    AppSnackbar.info(
+                      title: 'Profile',
+                      message: 'Profile management coming soon',
                     );
                   },
                 ),
@@ -536,9 +533,9 @@ class _LandScreenState extends State<LandScreen> {
               Expanded(
                 child: _bottomNavItem(
                   index: 3,
-                  icon: Icons.notifications_none_rounded,
-                  activeIcon: Icons.notifications_rounded,
-                  label: "Notifications",
+                  icon: Icons.upcoming_outlined,
+                  activeIcon: Icons.upcoming_rounded,
+                  label: "Incoming",
                   showBadge: true,
                 ),
               ),

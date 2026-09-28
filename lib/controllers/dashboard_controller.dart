@@ -3,9 +3,11 @@ import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:intl/intl.dart';
 
 
 class DashboardController extends GetxController {
@@ -19,6 +21,14 @@ class DashboardController extends GetxController {
   final companies = <CompanyModel>[].obs;
   final selectedCompany = Rxn<CompanyModel>();
 
+  // Selected month
+  final selectedDate = DateTime.now().obs;
+
+  // Display month
+  String get selectedMonthText {
+    return DateFormat('MMMM yyyy').format(selectedDate.value);
+  }
+
   /*@override
   void onInit() {
     super.onInit();
@@ -31,6 +41,27 @@ class DashboardController extends GetxController {
     super.onInit();
 
     getCompanies();
+  }
+
+  // Open month picker
+  Future<void> selectMonth() async {
+    final DateTime? picked = await showDatePicker(
+      context: Get.context!,
+      initialDate: selectedDate.value,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      initialDatePickerMode: DatePickerMode.year,
+    );
+
+    if (picked == null) return;
+
+    selectedDate.value = DateTime(
+      picked.year,
+      picked.month,
+      1,
+    );
+
+    await getDashboard();
   }
 
 

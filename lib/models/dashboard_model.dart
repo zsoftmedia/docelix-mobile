@@ -1,81 +1,212 @@
 class DashboardModel {
+  CompanyDashboardModel? company;
+  //List<AssignedConsultantModel> assignedConsultants;
+  QuickStatsModel? quickStats;
+
   PeriodModel? period;
   PeriodModel? comparisonPeriod;
+
   KpisModel? kpis;
-  List<MonthlyPerformanceModel>? monthlyPerformance;
-  List<ExpenseCategoryModel>? expenseCategories;
-  List<BankAccountModel>? bankAccounts;
+
+  List<MonthlyPerformanceModel> monthlyPerformance;
+  List<ExpenseCategoryModel> expenseCategories;
+  List<BankAccountModel> bankAccounts;
+
   OutstandingModel? outstanding;
-  List<RecentTransactionModel>? recentTransactions;
+
+  List<RecentTransactionModel> recentTransactions;
 
   DashboardModel({
+    this.company,
+    //this.assignedConsultants = const [],
+    this.quickStats,
     this.period,
     this.comparisonPeriod,
     this.kpis,
-    this.monthlyPerformance,
-    this.expenseCategories,
-    this.bankAccounts,
+    this.monthlyPerformance = const [],
+    this.expenseCategories = const [],
+    this.bankAccounts = const [],
     this.outstanding,
-    this.recentTransactions,
+    this.recentTransactions = const [],
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
     return DashboardModel(
-      period: json['period'] != null
-          ? PeriodModel.fromJson(json['period'])
+      company: json['company'] is Map<String, dynamic>
+          ? CompanyDashboardModel.fromJson(
+        json['company'] as Map<String, dynamic>,
+      )
           : null,
 
-      comparisonPeriod: json['comparisonPeriod'] != null
-          ? PeriodModel.fromJson(json['comparisonPeriod'])
+     /* assignedConsultants: _parseList(
+        json['assignedConsultants'],
+        AssignedConsultantModel.fromJson,
+      ),*/
+
+      quickStats: json['quickStats'] is Map<String, dynamic>
+          ? QuickStatsModel.fromJson(
+        json['quickStats'] as Map<String, dynamic>,
+      )
           : null,
 
-      kpis: json['kpis'] != null
-          ? KpisModel.fromJson(json['kpis'])
+      period: json['period'] is Map<String, dynamic>
+          ? PeriodModel.fromJson(
+        json['period'] as Map<String, dynamic>,
+      )
           : null,
 
-      monthlyPerformance: json['monthlyPerformance'] != null
-          ? List<MonthlyPerformanceModel>.from(
-        json['monthlyPerformance'].map(
-              (x) => MonthlyPerformanceModel.fromJson(x),
-        ),
+      comparisonPeriod: json['comparisonPeriod'] is Map<String, dynamic>
+          ? PeriodModel.fromJson(
+        json['comparisonPeriod'] as Map<String, dynamic>,
       )
-          : [],
-
-      expenseCategories: json['expenseCategories'] != null
-          ? List<ExpenseCategoryModel>.from(
-        json['expenseCategories'].map(
-              (x) => ExpenseCategoryModel.fromJson(x),
-        ),
-      )
-          : [],
-
-      bankAccounts: json['bankAccounts'] != null
-          ? List<BankAccountModel>.from(
-        json['bankAccounts'].map(
-              (x) => BankAccountModel.fromJson(x),
-        ),
-      )
-          : [],
-
-      outstanding: json['outstanding'] != null
-          ? OutstandingModel.fromJson(json['outstanding'])
           : null,
 
-      recentTransactions: json['recentTransactions'] != null
-          ? List<RecentTransactionModel>.from(
-        json['recentTransactions'].map(
-              (x) => RecentTransactionModel.fromJson(x),
-        ),
+      kpis: json['kpis'] is Map<String, dynamic>
+          ? KpisModel.fromJson(
+        json['kpis'] as Map<String, dynamic>,
       )
-          : [],
+          : null,
+
+      monthlyPerformance: _parseList(
+        json['monthlyPerformance'],
+        MonthlyPerformanceModel.fromJson,
+      ),
+
+      expenseCategories: _parseList(
+        json['expenseCategories'],
+        ExpenseCategoryModel.fromJson,
+      ),
+
+      bankAccounts: _parseList(
+        json['bankAccounts'],
+        BankAccountModel.fromJson,
+      ),
+
+      outstanding: json['outstanding'] is Map<String, dynamic>
+          ? OutstandingModel.fromJson(
+        json['outstanding'] as Map<String, dynamic>,
+      )
+          : null,
+
+      recentTransactions: _parseList(
+        json['recentTransactions'],
+        RecentTransactionModel.fromJson,
+      ),
+    );
+  }
+
+  static List<T> _parseList<T>(
+      dynamic value,
+      T Function(Map<String, dynamic>) fromJson,
+      ) {
+    if (value is! List) {
+      return [];
+    }
+
+    return value
+        .whereType<Map>()
+        .map(
+          (item) => fromJson(
+        Map<String, dynamic>.from(item),
+      ),
+    )
+        .toList();
+  }
+}
+
+class CompanyDashboardModel {
+  int? id;
+  String? name;
+  String? legalForm;
+  String? taxId;
+  String? vatNumber;
+  String? addressLine1;
+  String? addressLine2;
+  String? postalCode;
+  String? city;
+  String? country;
+  String? currencyCode;
+  String? customIndustryName;
+
+  CompanyDashboardModel({
+    this.id,
+    this.name,
+    this.legalForm,
+    this.taxId,
+    this.vatNumber,
+    this.addressLine1,
+    this.addressLine2,
+    this.postalCode,
+    this.city,
+    this.country,
+    this.currencyCode,
+    this.customIndustryName,
+  });
+
+  factory CompanyDashboardModel.fromJson(Map<String, dynamic> json) {
+    return CompanyDashboardModel(
+      id: json['id'] is num
+          ? (json['id'] as num).toInt()
+          : null,
+
+      name: json['name']?.toString(),
+
+      legalForm: json['legal_form']?.toString(),
+
+      taxId: json['tax_id']?.toString(),
+
+      vatNumber: json['vat_number']?.toString(),
+
+      addressLine1: json['address_line1']?.toString(),
+
+      addressLine2: json['address_line2']?.toString(),
+
+      postalCode: json['postal_code']?.toString(),
+
+      city: json['city']?.toString(),
+
+      country: json['country']?.toString(),
+
+      currencyCode: json['currency_code']?.toString(),
+
+      customIndustryName:
+      json['custom_industry_name']?.toString(),
     );
   }
 }
 
+class QuickStatsModel {
+  int totalClients;
+  int totalItems;
+  int totalEmployees;
+  int totalOffers;
 
-// ============================================================
-// PERIOD
-// ============================================================
+  QuickStatsModel({
+    this.totalClients = 0,
+    this.totalItems = 0,
+    this.totalEmployees = 0,
+    this.totalOffers = 0,
+  });
+
+  factory QuickStatsModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return QuickStatsModel(
+      totalClients: _toInt(json['totalClients']),
+      totalItems: _toInt(json['totalItems']),
+      totalEmployees: _toInt(json['totalEmployees']),
+      totalOffers: _toInt(json['totalOffers']),
+    );
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is num) {
+      return value.toInt();
+    }
+
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+}
 
 class PeriodModel {
   String? from;
@@ -86,18 +217,15 @@ class PeriodModel {
     this.to,
   });
 
-  factory PeriodModel.fromJson(Map<String, dynamic> json) {
+  factory PeriodModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return PeriodModel(
-      from: json['from'],
-      to: json['to'],
+      from: json['from']?.toString(),
+      to: json['to']?.toString(),
     );
   }
 }
-
-
-// ============================================================
-// KPIS
-// ============================================================
 
 class KpisModel {
   KpiItemModel? revenue;
@@ -112,31 +240,36 @@ class KpisModel {
     this.cashBalance,
   });
 
-  factory KpisModel.fromJson(Map<String, dynamic> json) {
+  factory KpisModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return KpisModel(
-      revenue: json['revenue'] != null
-          ? KpiItemModel.fromJson(json['revenue'])
+      revenue: json['revenue'] is Map<String, dynamic>
+          ? KpiItemModel.fromJson(
+        json['revenue'] as Map<String, dynamic>,
+      )
           : null,
 
-      expenses: json['expenses'] != null
-          ? KpiItemModel.fromJson(json['expenses'])
+      expenses: json['expenses'] is Map<String, dynamic>
+          ? KpiItemModel.fromJson(
+        json['expenses'] as Map<String, dynamic>,
+      )
           : null,
 
-      netResult: json['netResult'] != null
-          ? KpiItemModel.fromJson(json['netResult'])
+      netResult: json['netResult'] is Map<String, dynamic>
+          ? KpiItemModel.fromJson(
+        json['netResult'] as Map<String, dynamic>,
+      )
           : null,
 
-      cashBalance: json['cashBalance'] != null
-          ? KpiItemModel.fromJson(json['cashBalance'])
+      cashBalance: json['cashBalance'] is Map<String, dynamic>
+          ? KpiItemModel.fromJson(
+        json['cashBalance'] as Map<String, dynamic>,
+      )
           : null,
     );
   }
 }
-
-
-// ============================================================
-// KPI ITEM
-// ============================================================
 
 class KpiItemModel {
   num? value;
@@ -149,49 +282,52 @@ class KpiItemModel {
     this.changePercent,
   });
 
-  factory KpiItemModel.fromJson(Map<String, dynamic> json) {
+  factory KpiItemModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return KpiItemModel(
-      value: json['value'],
-      previousValue: json['previousValue'],
-      changePercent: json['changePercent'],
+      value: json['value'] is num
+          ? json['value'] as num
+          : null,
+
+      previousValue: json['previousValue'] is num
+          ? json['previousValue'] as num
+          : null,
+
+      changePercent: json['changePercent'] is num
+          ? json['changePercent'] as num
+          : null,
     );
   }
 }
 
-
-// ============================================================
-// MONTHLY PERFORMANCE
-// ============================================================
-
 class MonthlyPerformanceModel {
-  String? month;
+  String? date;
   num? revenue;
   num? expenses;
-  num? netResult;
 
   MonthlyPerformanceModel({
-    this.month,
+    this.date,
     this.revenue,
     this.expenses,
-    this.netResult,
   });
 
   factory MonthlyPerformanceModel.fromJson(
       Map<String, dynamic> json,
       ) {
     return MonthlyPerformanceModel(
-      month: json['month'],
-      revenue: json['revenue'],
-      expenses: json['expenses'],
-      netResult: json['netResult'],
+      date: json['date']?.toString(),
+
+      revenue: json['revenue'] is num
+          ? json['revenue'] as num
+          : null,
+
+      expenses: json['expenses'] is num
+          ? json['expenses'] as num
+          : null,
     );
   }
 }
-
-
-// ============================================================
-// EXPENSE CATEGORY
-// ============================================================
 
 class ExpenseCategoryModel {
   String? category;
@@ -208,17 +344,18 @@ class ExpenseCategoryModel {
       Map<String, dynamic> json,
       ) {
     return ExpenseCategoryModel(
-      category: json['category'],
-      amount: json['amount'],
-      percentage: json['percentage'],
+      category: json['category']?.toString(),
+
+      amount: json['amount'] is num
+          ? json['amount'] as num
+          : null,
+
+      percentage: json['percentage'] is num
+          ? json['percentage'] as num
+          : null,
     );
   }
 }
-
-
-// ============================================================
-// BANK ACCOUNT
-// ============================================================
 
 class BankAccountModel {
   int? id;
@@ -235,17 +372,18 @@ class BankAccountModel {
       Map<String, dynamic> json,
       ) {
     return BankAccountModel(
-      id: json['id'],
-      name: json['name'],
-      balance: json['balance'],
+      id: json['id'] is num
+          ? (json['id'] as num).toInt()
+          : null,
+
+      name: json['name']?.toString(),
+
+      balance: json['balance'] is num
+          ? json['balance'] as num
+          : null,
     );
   }
 }
-
-
-// ============================================================
-// OUTSTANDING
-// ============================================================
 
 class OutstandingModel {
   OutstandingItemModel? receivables;
@@ -262,25 +400,28 @@ class OutstandingModel {
       Map<String, dynamic> json,
       ) {
     return OutstandingModel(
-      receivables: json['receivables'] != null
-          ? OutstandingItemModel.fromJson(json['receivables'])
+      receivables: json['receivables'] is Map<String, dynamic>
+          ? OutstandingItemModel.fromJson(
+        json['receivables'] as Map<String, dynamic>,
+      )
           : null,
 
-      payables: json['payables'] != null
-          ? OutstandingItemModel.fromJson(json['payables'])
+      payables: json['payables'] is Map<String, dynamic>
+          ? OutstandingItemModel.fromJson(
+        json['payables'] as Map<String, dynamic>,
+      )
           : null,
 
-      overdueInvoices: json['overdueInvoices'] != null
-          ? OutstandingItemModel.fromJson(json['overdueInvoices'])
+      overdueInvoices:
+      json['overdueInvoices'] is Map<String, dynamic>
+          ? OutstandingItemModel.fromJson(
+        json['overdueInvoices']
+        as Map<String, dynamic>,
+      )
           : null,
     );
   }
 }
-
-
-// ============================================================
-// OUTSTANDING ITEM
-// ============================================================
 
 class OutstandingItemModel {
   num? amount;
@@ -295,41 +436,67 @@ class OutstandingItemModel {
       Map<String, dynamic> json,
       ) {
     return OutstandingItemModel(
-      amount: json['amount'],
-      count: json['count'],
+      amount: json['amount'] is num
+          ? json['amount'] as num
+          : null,
+
+      count: json['count'] is num
+          ? (json['count'] as num).toInt()
+          : null,
     );
   }
 }
 
-
-// ============================================================
-// RECENT TRANSACTION
-// ============================================================
-
 class RecentTransactionModel {
   int? id;
-  String? type;
   String? date;
-  num? amount;
   String? description;
+  String? type;
+  String? account;
+  num? amount;
+  String? status;
+  String? sourceType;
+  int? sourceId;
 
   RecentTransactionModel({
     this.id,
-    this.type,
     this.date,
-    this.amount,
     this.description,
+    this.type,
+    this.account,
+    this.amount,
+    this.status,
+    this.sourceType,
+    this.sourceId,
   });
 
   factory RecentTransactionModel.fromJson(
       Map<String, dynamic> json,
       ) {
     return RecentTransactionModel(
-      id: json['id'],
-      type: json['type'],
-      date: json['date'],
-      amount: json['amount'],
-      description: json['description'],
+      id: json['id'] is num
+          ? (json['id'] as num).toInt()
+          : null,
+
+      date: json['date']?.toString(),
+
+      description: json['description']?.toString(),
+
+      type: json['type']?.toString(),
+
+      account: json['account']?.toString(),
+
+      amount: json['amount'] is num
+          ? json['amount'] as num
+          : null,
+
+      status: json['status']?.toString(),
+
+      sourceType: json['source_type']?.toString(),
+
+      sourceId: json['source_id'] is num
+          ? (json['source_id'] as num).toInt()
+          : null,
     );
   }
 }

@@ -225,11 +225,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             SizedBox(width: width * 0.025),
 
-            Expanded(
+            /*Expanded(
               child: _headerDropdown(
                 width: width,
                 icon: Icons.calendar_today_outlined,
                 text: "September 2026",
+              ),
+            ),*/
+
+            Expanded(
+              child: Obx(
+                    () => _headerDropdown(
+                  width: width,
+                  icon: Icons.calendar_today_outlined,
+                  text: dashboardController.selectedMonthText,
+                  onTap: dashboardController.selectMonth,
+                ),
               ),
             ),
           ],
@@ -247,48 +258,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required double width,
     required IconData icon,
     required String text,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      height: width * 0.105,
-      padding: EdgeInsets.symmetric(
-        horizontal: width * 0.030,
-      ),
-      decoration: BoxDecoration(
-        color: colorsList.cardColor,
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(
-          color: colorsList.borderColor,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(13),
+      child: Container(
+        height: width * 0.105,
+        padding: EdgeInsets.symmetric(
+          horizontal: width * 0.030,
         ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: width * 0.045,
-            color: colorsList.primaryText,
+        decoration: BoxDecoration(
+          color: colorsList.cardColor,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(
+            color: colorsList.borderColor,
           ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: width * 0.045,
+              color: colorsList.primaryText,
+            ),
 
-          SizedBox(width: width * 0.025),
+            SizedBox(width: width * 0.025),
 
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: colorsList.primaryText,
-                fontSize: width * 0.027,
-                fontWeight: FontWeight.w500,
+            Expanded(
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: colorsList.primaryText,
+                  fontSize: width * 0.027,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-          ),
 
-          Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: width * 0.045,
-            color: colorsList.secondaryText,
-          ),
-        ],
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: width * 0.045,
+              color: colorsList.secondaryText,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -506,7 +522,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            "↑ +12.0%",
+                            "↑ ${dashboardController.dashboardData.value?.kpis?.revenue?.changePercent ?? 0}%",
                             style: TextStyle(
                               color: colorsList.green,
                               fontSize: width * 0.023,
@@ -519,7 +535,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                         Flexible(
                           child: Text(
-                            "81.3% profit margin",
+                            "${dashboardController.dashboardData.value?.kpis?.revenue?.changePercent ?? 0}% profit margin",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -707,15 +723,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }) {
     final revenue =
         dashboardController.dashboardData.value?.kpis?.revenue?.value ?? 0;
+    final revenuePercent =
+        dashboardController.dashboardData.value?.kpis?.revenue?.changePercent ?? 0;
 
     final expenses =
         dashboardController.dashboardData.value?.kpis?.expenses?.value ?? 0;
 
+    final expensesPercent =
+        dashboardController.dashboardData.value?.kpis?.expenses?.changePercent ?? 0.0;
+
     final cashBalance =
         dashboardController.dashboardData.value?.kpis?.cashBalance?.value ?? 0;
+    final cashBalancePercent =
+        dashboardController.dashboardData.value?.kpis?.cashBalance?.changePercent ?? 0;
 
     final netProfit =
         dashboardController.dashboardData.value?.kpis?.netResult?.value ?? 0;
+    final netProfitPercent =
+        dashboardController.dashboardData.value?.kpis?.netResult?.changePercent ?? 0;
 
     return Column(
       key: const ValueKey("overview_tab"),
@@ -733,7 +758,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 height: height,
                 title: "Revenue",
                 value: _formatCurrency(revenue),
-                percentage: "+23.2%",
+                percentage: _formatCurrency(revenuePercent),
                 subtitle: "vs last month",
                 icon: Icons.bar_chart_rounded,
                 iconColor: colorsList.green,
@@ -748,7 +773,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 height: height,
                 title: "Expenses",
                 value: _formatCurrency(expenses),
-                percentage: "-8.1%",
+                percentage: _formatCurrency(expensesPercent),
                 subtitle: "vs last month",
                 icon: Icons.wallet_outlined,
                 iconColor: colorsList.red,
@@ -766,9 +791,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 width: width,
                 height: height,
                 title: "Cash balance",
-                value: "Bank not connected",
-                percentage: "",
-                subtitle: "Connect your bank to view your balance",
+                value: _formatCurrency(cashBalance),
+                percentage: _formatCurrency(cashBalancePercent),
+                subtitle: "vs last month your balance",
                 icon: Icons.account_balance_outlined,
                 iconColor: colorsList.orange,
               ),
@@ -782,7 +807,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 height: height,
                 title: "Outstanding",
                 value: _formatCurrency(netProfit),
-                percentage: "+6.7%",
+                percentage: _formatCurrency(netProfitPercent),
                 subtitle: "vs last month",
                 icon: Icons.receipt_long_outlined,
                 iconColor: colorsList.purple,
@@ -800,6 +825,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _buildQuickActions(
           width: width,
           height: height,
+        ),
+
+        SizedBox(height: height * 0.018),
+
+        // ==========================================================
+        // OUTSTANDING AMOUNT
+        // ==========================================================
+
+        Obx(
+              () => _buildOutStandingAmount(
+            width: width,
+            height: height,
+          ),
         ),
 
         SizedBox(height: height * 0.018),
@@ -1132,6 +1170,141 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // ================================================================
+// OUTSTANDING AMOUNT
+// ================================================================
+
+  Widget _buildOutStandingAmount({
+    required double width,
+    required double height,
+  }) {
+    final dashboard = dashboardController.dashboardData.value;
+
+    final overdueInvoices =
+        dashboard?.outstanding?.overdueInvoices;
+
+    final overdueCount =
+        overdueInvoices?.count ?? 0;
+
+    final overdueAmount =
+        overdueInvoices?.amount ?? 0;
+
+    final recievableInvoices =
+        dashboard?.outstanding?.receivables;
+
+    final recievableCount =
+        recievableInvoices?.count ?? 0;
+
+    final recievableAmount =
+        recievableInvoices?.count ?? 0;
+
+    final payableInvoices =
+        dashboard?.outstanding?.payables;
+
+    final payableCount =
+        payableInvoices?.count ?? 0;
+
+    final payableAmount =
+        payableInvoices?.count ?? 0;
+
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colorsList.cardColor,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: colorsList.borderColor,
+        ),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              width * 0.030,
+              width * 0.030,
+              width * 0.020,
+              width * 0.020,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Outstanding Amount",
+                    style: TextStyle(
+                      color: colorsList.primaryText,
+                      fontSize: width * 0.037,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+
+                Row(
+                  children: [
+                    Text(
+                      "See all",
+                      style: TextStyle(
+                        color: colorsList.green,
+                        fontSize: width * 0.023,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: colorsList.green,
+                      size: width * 0.045,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // ==============================
+          // RECEIVABLES INVOICES
+          // ==============================
+
+          _attentionItem(
+            width: width,
+            icon: Icons.arrow_downward,
+            iconColor: colorsList.green,
+            title: "$recievableCount receivables invoices",
+            subtitle:
+            "Total receivables amount € ${recievableAmount.toStringAsFixed(2)}",
+            showDivider: true,
+          ),
+
+          // ==============================
+          // PAYABLES
+          // ==============================
+
+          _attentionItem(
+            width: width,
+            icon: Icons.arrow_upward_rounded,
+            iconColor: colorsList.red,
+            title: "$payableCount payables invoices",
+            subtitle:
+            "Total payables amount € ${payableAmount.toStringAsFixed(2)}",
+            showDivider: true,
+          ),
+
+          // ==============================
+          // OVERDUE INVOICES
+          // ==============================
+
+          _attentionItem(
+            width: width,
+            icon: Icons.priority_high_rounded,
+            iconColor: colorsList.orange,
+            title: "$overdueCount overdue invoices",
+            subtitle:
+            "Total amount € ${overdueAmount.toStringAsFixed(2)}",
+            showDivider: false,
+          ),
+        ],
+      ),
+    );
+  }
 
 // ================================================================
 // ATTENTION REQUIRED
