@@ -174,7 +174,8 @@ class DashboardController extends GetxController {
   Future<void> selectCompany(
       CompanyModel company, {
         bool loadDashboard = true,
-      }) async {
+      }) async
+  {
 
     selectedCompany.value = company;
 

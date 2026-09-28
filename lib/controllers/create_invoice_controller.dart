@@ -1,12 +1,34 @@
+import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
+import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CreateInvoiceController extends GetxController {
+
   final DioClient dioClient = DioClient();
+
+  final RxString errorMessage = ''.obs;
+  // Companies
+  final RxList<CompanyModel> companies = <CompanyModel>[].obs;
+
+  final RxList<String> companyNames = <String>[].obs;
+
+  final Rxn<CompanyModel> selectedCompany = Rxn<CompanyModel>();
+
+  // ============================================================
+  // CATALOG LIST
+  // ============================================================
+
+  final RxList<CatalogModel> catalogList = <CatalogModel>[].obs;
+
+  final RxList<String> catalogNames = <String>[].obs;
+
+  final Rxn<CatalogModel> selectedCatalogItem = Rxn<CatalogModel>();
 
   // ============================================================
   // GENERAL
@@ -47,20 +69,6 @@ class CreateInvoiceController extends GetxController {
   final currentStep = 0.obs;
 
   final int totalSteps = 4;
-
-  // ============================================================
-  // SENDER
-  // ============================================================
-
-  final senders = <String>[
-    'CFC KP',
-  ].obs;
-
-  final selectedSender = RxnString();
-
-  void selectSender(String? value) {
-    selectedSender.value = value;
-  }
 
   // ============================================================
   // CLIENT TEXT CONTROLLERS
@@ -122,21 +130,16 @@ class CreateInvoiceController extends GetxController {
   final descriptionController =
   TextEditingController();
 
+  final unitController =
+  TextEditingController();
+
   final quantityController =
   TextEditingController(text: '1');
 
   final unitPriceController =
   TextEditingController(text: '0');
 
-  final units = <String>[
-    'pcs',
-    'hours',
-    'kg',
-    'm',
-    'days',
-  ].obs;
-
-  final selectedUnit = RxnString();
+ // final selectedUnit = RxnString();
 
   final lineItems =
       <Map<String, dynamic>>[].obs;
@@ -156,7 +159,13 @@ class CreateInvoiceController extends GetxController {
   void onInit() {
     super.onInit();
 
+    // Get List Clients
     getClients();
+    // Get List Item
+    getCatalog();
+
+    // Get List Companies
+    getCompanies();
   }
 
   // ============================================================
@@ -419,11 +428,7 @@ class CreateInvoiceController extends GetxController {
     // --------------------------------------------------------
 
       case 0:
-        if (selectedSender.value ==
-            null ||
-            selectedSender.value!
-                .trim()
-                .isEmpty) {
+        if (selectedCompany.value == null) {
           AppSnackbar.error(
             title: 'Required',
             message:
@@ -529,14 +534,6 @@ class CreateInvoiceController extends GetxController {
   }
 
   // ============================================================
-  // SELECT UNIT
-  // ============================================================
-
-  void selectUnit(String? value) {
-    selectedUnit.value = value;
-  }
-
-  // ============================================================
   // ADD LINE
   // ============================================================
 
@@ -547,8 +544,8 @@ class CreateInvoiceController extends GetxController {
     final quantityText =
     quantityController.text.trim();
 
-    final unitPriceText =
-    unitPriceController.text.trim();
+    final unitPriceText = unitPriceController.text.trim();
+    final unit = unitController.text.trim();
 
     // ----------------------------------------------------------
     // DESCRIPTION
@@ -573,24 +570,6 @@ class CreateInvoiceController extends GetxController {
         title: 'Required',
         message:
         'Please enter quantity.',
-      );
-
-      return;
-    }
-
-    // ----------------------------------------------------------
-    // UNIT
-    // ----------------------------------------------------------
-
-    if (selectedUnit.value ==
-        null ||
-        selectedUnit.value!
-            .trim()
-            .isEmpty) {
-      AppSnackbar.error(
-        title: 'Required',
-        message:
-        'Please select unit.',
       );
 
       return;
@@ -674,7 +653,7 @@ class CreateInvoiceController extends GetxController {
     lineItems.add({
       'description': description,
       'quantity': quantity,
-      'unit': selectedUnit.value,
+      'unit': unit,
       'unitPrice': unitPrice,
       'total': total,
     });
@@ -684,12 +663,12 @@ class CreateInvoiceController extends GetxController {
     // ----------------------------------------------------------
 
     descriptionController.clear();
+    unitController.clear();
 
     quantityController.text = '1';
 
     unitPriceController.text = '0';
 
-    selectedUnit.value = null;
   }
 
   // ============================================================
@@ -734,10 +713,6 @@ class CreateInvoiceController extends GetxController {
       print('==============================');
       print('CREATE INVOICE');
       print('==============================');
-
-      print(
-        'Sender: ${selectedSender.value}',
-      );
 
       print(
         'Client: ${selectedClientName.value}',
@@ -853,5 +828,265 @@ class CreateInvoiceController extends GetxController {
     closingTextController.dispose();
 
     super.onClose();
+  }
+
+  // ============================================================
+  // GET CATALOG
+  // ============================================================
+
+  Future<void> getCatalog({
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      final accessToken = SessionManager.accessToken;
+      final companyId = SessionManager.accessCompanyid;
+
+      if (accessToken == null || accessToken.isEmpty) {
+        errorMessage.value = 'Access token is not available.';
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Access token is not available.',
+        );
+
+        return;
+      }
+
+      if (companyId == null) {
+        errorMessage.value = 'Company ID is not available.';
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Company ID is not available.',
+        );
+
+        return;
+      }
+
+      final companyIdInt = int.parse(companyId.toString());
+
+      final response = await dioClient.getCatalog(
+        companyId: companyIdInt,
+        accessToken: accessToken,
+        page: page,
+        pageSize: pageSize,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+
+        final fetchedCatalog = data
+            .map(
+              (json) => CatalogModel.fromJson(
+            json as Map<String, dynamic>,
+          ),
+        )
+            .toList();
+
+        catalogList.assignAll(fetchedCatalog);
+
+        catalogNames.assignAll(
+          fetchedCatalog
+              .map((item) => item.articleName?.trim() ?? '')
+              .where((name) => name.isNotEmpty)
+              .toList(),
+        );
+
+        currentPage.value = page;
+        this.pageSize.value = pageSize;
+      } else {
+        catalogList.clear();
+        catalogNames.clear();
+
+        errorMessage.value = 'Unable to load items.';
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Unable to load items.',
+        );
+      }
+    } catch (e) {
+      catalogList.clear();
+      catalogNames.clear();
+
+      errorMessage.value = 'Unable to load items.';
+
+      print('Get Catalog Error: $e');
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Unable to load items.',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void selectCatalogItem(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return;
+    }
+
+    final item = catalogList.firstWhereOrNull(
+          (catalog) => catalog.articleName?.trim() == value.trim(),
+    );
+
+    if (item == null) {
+      return;
+    }
+
+    selectedCatalogItem.value = item;
+
+    // Description
+    descriptionController.text = item.articleName ?? '';
+
+    // Unit
+    if (item.unitCode != null) {
+      unitController.text =
+          item.unitCode!.toString();
+    }
+
+    // Unit price
+    if (item.unitPriceNet != null) {
+      unitPriceController.text =
+          item.unitPriceNet!.toString();
+    }
+  }
+
+  // ============================================================
+  // GET COMPANIES
+  // ============================================================
+
+  Future<void> getCompanies() async {
+
+    try {
+
+      isLoading.value = true;
+
+      final accessToken = SessionManager.accessToken;
+
+      if (accessToken == null || accessToken.isEmpty) {
+        print("Access token not found");
+        return;
+      }
+
+      final response = await dioClient.getCompanies(
+        accessToken: accessToken,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+
+        final fetchedCompanies = data
+            .map(
+              (json) => CompanyModel.fromJson(
+            json as Map<String, dynamic>,
+          ),
+        )
+            .toList();
+
+        companies.assignAll(fetchedCompanies);
+
+        // Create dropdown names
+        companyNames.assignAll(
+          companies
+              .map((company) => company.name?.trim() ?? '')
+              .where((name) => name.isNotEmpty)
+              .toList(),
+        );
+
+        print("Companies loaded: ${companies.length}");
+        print("Company names: $companyNames");
+
+        // Select company from SessionManager
+        final sessionCompanyId = SessionManager.accessCompanyid;
+
+        if (sessionCompanyId != null) {
+          final company = companies.firstWhereOrNull(
+                (company) => company.id.toString() == sessionCompanyId.toString(),
+          );
+
+          if (company != null) {
+            selectedCompany.value = company;
+          }
+        }
+
+        // If no company is selected, select first company
+        if (selectedCompany.value == null && companies.isNotEmpty) {
+          await selectCompany(
+            companies.first,
+            loadDashboard: false,
+          );
+        }
+      }
+
+    } on DioException catch (e) {
+
+      print("Companies API Error: ${e.message}");
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: e.response?.data?.toString() ??
+            e.message ??
+            'Unable to load companies',
+      );
+
+    } catch (e) {
+
+      print("Companies Error: $e");
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: e.toString(),
+      );
+
+    } finally {
+
+      isLoading.value = false;
+    }
+  }
+
+
+  // ============================================================
+  // SELECT COMPANY
+  // ============================================================
+
+  Future<void> selectCompanyByName(String? value) async {
+    if (value == null || value.trim().isEmpty) {
+      return;
+    }
+
+    final company = companies.firstWhereOrNull(
+          (company) => company.name?.trim() == value.trim(),
+    );
+
+    if (company == null) {
+      return;
+    }
+
+    await selectCompany(
+      company,
+      loadDashboard: false,
+    );
+  }
+
+  Future<void> selectCompany(
+      CompanyModel company, {
+        bool loadDashboard = true,
+      }) async {
+    selectedCompany.value = company;
+
+    await SessionManager.saveCompanyid(company.id);
+
+    print("Selected company: ${company.name}");
+    print("Selected company ID: ${company.id}");
+
+    if (loadDashboard) {
+      // Load dashboard if required
+    }
   }
 }

@@ -859,10 +859,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         // AI INSIGHT
         // ==========================================================
 
-        _buildAiInsight(
+        /*_buildAiInsight(
           width: width,
           height: height,
-        ),
+        ),*/
       ],
     );
   }
@@ -1241,7 +1241,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
 
-                Row(
+                // See All
+
+                /*Row(
                   children: [
                     Text(
                       "See all",
@@ -1257,7 +1259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       size: width * 0.045,
                     ),
                   ],
-                ),
+                ),*/
               ],
             ),
           ),

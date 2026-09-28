@@ -1,5 +1,7 @@
 import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/create_invoice_controller.dart';
+import 'package:docelix_mobileapp/models/catalog_model.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,29 +15,22 @@ class CreateInvoiceScreen extends StatefulWidget {
 }
 
 class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
-  final CreateInvoiceController controller =
-  Get.put(CreateInvoiceController());
-
-  static const Color backgroundColor = Color(0xFFF7F9FC);
-  static const Color primaryColor = Color(0xFF0A2342);
-  static const Color borderColor = Color(0xFFE5E7EB);
-  static const Color textColor = Color(0xFF172033);
-  static const Color secondaryTextColor = Color(0xFF6B7280);
+  final CreateInvoiceController controllerCreateInvoice = Get.put(CreateInvoiceController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: colorsList.backgroundColor,
       appBar: _buildAppBar(),
       body: Obx(() {
-        final currentStep = controller.currentStep.value;
+        final currentStep = controllerCreateInvoice.currentStep.value;
 
         return Stepper(
           type: StepperType.horizontal,
           currentStep: currentStep,
-          onStepTapped: controller.goToStep,
-          onStepContinue: controller.nextStep,
-          onStepCancel: controller.previousStep,
+          onStepTapped: controllerCreateInvoice.goToStep,
+          onStepContinue: controllerCreateInvoice.nextStep,
+          onStepCancel: controllerCreateInvoice.previousStep,
           elevation: 0,
           margin: EdgeInsets.zero,
           controlsBuilder: _buildControls,
@@ -114,9 +109,9 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       BuildContext context,
       ControlsDetails details,
       ) {
-    final isFirstStep = controller.currentStep.value == 0;
+    final isFirstStep = controllerCreateInvoice.currentStep.value == 0;
     final isLastStep =
-        controller.currentStep.value == controller.totalSteps - 1;
+        controllerCreateInvoice.currentStep.value == controllerCreateInvoice.totalSteps - 1;
 
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 8),
@@ -148,7 +143,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           ],
           Expanded(
             child: Obx(() {
-              final isLoading = controller.isLoading.value;
+              final isLoading = controllerCreateInvoice.isLoading.value;
 
               return ElevatedButton(
                 onPressed: isLoading
@@ -156,7 +151,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     : details.onStepContinue,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
-                  backgroundColor: primaryColor,
+                  backgroundColor: colorsList.primaryColor,
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: Colors.grey.shade400,
                   shape: RoundedRectangleBorder(
@@ -202,9 +197,11 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
             isDropdown: true,
             hintText: 'Select sender',
             prefixIcon: Icons.business_outlined,
-            dropdownItems: controller.senders,
-            selectedValue: controller.selectedSender.value,
-            onDropdownChanged: controller.selectSender,
+            dropdownItems: controllerCreateInvoice.companyNames,
+            selectedValue:
+            controllerCreateInvoice.selectedCompany.value?.name,
+            onDropdownChanged:
+            controllerCreateInvoice.selectCompanyByName,
           ),
         ),
         const SizedBox(height: 12),
@@ -229,18 +226,18 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         Obx(
               () => AppTextField(
             isDropdown: true,
-            hintText: controller.isLoading.value
+            hintText: controllerCreateInvoice.isLoading.value
                 ? 'Loading clients...'
                 : 'Select client',
             prefixIcon: Icons.person_search_outlined,
-            dropdownItems: controller.clientNames,
-            selectedValue: controller.selectedClientName.value,
-            onDropdownChanged: controller.selectClient,
+            dropdownItems: controllerCreateInvoice.clientNames,
+            selectedValue: controllerCreateInvoice.selectedClientName.value,
+            onDropdownChanged: controllerCreateInvoice.selectClient,
           ),
         ),
         const SizedBox(height: 14),
         AppTextField(
-          controller: controller.customerController,
+          controller: controllerCreateInvoice.customerController,
           hintText: 'Customer / Company',
           prefixIcon: Icons.business_outlined,
         ),
@@ -248,7 +245,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         const SizedBox(height: 12),
 
         AppTextField(
-          controller: controller.addressController,
+          controller: controllerCreateInvoice.addressController,
           hintText: 'Street / Address',
           prefixIcon: Icons.location_on_outlined,
         ),
@@ -259,7 +256,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           children: [
             Expanded(
               child: AppTextField(
-                controller: controller.zipController,
+                controller: controllerCreateInvoice.zipController,
                 hintText: 'ZIP',
                 prefixIcon: Icons.markunread_mailbox_outlined,
                 keyboardType: TextInputType.number,
@@ -268,7 +265,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: AppTextField(
-                controller: controller.cityController,
+                controller: controllerCreateInvoice.cityController,
                 hintText: 'City',
                 prefixIcon: Icons.location_city_outlined,
               ),
@@ -279,7 +276,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         const SizedBox(height: 12),
 
         AppTextField(
-          controller: controller.attnController,
+          controller: controllerCreateInvoice.attnController,
           hintText: 'Attn',
           prefixIcon: Icons.person_outline_rounded,
         ),
@@ -287,7 +284,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         const SizedBox(height: 12),
 
         AppTextField(
-          controller: controller.emailController,
+          controller: controllerCreateInvoice.emailController,
           hintText: 'Email',
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
@@ -296,7 +293,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         const SizedBox(height: 12),
 
         AppTextField(
-          controller: controller.phoneController,
+          controller: controllerCreateInvoice.phoneController,
           hintText: 'Phone',
           prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
@@ -318,35 +315,35 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         Obx(
               () => _switchRow(
             title: 'Auto generate invoice number',
-            value: controller.autoGenerate.value,
-            onChanged: controller.toggleAutoGenerate,
+            value: controllerCreateInvoice.autoGenerate.value,
+            onChanged: controllerCreateInvoice.toggleAutoGenerate,
           ),
         ),
         const SizedBox(height: 12),
         Obx(
               () => AppTextField(
-            controller: controller.invoiceNumberController,
-            hintText: controller.autoGenerate.value
+            controller: controllerCreateInvoice.invoiceNumberController,
+            hintText: controllerCreateInvoice.autoGenerate.value
                 ? 'Invoice number will be generated automatically'
                 : 'Invoice number',
             prefixIcon: Icons.receipt_long_outlined,
-            readOnly: controller.autoGenerate.value,
+            readOnly: controllerCreateInvoice.autoGenerate.value,
           ),
         ),
         const SizedBox(height: 12),
         AppTextField(
-          controller: controller.invoiceDateController,
+          controller: controllerCreateInvoice.invoiceDateController,
           hintText: 'Invoice date',
           prefixIcon: Icons.calendar_today_outlined,
           readOnly: true,
-          onTap: controller.selectInvoiceDate,
+          onTap: controllerCreateInvoice.selectInvoiceDate,
         ),
         const SizedBox(height: 12),
         Obx(
               () => _switchRow(
             title: 'Enable VAT',
-            value: controller.enableVat.value,
-            onChanged: controller.toggleEnableVat,
+            value: controllerCreateInvoice.enableVat.value,
+            onChanged: controllerCreateInvoice.toggleEnableVat,
           ),
         ),
       ],
@@ -364,10 +361,26 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         _sectionTitle('Line Items'),
         const SizedBox(height: 16),
 
-        AppTextField(
-          controller: controller.descriptionController,
+        /*AppTextField(
+          controller: controllerCreateInvoice.descriptionController,
           hintText: 'Description',
           prefixIcon: Icons.description_outlined,
+        ),*/
+        Obx(
+              () => InkWell(
+            onTap: () => _showCatalogSearch(),
+            borderRadius: BorderRadius.circular(8),
+            child: IgnorePointer(
+              child: AppTextField(
+                controller:
+                controllerCreateInvoice.descriptionController,
+                hintText: controllerCreateInvoice.isLoading.value
+                    ? 'Loading catalog...'
+                    : 'Search catalog item',
+                prefixIcon: Icons.description_outlined,
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -376,25 +389,45 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           children: [
             Expanded(
               child: AppTextField(
-                controller: controller.quantityController,
+                controller:
+                controllerCreateInvoice.quantityController,
                 hintText: 'Quantity',
-                prefixIcon: Icons.numbers_outlined,
-                keyboardType: const TextInputType.numberWithOptions(
+                prefixIcon:
+                Icons.numbers_outlined,
+                keyboardType:
+                const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
               ),
             ),
+
             const SizedBox(width: 12),
-            Expanded(
+
+            /*Expanded(
               child: Obx(
                     () => AppTextField(
                   isDropdown: true,
                   hintText: 'Unit',
-                  prefixIcon: Icons.straighten_outlined,
-                  dropdownItems: controller.units,
-                  selectedValue: controller.selectedUnit.value,
-                  onDropdownChanged: controller.selectUnit,
+                  prefixIcon:
+                  Icons.straighten_outlined,
+                  dropdownItems:
+                  controllerCreateInvoice.units,
+                  selectedValue:
+                  controllerCreateInvoice
+                      .selectedUnit
+                      .value,
+                  onDropdownChanged:
+                  controllerCreateInvoice
+                      .selectUnit,
                 ),
+              ),
+            ),*/
+
+            Expanded(
+              child: AppTextField(
+                controller: controllerCreateInvoice.unitController,
+                hintText: 'Unit',
+                prefixIcon: Icons.straighten_outlined,
               ),
             ),
           ],
@@ -403,10 +436,12 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         const SizedBox(height: 12),
 
         AppTextField(
-          controller: controller.unitPriceController,
+          controller:
+          controllerCreateInvoice.unitPriceController,
           hintText: 'Unit price',
           prefixIcon: Icons.euro_outlined,
-          keyboardType: const TextInputType.numberWithOptions(
+          keyboardType:
+          const TextInputType.numberWithOptions(
             decimal: true,
           ),
         ),
@@ -416,13 +451,20 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: controller.addLine,
-            icon: const Icon(Icons.add, size: 19),
+            onPressed:
+            controllerCreateInvoice.addLine,
+            icon: const Icon(
+              Icons.add,
+              size: 19,
+            ),
             label: const Text('Add line'),
             style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(46),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+              minimumSize:
+              const Size.fromHeight(46),
+              shape:
+              RoundedRectangleBorder(
+                borderRadius:
+                BorderRadius.circular(8),
               ),
               side: const BorderSide(
                 color: Color(0xFFD1D5DB),
@@ -446,7 +488,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         const SizedBox(height: 12),
 
         AppTextField(
-          controller: controller.closingTextController,
+          controller: controllerCreateInvoice.closingTextController,
           hintText: 'Enter closing text',
           prefixIcon: Icons.notes_outlined,
           maxLines: 4,
@@ -457,8 +499,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         Obx(
               () => _switchRow(
             title: 'Recurring invoice',
-            value: controller.recurringInvoice.value,
-            onChanged: controller.toggleRecurringInvoice,
+            value: controllerCreateInvoice.recurringInvoice.value,
+            onChanged: controllerCreateInvoice.toggleRecurringInvoice,
           ),
         ),
       ],
@@ -467,7 +509,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
   Widget _buildItemsList() {
     return Obx(() {
-      if (controller.lineItems.isEmpty) {
+      if (controllerCreateInvoice.lineItems.isEmpty) {
         return const Padding(
           padding: EdgeInsets.symmetric(vertical: 20),
           child: Center(
@@ -484,10 +526,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
       return Column(
         children: List.generate(
-          controller.lineItems.length,
+          controllerCreateInvoice.lineItems.length,
               (index) => _itemRow(
             index,
-            controller.lineItems[index],
+                controllerCreateInvoice.lineItems[index],
           ),
         ),
       );
@@ -505,7 +547,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: borderColor,
+              color: colorsList.borderColor,
             ),
           ),
         ),
@@ -520,7 +562,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
               ),
             ),
             Text(
-              '€${controller.subtotal.toStringAsFixed(2)}',
+              '€${controllerCreateInvoice.subtotal.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -539,7 +581,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   Widget _itemRow(
       int index,
       Map<String, dynamic> item,
-      ) {
+      )
+  {
     final description = item['description']?.toString() ?? '';
     final quantity = (item['quantity'] as num?)?.toDouble() ?? 0;
     final unit = item['unit']?.toString() ?? '';
@@ -552,7 +595,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: borderColor,
+            color: colorsList.borderColor,
           ),
         ),
       ),
@@ -570,7 +613,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: textColor,
+                    color: colorsList.textColor,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -578,7 +621,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   '$quantity $unit × €${unitPrice.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: secondaryTextColor,
+                    color: colorsList.secondaryTextColor,
                   ),
                 ),
               ],
@@ -593,12 +636,12 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
             ),
           ),
           IconButton(
-            onPressed: () => controller.removeLine(index),
+            onPressed: () => controllerCreateInvoice.removeLine(index),
             icon: const Icon(
               Icons.delete_outline_rounded,
               size: 20,
             ),
-            color: secondaryTextColor,
+            color: colorsList.secondaryTextColor,
             tooltip: 'Delete',
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(
@@ -621,7 +664,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: textColor,
+        color: colorsList.textColor,
       ),
     );
   }
@@ -645,7 +688,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           Icon(
             icon,
             size: 18,
-            color: secondaryTextColor,
+            color: colorsList.secondaryTextColor,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -675,7 +718,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       ),
       decoration: BoxDecoration(
         border: Border.all(
-          color: borderColor,
+          color: colorsList.borderColor,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -697,5 +740,168 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         ],
       ),
     );
+  }
+
+  void _showCatalogSearch() {
+    final searchController = TextEditingController();
+    final filteredItems =
+        <CatalogModel>[].obs;
+
+    filteredItems.assignAll(
+      controllerCreateInvoice.catalogList,
+    );
+
+    void search(String value) {
+      final query = value.trim().toLowerCase();
+
+      filteredItems.assignAll(
+        controllerCreateInvoice.catalogList.where(
+              (item) {
+            final name =
+                item.articleName?.toLowerCase() ?? '';
+
+            return name.contains(query);
+          },
+        ),
+      );
+    }
+
+    Get.bottomSheet(
+      Container(
+        height: Get.height * 0.75,
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(18),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment:
+          CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Select Catalog Item',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(
+                    Icons.close,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: searchController,
+              onChanged: search,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search item...',
+                prefixIcon: const Icon(
+                  Icons.search,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius:
+                  BorderRadius.circular(8),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Expanded(
+              child: Obx(
+                    () {
+                  if (filteredItems.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No catalog items found.',
+                        style: TextStyle(
+                          color:
+                          Color(0xFF6B7280),
+                        ),
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    itemCount:
+                    filteredItems.length,
+                    separatorBuilder:
+                        (_, __) =>
+                    const Divider(
+                      height: 1,
+                    ),
+                    itemBuilder:
+                        (context, index) {
+                      final item =
+                      filteredItems[index];
+
+                      return ListTile(
+                        contentPadding:
+                        EdgeInsets.zero,
+                        title: Text(
+                          item.articleName ?? '',
+                          style:
+                          const TextStyle(
+                            fontSize: 14,
+                            fontWeight:
+                            FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          _catalogSubtitle(item),
+                        ),
+                        onTap: () {
+                          controllerCreateInvoice
+                              .selectCatalogItem(
+                            item.articleName,
+                          );
+
+                          Get.back();
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  String _catalogSubtitle(CatalogModel item) {
+    final unit = item.unitCode?.trim() ?? '';
+
+    final price =
+        item.unitPriceNet?.toString() ?? '';
+
+    if (unit.isEmpty && price.isEmpty) {
+      return '';
+    }
+
+    if (unit.isEmpty) {
+      return '€$price';
+    }
+
+    if (price.isEmpty) {
+      return unit;
+    }
+
+    return '$unit • €$price';
   }
 }
