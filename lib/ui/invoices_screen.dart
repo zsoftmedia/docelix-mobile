@@ -31,39 +31,72 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
 
-        leading: IconButton(
-          onPressed: () {
-            Get.back();
-          },
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: const Color(0xFF0A2342),
-            size: width * 0.05,
-          ),
-        ),
+        leading: Obx(() {
+          final bool searching =
+              invoicesController.isSearching.value;
 
-        title: Text(
-          "Invoices",
-          style: TextStyle(
-            color: const Color(0xFF0A2342),
-            fontSize: width * 0.055,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+          return IconButton(
+            onPressed: () {
+              if (searching) {
+                invoicesController.closeSearch();
+              } else {
+                Get.back();
+              }
+            },
+            icon: Icon(
+              searching
+                  ? Icons.close_rounded
+                  : Icons.arrow_back_ios_new_rounded,
+              color: const Color(0xFF0A2342),
+              size: width * 0.05,
+            ),
+          );
+        }),
+
+        title: Obx(() {
+          if (invoicesController.isSearching.value) {
+            return TextField(
+              autofocus: true,
+              onChanged: invoicesController.searchInvoices,
+              style: TextStyle(
+                color: const Color(0xFF172A46),
+                fontSize: width * 0.04,
+              ),
+              decoration: const InputDecoration(
+                hintText: 'Search invoices...',
+                border: InputBorder.none,
+                isDense: true,
+              ),
+            );
+          }
+
+          return Text(
+            "Invoices",
+            style: TextStyle(
+              color: const Color(0xFF0A2342),
+              fontSize: width * 0.055,
+              fontWeight: FontWeight.w700,
+            ),
+          );
+        }),
 
         centerTitle: false,
 
         actions: [
-          IconButton(
-            onPressed: () {
-              // Search action
-            },
-            icon: Icon(
-              Icons.search_rounded,
-              color: const Color(0xFF0A2342),
-              size: width * 0.065,
-            ),
-          ),
+          Obx(() {
+            if (invoicesController.isSearching.value) {
+              return const SizedBox.shrink();
+            }
+
+            return IconButton(
+              onPressed: invoicesController.openSearch,
+              icon: Icon(
+                Icons.search_rounded,
+                color: const Color(0xFF0A2342),
+                size: width * 0.065,
+              ),
+            );
+          }),
 
           SizedBox(
             width: width * 0.02,
@@ -134,25 +167,40 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
             Expanded(
               child: Obx(() {
-                // Loading
+                // ==========================================================
+                // LOADING
+                // ==========================================================
+
                 if (invoicesController.isLoading.value) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
 
-                // Empty
-                if (invoicesController.invoices.isEmpty) {
+                // ==========================================================
+                // NO SEARCH RESULTS / NO INVOICES
+                // ==========================================================
+
+                if (invoicesController.filteredInvoices.isEmpty) {
+                  final bool hasSearch =
+                      invoicesController.searchQuery.value
+                          .trim()
+                          .isNotEmpty;
+
                   return RefreshIndicator(
                     onRefresh: invoicesController.refreshInvoices,
                     child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
-                        SizedBox(height: 150),
+                      physics:
+                      const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        const SizedBox(height: 150),
+
                         Center(
                           child: Text(
-                            'No invoices found.',
-                            style: TextStyle(
+                            hasSearch
+                                ? 'No invoices found.'
+                                : 'No invoices found.',
+                            style: const TextStyle(
                               color: Color(0xFF667085),
                               fontSize: 15,
                             ),
@@ -163,18 +211,28 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   );
                 }
 
-                // Invoice list
+                // ==========================================================
+                // INVOICE LIST
+                // ==========================================================
+
                 return RefreshIndicator(
                   onRefresh: invoicesController.refreshInvoices,
+
                   child: ListView.builder(
                     padding: EdgeInsets.only(
                       top: height * 0.005,
                       bottom: height * 0.12,
                     ),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: invoicesController.invoices.length,
+
+                    physics:
+                    const AlwaysScrollableScrollPhysics(),
+
+                    itemCount:
+                    invoicesController.filteredInvoices.length,
+
                     itemBuilder: (context, index) {
-                      final invoice = invoicesController.invoices[index];
+                      final InvoicesModel invoice =
+                      invoicesController.filteredInvoices[index];
 
                       return InkWell(
                         onTap: () {
@@ -183,6 +241,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                             arguments: invoice,
                           );
                         },
+
                         child: Column(
                           children: [
                             _invoiceCard(
@@ -192,13 +251,10 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                               height: height,
                             ),
 
-                            // Thin divider — no card border
                             const Divider(
                               height: 1,
                               thickness: 1,
                               color: Color(0xFFE9EDF3),
-                              indent: 0,
-                              endIndent: 0,
                             ),
                           ],
                         ),
@@ -394,221 +450,4 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       ),
     );
   }
-
-  /*Widget _invoiceCard({
-    required BuildContext context,
-    required InvoicesModel invoice,
-    required double width,
-    required double height,
-  })
-  {
-
-    // ----------------------------------------------------------
-    // STATUS
-    // ----------------------------------------------------------
-
-    final String status = invoice.status.toLowerCase();
-
-    Color statusColor;
-
-    if (status == "paid") {
-      statusColor = const Color(0xFF00B894);
-    } else if (status == "pending" || status == "unpaid") {
-      statusColor = const Color(0xFFF39C12);
-    } else if (status == "overdue") {
-      statusColor = Colors.red;
-    } else {
-      statusColor = const Color(0xFF71829A);
-    }
-
-    // Display status with first letter uppercase
-    final String displayStatus = status.isNotEmpty
-        ? status[0].toUpperCase() + status.substring(1)
-        : "Unknown";
-
-    return Container(
-      margin: EdgeInsets.only(
-        bottom: height * 0.015,
-      ),
-      padding: EdgeInsets.all(
-        width * 0.045,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(
-          width * 0.045,
-        ),
-        border: Border.all(
-          color: const Color(0xFFE1E7EF),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // ----------------------------------------------------------
-          // TOP ROW
-          // ----------------------------------------------------------
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Invoice Icon
-              Container(
-                width: width * 0.115,
-                height: width * 0.115,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF3FB),
-                  borderRadius: BorderRadius.circular(
-                    width * 0.03,
-                  ),
-                ),
-                child: Icon(
-                  Icons.receipt_long_rounded,
-                  color: const Color(0xFF063C70),
-                  size: width * 0.06,
-                ),
-              ),
-
-              SizedBox(
-                width: width * 0.035,
-              ),
-
-              // ----------------------------------------------------------
-              // INVOICE INFORMATION
-              // ----------------------------------------------------------
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      invoice.invoiceNumber ?? 'No Invoice Number',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: const Color(0xFF0A2342),
-                        fontSize: width * 0.04,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.005,
-                    ),
-
-                    Text(
-                      invoice.invoiceNumber ?? 'Unknown Client',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: const Color(0xFF60728D),
-                        fontSize: width * 0.035,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(
-                width: width * 0.02,
-              ),
-
-              // ----------------------------------------------------------
-              // STATUS
-              // ----------------------------------------------------------
-
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.025,
-                  vertical: height * 0.006,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  displayStatus,
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: width * 0.03,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(
-            height: height * 0.018,
-          ),
-
-          const Divider(
-            height: 1,
-            color: Color(0xFFE9EDF3),
-          ),
-
-          SizedBox(
-            height: height * 0.015,
-          ),
-
-          // ----------------------------------------------------------
-          // BOTTOM ROW
-          // ----------------------------------------------------------
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // ----------------------------------------------------------
-              // DATE
-              // ----------------------------------------------------------
-
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    color: const Color(0xFF71829A),
-                    size: width * 0.04,
-                  ),
-
-                  SizedBox(
-                    width: width * 0.018,
-                  ),
-
-                  Text(
-                    invoice.issueDate ?? 'N/A',
-                    style: TextStyle(
-                      color: const Color(0xFF71829A),
-                      fontSize: width * 0.033,
-                    ),
-                  ),
-                ],
-              ),
-
-              // ----------------------------------------------------------
-              // AMOUNT
-              // ----------------------------------------------------------
-
-              Text(
-                '${invoice.currencyCode ?? ''} ${invoice.paidAmount ?? 0}',
-                style: TextStyle(
-                  color: const Color(0xFF0A2342),
-                  fontSize: width * 0.043,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }*/
-
 }
