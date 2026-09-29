@@ -139,19 +139,33 @@ class _LoginPageState extends State<LoginScreen> {
                 // PASSWORD
                 // ======================================================
 
-                AppTextField(
-                  controller: loginController.passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                  keyboardType: TextInputType.visiblePassword,
 
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
+                Obx(
+                      () => AppTextField(
+                    controller: loginController.passwordController,
+                    hintText: 'Password',
 
-                    return null;
-                  },
+                    obscureText: !loginController.isPasswordVisible.value,
+
+                    keyboardType: TextInputType.visiblePassword,
+
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        loginController.isPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: loginController.togglePasswordVisibility,
+                    ),
+
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+
+                      return null;
+                    },
+                  ),
                 ),
 
                 // ======================================================

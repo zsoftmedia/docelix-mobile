@@ -191,6 +191,7 @@ class CreateInvoiceController extends GetxController {
 
       if (accessToken == null ||
           accessToken.isEmpty) {
+        isLoading.value = false;
         AppSnackbar.error(
           title: 'Error',
           message:
@@ -205,6 +206,7 @@ class CreateInvoiceController extends GetxController {
       // ----------------------------------------------------------
 
       if (companyId == null) {
+        isLoading.value = false;
         AppSnackbar.error(
           title: 'Error',
           message:
@@ -245,6 +247,9 @@ class CreateInvoiceController extends GetxController {
       // ----------------------------------------------------------
 
       if (response.statusCode == 200) {
+
+        isLoading.value = false;
+
         final List<dynamic> data = response.data;
 
         final List<ClientScreenModel> fetchedClients =
@@ -279,6 +284,8 @@ class CreateInvoiceController extends GetxController {
 
         clientNames.clear();
 
+        isLoading.value = false;
+
         AppSnackbar.error(
           title: 'Error',
           message:
@@ -289,6 +296,8 @@ class CreateInvoiceController extends GetxController {
       clients.clear();
 
       clientNames.clear();
+
+      isLoading.value = false;
 
       print(
         'Get Clients Error: $e',

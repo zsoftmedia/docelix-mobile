@@ -18,8 +18,17 @@ class LoginController extends GetxController {
   final isLoading = false.obs;
 
   final emailController = TextEditingController();
-
   final passwordController = TextEditingController();
+
+  // ======================================================
+  // PASSWORD VISIBILITY
+  // ======================================================
+
+  final isPasswordVisible = false.obs;
+
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
+  }
 
   void login () async {
 

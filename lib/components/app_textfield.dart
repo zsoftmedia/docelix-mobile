@@ -22,6 +22,7 @@ class AppTextField extends StatelessWidget {
   final IconData? prefixIcon;
   final Widget? prefix;
   final Widget? suffix;
+  final Widget? suffixIcon;
 
 // ============================================================
 // INPUT
@@ -117,6 +118,7 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.prefix,
     this.suffix,
+    this.suffixIcon,
 
 // Input
     this.keyboardType,
@@ -276,6 +278,7 @@ class AppTextField extends StatelessWidget {
 
       prefix: prefix,
       suffix: suffix,
+      suffixIcon: suffixIcon,
 
       contentPadding: contentPadding,
 
