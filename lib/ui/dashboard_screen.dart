@@ -169,7 +169,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            Stack(
+            IconButton(
+              onPressed: () {
+                // Notification click functionality
+                Get.toNamed('/NotificationScreen',
+                  arguments: 'Notification Screen',);
+              },
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    Icons.notifications_none_rounded,
+                    color: colorsList.primaryText,
+                    size: width * 0.065,
+                  ),
+
+                  Positioned(
+                    right: -2,
+                    top: -4,
+                    child: Container(
+                      width: width * 0.042,
+                      height: width * 0.042,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: colorsList.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        "0",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: width * 0.020,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            /*Stack(
               clipBehavior: Clip.none,
               children: [
                 Icon(
@@ -190,7 +232,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: Text(
-                      "3",
+                      "",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: width * 0.020,
@@ -200,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
               ],
-            ),
+            ),*/
           ],
         ),
 
@@ -556,7 +598,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               SizedBox(width: width * 0.025),
 
-              Expanded(
+              // Graph just hide due to unavailable data in APi.
+
+              /*Expanded(
                 flex: 4,
                 child: SizedBox(
                   height: width * 0.17,
@@ -565,7 +609,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     height: height,
                   ),
                 ),
-              ),
+              ),*/
             ],
           ),
         ],
@@ -2367,8 +2411,8 @@ class _ProfitChartPainter extends CustomPainter {
 
     final points = [
       Offset(size.width * 0.00, size.height * 0.82),
-      Offset(size.width * 0.12, size.height * 0.67),
-      Offset(size.width * 0.23, size.height * 0.72),
+      Offset(size.width * 0.12, size.height * 0.6),
+      Offset(size.width * 0.23, size.height * 0.2),
       Offset(size.width * 0.34, size.height * 0.43),
       Offset(size.width * 0.46, size.height * 0.52),
       Offset(size.width * 0.58, size.height * 0.22),

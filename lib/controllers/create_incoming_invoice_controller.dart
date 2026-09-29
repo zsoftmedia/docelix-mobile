@@ -120,6 +120,9 @@ class CreateIncomingInvoiceController extends GetxController {
   // ============================================================
 
   Future<void> uploadInvoice() async {
+
+    isLoading.value = true;
+
     if (filePath.value.isEmpty) {
 
       AppSnackbar.info(
@@ -165,6 +168,9 @@ class CreateIncomingInvoiceController extends GetxController {
       );
 
       if (response.data['ok'] == true) {
+
+        isLoading.value = false;
+
         final data = response.data['data'];
 
         /*print('================================');
@@ -186,6 +192,8 @@ class CreateIncomingInvoiceController extends GetxController {
 
       } else {
 
+        isLoading.value = false;
+
         AppSnackbar.success(
           title: 'Error',
           message:'Invoice upload failed.',
@@ -193,12 +201,8 @@ class CreateIncomingInvoiceController extends GetxController {
 
       }
     } on DioException catch (e) {
-      /*print('================================');
-      print('INVOICE UPLOAD ERROR');
-      print('Status Code: ${e.response?.statusCode}');
-      print('Response: ${e.response?.data}');
-      print('Message: ${e.message}');
-      print('================================');*/
+
+      isLoading.value = false;
 
       AppSnackbar.error(
         title: 'Upload Error',
@@ -208,6 +212,8 @@ class CreateIncomingInvoiceController extends GetxController {
       );
 
     } catch (e) {
+
+      isLoading.value = false;
 
       AppSnackbar.error(
         title: 'Error',

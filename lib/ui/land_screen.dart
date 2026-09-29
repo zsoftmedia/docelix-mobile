@@ -1,10 +1,7 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
-import 'package:docelix_mobileapp/controllers/profile_controller.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
-import 'package:docelix_mobileapp/ui/profile_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
-import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -477,7 +474,7 @@ class _LandScreenState extends State<LandScreen> {
               ),
 
               // ==================================================
-              // NOTIFICATIONS
+              // INCOMING
               // ==================================================
 
               Expanded(
@@ -486,7 +483,7 @@ class _LandScreenState extends State<LandScreen> {
                   icon: Icons.upcoming_outlined,
                   activeIcon: Icons.upcoming_rounded,
                   label: "Incoming",
-                  showBadge: true,
+                  showBadge: false,
                 ),
               ),
 

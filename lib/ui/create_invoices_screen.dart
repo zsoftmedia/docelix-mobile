@@ -340,12 +340,33 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           onTap: controllerCreateInvoice.selectInvoiceDate,
         ),
         const SizedBox(height: 12),
+                 // ==========================================================
+          // VAT
+          // ==========================================================
+
         Obx(
               () => _switchRow(
             title: 'Enable VAT',
             value: controllerCreateInvoice.enableVat.value,
             onChanged: controllerCreateInvoice.toggleEnableVat,
           ),
+        ),
+
+        Obx(
+              () => controllerCreateInvoice.enableVat.value
+              ? Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: AppTextField(
+              controller:
+              controllerCreateInvoice.vatRateController,
+              hintText: 'VAT rate (%)',
+              prefixIcon: Icons.percent_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+          )
+              : const SizedBox.shrink(),
         ),
       ],
     );
@@ -362,11 +383,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         _sectionTitle('Line Items'),
         const SizedBox(height: 16),
 
-        /*AppTextField(
-          controller: controllerCreateInvoice.descriptionController,
-          hintText: 'Description',
-          prefixIcon: Icons.description_outlined,
-        ),*/
         Obx(
               () => InkWell(
             onTap: () => _showCatalogSearch(),
@@ -497,13 +513,13 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
         const SizedBox(height: 16),
 
-        Obx(
+        /*Obx(
               () => _switchRow(
             title: 'Recurring invoice',
             value: controllerCreateInvoice.recurringInvoice.value,
             onChanged: controllerCreateInvoice.toggleRecurringInvoice,
           ),
-        ),
+        ),*/
       ],
     );
   }
@@ -745,15 +761,24 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
   void _showCatalogSearch() {
     final searchController = TextEditingController();
-    final filteredItems =
-        <CatalogModel>[].obs;
+    final searchText = ''.obs;
+    final filteredItems = <CatalogModel>[].obs;
 
     filteredItems.assignAll(
       controllerCreateInvoice.catalogList,
     );
 
     void search(String value) {
+      searchText.value = value;
+
       final query = value.trim().toLowerCase();
+
+      if (query.isEmpty) {
+        filteredItems.assignAll(
+          controllerCreateInvoice.catalogList,
+        );
+        return;
+      }
 
       filteredItems.assignAll(
         controllerCreateInvoice.catalogList.where(
@@ -778,9 +803,12 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           ),
         ),
         child: Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ======================================================
+            // HEADER
+            // ======================================================
+
             Row(
               children: [
                 const Expanded(
@@ -793,87 +821,138 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   ),
                 ),
                 IconButton(
-                  onPressed: Get.back,
-                  icon: const Icon(
-                    Icons.close,
-                  ),
+                  onPressed: () {
+                    Get.back();
+                  },
+                  icon: const Icon(Icons.close),
                 ),
               ],
             ),
 
             const SizedBox(height: 12),
 
+            // ======================================================
+            // SEARCH
+            // ======================================================
+
             TextField(
               controller: searchController,
               onChanged: search,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Search item...',
-                prefixIcon: const Icon(
-                  Icons.search,
-                ),
+                hintText: 'Search item or enter manually',
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
 
             const SizedBox(height: 12),
 
+            // ======================================================
+            // RESULTS
+            // ======================================================
+
             Expanded(
               child: Obx(
                     () {
-                  if (filteredItems.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No catalog items found.',
-                        style: TextStyle(
-                          color:
-                          Color(0xFF6B7280),
-                        ),
-                      ),
-                    );
-                  }
+                  final query = searchText.value.trim();
 
-                  return ListView.separated(
-                    itemCount:
-                    filteredItems.length,
-                    separatorBuilder:
-                        (_, __) =>
-                    const Divider(
-                      height: 1,
-                    ),
-                    itemBuilder:
-                        (context, index) {
-                      final item =
-                      filteredItems[index];
+                  return ListView(
+                    children: [
+                      // ==================================================
+                      // MANUAL ENTRY
+                      // ==================================================
 
-                      return ListTile(
-                        contentPadding:
-                        EdgeInsets.zero,
-                        title: Text(
-                          item.articleName ?? '',
-                          style:
-                          const TextStyle(
-                            fontSize: 14,
-                            fontWeight:
-                            FontWeight.w500,
+                      if (query.isNotEmpty)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.edit_outlined,
                           ),
-                        ),
-                        subtitle: Text(
-                          _catalogSubtitle(item),
-                        ),
-                        onTap: () {
-                          controllerCreateInvoice
-                              .selectCatalogItem(
-                            item.articleName,
-                          );
+                          title: Text(
+                            'Use "$query"',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Add this item manually',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                          onTap: () {
+                            controllerCreateInvoice
+                                .descriptionController
+                                .text = query;
 
-                          Get.back();
-                        },
-                      );
-                    },
+                            Get.back();
+                          },
+                        ),
+
+                      if (query.isNotEmpty)
+                        const Divider(height: 1),
+
+                      // ==================================================
+                      // CATALOG ITEMS
+                      // ==================================================
+
+                      if (filteredItems.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: 40,
+                          ),
+                          child: Center(
+                            child: Text(
+                              query.isEmpty
+                                  ? 'No catalog items available.'
+                                  : 'No catalog item found.',
+                              style: const TextStyle(
+                                color: Color(0xFF6B7280),
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        ...filteredItems.map(
+                              (item) {
+                            return Column(
+                              children: [
+                                ListTile(
+                                  contentPadding:
+                                  EdgeInsets.zero,
+                                  title: Text(
+                                    item.articleName ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight:
+                                      FontWeight.w500,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    _catalogSubtitle(item),
+                                  ),
+                                  onTap: () {
+                                    controllerCreateInvoice
+                                        .selectCatalogItem(
+                                      item.articleName,
+                                    );
+
+                                    Get.back();
+                                  },
+                                ),
+                                const Divider(
+                                  height: 1,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                    ],
                   );
                 },
               ),

@@ -105,6 +105,8 @@ class CreateInvoiceController extends GetxController {
   final invoiceDateController =
   TextEditingController();
 
+  final vatRateController = TextEditingController(text: '0');
+
   final autoGenerate = true.obs;
 
   final enableVat = false.obs;
@@ -117,6 +119,15 @@ class CreateInvoiceController extends GetxController {
 
   void toggleEnableVat(bool value) {
     enableVat.value = value;
+
+    if (!value) {
+      vatRateController.text = '0';
+    } else {
+      if (vatRateController.text.trim().isEmpty ||
+          vatRateController.text.trim() == '0') {
+        vatRateController.text = '20';
+      }
+    }
   }
 
   void toggleRecurringInvoice(bool value) {
@@ -219,12 +230,6 @@ class CreateInvoiceController extends GetxController {
       final int companyIdInt =
       int.parse(companyId.toString());
 
-      print('==============================');
-      print('GET CLIENTS');
-      print('Company ID: $companyIdInt');
-      print('Page: $page');
-      print('Page Size: $pageSize');
-      print('==============================');
 
       // ----------------------------------------------------------
       // API
@@ -601,7 +606,25 @@ class CreateInvoiceController extends GetxController {
     }
 
     // VAT rate
-    final vatRate = enableVat.value ? 20.0 : 0.0;
+   // final vatRate = enableVat.value ? 20.0 : 0.0;
+
+    // VAT rate
+    double vatRate = 0.0;
+
+    if (enableVat.value) {
+      vatRate = double.tryParse(
+        vatRateController.text.trim().replaceAll(',', '.'),
+      ) ??
+          0.0;
+
+      if (vatRate < 0 || vatRate > 100) {
+        AppSnackbar.error(
+          title: 'Invalid VAT',
+          message: 'Please enter a VAT rate between 0% and 100%.',
+        );
+        return;
+      }
+    }
 
     // Net amount
     final netAmount = quantity * unitPrice;
@@ -886,17 +909,6 @@ class CreateInvoiceController extends GetxController {
       }
 
       // ============================================================
-      // DEBUG
-      // ============================================================
-
-      print('==============================');
-      print('CREATE INVOICE API');
-      print('==============================');
-      print('URL: /invoices');
-      print('Payload: $payload');
-      print('==============================');
-
-      // ============================================================
       // API CALL
       // ============================================================
 
@@ -927,7 +939,11 @@ class CreateInvoiceController extends GetxController {
           message: 'Invoice created successfully.',
         );
 
-        // Go back after successful creation
+        // Small delay so the success message is visible
+        await Future.delayed(
+          const Duration(milliseconds: 500),
+        );
+
         Get.back(result: responseData);
       } else {
         AppSnackbar.error(
@@ -994,6 +1010,7 @@ class CreateInvoiceController extends GetxController {
     descriptionController.dispose();
     quantityController.dispose();
     unitPriceController.dispose();
+    vatRateController.dispose();
 
     closingTextController.dispose();
 
@@ -1007,7 +1024,8 @@ class CreateInvoiceController extends GetxController {
   Future<void> getCatalog({
     int page = 1,
     int pageSize = 10,
-  }) async {
+  }) async
+  {
     try {
       isLoading.value = true;
       errorMessage.value = '';
@@ -1247,7 +1265,8 @@ class CreateInvoiceController extends GetxController {
   Future<void> selectCompany(
       CompanyModel company, {
         bool loadDashboard = true,
-      }) async {
+      }) async
+  {
     selectedCompany.value = company;
 
     await SessionManager.saveCompanyid(company.id);

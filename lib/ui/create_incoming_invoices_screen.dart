@@ -20,6 +20,54 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.white,
+
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+
+        leading: IconButton(
+          onPressed: () {
+            Get.back();
+          },
+
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0A2342),
+            size: width * 0.05,
+          ),
+        ),
+
+        title: Text(
+          "Create Invoice",
+          style: TextStyle(
+            color: const Color(0xFF0A2342),
+            fontSize: width * 0.055,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+
+        /*centerTitle: false,
+
+        actions: [
+
+          IconButton(
+            onPressed: () {
+              // Search clients
+            },
+
+            icon: Icon(
+              Icons.search_rounded,
+              color: const Color(0xFF0A2342),
+              size: width * 0.065,
+            ),
+          ),
+
+          SizedBox(
+            width: width * 0.02,
+          ),
+        ],*/
+      ),
+
       body: SafeArea(
         child: Stack(
           children: [
@@ -27,7 +75,7 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
         // TOP RIGHT DECORATION
         // ==========================================================
 
-            Positioned(
+            /*Positioned(
               top: 0,
               right: 0,
               child: ClipPath(
@@ -38,7 +86,7 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
                   color: const Color(0xFFEAF3FB),
                 ),
               ),
-            ),
+            ),*/
           // ==========================================================
           // MAIN CONTENT
           // ==========================================================
@@ -56,15 +104,15 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
                 // TITLE
                 // ==========================================================
 
-                  const Text(
+                  /*const Text(
                     'Create Invoice',
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1D2939),
                     ),
-                  ),
-                  const SizedBox(height: 8),
+                  ),*/
+                  //const SizedBox(height: 8),
                   const Text( 'Capture an invoice using your camera or select an image or PDF file.',
                     style: TextStyle(
                       fontSize: 14,

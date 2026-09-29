@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
 
-      appBar: AppBar(
+      /*appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
@@ -38,6 +38,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
+      ),*/
+
+      // ============================================================
+      // APP BAR
+      // ============================================================
+
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+
+        leading: IconButton(
+          onPressed: () {
+            Get.back();
+          },
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: const Color(0xFF0A2342),
+            size: width * 0.05,
+          ),
+        ),
+
+        title: Text(
+          "Profile",
+          style: TextStyle(
+            color: const Color(0xFF0A2342),
+            fontSize: width * 0.055,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+
       ),
 
       body: Obx(

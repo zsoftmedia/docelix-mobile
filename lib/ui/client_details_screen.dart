@@ -36,7 +36,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
           onPressed: Get.back,
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: colorsList.primaryColor,
+            color: Color(0xFF0A2342),
             size: 20,
           ),
         ),

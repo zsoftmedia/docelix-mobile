@@ -17,7 +17,7 @@ class CatalogsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
 
-      appBar: AppBar(
+      /*appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -28,6 +28,32 @@ class CatalogsScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
+      ),*/
+
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.white,
+
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0A2342),
+            size: 20,
+          ),
+        ),
+
+        title: const Text(
+          'Items',
+          style: TextStyle(
+            color: Color(0xFF0A2342),
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+
+        centerTitle: false,
       ),
 
       body: Obx(() {
@@ -98,120 +124,96 @@ class CatalogsScreen extends StatelessWidget {
     required double height,
     required bool lowStock,
   }) {
-    final Color stockColor =
-    lowStock ? Colors.red : const Color(0xFF00B894);
-
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.symmetric(
-        horizontal: width * 0.045,
-        vertical: height * 0.018,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
         children: [
-
-          // ==========================================================
-          // ITEM ICON
-          // ==========================================================
-
-          Container(
-            width: width * 0.115,
-            height: width * 0.115,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(width * 0.03),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: width * 0.045,
+              vertical: height * 0.014,
             ),
-            child: Icon(
-              Icons.inventory_2_outlined,
-              color: const Color(0xFF063C70),
-              size: width * 0.09,
-            ),
-          ),
-
-          SizedBox(width: width * 0.035),
-
-          // ==========================================================
-          // ITEM INFORMATION
-          // ==========================================================
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Item icon
+                Icon(
+                  Icons.inventory_2_outlined,
+                  color: const Color(0xFF5F6B7A),
+                  size: width * 0.06,
+                ),
 
-                Text(
-                  item.articleName ?? 'Unnamed Item',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: const Color(0xFF172A46),
-                    fontSize: width * 0.045,
+                SizedBox(width: width * 0.035),
+
+                // Item information
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.articleName ?? 'Unnamed Item',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: const Color(0xFF172A46),
+                          fontSize: width * 0.043,
+                        //  fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      SizedBox(height: height * 0.004),
+
+                      Text(
+                        item.articleNumber ?? 'N/A',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: const Color(0xFF7A8699),
+                          fontSize: width * 0.032,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
-                SizedBox(height: height * 0.006),
+                SizedBox(width: width * 0.025),
 
-                Text(
-                  item.articleNumber ?? 'N/A',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: const Color(0xFF71829A),
-                    fontSize: width * 0.033,
-                    fontWeight: FontWeight.w400,
-                  ),
+                // Price
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      item.unitPriceNet?.toStringAsFixed(2) ?? '0.00',
+                      style: TextStyle(
+                        color: const Color(0xFF172A46),
+                        fontSize: width * 0.037,
+                      //  fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.003),
+
+                    Text(
+                      item.unitCode ?? '',
+                      style: TextStyle(
+                        color: const Color(0xFF7A8699),
+                        fontSize: width * 0.029,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
 
+          // List separator
           const Divider(
             height: 1,
             thickness: 1,
-            indent: 52,
-            endIndent: 4,
-            color: Color(0xFFEFF2F6),
+            color: Color(0xFFE8ECF1),
+            indent: 20,
+            endIndent: 20,
           ),
-
-          // ==========================================================
-          // RIGHT SIDE: STOCK + PRICE
-          // ==========================================================
-
-          /*Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-
-              // Stock
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.025,
-                  vertical: height * 0.005,
-                ),
-                decoration: BoxDecoration(
-                  color: stockColor.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Stock: ${item.stockQty?.toStringAsFixed(0) ?? '0'}',
-                  style: TextStyle(
-                    color: stockColor,
-                    fontSize: width * 0.03,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: height * 0.006),
-
-              // Price
-              Text(
-                '${item.unitPriceNet?.toStringAsFixed(2) ?? '0.00'} ${item.unitCode ?? ''}',
-                style: TextStyle(
-                  color: const Color(0xFF172A46),
-                  fontSize: width * 0.043,
-                ),
-              ),
-            ],
-          ),*/
         ],
       ),
     );

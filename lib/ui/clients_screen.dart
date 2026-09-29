@@ -39,7 +39,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: const Color(0xFF0A2342),
+            color: Color(0xFF0A2342),
             size: width * 0.05,
           ),
         ),

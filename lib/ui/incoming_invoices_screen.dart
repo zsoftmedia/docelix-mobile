@@ -245,19 +245,6 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
             '/CreateIncomingInvoicesScreen',
             arguments: 'Create Incoming Invoices Screen',);
 
-          // Get.to(
-          //   () => const AddInvoiceScreen(),
-          // );
-
-          // Temporary action
-          Get.snackbar(
-            "Add Invoice",
-            "Add Invoice page will open here.",
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(15),
-            backgroundColor: const Color(0xFF063C70),
-            colorText: Colors.white,
-          );
         },
 
         backgroundColor: const Color(0xFF063C70),
