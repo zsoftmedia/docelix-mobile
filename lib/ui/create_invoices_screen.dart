@@ -108,7 +108,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   Widget _buildControls(
       BuildContext context,
       ControlsDetails details,
-      ) {
+      )
+  {
     final isFirstStep = controllerCreateInvoice.currentStep.value == 0;
     final isLastStep =
         controllerCreateInvoice.currentStep.value == controllerCreateInvoice.totalSteps - 1;

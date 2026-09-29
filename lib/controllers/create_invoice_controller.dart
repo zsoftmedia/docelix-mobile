@@ -538,137 +538,89 @@ class CreateInvoiceController extends GetxController {
   // ============================================================
 
   void addLine() {
-    final description =
-    descriptionController.text.trim();
-
-    final quantityText =
-    quantityController.text.trim();
-
+    final description = descriptionController.text.trim();
+    final quantityText = quantityController.text.trim();
     final unitPriceText = unitPriceController.text.trim();
     final unit = unitController.text.trim();
-
-    // ----------------------------------------------------------
-    // DESCRIPTION
-    // ----------------------------------------------------------
 
     if (description.isEmpty) {
       AppSnackbar.error(
         title: 'Required',
-        message:
-        'Please enter item description.',
+        message: 'Please enter item description.',
       );
-
       return;
     }
-
-    // ----------------------------------------------------------
-    // QUANTITY
-    // ----------------------------------------------------------
 
     if (quantityText.isEmpty) {
       AppSnackbar.error(
         title: 'Required',
-        message:
-        'Please enter quantity.',
+        message: 'Please enter quantity.',
       );
-
       return;
     }
-
-    // ----------------------------------------------------------
-    // PRICE
-    // ----------------------------------------------------------
 
     if (unitPriceText.isEmpty) {
       AppSnackbar.error(
         title: 'Required',
-        message:
-        'Please enter unit price.',
+        message: 'Please enter unit price.',
       );
-
       return;
     }
 
-    // ----------------------------------------------------------
-    // PARSE
-    // ----------------------------------------------------------
-
-    final quantity =
-    double.tryParse(
-      quantityText.replaceAll(
-        ',',
-        '.',
-      ),
+    final quantity = double.tryParse(
+      quantityText.replaceAll(',', '.'),
     );
 
-    final unitPrice =
-    double.tryParse(
-      unitPriceText.replaceAll(
-        ',',
-        '.',
-      ),
+    final unitPrice = double.tryParse(
+      unitPriceText.replaceAll(',', '.'),
     );
 
-    // ----------------------------------------------------------
-    // QUANTITY VALIDATION
-    // ----------------------------------------------------------
-
-    if (quantity == null ||
-        quantity <= 0) {
+    if (quantity == null || quantity <= 0) {
       AppSnackbar.error(
         title: 'Invalid quantity',
-        message:
-        'Please enter a valid quantity.',
+        message: 'Please enter a valid quantity.',
       );
-
       return;
     }
 
-    // ----------------------------------------------------------
-    // PRICE VALIDATION
-    // ----------------------------------------------------------
-
-    if (unitPrice == null ||
-        unitPrice < 0) {
+    if (unitPrice == null || unitPrice < 0) {
       AppSnackbar.error(
         title: 'Invalid price',
-        message:
-        'Please enter a valid unit price.',
+        message: 'Please enter a valid unit price.',
       );
-
       return;
     }
 
-    // ----------------------------------------------------------
-    // TOTAL
-    // ----------------------------------------------------------
+    // VAT rate
+    final vatRate = enableVat.value ? 20.0 : 0.0;
 
-    final total =
-        quantity * unitPrice;
+    // Net amount
+    final netAmount = quantity * unitPrice;
 
-    // ----------------------------------------------------------
-    // ADD
-    // ----------------------------------------------------------
+    // Gross amount
+    final grossAmount = netAmount + (netAmount * vatRate / 100);
 
     lineItems.add({
+      'catalog_item_id': selectedCatalogItem.value?.id,
+      'item_desc': description,
       'description': description,
       'quantity': quantity,
       'unit': unit,
+      'unit_price': unitPrice,
       'unitPrice': unitPrice,
-      'total': total,
+      'vat_rate': vatRate,
+      'gross_amount': grossAmount,
+      'total': grossAmount,
     });
 
-    // ----------------------------------------------------------
-    // RESET
-    // ----------------------------------------------------------
+    // Reset selected catalog item
+    selectedCatalogItem.value = null;
 
     descriptionController.clear();
     unitController.clear();
 
     quantityController.text = '1';
-
     unitPriceController.text = '0';
-
   }
 
   // ============================================================
@@ -686,7 +638,7 @@ class CreateInvoiceController extends GetxController {
   // SUBTOTAL
   // ============================================================
 
-  double get subtotal {
+  /*double get subtotal {
     return lineItems.fold(
       0.0,
           (sum, item) {
@@ -696,6 +648,38 @@ class CreateInvoiceController extends GetxController {
                 0.0);
       },
     );
+  }*/
+
+  double get subtotal {
+    return lineItems.fold(
+      0.0,
+          (sum, item) {
+        return sum +
+            ((item['gross_amount'] as num?)?.toDouble() ?? 0.0);
+      },
+    );
+  }
+
+  String? _formatInvoiceDateForApi(String value) {
+    if (value.trim().isEmpty) {
+      return null;
+    }
+
+    try {
+      final parts = value.trim().split('.');
+
+      if (parts.length != 3) {
+        return null;
+      }
+
+      final day = parts[0].padLeft(2, '0');
+      final month = parts[1].padLeft(2, '0');
+      final year = parts[2];
+
+      return '$year-$month-$day';
+    } catch (e) {
+      return null;
+    }
   }
 
   // ============================================================
@@ -707,97 +691,274 @@ class CreateInvoiceController extends GetxController {
       return;
     }
 
+    // ============================================================
+    // BASIC VALIDATION
+    // ============================================================
+
+    if (selectedCompany.value == null) {
+      AppSnackbar.error(
+        title: 'Required',
+        message: 'Please select a sender.',
+      );
+      return;
+    }
+
+    if (selectedClient.value == null) {
+      AppSnackbar.error(
+        title: 'Required',
+        message: 'Please select a client.',
+      );
+      return;
+    }
+
+    if (invoiceDateController.text.trim().isEmpty) {
+      AppSnackbar.error(
+        title: 'Required',
+        message: 'Please select invoice date.',
+      );
+      return;
+    }
+
+    if (lineItems.isEmpty) {
+      AppSnackbar.error(
+        title: 'Required',
+        message: 'Please add at least one line item.',
+      );
+      return;
+    }
+
+    final accessToken = SessionManager.accessToken;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Access token is not available.',
+      );
+      return;
+    }
+
+    // ============================================================
+    // COMPANY ID
+    // ============================================================
+
+    final companyId = selectedCompany.value?.id;
+
+    if (companyId == null) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Company ID is not available.',
+      );
+      return;
+    }
+
+    // ============================================================
+    // CLIENT ID
+    // ============================================================
+
+    final clientId = selectedClient.value?.id;
+
+    if (clientId == null) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Client ID is not available.',
+      );
+      return;
+    }
+
+    // ============================================================
+    // INVOICE DATE
+    // ============================================================
+
+    final issueDate = _formatInvoiceDateForApi(
+      invoiceDateController.text,
+    );
+
+    if (issueDate == null) {
+      AppSnackbar.error(
+        title: 'Invalid date',
+        message: 'Please select a valid invoice date.',
+      );
+      return;
+    }
+
+    // ============================================================
+    // INVOICE NUMBER
+    // ============================================================
+
+    final invoiceNumber = invoiceNumberController.text.trim();
+
+    if (!autoGenerate.value && invoiceNumber.isEmpty) {
+      AppSnackbar.error(
+        title: 'Required',
+        message: 'Please enter invoice number.',
+      );
+      return;
+    }
+
     try {
       isLoading.value = true;
 
+      // ============================================================
+      // BUILD ITEMS
+      // ============================================================
+
+      final List<Map<String, dynamic>> items =
+      lineItems.map((item) {
+        final map = <String, dynamic>{
+          'item_desc':
+          item['item_desc']?.toString() ?? '',
+          'quantity':
+          (item['quantity'] as num?)?.toDouble() ?? 0,
+          'unit_price':
+          (item['unit_price'] as num?)?.toDouble() ?? 0,
+          'vat_rate':
+          (item['vat_rate'] as num?)?.toDouble() ?? 0,
+          'gross_amount':
+          (item['gross_amount'] as num?)?.toDouble() ?? 0,
+        };
+
+        final catalogItemId = item['catalog_item_id'];
+
+        if (catalogItemId != null) {
+          map['catalog_item_id'] = catalogItemId;
+        }
+
+        return map;
+      }).toList();
+
+      // ============================================================
+      // BUILD PAYLOAD
+      // ============================================================
+
+      final Map<String, dynamic> payload = {
+        'company_id': companyId,
+        'client_id': clientId,
+
+        // If auto generation is enabled, backend should generate it.
+        // If backend requires a string, send empty string.
+        'invoice_number': autoGenerate.value
+            ? ''
+            : invoiceNumber,
+
+        'issue_date': issueDate,
+
+        'due_date': null,
+
+        'notes': closingTextController.text.trim().isEmpty
+            ? null
+            : closingTextController.text.trim(),
+
+        'notes_pre': null,
+
+        'notes_post': null,
+
+        'layout_order': [
+          'pretext',
+          'items',
+          'posttext',
+        ],
+
+        'items': items,
+      };
+
+      // ============================================================
+      // RECURRING SCHEDULE
+      // ============================================================
+
+      if (recurringInvoice.value) {
+        payload['schedule'] = {
+          'enabled': true,
+          'frequency': 'monthly',
+          'interval': 1,
+          'startDate': issueDate,
+          'endType': 'never',
+          'autoSendEmail': false,
+        };
+      }
+
+      // ============================================================
+      // DEBUG
+      // ============================================================
+
       print('==============================');
-      print('CREATE INVOICE');
+      print('CREATE INVOICE API');
+      print('==============================');
+      print('URL: /invoices');
+      print('Payload: $payload');
       print('==============================');
 
-      print(
-        'Client: ${selectedClientName.value}',
+      // ============================================================
+      // API CALL
+      // ============================================================
+
+      final response = await dioClient.createInvoice(
+        accessToken: accessToken,
+        data: payload,
       );
 
-      print(
-        'Customer: ${customerController.text}',
-      );
+      print('Create Invoice Status: ${response.statusCode}');
+      print('Create Invoice Response: ${response.data}');
 
-      print(
-        'Address: ${addressController.text}',
-      );
+      // ============================================================
+      // SUCCESS
+      // ============================================================
 
-      print(
-        'ZIP: ${zipController.text}',
-      );
+      if (response.statusCode == 200 ||
+          response.statusCode == 201) {
+        final responseData = response.data;
 
-      print(
-        'City: ${cityController.text}',
-      );
+        print('Invoice created successfully.');
+        print('Invoice ID: ${responseData['id']}');
+        print(
+          'Invoice Number: ${responseData['invoice_number']}',
+        );
 
-      print(
-        'Attn: ${attnController.text}',
-      );
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Invoice created successfully.',
+        );
 
-      print(
-        'Email: ${emailController.text}',
-      );
-
-      print(
-        'Phone: ${phoneController.text}',
-      );
-
-      print(
-        'Invoice Number: ${invoiceNumberController.text}',
-      );
-
-      print(
-        'Invoice Date: ${invoiceDateController.text}',
-      );
-
-      print(
-        'Auto Generate: ${autoGenerate.value}',
-      );
-
-      print(
-        'Enable VAT: ${enableVat.value}',
-      );
-
-      print(
-        'Recurring: ${recurringInvoice.value}',
-      );
-
-      print(
-        'Line Items: ${lineItems.length}',
-      );
-
-      print(
-        'Subtotal: $subtotal',
-      );
-
-      print(
-        'Closing Text: ${closingTextController.text}',
-      );
-
+        // Go back after successful creation
+        Get.back(result: responseData);
+      } else {
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Unable to create invoice.',
+        );
+      }
+    } on DioException catch (e) {
+      print('==============================');
+      print('CREATE INVOICE ERROR');
+      print('==============================');
+      print('Message: ${e.message}');
+      print('Status: ${e.response?.statusCode}');
+      print('Response: ${e.response?.data}');
       print('==============================');
 
-      // ========================================================
-      // YOUR API SAVE LOGIC
-      // ========================================================
+      String message = 'Unable to create invoice.';
 
-      AppSnackbar.success(
-        title: 'Success',
-        message:
-        'Invoice saved successfully.',
-      );
-    } catch (e) {
-      print(
-        'Save Invoice Error: $e',
-      );
+      final responseData = e.response?.data;
+
+      if (responseData is Map<String, dynamic>) {
+        if (responseData['detail'] != null) {
+          message = responseData['detail'].toString();
+        } else if (responseData['message'] != null) {
+          message = responseData['message'].toString();
+        } else if (responseData['error'] != null) {
+          message = responseData['error'].toString();
+        }
+      }
 
       AppSnackbar.error(
         title: 'Error',
-        message:
-        'Unable to save invoice.',
+        message: message,
+      );
+    } catch (e) {
+      print('Create Invoice Error: $e');
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Unable to create invoice.',
       );
     } finally {
       isLoading.value = false;

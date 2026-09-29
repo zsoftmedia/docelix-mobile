@@ -308,4 +308,23 @@ class DioClient {
     );
   }
 
+  // ==============================
+// CREATE INVOICE
+// ==============================
+  Future<Response> createInvoice({
+    required String accessToken,
+    required Map<String, dynamic> data,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/invoices',
+      data: data,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
 }
