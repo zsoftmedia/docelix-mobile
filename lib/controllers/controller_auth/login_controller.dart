@@ -130,6 +130,7 @@ class LoginController extends GetxController {
         }*/
 
         // Save token
+        await SessionManager.saveEmail(user.email ?? '');
         await SessionManager.saveAccessToken(accessToken);
         await SessionManager.saveCompanyid(company?.id ?? 0);
         await SessionManager.saveCompanyname(company?.name ?? '');

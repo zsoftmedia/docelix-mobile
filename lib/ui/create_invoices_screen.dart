@@ -206,9 +206,13 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        _infoField(
-          icon: Icons.email_outlined,
-          text: SessionManager.email ?? '',
+        Obx(
+              () => _infoField(
+            icon: Icons.email_outlined,
+            text: controllerCreateInvoice.sessionEmail.value.isEmpty
+                ? 'No email available'
+                : controllerCreateInvoice.sessionEmail.value,
+          ),
         ),
       ],
     );

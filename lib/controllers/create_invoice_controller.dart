@@ -12,6 +12,8 @@ class CreateInvoiceController extends GetxController {
 
   final DioClient dioClient = DioClient();
 
+  final RxString sessionEmail = ''.obs;
+
   final RxString errorMessage = ''.obs;
   // Companies
   final RxList<CompanyModel> companies = <CompanyModel>[].obs;
@@ -170,6 +172,7 @@ class CreateInvoiceController extends GetxController {
   void onInit() {
     super.onInit();
 
+    sessionEmail.value = SessionManager.email ?? '';
     // Get List Clients
     getClients();
     // Get List Item
