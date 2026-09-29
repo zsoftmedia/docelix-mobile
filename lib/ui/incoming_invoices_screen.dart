@@ -31,39 +31,96 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
 
-        leading: IconButton(
-          onPressed: () {
-            Get.back();
-          },
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: const Color(0xFF0A2342),
-            size: width * 0.05,
-          ),
-        ),
+        // ============================================================
+        // BACK / CLOSE SEARCH
+        // ============================================================
 
-        title: Text(
-          "Incoming Invoices",
-          style: TextStyle(
-            color: const Color(0xFF0A2342),
-            fontSize: width * 0.055,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        leading: Obx(() {
+          final bool searching =
+              incomingInvoicesController.isSearching.value;
+
+          return IconButton(
+            onPressed: () {
+              if (searching) {
+                incomingInvoicesController.closeSearch();
+              } else {
+                Get.back();
+              }
+            },
+            icon: Icon(
+              searching
+                  ? Icons.close_rounded
+                  : Icons.arrow_back_ios_new_rounded,
+              color: const Color(0xFF0A2342),
+              size: width * 0.05,
+            ),
+          );
+        }),
+
+        // ============================================================
+        // TITLE / SEARCH FIELD
+        // ============================================================
+
+        title: Obx(() {
+          if (incomingInvoicesController.isSearching.value) {
+            return TextField(
+              autofocus: true,
+
+              onChanged:
+              incomingInvoicesController
+                  .searchIncomingInvoices,
+
+              textInputAction:
+              TextInputAction.search,
+
+              style: TextStyle(
+                color: const Color(0xFF172A46),
+                fontSize: width * 0.04,
+              ),
+
+              decoration: const InputDecoration(
+                hintText: 'Search incoming invoices...',
+                hintStyle: TextStyle(
+                  color: Color(0xFF98A2B3),
+                ),
+                border: InputBorder.none,
+                isDense: true,
+              ),
+            );
+          }
+
+          return Text(
+            "Incoming Invoices",
+            style: TextStyle(
+              color: const Color(0xFF0A2342),
+              fontSize: width * 0.055,
+              fontWeight: FontWeight.w700,
+            ),
+          );
+        }),
 
         centerTitle: false,
 
+        // ============================================================
+        // SEARCH BUTTON
+        // ============================================================
+
         actions: [
-          IconButton(
-            onPressed: () {
-              // Search action
-            },
-            icon: Icon(
-              Icons.search_rounded,
-              color: const Color(0xFF0A2342),
-              size: width * 0.065,
-            ),
-          ),
+          Obx(() {
+            if (incomingInvoicesController.isSearching.value) {
+              return const SizedBox.shrink();
+            }
+
+            return IconButton(
+              onPressed:
+              incomingInvoicesController.openSearch,
+              icon: Icon(
+                Icons.search_rounded,
+                color: const Color(0xFF0A2342),
+                size: width * 0.065,
+              ),
+            );
+          }),
 
           SizedBox(
             width: width * 0.02,
@@ -134,24 +191,37 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
 
             Expanded(
               child: Obx(() {
-                // Loading
+                // ==========================================================
+                // LOADING
+                // ==========================================================
+
                 if (incomingInvoicesController.isLoading.value) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
 
-                // Empty
-                if (incomingInvoicesController.invoices.isEmpty) {
+                // ==========================================================
+                // EMPTY / NO SEARCH RESULT
+                // ==========================================================
+
+                if (incomingInvoicesController
+                    .filteredInvoices
+                    .isEmpty) {
                   return RefreshIndicator(
-                    onRefresh: incomingInvoicesController.refreshInvoices,
+                    onRefresh:
+                    incomingInvoicesController.refreshInvoices,
+
                     child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
+                      physics:
+                      const AlwaysScrollableScrollPhysics(),
+
                       children: const [
                         SizedBox(height: 150),
+
                         Center(
                           child: Text(
-                            'No invoices found.',
+                            'No incoming invoices found.',
                             style: TextStyle(
                               color: Color(0xFF667085),
                               fontSize: 15,
@@ -163,20 +233,32 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                   );
                 }
 
-                // Invoice list
+                // ==========================================================
+                // INVOICE LIST
+                // ==========================================================
+
                 return RefreshIndicator(
-                  onRefresh: incomingInvoicesController.refreshInvoices,
+                  onRefresh:
+                  incomingInvoicesController.refreshInvoices,
 
                   child: ListView.builder(
                     padding: EdgeInsets.only(
                       top: height * 0.005,
                       bottom: height * 0.12,
                     ),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: incomingInvoicesController.invoices.length,
+
+                    physics:
+                    const AlwaysScrollableScrollPhysics(),
+
+                    itemCount:
+                    incomingInvoicesController
+                        .filteredInvoices
+                        .length,
+
                     itemBuilder: (context, index) {
                       final invoice =
-                      incomingInvoicesController.invoices[index];
+                      incomingInvoicesController
+                          .filteredInvoices[index];
 
                       return InkWell(
                         onTap: () async {

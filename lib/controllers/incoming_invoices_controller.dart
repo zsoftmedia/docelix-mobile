@@ -13,16 +13,45 @@ class IncomingInvoicesController extends GetxController {
 
   final RxBool isLoading = false.obs;
 
-  /// Invoice list
+  // ============================================================
+  // ALL INCOMING INVOICES
+  // ============================================================
+
   final RxList<IncomingInvoicesModel> invoices =
       <IncomingInvoicesModel>[].obs;
 
-  /// Total invoices from API
+  // ============================================================
+  // FILTERED / SEARCHED INVOICES
+  // ============================================================
+
+  final RxList<IncomingInvoicesModel> filteredInvoices =
+      <IncomingInvoicesModel>[].obs;
+
+  // ============================================================
+  // SEARCH
+  // ============================================================
+
+  final RxBool isSearching = false.obs;
+
+  final RxString searchQuery = ''.obs;
+
+  // ============================================================
+  // TOTAL INVOICES FROM API
+  // ============================================================
+
   final RxInt totalInvoices = 0.obs;
 
-  /// Pagination
+  // ============================================================
+  // PAGINATION
+  // ============================================================
+
   final RxInt currentPage = 1.obs;
+
   final RxInt limit = 20.obs;
+
+  // ============================================================
+  // INIT
+  // ============================================================
 
   @override
   void onInit() {
@@ -42,25 +71,33 @@ class IncomingInvoicesController extends GetxController {
       final accessToken = SessionManager.accessToken;
       final companyId = SessionManager.accessCompanyid;
 
-      if (accessToken == null || accessToken.isEmpty) {
+      // ----------------------------------------------------------
+      // ACCESS TOKEN
+      // ----------------------------------------------------------
 
+      if (accessToken == null || accessToken.isEmpty) {
         AppSnackbar.error(
           title: 'Error',
-          message:'Access token is not available.',
+          message: 'Access token is not available.',
         );
-
         return;
       }
+
+      // ----------------------------------------------------------
+      // COMPANY ID
+      // ----------------------------------------------------------
 
       if (companyId == null) {
-
         AppSnackbar.error(
           title: 'Error',
-          message:'Company ID is not available.',
+          message: 'Company ID is not available.',
         );
-
         return;
       }
+
+      // ----------------------------------------------------------
+      // API CALL
+      // ----------------------------------------------------------
 
       final response =
       await dioClient.getIncomingInvoices(
@@ -72,6 +109,10 @@ class IncomingInvoicesController extends GetxController {
         accessToken: accessToken,
       );
 
+      // ----------------------------------------------------------
+      // RESPONSE
+      // ----------------------------------------------------------
+
       if (response.data != null) {
         final data = response.data;
 
@@ -81,47 +122,190 @@ class IncomingInvoicesController extends GetxController {
         totalInvoices.value =
             data['total'] ?? 0;
 
-        invoices.value = items
+        final List<IncomingInvoicesModel> loadedInvoices =
+        items
             .map(
               (item) =>
-                  IncomingInvoicesModel.fromJson(
+              IncomingInvoicesModel.fromJson(
                 Map<String, dynamic>.from(item),
               ),
         )
             .toList();
 
+        // --------------------------------------------------------
+        // STORE COMPLETE CURRENT PAGE
+        // --------------------------------------------------------
+
+        invoices.assignAll(loadedInvoices);
+
+        // --------------------------------------------------------
+        // DISPLAY ALL INITIALLY
+        // --------------------------------------------------------
+
+        filteredInvoices.assignAll(
+          loadedInvoices,
+        );
+
         print('================================');
-        print('INVOICES LOADED');
+        print('INCOMING INVOICES LOADED');
         print('Total: ${totalInvoices.value}');
-        print('Current Page: ${currentPage.value}');
-        print('Items: ${invoices.length}');
+        print(
+          'Current Page: ${currentPage.value}',
+        );
+        print(
+          'Items: ${invoices.length}',
+        );
         print('================================');
       }
     } on DioException catch (e) {
       print('================================');
-      print('GET INVOICES ERROR');
-      print('Status Code: ${e.response?.statusCode}');
-      print('Response: ${e.response?.data}');
-      print('Message: ${e.message}');
+      print('GET INCOMING INVOICES ERROR');
+      print(
+        'Status Code: ${e.response?.statusCode}',
+      );
+      print(
+        'Response: ${e.response?.data}',
+      );
+      print(
+        'Message: ${e.message}',
+      );
       print('================================');
 
       AppSnackbar.error(
         title: 'Error',
-        message:e.response?.data?['message']?.toString() ??
+        message:
+        e.response?.data?['message']?.toString() ??
             e.message ??
             'Unable to load invoices.',
       );
-
     } catch (e) {
-
       AppSnackbar.error(
         title: 'Error',
-        message:e.toString(),
+        message: e.toString(),
       );
-
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // ============================================================
+  // REAL-TIME SEARCH
+  // ============================================================
+
+  void searchIncomingInvoices(String value) {
+    searchQuery.value = value;
+
+    final String query =
+    value.trim().toLowerCase();
+
+    // ----------------------------------------------------------
+    // EMPTY SEARCH
+    // ----------------------------------------------------------
+
+    if (query.isEmpty) {
+      filteredInvoices.assignAll(invoices);
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // FILTER
+    // ----------------------------------------------------------
+
+    final List<IncomingInvoicesModel> results =
+    invoices.where((invoice) {
+
+      // --------------------------------------------------------
+      // INVOICE NUMBER
+      // --------------------------------------------------------
+
+      final String invoiceNumber =
+          invoice.invoiceNumber
+              ?.toString()
+              .toLowerCase() ??
+              '';
+
+      // --------------------------------------------------------
+      // STATUS
+      // --------------------------------------------------------
+
+      final String status =
+          invoice.status
+              ?.toString()
+              .toLowerCase() ??
+              '';
+
+      // --------------------------------------------------------
+      // DATE
+      // --------------------------------------------------------
+
+      final String issueDate =
+          invoice.invoiceDate
+              ?.toString()
+              .toLowerCase() ??
+              '';
+
+      // --------------------------------------------------------
+      // CURRENCY
+      // --------------------------------------------------------
+
+      final String currency =
+          invoice.currency
+              ?.toString()
+              .toLowerCase() ??
+              '';
+
+      // --------------------------------------------------------
+      // AMOUNT
+      // --------------------------------------------------------
+
+      final String amount =
+          invoice.totalAmount
+              ?.toString()
+              .toLowerCase() ??
+              '';
+
+      // --------------------------------------------------------
+      // SEARCH MATCH
+      // --------------------------------------------------------
+
+      return invoiceNumber.contains(query) ||
+          status.contains(query) ||
+          issueDate.contains(query) ||
+          currency.contains(query) ||
+          amount.contains(query);
+    }).toList();
+
+    // ----------------------------------------------------------
+    // UPDATE DISPLAYED LIST
+    // ----------------------------------------------------------
+
+    filteredInvoices.assignAll(results);
+  }
+
+  // ============================================================
+  // OPEN SEARCH
+  // ============================================================
+
+  void openSearch() {
+    isSearching.value = true;
+
+    searchQuery.value = '';
+
+    // Show all invoices when search opens
+    filteredInvoices.assignAll(invoices);
+  }
+
+  // ============================================================
+  // CLOSE SEARCH
+  // ============================================================
+
+  void closeSearch() {
+    isSearching.value = false;
+
+    searchQuery.value = '';
+
+    // Restore complete list
+    filteredInvoices.assignAll(invoices);
   }
 
   // ============================================================
@@ -130,6 +314,15 @@ class IncomingInvoicesController extends GetxController {
 
   Future<void> refreshInvoices() async {
     currentPage.value = 1;
+
     await getIncomingInvoices();
+
+    // Re-apply search after refresh
+    if (isSearching.value &&
+        searchQuery.value.trim().isNotEmpty) {
+      searchIncomingInvoices(
+        searchQuery.value,
+      );
+    }
   }
 }
