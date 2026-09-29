@@ -201,31 +201,25 @@ class _LoginPageState extends State<LoginScreen> {
 
                 Row(
                   children: [
-
-                    SizedBox(
-                      width: width * 0.055,
-                      height: width * 0.055,
-
-                      child: Checkbox(
-                        value: _rememberMe,
-
-                        onChanged: (value) {
-                          setState(() {
-                            _rememberMe = value ?? false;
-                          });
-                        },
-
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 1.4,
+                    Obx(
+                          () => SizedBox(
+                        width: width * 0.055,
+                        height: width * 0.055,
+                        child: Checkbox(
+                          value: loginController.rememberMe.value,
+                          onChanged: (value) {
+                            loginController.rememberMe.value = value ?? false;
+                          },
+                          side: const BorderSide(
+                            color: Color(0xFF333333),
+                            width: 1.4,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          materialTapTargetSize:
+                          MaterialTapTargetSize.shrinkWrap,
                         ),
-
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-
-                        materialTapTargetSize:
-                        MaterialTapTargetSize.shrinkWrap,
                       ),
                     ),
 

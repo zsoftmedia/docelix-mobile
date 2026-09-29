@@ -14,11 +14,30 @@ class LoginController extends GetxController {
   final authService = AuthServices();
   final dioClient = DioClient();
   final sessionManager = SessionManager();
+  final RxBool rememberMe = false.obs;
 
   final isLoading = false.obs;
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadRememberedLogin();
+  }
+
+  Future<void> loadRememberedLogin() async {
+    final data = await SessionManager.getRememberMe();
+
+    final remember = data['remember'] as bool? ?? false;
+
+    if (remember) {
+      emailController.text = data['email']?.toString() ?? '';
+      passwordController.text = data['password']?.toString() ?? '';
+      rememberMe.value = true;
+    }
+  }
 
   // ======================================================
   // PASSWORD VISIBILITY
@@ -70,19 +89,9 @@ class LoginController extends GetxController {
 
         return;
       }
-      // GET USER
-      final User user = session.user;
 
       // GET SUPABASE ACCESS TOKEN
       final String accessToken = session.accessToken;
-
-      // DEBUG ONLY
-      debugPrint('================================');
-      debugPrint('SUPABASE LOGIN SUCCESS');
-      debugPrint('User ID: ${user.id}');
-      debugPrint('Email: ${user.email}');
-      debugPrint('Access Token: $accessToken');
-      debugPrint('================================');
 
       // ==============================
       // 4. CALL DOCELIX /api/me
@@ -90,6 +99,13 @@ class LoginController extends GetxController {
       final meResponse = await dioClient.getMe('/me',accessToken);
 
       if (meResponse.statusCode == 200) {
+
+        // Save Remember Me information shared prefrences
+        await SessionManager.saveRememberMe(
+          remember: rememberMe.value,
+          email: email,
+          password: password,
+        );
 
         AppSnackbar.success(
           title: 'Success',
@@ -122,14 +138,7 @@ class LoginController extends GetxController {
             ? user.companies!.first
             : null;
 
-        /*if (company != null) {
-          print("Company ID: ${company.id}");
-          print("Company Name: ${company.name}");
-          print("Currency: ${company.currencyCode}");
-          print("Role: ${company.myRole}");
-        }*/
-
-        // Save token
+        // Save data in session
         await SessionManager.saveEmail(user.email ?? '');
         await SessionManager.saveAccessToken(accessToken);
         await SessionManager.saveCompanyid(company?.id ?? 0);

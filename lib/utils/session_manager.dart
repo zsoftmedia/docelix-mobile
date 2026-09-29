@@ -1,4 +1,5 @@
 import 'package:get_storage/get_storage.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class SessionManager {
 
@@ -18,6 +19,11 @@ class SessionManager {
   static const String _correncycodeKey = 'corrency_code';
   static const String _userDataKey = 'user_data';
   static const String _accCreatedDateKey = 'created_at';
+
+  // Shared Prefrences
+  static const String _rememberMeKey = 'remember_me';
+  static const String _rememberEmailKey = 'remember_email';
+  static const String _rememberPasswordKey = 'remember_password';
 
   // ==============================
   // ACCESS TOKEN
@@ -229,4 +235,35 @@ class SessionManager {
     await _storage.remove(_roleKey);
     await _storage.remove(_userDataKey);
   }
+
+
+  // Shared prefrences
+  static Future<void> saveRememberMe({
+    required bool remember,
+    String? email,
+    String? password,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool(_rememberMeKey, remember);
+
+    if (remember) {
+      await prefs.setString(_rememberEmailKey, email ?? '');
+      await prefs.setString(_rememberPasswordKey, password ?? '');
+    } else {
+      await prefs.remove(_rememberEmailKey);
+      await prefs.remove(_rememberPasswordKey);
+    }
+  }
+
+  static Future<Map<String, dynamic>> getRememberMe() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    return {
+      'remember': prefs.getBool(_rememberMeKey) ?? false,
+      'email': prefs.getString(_rememberEmailKey) ?? '',
+      'password': prefs.getString(_rememberPasswordKey) ?? '',
+    };
+  }
+
 }
