@@ -32,42 +32,93 @@ class _ClientsScreenState extends State<ClientsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
 
-        leading: IconButton(
-          onPressed: () {
-            Get.back();
-          },
+        // ============================================================
+        // BACK / CLOSE SEARCH
+        // ============================================================
 
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0A2342),
-            size: width * 0.05,
-          ),
-        ),
+        leading: Obx(() {
+          final bool searching =
+              controller.isSearching.value;
 
-        title: Text(
-          "Clients",
-          style: TextStyle(
-            color: const Color(0xFF0A2342),
-            fontSize: width * 0.055,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+          return IconButton(
+            onPressed: () {
+              if (searching) {
+                controller.closeSearch();
+              } else {
+                Get.back();
+              }
+            },
+            icon: Icon(
+              searching
+                  ? Icons.close_rounded
+                  : Icons.arrow_back_ios_new_rounded,
+              color: const Color(0xFF0A2342),
+              size: width * 0.05,
+            ),
+          );
+        }),
+
+        // ============================================================
+        // TITLE / SEARCH FIELD
+        // ============================================================
+
+        title: Obx(() {
+          if (controller.isSearching.value) {
+            return TextField(
+              autofocus: true,
+
+              onChanged: controller.searchClients,
+
+              textInputAction:
+              TextInputAction.search,
+
+              style: TextStyle(
+                color: const Color(0xFF172A46),
+                fontSize: width * 0.04,
+              ),
+
+              decoration: const InputDecoration(
+                hintText: 'Search clients...',
+                hintStyle: TextStyle(
+                  color: Color(0xFF98A2B3),
+                ),
+                border: InputBorder.none,
+                isDense: true,
+              ),
+            );
+          }
+
+          return Text(
+            "Clients",
+            style: TextStyle(
+              color: const Color(0xFF0A2342),
+              fontSize: width * 0.055,
+              fontWeight: FontWeight.w700,
+            ),
+          );
+        }),
 
         centerTitle: false,
 
+        // ============================================================
+        // SEARCH BUTTON
+        // ============================================================
+
         actions: [
+          Obx(() {
+            if (controller.isSearching.value) {
+              return const SizedBox.shrink();
+            }
 
-          IconButton(
-            onPressed: () {
-              // Search clients
-            },
-
-            icon: Icon(
-              Icons.search_rounded,
-              color: const Color(0xFF0A2342),
-              size: width * 0.065,
-            ),
-          ),
+            return IconButton(
+              onPressed: controller.openSearch,
+              icon: Icon(
+                Icons.search_rounded,
+                color: const Color(0xFF0A2342),
+                size: width * 0.065,
+              ),
+            );
+          }),
 
           SizedBox(
             width: width * 0.02,
@@ -138,12 +189,12 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
             Expanded(
               child: Obx(() {
-                // ----------------------------------------------------------
+                // ==========================================================
                 // LOADING
-                // ----------------------------------------------------------
+                // ==========================================================
 
                 if (controller.isLoading.value &&
-                    controller.clients.isEmpty) {
+                    controller.filteredClients.isEmpty) {
                   return const Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
@@ -152,15 +203,22 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   );
                 }
 
-                // ----------------------------------------------------------
-                // EMPTY
-                // ----------------------------------------------------------
+                // ==========================================================
+                // EMPTY / NO SEARCH RESULT
+                // ==========================================================
 
-                if (controller.clients.isEmpty) {
-                  return const Center(
+                if (controller.filteredClients.isEmpty) {
+                  final bool searching =
+                      controller.searchQuery.value
+                          .trim()
+                          .isNotEmpty;
+
+                  return Center(
                     child: Text(
-                      'No clients found',
-                      style: TextStyle(
+                      searching
+                          ? 'No clients found.'
+                          : 'No clients found.',
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Color(0xFF64748B),
                       ),
@@ -168,9 +226,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   );
                 }
 
-                // ----------------------------------------------------------
+                // ==========================================================
                 // CLIENT LIST
-                // ----------------------------------------------------------
+                // ==========================================================
 
                 return ListView.builder(
                   padding: EdgeInsets.only(
@@ -178,10 +236,15 @@ class _ClientsScreenState extends State<ClientsScreen> {
                     right: width * 0.04,
                     bottom: height * 0.12,
                   ),
+
                   physics: const BouncingScrollPhysics(),
-                  itemCount: controller.clients.length,
+
+                  itemCount:
+                  controller.filteredClients.length,
+
                   itemBuilder: (context, index) {
-                    final client = controller.clients[index];
+                    final client =
+                    controller.filteredClients[index];
 
                     return _clientCard(
                       context: context,
