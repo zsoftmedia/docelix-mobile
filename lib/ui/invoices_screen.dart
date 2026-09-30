@@ -1,5 +1,6 @@
 import 'package:docelix_mobileapp/controllers/invoices_controller.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,14 +22,14 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: colorsList.backgroundColor,
 
       // ============================================================
       // APP BAR
       // ============================================================
 
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorsList.colorWhite,
         elevation: 0,
 
         leading: Obx(() {
@@ -47,7 +48,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               searching
                   ? Icons.close_rounded
                   : Icons.arrow_back_ios_new_rounded,
-              color: const Color(0xFF0A2342),
+              color: colorsList.iconColor,
               size: width * 0.05,
             ),
           );
@@ -59,7 +60,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               autofocus: true,
               onChanged: invoicesController.searchInvoices,
               style: TextStyle(
-                color: const Color(0xFF172A46),
+                color: colorsList.textColor,
                 fontSize: width * 0.04,
               ),
               decoration: const InputDecoration(
@@ -73,7 +74,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           return Text(
             "Invoices",
             style: TextStyle(
-              color: const Color(0xFF0A2342),
+              color: colorsList.textColor,
               fontSize: width * 0.055,
               fontWeight: FontWeight.w700,
             ),
@@ -92,7 +93,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               onPressed: invoicesController.openSearch,
               icon: Icon(
                 Icons.search_rounded,
-                color: const Color(0xFF0A2342),
+                color: colorsList.iconColor,
                 size: width * 0.065,
               ),
             );
@@ -130,7 +131,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   Text(
                     "All Invoices",
                     style: TextStyle(
-                      color: const Color(0xFF172A46),
+                      color: colorsList.textColor,
                       fontSize: width * 0.045,
                     //  fontWeight: FontWeight.w700,
                     ),
@@ -143,7 +144,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       ),
 
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEAF3FB),
+                        color: colorsList.colorBoxDecoration,
                         borderRadius: BorderRadius.circular(20),
                       ),
 
@@ -151,7 +152,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                         return Text(
                           "${invoicesController.invoices.length} Invoices",
                           style: TextStyle(
-                            color: const Color(0xFF063C70),
+                            color: colorsList.textColor,
                             fontSize: width * 0.032,
                           //  fontWeight: FontWeight.w600,
                           ),
@@ -200,8 +201,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                             hasSearch
                                 ? 'No invoices found.'
                                 : 'No invoices found.',
-                            style: const TextStyle(
-                              color: Color(0xFF667085),
+                            style: TextStyle(
+                              color: colorsList.textHintColor,
                               fontSize: 15,
                             ),
                           ),
@@ -354,7 +355,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         : "Unknown";
 
     return Container(
-      color: Colors.white,
+      color: colorsList.colorWhite,
       padding: EdgeInsets.symmetric(
         horizontal: width * 0.045,
         vertical: height * 0.018,
@@ -372,7 +373,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             ),
             child: Icon(
               Icons.receipt_long_rounded,
-              color: const Color(0xFF063C70),
+              color: colorsList.iconColor,
               size: width * 0.09,
             ),
           ),
@@ -389,7 +390,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: const Color(0xFF172A46),
+                    color: colorsList.textColor,
                     fontSize: width * 0.04,
                    // fontWeight: FontWeight.w700, // Bold
                   ),
@@ -400,7 +401,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 Text(
                   invoice.issueDate ?? 'N/A',
                   style: TextStyle(
-                    color: const Color(0xFF71829A),
+                    color: colorsList.textHintColor,
                     fontSize: width * 0.033,
                     fontWeight: FontWeight.w400,
                   ),
@@ -439,7 +440,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               Text(
                 '${invoice.currencyCode ?? ''} ${invoice.paidAmount ?? 0}',
                 style: TextStyle(
-                  color: const Color(0xFF172A46),
+                  color: colorsList.textColor,
                   fontSize: width * 0.043,
                   //fontWeight: FontWeight.w800, // Bold amount
                 ),

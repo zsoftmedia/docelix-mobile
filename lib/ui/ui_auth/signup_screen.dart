@@ -121,7 +121,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       style: TextStyle(
                         fontSize: width * 0.075,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0A2342),
+                        color: colorsList.textColor,
                       ),
                     ),
 
@@ -131,7 +131,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       StringsList.txtRegister_desc,
                       style: TextStyle(
                         fontSize: width * 0.043,
-                        color: const Color(0xFF60728D),
+                        color: colorsList.mutedTextColor,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -149,13 +149,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       decoration: InputDecoration(
                         hintText: "Email address",
                         hintStyle: TextStyle(
-                          color: const Color(0xFF71829A),
+                          color: colorsList.textColor,
                           fontSize: width * 0.043,
                         ),
 
                         prefixIcon: Icon(
                           Icons.mail_outline_rounded,
-                          color: const Color(0xFF344E6F),
+                          color: colorsList.textColor,
                           size: width * 0.065,
                         ),
 
@@ -171,8 +171,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           borderRadius: BorderRadius.circular(
                             width * 0.04,
                           ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
+                          borderSide: BorderSide(
+                            color: colorsList.borderColor,
                             width: 1.3,
                           ),
                         ),
@@ -181,8 +181,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           borderRadius: BorderRadius.circular(
                             width * 0.04,
                           ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
+                          borderSide: BorderSide(
+                            color: colorsList.borderColor,
                             width: 1.3,
                           ),
                         ),
@@ -192,7 +192,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width * 0.04,
                           ),
                           borderSide: const BorderSide(
-                            color: Color(0xFF0B4380),
+                            color: colorsList.primaryBlue,
                             width: 1.5,
                           ),
                         ),
@@ -226,7 +226,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                         prefixIcon: Icon(
                           Icons.lock_outline_rounded,
-                          color: const Color(0xFF344E6F),
+                          color: colorsList.textColor,
                           size: width * 0.065,
                         ),
 
@@ -242,7 +242,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
 
-                            color: const Color(0xFF344E6F),
+                            color: colorsList.textColor,
                             size: width * 0.065,
                           ),
                         ),
@@ -259,8 +259,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           borderRadius: BorderRadius.circular(
                             width * 0.04,
                           ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
+                          borderSide: BorderSide(
+                            color: colorsList.borderColor,
                             width: 1.3,
                           ),
                         ),
@@ -270,7 +270,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width * 0.04,
                           ),
                           borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
+                            color: colorsList.borderColor,
                             width: 1.3,
                           ),
                         ),
@@ -279,8 +279,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           borderRadius: BorderRadius.circular(
                             width * 0.04,
                           ),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF0B4380),
+                          borderSide: BorderSide(
+                            color: colorsList.focusedBorderColor,
                             width: 1.5,
                           ),
                         ),
@@ -308,14 +308,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                       icon: Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: const Color(0xFF344E6F),
+                        color: colorsList.iconColor,
                         size: width * 0.065,
                       ),
 
                       hint: Text(
                         "Select Country",
                         style: TextStyle(
-                          color: const Color(0xFF71829A),
+                          color: colorsList.textColor,
                           fontSize: width * 0.043,
                         ),
                       ),
@@ -334,7 +334,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width * 0.04,
                           ),
                           borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
+                            color: colorsList.borderColor,
                             width: 1.3,
                           ),
                         ),
@@ -344,7 +344,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width * 0.04,
                           ),
                           borderSide: const BorderSide(
-                            color: Color(0xFFD2DDEB),
+                            color: colorsList.borderColor,
                             width: 1.3,
                           ),
                         ),
@@ -354,7 +354,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width * 0.04,
                           ),
                           borderSide: const BorderSide(
-                            color: Color(0xFF0B4380),
+                            color: colorsList.focusedBorderColor,
                             width: 1.5,
                           ),
                         ),
@@ -364,7 +364,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width * 0.04,
                           ),
                           borderSide: const BorderSide(
-                            color: Colors.red,
+                            color: colorsList.red,
                             width: 1.3,
                           ),
                         ),
@@ -373,8 +373,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           borderRadius: BorderRadius.circular(
                             width * 0.04,
                           ),
-                          borderSide: const BorderSide(
-                            color: Colors.red,
+                          borderSide: BorderSide(
+                            color: colorsList.red,
                             width: 1.5,
                           ),
                         ),
@@ -387,7 +387,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: Text(
                             country,
                             style: TextStyle(
-                              color: const Color(0xFF172A46),
+                              color: colorsList.textColor,
                               fontSize: width * 0.043,
                             ),
                           ),
@@ -421,7 +421,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         },
 
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF063C70),
+                          backgroundColor: colorsList.colorButton,
                           foregroundColor: Colors.white,
 
                           elevation: 0,

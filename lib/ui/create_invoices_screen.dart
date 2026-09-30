@@ -100,6 +100,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
+          color: colorsList.textColor,
         ),
       ),
     );
@@ -127,8 +128,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  side: const BorderSide(
-                    color: Color(0xFFD1D5DB),
+                  side: BorderSide(
+                    color: colorsList.borderColor,
                   ),
                 ),
                 child: const Text(
@@ -725,7 +726,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         vertical: 11,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: colorsList.colorBoxDecoration,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -733,7 +734,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           Icon(
             icon,
             size: 18,
-            color: colorsList.secondaryTextColor,
+            color: colorsList.iconColor,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -741,7 +742,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
               text,
               style: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF4B5563),
+                color: colorsList.textColor,
               ),
             ),
           ),
@@ -763,7 +764,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       ),
       decoration: BoxDecoration(
         border: Border.all(
-          color: colorsList.borderColor,
+          color: colorsList.colorBoxDecoration,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -774,7 +775,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
               title,
               style: const TextStyle(
                 fontSize: 14,
-                color: Color(0xFF374151),
+                color: colorsList.textColor,
               ),
             ),
           ),
@@ -852,7 +853,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   onPressed: () {
                     Get.back();
                   },
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Icons.close,
+                    color: colorsList.iconColor,),
                 ),
               ],
             ),
@@ -869,7 +871,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
               autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Search item or enter manually',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(Icons.search,
+                  color: colorsList.iconColor,),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -898,6 +901,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(
                             Icons.edit_outlined,
+                            color: colorsList.iconColor,
                           ),
                           title: Text(
                             'Use "$query"',
@@ -910,7 +914,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                             'Add this item manually',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF6B7280),
+                              color: colorsList.textColor,
                             ),
                           ),
                           onTap: () {
@@ -940,7 +944,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                                   ? 'No catalog items available.'
                                   : 'No catalog item found.',
                               style: const TextStyle(
-                                color: Color(0xFF6B7280),
+                                color: colorsList.textHintColor,
                               ),
                             ),
                           ),
@@ -955,10 +959,11 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                                   EdgeInsets.zero,
                                   title: Text(
                                     item.articleName ?? '',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight:
                                       FontWeight.w500,
+                                      color: colorsList.textColor
                                     ),
                                   ),
                                   subtitle: Text(
@@ -973,8 +978,9 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                                     Get.back();
                                   },
                                 ),
-                                const Divider(
+                                Divider(
                                   height: 1,
+                                  color: colorsList.dividerColor,
                                 ),
                               ],
                             );

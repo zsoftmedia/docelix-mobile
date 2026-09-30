@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/voice_recognition_controller.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,7 +13,7 @@ class VoiceRecognitionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
+      backgroundColor: colorsList.backgroundColor,
 
       appBar: AppBar(
         title: const Text('Voice Recognition'),
@@ -57,7 +58,7 @@ class VoiceRecognitionScreen extends StatelessWidget {
                         onPressed: controller.clearText,
                         icon: const Icon(
                           Icons.clear,
-                          color: Colors.grey,
+                          color: colorsList.iconColor,
                         ),
                       ),
                     ),

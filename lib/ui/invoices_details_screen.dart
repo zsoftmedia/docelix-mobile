@@ -28,7 +28,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
           icon: const Icon(
             Icons.arrow_back_ios_new,
             size: 20,
-            color: Color(0xFF172033),
+            color: colorsList.iconColor,
           ),
         ),
 
@@ -37,22 +37,22 @@ class InvoicesDetailsScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF172033),
+            color: colorsList.textColor,
           ),
         ),
 
         centerTitle: false,
 
         actions: [
-          IconButton(
+          /*IconButton(
             onPressed: () {
               // TODO: More options
             },
             icon: const Icon(
               Icons.more_vert,
-              color: Color(0xFF172033),
+              color: colorsList.iconColor,
             ),
-          ),
+          ),*/
         ],
       ),
 
@@ -75,7 +75,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               'Invoice not found.',
               style: TextStyle(
                 fontSize: 16,
-                color: Color(0xFF64748B),
+                color: colorsList.textHintColor,
               ),
             ),
           );
@@ -251,7 +251,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
             const Icon(
               Icons.receipt_long_outlined,
               size: 22,
-              color: Color(0xFF2563EB),
+              color: colorsList.iconColor,
             ),
 
             const SizedBox(width: 10),
@@ -333,7 +333,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       style: const TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF172033),
+        color: colorsList.textColor,
       ),
     );
   }
@@ -354,7 +354,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
           Icon(
             icon,
             size: 18,
-            color: const Color(0xFF64748B),
+            color: colorsList.iconColor,
           ),
 
           const SizedBox(width: 10),
@@ -362,9 +362,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF64748B),
+                color: colorsList.textHintColor,
                // fontWeight: FontWeight.w400,
               ),
             ),
@@ -378,7 +378,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
              // fontWeight: FontWeight.w700,
-              color: Color(0xFF172033),
+              color: colorsList.textColor,
             ),
           ),
         ],
@@ -416,7 +416,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               const Icon(
                 Icons.person_outline,
                 size: 20,
-                color: Color(0xFF64748B),
+                color: colorsList.iconColor,
               ),
 
               const SizedBox(width: 10),
@@ -425,12 +425,12 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Client',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF172033),
+                        color: colorsList.textColor,
                       ),
                     ),
 
@@ -440,7 +440,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                       'Client ID: ${controller.invoice.value?.clientId ?? '—'}',
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF64748B),
+                        color: colorsList.textHintColor,
                       ),
                     ),
                   ],
@@ -462,7 +462,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               const Icon(
                 Icons.person_outline,
                 size: 20,
-                color: Color(0xFF2563EB),
+                color: colorsList.iconColor,
               ),
 
               const SizedBox(width: 10),
@@ -480,7 +480,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                      //   fontWeight: FontWeight.w700,
-                        color: Color(0xFF172033),
+                        color: colorsList.textColor,
                       ),
                     ),
 
@@ -492,7 +492,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF64748B),
+                          color: colorsList.textHintColor,
                         ),
                       ),
                     ],
@@ -501,9 +501,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         client.phone!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF64748B),
+                          color: colorsList.textHintColor,
                         ),
                       ),
                     ],
@@ -516,7 +516,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF64748B),
+                          color: colorsList.textHintColor,
                         ),
                       ),
                     ],
@@ -531,9 +531,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
                           if ((client.country ?? '').isNotEmpty)
                             client.country!,
                         ].join(', '),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF94A3B8),
+                          color: colorsList.textHintColor,
                         ),
                       ),
                     ],
@@ -545,9 +545,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          const Divider(
+          Divider(
             height: 1,
-            color: Color(0xFFE5E7EB),
+            color: colorsList.dividerColor,
           ),
         ],
       );
@@ -578,7 +578,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
 
             border: Border.all(
-              color: const Color(0xFFE3E8EF),
+              color: colorsList.borderColor,
             ),
           ),
 
@@ -604,7 +604,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
 
             border: Border.all(
-              color: const Color(0xFFE3E8EF),
+              color: colorsList.borderColor,
             ),
           ),
 
@@ -614,7 +614,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               Icon(
                 Icons.inventory_2_outlined,
                 size: 36,
-                color: Color(0xFF94A3B8),
+                color: colorsList.iconColor,
               ),
 
               SizedBox(height: 10),
@@ -624,7 +624,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF475569),
+                  color: colorsList.textHintColor,
                 ),
               ),
             ],
@@ -700,7 +700,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               ),
 
               decoration: const BoxDecoration(
-                color: Color(0xFFF8FAFC),
+                color: colorsList.colorBoxDecoration,
 
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(16),
@@ -719,7 +719,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF475569),
+                      color: colorsList.textColor,
                     ),
                   ),
 
@@ -734,7 +734,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF172033),
+                      color: colorsList.textColor,
                     ),
                   ),
                 ],
@@ -781,7 +781,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       //fontWeight: FontWeight.w500,
-                      color: Color(0xFF172033),
+                      color: colorsList.textColor,
                     ),
                   ),
                 ),
@@ -796,7 +796,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF64748B),
+                      color: colorsList.textHintColor,
                     ),
                   ),
                 ),
@@ -812,7 +812,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                   //    fontWeight: FontWeight.w600,
-                      color: Color(0xFF172033),
+                      color: colorsList.textColor,
                     ),
                   ),
                 ),
@@ -826,7 +826,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               thickness: 1,
               indent: 0,
               endIndent: 0,
-              color: Color(0xFFE5E7EB),
+              color: colorsList.dividerColor,
             ),
         ],
       ),
@@ -950,7 +950,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
             style: TextStyle(
               fontSize: 14,
-              color: const Color(0xFF64748B),
+              color: colorsList.textHintColor,
               fontWeight: bold
                   ? FontWeight.w600
                   : FontWeight.normal,
@@ -963,7 +963,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
           style: TextStyle(
             fontSize: bold ? 17 : 14,
-            color: const Color(0xFF172033),
+            color: colorsList.textColor,
             fontWeight: bold
                 ? FontWeight.w700
                 : FontWeight.w500,
@@ -986,7 +986,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF172033),
+            color: colorsList.textColor,
           ),
         ),
 
@@ -997,15 +997,15 @@ class InvoicesDetailsScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 13,
             height: 1.4,
-            color: Color(0xFF64748B),
+            color: colorsList.textHintColor,
           ),
         ),
 
         const SizedBox(height: 12),
 
-        const Divider(
+        Divider(
           height: 1,
-          color: Color(0xFFE5E7EB),
+          color: colorsList.dividerColor,
         ),
       ],
     );
@@ -1085,9 +1085,10 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   // TODO: Download
                 },
 
-                icon: const Icon(
+                icon: Icon(
                   Icons.download_outlined,
                   size: 19,
+                  color: colorsList.iconColor,
                 ),
 
                 label: const Text(
@@ -1096,10 +1097,10 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                 style: OutlinedButton.styleFrom(
                   foregroundColor:
-                  const Color(0xFF475569),
+                  colorsList.textHintColor,
 
                   side: const BorderSide(
-                    color: Color(0xFFD5DCE5),
+                    color: colorsList.borderColor,
                   ),
 
                   minimumSize:
@@ -1126,7 +1127,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   // TODO: Send invoice
                 },
 
-                icon: const Icon(
+                icon: Icon(
                   Icons.send_outlined,
                   size: 18,
                 ),
@@ -1137,7 +1138,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                  const Color(0xFF2563EB),
+                  colorsList.colorButton,
 
                   foregroundColor:
                   Colors.white,
@@ -1175,7 +1176,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   padding: EdgeInsets.zero,
 
                   side: const BorderSide(
-                    color: Color(0xFFD5DCE5),
+                    color: colorsList.borderColor,
                   ),
 
                   shape:
@@ -1185,9 +1186,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   ),
                 ),
 
-                child: const Icon(
+                child: Icon(
                   Icons.more_horiz,
-                  color: Color(0xFF475569),
+                  color: colorsList.iconColor,
                 ),
               ),
             ),
@@ -1229,7 +1230,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               height: 4,
 
               decoration: BoxDecoration(
-                color: const Color(0xFFD1D5DB),
+                color: colorsList.colorBoxDecoration,
                 borderRadius:
                 BorderRadius.circular(10),
               ),
@@ -1285,7 +1286,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    Color color = const Color(0xFF172033),
+    Color color = colorsList.textColor,
   }) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -1295,7 +1296,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
         height: 40,
 
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F7FA),
+          color: colorsList.colorBoxDecoration,
           borderRadius: BorderRadius.circular(10),
         ),
 

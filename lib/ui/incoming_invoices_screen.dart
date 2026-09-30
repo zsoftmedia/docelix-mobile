@@ -1,5 +1,6 @@
 import 'package:docelix_mobileapp/controllers/incoming_invoices_controller.dart';
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -51,7 +52,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
               searching
                   ? Icons.close_rounded
                   : Icons.arrow_back_ios_new_rounded,
-              color: const Color(0xFF0A2342),
+              color: colorsList.iconColor,
               size: width * 0.05,
             ),
           );
@@ -74,14 +75,14 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
               TextInputAction.search,
 
               style: TextStyle(
-                color: const Color(0xFF172A46),
+                color: colorsList.textColor,
                 fontSize: width * 0.04,
               ),
 
               decoration: const InputDecoration(
                 hintText: 'Search incoming invoices...',
                 hintStyle: TextStyle(
-                  color: Color(0xFF98A2B3),
+                  color: colorsList.textHintColor,
                 ),
                 border: InputBorder.none,
                 isDense: true,
@@ -92,7 +93,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
           return Text(
             "Incoming Invoices",
             style: TextStyle(
-              color: const Color(0xFF0A2342),
+              color: colorsList.textColor,
               fontSize: width * 0.055,
               fontWeight: FontWeight.w700,
             ),
@@ -116,7 +117,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
               incomingInvoicesController.openSearch,
               icon: Icon(
                 Icons.search_rounded,
-                color: const Color(0xFF0A2342),
+                color: colorsList.iconColor,
                 size: width * 0.065,
               ),
             );
@@ -154,7 +155,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                   Text(
                     "All Invoices",
                     style: TextStyle(
-                      color: const Color(0xFF172A46),
+                      color: colorsList.textColor,
                       fontSize: width * 0.045,
                   //    fontWeight: FontWeight.w700,
                     ),
@@ -175,7 +176,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                       return Text(
                       "${incomingInvoicesController.invoices.length} Invoices",
                       style: TextStyle(
-                        color: const Color(0xFF063C70),
+                        color: colorsList.textColor,
                         fontSize: width * 0.032,
                       //  fontWeight: FontWeight.w600,
                       ),
@@ -223,7 +224,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                           child: Text(
                             'No incoming invoices found.',
                             style: TextStyle(
-                              color: Color(0xFF667085),
+                              color: colorsList.textHintColor,
                               fontSize: 15,
                             ),
                           ),
@@ -292,10 +293,10 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                               height: height,
                             ),
 
-                            const Divider(
+                            Divider(
                               height: 1,
                               thickness: 1,
-                              color: Color(0xFFE9EDF3),
+                              color: colorsList.dividerColor,
                             ),
                           ],
                         ),
@@ -329,8 +330,8 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
 
         },
 
-        backgroundColor: const Color(0xFF063C70),
-        foregroundColor: Colors.white,
+        backgroundColor: colorsList.colorButton,
+        foregroundColor: colorsList.colorWhite,
 
         elevation: 4,
 
@@ -343,6 +344,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
           style: TextStyle(
             fontSize: width * 0.038,
             fontWeight: FontWeight.w700,
+            color: colorsList.colorWhite
           ),
         ),
       ),
@@ -397,7 +399,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
             ),
             child: Icon(
               Icons.receipt_long_sharp,
-              color: const Color(0xFF063C70),
+              color: colorsList.iconColor,
               size: width * 0.09,
             ),
           ),
@@ -414,7 +416,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: const Color(0xFF172A46),
+                    color: colorsList.textColor,
                     fontSize: width * 0.04,
                   //  fontWeight: FontWeight.w700,
                   ),
@@ -427,7 +429,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: const Color(0xFF71829A),
+                    color: colorsList.textHintColor,
                     fontSize: width * 0.033,
                    // fontWeight: FontWeight.w400,
                   ),
@@ -466,7 +468,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
               Text(
                 '${invoice.currency ?? ''} ${invoice.totalAmount ?? 0}',
                 style: TextStyle(
-                  color: const Color(0xFF172A46),
+                  color: colorsList.textColor,
                   fontSize: width * 0.043,
                 //  fontWeight: FontWeight.w800,
                 ),

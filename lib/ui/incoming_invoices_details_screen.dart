@@ -1,5 +1,6 @@
 import 'package:docelix_mobileapp/controllers/incoming_invoices_details_controller.dart';
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -41,7 +42,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: colorsList.backgroundColor,
 
       // ----------------------------------------------------------
       // APP BAR
@@ -58,7 +59,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           },
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0A2342),
+            color: colorsList.iconColor,
             size: 20,
           ),
         ),
@@ -69,7 +70,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
             Text(
               'Incoming Invoice Details',
               style: TextStyle(
-                color: const Color(0xFF0A2342),
+                color: colorsList.textColor,
                 fontSize: width * 0.045,
                 fontWeight: FontWeight.w700,
               ),
@@ -78,7 +79,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
             Text(
               '#${controller.invoiceNumberController.text}',
               style: TextStyle(
-                color: const Color(0xFF71829A),
+                color: colorsList.textHintColor,
                 fontSize: width * 0.030,
                 fontWeight: FontWeight.w400,
               ),
@@ -89,9 +90,9 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(
+            icon: Icon(
               Icons.more_vert_rounded,
-              color: Color(0xFF0A2342),
+              color: colorsList.iconColor,
             ),
           ),
         ],
@@ -685,9 +686,9 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
     return Text(
       title,
       style: TextStyle(
-        color: const Color(0xFF0A2342),
+        color: colorsList.textColor,
         fontSize: width * 0.038,
-        fontWeight: FontWeight.w700,
+      //  fontWeight: FontWeight.w700,
       ),
     );
   }
@@ -711,7 +712,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
         children: [
           Icon(
             icon,
-            color: const Color(0xFF063C70),
+            color: colorsList.iconColor,
             size: width * 0.055,
           ),
 
@@ -721,7 +722,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: const Color(0xFF71829A),
+              color: colorsList.textHintColor,
               fontSize: width * 0.027,
             ),
           ),
@@ -734,7 +735,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: const Color(0xFF0A2342),
+              color: colorsList.textColor,
               fontSize: width * 0.031,
               fontWeight: FontWeight.w700,
             ),
@@ -760,7 +761,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
         Text(
           label,
           style: TextStyle(
-            color: const Color(0xFF60728D),
+            color: colorsList.textHintColor,
             fontSize: width * 0.030,
            // fontWeight: FontWeight.w500,
           ),
@@ -776,7 +777,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           keyboardType: keyboardType,
 
           style: TextStyle(
-            color: const Color(0xFF0A2342),
+            color: colorsList.textColor,
             fontSize: width * 0.034,
            // fontWeight: FontWeight.w600,
           ),
@@ -784,7 +785,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           decoration: InputDecoration(
             prefixIcon: Icon(
               icon,
-              color: const Color(0xFF71829A),
+              color: colorsList.iconColor,
               size: width * 0.050,
             ),
             filled: true,
@@ -800,7 +801,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                 width * 0.03,
               ),
               borderSide: const BorderSide(
-                color: Color(0xFFE1E7EF),
+                color: colorsList.borderColor,
               ),
             ),
 
@@ -809,7 +810,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                 width * 0.03,
               ),
               borderSide: const BorderSide(
-                color: Color(0xFFE1E7EF),
+                color: colorsList.borderColor,
               ),
             ),
 
@@ -818,7 +819,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                 width * 0.03,
               ),
               borderSide: const BorderSide(
-                color: Color(0xFF063C70),
+                color: colorsList.textColor,
               ),
             ),
           ),
@@ -890,7 +891,7 @@ void showInvoiceDocumentDialog({
                   color: Colors.white,
                   border: Border(
                     bottom: BorderSide(
-                      color: Color(0xFFE5EAF0),
+                      color: colorsList.borderColor,
                     ),
                   ),
                 ),
@@ -913,8 +914,8 @@ void showInvoiceDocumentDialog({
                             ? Icons.picture_as_pdf_rounded
                             : Icons.image_outlined,
                         color: isPdf
-                            ? const Color(0xFFD64545)
-                            : const Color(0xFF063C70),
+                            ? colorsList.colorRed
+                            : colorsList.textColor,
                         size: width * 0.055,
                       ),
                     ),
@@ -932,7 +933,7 @@ void showInvoiceDocumentDialog({
                             'Invoice Document',
                             style: TextStyle(
                               color:
-                              const Color(0xFF0A2342),
+                              colorsList.textColor,
                               fontSize: width * 0.040,
                               fontWeight: FontWeight.w700,
                             ),
@@ -948,7 +949,7 @@ void showInvoiceDocumentDialog({
                                 : 'Image Document',
                             style: TextStyle(
                               color:
-                              const Color(0xFF71829A),
+                              colorsList.textColor,
                               fontSize: width * 0.028,
                             ),
                           ),
@@ -961,7 +962,7 @@ void showInvoiceDocumentDialog({
                     // ------------------------------------------------
 
                     Material(
-                      color: const Color(0xFFF3F5F8),
+                      color: Color(0xFFF3F5F8),
                       shape: const CircleBorder(),
 
                       child: InkWell(
@@ -980,7 +981,7 @@ void showInvoiceDocumentDialog({
                           child: Icon(
                             Icons.close_rounded,
                             color:
-                            const Color(0xFF52657A),
+                            colorsList.iconColor,
                             size: width * 0.055,
                           ),
                         ),
@@ -997,7 +998,7 @@ void showInvoiceDocumentDialog({
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  color: const Color(0xFFF5F7FA),
+                  color: colorsList.colorBoxDecoration,
 
                   child: _buildDocumentPreview(
                     fileUrl: fileUrl,
@@ -1047,7 +1048,7 @@ Widget _buildDocumentPreview({
 
             return const Center(
               child: CircularProgressIndicator(
-                color: Color(0xFF063C70),
+                color: colorsList.textColor,
               ),
             );
           },
@@ -1064,13 +1065,13 @@ Widget _buildDocumentPreview({
                 Icon(
                   Icons.broken_image_outlined,
                   size: 50,
-                  color: Color(0xFF9AA6B2),
+                  color: colorsList.iconColor,
                 ),
                 SizedBox(height: 12),
                 Text(
                   'Unable to load document.',
                   style: TextStyle(
-                    color: Color(0xFF667085),
+                    color: colorsList.textHintColor,
                   ),
                 ),
               ],
@@ -1085,7 +1086,7 @@ Widget _buildDocumentPreview({
     child: Text(
       'Unsupported document format.',
       style: TextStyle(
-        color: Color(0xFF667085),
+        color: colorsList.textHintColor,
       ),
     ),
   );

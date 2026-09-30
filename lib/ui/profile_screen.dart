@@ -54,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: const Color(0xFF0A2342),
+            color: colorsList.iconColor,
             size: width * 0.05,
           ),
         ),
@@ -62,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text(
           "Profile",
           style: TextStyle(
-            color: const Color(0xFF0A2342),
+            color: colorsList.textColor,
             fontSize: width * 0.055,
             fontWeight: FontWeight.w700,
           ),
@@ -98,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFE5E7EB),
+                      color: colorsList.borderColor,
                     ),
                   ),
                   child: Column(
@@ -160,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ? const Icon(
                                   Icons.person_outline,
                                   size: 55,
-                                  color: Color(0xFF98A2B3),
+                                  color: colorsList.iconColor,
                                 )
                                     : null,
                               );
@@ -213,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF172033),
+                            color: colorsList.textColor,
                           ),
                         ),
                       ),
@@ -229,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF667085),
+                            color: colorsList.textHintColor,
                           ),
                         ),
                       ),
@@ -249,9 +249,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   .profilePlan
                                   .value,
                               backgroundColor:
-                              const Color(0xFFEAF4FF),
+                              colorsList.backgroundColor,
                               textColor:
-                              const Color(0xFF1769AA),
+                              colorsList.textColor,
                             ),
                           ),
 
@@ -268,9 +268,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   .profileRole
                                   .value,
                               backgroundColor:
-                              const Color(0xFFF2F4F7),
+                              colorsList.backgroundColor,
                               textColor:
-                              const Color(0xFF475467),
+                              colorsList.textColor,
                             )
                                 : const SizedBox(),
                           ),
@@ -286,7 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: const Text(
                           'Change Profile Picture',
                           style: TextStyle(
-                            color: Color(0xFF1769AA),
+                            color: colorsList.textColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -306,8 +306,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   'Account Information',
                   style: TextStyle(
                     fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF172033),
+                    //fontWeight: FontWeight.w600,
+                    color: colorsList.textColor,
                   ),
                 ),
 
@@ -320,7 +320,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFE5E7EB),
+                      color: colorsList.borderColor,
                     ),
                   ),
                   child: Column(
@@ -386,8 +386,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   'Account Details',
                   style: TextStyle(
                     fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF172033),
+                  //  fontWeight: FontWeight.w600,
+                    color: colorsList.textColor,
                   ),
                 ),
 
@@ -399,7 +399,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFE5E7EB),
+                      color: colorsList.borderColor,
                     ),
                   ),
                   child: Column(
@@ -535,10 +535,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF344054),
+          color: colorsList.textColor,
         ),
       ),
     );
@@ -554,7 +554,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return InputDecoration(
       hintText: hint,
       filled: true,
-      fillColor: const Color(0xFFF9FAFB),
+      fillColor: colorsList.backgroundColor,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 14,
         vertical: 13,
@@ -562,19 +562,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
         borderSide: const BorderSide(
-          color: Color(0xFFD0D5DD),
+          color: colorsList.borderColor,
         ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
         borderSide: const BorderSide(
-          color: Color(0xFFD0D5DD),
+          color: colorsList.borderColor,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
         borderSide: const BorderSide(
-          color: Color(0xFF1769AA),
+          color: colorsList.focusedBorderColor,
           width: 1.2,
         ),
       ),
@@ -599,9 +599,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF667085),
+                color: colorsList.textHintColor,
               ),
             ),
           ),
@@ -612,10 +612,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               value.isEmpty ? '-' : value,
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF172033),
+                color: colorsList.textColor,
               ),
             ),
           ),
@@ -629,10 +629,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // =========================================================
 
   Widget _divider() {
-    return const Divider(
+    return Divider(
       height: 1,
       thickness: 1,
-      color: Color(0xFFE5E7EB),
+      color: colorsList.dividerColor,
     );
   }
 }

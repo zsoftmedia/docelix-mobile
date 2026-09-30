@@ -211,7 +211,7 @@ class _LoginPageState extends State<LoginScreen> {
                             loginController.rememberMe.value = value ?? false;
                           },
                           side: const BorderSide(
-                            color: Color(0xFF333333),
+                            color: colorsList.textColor,
                             width: 1.4,
                           ),
                           shape: RoundedRectangleBorder(
@@ -231,7 +231,7 @@ class _LoginPageState extends State<LoginScreen> {
                       "Remember me",
                       style: TextStyle(
                         fontSize: width * 0.037,
-                        color: const Color(0xFF333333),
+                        color: colorsList.textColor,
                       ),
                     ),
                   ],
@@ -284,7 +284,7 @@ class _LoginPageState extends State<LoginScreen> {
 
                     const Expanded(
                       child: Divider(
-                        color: Color(0xFFD5D5D5),
+                        color: colorsList.dividerColor,
                         thickness: 1,
                       ),
                     ),
@@ -298,14 +298,14 @@ class _LoginPageState extends State<LoginScreen> {
                         "or continue with",
                         style: TextStyle(
                           fontSize: width * 0.035,
-                          color: const Color(0xFF777777),
+                          color: colorsList.textColor,
                         ),
                       ),
                     ),
 
                     const Expanded(
                       child: Divider(
-                        color: Color(0xFFD5D5D5),
+                        color: colorsList.dividerColor,
                         thickness: 1,
                       ),
                     ),
@@ -385,7 +385,7 @@ class _LoginPageState extends State<LoginScreen> {
 
                       style: TextStyle(
                         fontSize: width * 0.037,
-                        color: const Color(0xFF777777),
+                        color: colorsList.dividerColor,
                       ),
 
                       children: [
@@ -395,7 +395,7 @@ class _LoginPageState extends State<LoginScreen> {
 
                           style: TextStyle(
                             fontSize: width * 0.037,
-                            color: const Color(0xFF198754),
+                            color: colorsList.green,
                             fontWeight: FontWeight.w600,
                           ),
 

@@ -52,7 +52,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
               searching
                   ? Icons.close_rounded
                   : Icons.arrow_back_ios_new_rounded,
-              color: const Color(0xFF0A2342),
+              color: colorsList.iconColor,
               size: width * 0.05,
             ),
           );
@@ -73,14 +73,14 @@ class _ClientsScreenState extends State<ClientsScreen> {
               TextInputAction.search,
 
               style: TextStyle(
-                color: const Color(0xFF172A46),
+                color: colorsList.textColor,
                 fontSize: width * 0.04,
               ),
 
               decoration: const InputDecoration(
                 hintText: 'Search clients...',
                 hintStyle: TextStyle(
-                  color: Color(0xFF98A2B3),
+                  color: colorsList.textHintColor,
                 ),
                 border: InputBorder.none,
                 isDense: true,
@@ -91,7 +91,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
           return Text(
             "Clients",
             style: TextStyle(
-              color: const Color(0xFF0A2342),
+              color: colorsList.textColor,
               fontSize: width * 0.055,
               fontWeight: FontWeight.w700,
             ),
@@ -114,7 +114,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
               onPressed: controller.openSearch,
               icon: Icon(
                 Icons.search_rounded,
-                color: const Color(0xFF0A2342),
+                color: colorsList.iconColor,
                 size: width * 0.065,
               ),
             );
@@ -152,7 +152,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   Text(
                     "All Clients",
                     style: TextStyle(
-                      color: const Color(0xFF172A46),
+                      color: colorsList.textColor,
                       fontSize: width * 0.045,
                      // fontWeight: FontWeight.w700,
                     ),
@@ -172,7 +172,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                       child: Text(
                         "${controller.clients.length} Clients",
                         style: TextStyle(
-                          color: const Color(0xFF063C70),
+                          color: colorsList.textColor,
                           fontSize: width * 0.032,
                          // fontWeight: FontWeight.w600,
                         ),
@@ -195,10 +195,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
                 if (controller.isLoading.value &&
                     controller.filteredClients.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Color(0xFF063C70),
+                      color: colorsList.textColor,
                     ),
                   );
                 }
@@ -220,7 +220,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           : 'No clients found.',
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF64748B),
+                        color: colorsList.textHintColor,
                       ),
                     ),
                   );
@@ -280,7 +280,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
         },
 
-        backgroundColor: const Color(0xFF063C70),
+        backgroundColor: colorsList.colorButton,
         foregroundColor: Colors.white,
 
         elevation: 4,
@@ -358,12 +358,12 @@ class _ClientsScreenState extends State<ClientsScreen> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: colorsList.colorBoxDecoration,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.person_outline_rounded,
-                      color: Color(0xFF64748B),
+                      color: colorsList.iconColor,
                       size: 21,
                     ),
                   ),
@@ -382,8 +382,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Color(0xFF172033),
+                          style: TextStyle(
+                            color: colorsList.textColor,
                             fontSize: 18,
                           //  fontWeight: FontWeight.w600,
                             height: 1.2,
@@ -402,7 +402,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                       const Icon(
                                         Icons.email_outlined,
                                         size: 14,
-                                        color: Color(0xFF94A3B8),
+                                        color: colorsList.iconColor,
                                       ),
                                       const SizedBox(width: 5),
                                       Expanded(
@@ -411,7 +411,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            color: Color(0xFF64748B),
+                                            color: colorsList.textColor,
                                             fontSize: 12.5,
                                             height: 1.2,
                                           ),
@@ -431,7 +431,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                       const Icon(
                                         Icons.phone_outlined,
                                         size: 14,
-                                        color: Color(0xFF94A3B8),
+                                        color: colorsList.iconColor,
                                       ),
                                       const SizedBox(width: 5),
                                       Expanded(
@@ -440,7 +440,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            color: Color(0xFF64748B),
+                                            color: colorsList.textColor,
                                             fontSize: 12.5,
                                             height: 1.2,
                                           ),
@@ -460,7 +460,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                               const Icon(
                                 Icons.location_on_outlined,
                                 size: 13,
-                                color: Color(0xFFB0BAC7),
+                                color: colorsList.iconColor,
                               ),
                               const SizedBox(width: 4),
                               Expanded(
@@ -469,7 +469,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                    color: Color(0xFF94A3B8),
+                                    color: colorsList.textColor,
                                     fontSize: 12,
                                     height: 1.2,
                                   ),
@@ -490,7 +490,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
               thickness: 1,
               indent: 52,
               endIndent: 4,
-              color: Color(0xFFEFF2F6),
+              color: colorsList.dividerColor,
             ),
           ],
         ),

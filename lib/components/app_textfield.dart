@@ -50,13 +50,9 @@ class AppTextField extends StatelessWidget {
 // ============================================================
 
   final bool isDropdown;
-
   final List<String>? dropdownItems;
-
   final String? selectedValue;
-
   final void Function(String?)? onDropdownChanged;
-
   final IconData dropdownIcon;
 
 // ============================================================
@@ -143,16 +139,16 @@ class AppTextField extends StatelessWidget {
     this.dropdownIcon = Icons.keyboard_arrow_down,
 
 // Colors
-    this.borderColor = const Color(0xFF333333),
-    this.focusedBorderColor = const Color(0xFF222222),
+    this.borderColor = const Color(0xFFD1D5DB),
+    this.focusedBorderColor = const Color(0xFF5f626a),
     this.fillColor = Colors.white,
-    this.textColor = const Color(0xFF222222),
-    this.hintColor = const Color(0xFF9A9A9A),
+    this.textColor = const Color(0xFF4b4f57),
+    this.hintColor = const Color(0xFFA8A8A8),
 
 // Border
     this.borderWidth = 1.2,
     this.focusedBorderWidth = 1.8,
-    this.borderRadius = 4,
+    this.borderRadius = 7,
 
 // Text size
     this.fontSize = 16,
@@ -169,7 +165,7 @@ class AppTextField extends StatelessWidget {
     this.minLines,
     this.maxLength,
 
-// Capitalization
+  // Capitalization
     this.textCapitalization = TextCapitalization.none,
   });
 
@@ -182,7 +178,6 @@ class AppTextField extends StatelessWidget {
 // ----------------------------------------------------------
 // DROPDOWN
 // ----------------------------------------------------------
-
     if (isDropdown) {
       return DropdownButtonFormField<String>(
         value: selectedValue,
@@ -222,9 +217,9 @@ class AppTextField extends StatelessWidget {
       );
     }
 
-// ----------------------------------------------------------
-// NORMAL TEXT FIELD
-// ----------------------------------------------------------
+  // ----------------------------------------------------------
+  // NORMAL TEXT FIELD
+  // ----------------------------------------------------------
 
     return TextFormField(
       controller: controller,

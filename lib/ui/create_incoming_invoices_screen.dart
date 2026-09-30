@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:docelix_mobileapp/controllers/create_incoming_invoice_controller.dart';
 import 'package:docelix_mobileapp/controllers/ocr_controller.dart';
 import 'package:docelix_mobileapp/ui/ui_custom/topCurveClipper.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/string_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,7 +33,7 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
 
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0A2342),
+            color: colorsList.colorBackArrow,
             size: width * 0.05,
           ),
         ),
@@ -40,7 +41,7 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
         title: Text(
           "Create Invoice",
           style: TextStyle(
-            color: const Color(0xFF0A2342),
+            color: colorsList.textColor,
             fontSize: width * 0.055,
             fontWeight: FontWeight.w700,
           ),
@@ -116,7 +117,7 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
                   const Text( 'Capture an invoice using your camera or select an image or PDF file.',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF667085),
+                      color: colorsList.textHintColor,
                       height: 1.4,
                     ),
                   ),
@@ -142,11 +143,11 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
                           height: 52,
                           child: ElevatedButton.icon(
                             onPressed: incomingInvoiceController.captureFromCamera,
-                            icon: const Icon( Icons.camera_alt_outlined, size: 21, ),
+                            icon: Icon( Icons.camera_alt_outlined, size: 21, ),
                             label: const Text( 'Camera',
                               style: TextStyle( fontSize: 15, fontWeight: FontWeight.w600, ), ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1976D2),
+                              backgroundColor: colorsList.colorButton,
                               foregroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
@@ -169,12 +170,12 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
                             icon: const Icon(
                               Icons.attach_file_outlined,
                               size: 21, ),
-                            label: const Text( 'Select File',
+                            label: Text( 'Select File',
                               style: TextStyle( fontSize: 15,
                                 fontWeight: FontWeight.w600, ), ),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF1976D2),
-                              side: const BorderSide( color: Color(0xFF1976D2), ),
+                              foregroundColor: colorsList.colorButton,
+                              side: const BorderSide( color: colorsList.colorButton, ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -225,14 +226,14 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
           children: [
             Icon( Icons.document_scanner_outlined,
               size: 60,
-              color: Color(0xFF98A2B3), ),
+              color: colorsList.iconColor, ),
             SizedBox(height: 12),
             Text( 'No document selected',
-              style: TextStyle( fontSize: 15, color: Color(0xFF667085),
+              style: TextStyle( fontSize: 15, color: colorsList.textHintColor,
               ), ),
             SizedBox(height: 5),
             Text( 'Use Camera or Select File',
-              style: TextStyle( fontSize: 13, color: Color(0xFF98A2B3),
+              style: TextStyle( fontSize: 13, color: colorsList.textHintColor,
               ),
             ),
           ],
@@ -251,7 +252,7 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFFE4E7EC), ), ),
+            color: colorsList.borderColor, ), ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: Image.file(
@@ -284,7 +285,7 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
             const Icon(
               Icons.picture_as_pdf_outlined,
               size: 65,
-              color: Color(0xFFD32F2F),
+              color: colorsList.red,
             ),
             const SizedBox(height: 12),
             Padding(
@@ -293,18 +294,18 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF344054),
+                  color: colorsList.textColor,
                 ),
               ),
             ),
             const SizedBox(height: 6),
-            const Text( 'PDF document',
+            Text( 'PDF document',
               style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF667085),
+                color: colorsList.textHintColor,
               ),
             ),
           ],
@@ -337,7 +338,7 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
         children: [
           Icon( isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
             size: 24,
-            color: isPdf ? const Color(0xFFD32F2F) : const Color(0xFF1976D2),
+            color: isPdf ? const Color(0xFFD32F2F) : const Color(0xFF063C70),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -348,14 +349,14 @@ class _CreateIncomingInvoicesScreenState extends State<CreateIncomingInvoicesScr
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF344054),
+                color: colorsList.textColor,
               ),
             ),
           ),
           IconButton(
             onPressed: incomingInvoiceController.clearFile,
             icon: const Icon( Icons.close, size: 20, ),
-            color: const Color(0xFF667085),
+            color: colorsList.iconColor,
             tooltip: 'Remove',
           ),
         ],

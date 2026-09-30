@@ -39,7 +39,7 @@ class CatalogsScreen extends StatelessWidget {
           onPressed: Get.back,
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0A2342),
+            color: colorsList.colorBackArrow,
             size: 20,
           ),
         ),
@@ -47,7 +47,7 @@ class CatalogsScreen extends StatelessWidget {
         title: const Text(
           'Items',
           style: TextStyle(
-            color: Color(0xFF0A2342),
+            color: colorsList.textColor,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -72,7 +72,7 @@ class CatalogsScreen extends StatelessWidget {
             child: Text(
               controller.errorMessage.value,
               style: const TextStyle(
-                color: Colors.red,
+                color: colorsList.red,
               ),
             ),
           );
@@ -80,12 +80,12 @@ class CatalogsScreen extends StatelessWidget {
 
         // Empty
         if (controller.catalogList.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
               'No items found.',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: colorsList.colorGray_350,
               ),
             ),
           );
@@ -125,7 +125,7 @@ class CatalogsScreen extends StatelessWidget {
     required bool lowStock,
   }) {
     return Container(
-      color: Colors.white,
+      color: colorsList.colorWhite,
       child: Column(
         children: [
           Padding(
@@ -139,7 +139,7 @@ class CatalogsScreen extends StatelessWidget {
                 // Item icon
                 Icon(
                   Icons.inventory_2_outlined,
-                  color: const Color(0xFF5F6B7A),
+                  color: colorsList.iconColor,
                   size: width * 0.06,
                 ),
 
@@ -155,7 +155,7 @@ class CatalogsScreen extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: const Color(0xFF172A46),
+                          color: colorsList.textColor,
                           fontSize: width * 0.043,
                         //  fontWeight: FontWeight.w600,
                         ),
@@ -168,7 +168,7 @@ class CatalogsScreen extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: const Color(0xFF7A8699),
+                          color: colorsList.textColor,
                           fontSize: width * 0.032,
                         ),
                       ),
@@ -185,7 +185,7 @@ class CatalogsScreen extends StatelessWidget {
                     Text(
                       item.unitPriceNet?.toStringAsFixed(2) ?? '0.00',
                       style: TextStyle(
-                        color: const Color(0xFF172A46),
+                        color: colorsList.textColor,
                         fontSize: width * 0.037,
                       //  fontWeight: FontWeight.w600,
                       ),
@@ -196,7 +196,7 @@ class CatalogsScreen extends StatelessWidget {
                     Text(
                       item.unitCode ?? '',
                       style: TextStyle(
-                        color: const Color(0xFF7A8699),
+                        color: colorsList.textColor,
                         fontSize: width * 0.029,
                       ),
                     ),
@@ -207,10 +207,10 @@ class CatalogsScreen extends StatelessWidget {
           ),
 
           // List separator
-          const Divider(
+          Divider(
             height: 1,
             thickness: 1,
-            color: Color(0xFFE8ECF1),
+            color: colorsList.dividerColor,
             indent: 20,
             endIndent: 20,
           ),

@@ -28,7 +28,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
       backgroundColor: colorsList.backgroundColor,
 
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorsList.colorWhite,
         elevation: 0,
         surfaceTintColor: Colors.white,
 
@@ -36,7 +36,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
           onPressed: Get.back,
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0A2342),
+            color: colorsList.colorBackArrow,
             size: 20,
           ),
         ),
@@ -44,7 +44,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
         title: const Text(
           'Client Details',
           style: TextStyle(
-            color: colorsList.primaryColor,
+            color: colorsList.textColor,
             fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
@@ -395,7 +395,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
   Widget _invoiceSummary(ClientScreenModel client) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -439,7 +439,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
           const Divider(
             height: 1,
             thickness: 1,
-            color: colorsList.borderColor,
+            color: colorsList.dividerColor,
           ),
 
           const SizedBox(height: 4),
@@ -485,8 +485,8 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: colorsList.mutedTextColor,
+                style: TextStyle(
+                  color: colorsList.textColor,
                   fontSize: 11.5,
                 ),
               ),
@@ -518,7 +518,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
     return const Divider(
       height: 1,
       thickness: 1,
-      color: colorsList.borderColor,
+      color: colorsList.dividerColor,
     );
   }
 

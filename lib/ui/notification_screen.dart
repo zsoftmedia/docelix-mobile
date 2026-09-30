@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'ui_custom/topCurveClipper.dart';
@@ -30,7 +31,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           onPressed: Get.back,
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0A2342),
+            color: colorsList.iconColor,
             size: 20,
           ),
         ),
@@ -38,7 +39,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         title: const Text(
           'Notification',
           style: TextStyle(
-            color: Color(0xFF0A2342),
+            color: colorsList.textColor,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -68,6 +69,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Text(
                 'Notification not found',
                 textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: colorsList.textHintColor,
+                ),
               ),
             ),
           ],

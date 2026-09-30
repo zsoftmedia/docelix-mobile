@@ -31,7 +31,7 @@ class AddClientScreen extends StatelessWidget {
           onPressed: Get.back,
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF0A2342),
+            color: colorsList.colorBackArrow,
             size: 20,
           ),
         ),
@@ -39,7 +39,7 @@ class AddClientScreen extends StatelessWidget {
         title: const Text(
           'Add Client',
           style: TextStyle(
-            color: Color(0xFF0A2342),
+            color: colorsList.textColor,
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -66,7 +66,7 @@ class AddClientScreen extends StatelessWidget {
               'Create a new client and manage their information.',
               style: TextStyle(
                 fontSize: width * 0.040,
-                color: const Color(0xFF60728D),
+                color: colorsList.textHintColor,
               ),
             ),
 
@@ -305,7 +305,7 @@ class AddClientScreen extends StatelessWidget {
                 text: 'Save Client',
                 icon: Icons.person_add_alt_1_rounded,
                 height: 52,
-                backgroundColor: colorsList.colorGray_1100,
+                backgroundColor: colorsList.colorButton,
                 foregroundColor: Colors.white,
                 isLoading: controller.isLoading.value,
                 onPressed: controller.saveClient,
@@ -331,7 +331,7 @@ class AddClientScreen extends StatelessWidget {
       children: [
         Icon(
           icon,
-          color: colorsList.colorGray_1100,
+          color: colorsList.iconColor,
           size: 22,
         ),
 
@@ -340,7 +340,7 @@ class AddClientScreen extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            color: colorsList.colorGray_1100,
+            color: colorsList.textColor,
             fontSize: 16,
            // fontWeight: FontWeight.w700,
           ),
@@ -357,7 +357,7 @@ class AddClientScreen extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: colorsList.colorGray_1100,
+        color: colorsList.textColor,
         fontSize: 14,
        // fontWeight: FontWeight.w600,
       ),

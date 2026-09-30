@@ -161,7 +161,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Text(
                 "Docelix",
                 style: TextStyle(
-                  color: colorsList.primaryText,
+                  color: colorsList.textColor,
                   fontSize: width * 0.065,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.8,
@@ -899,34 +899,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         // RECENT TRANSACTION
         // ==========================================================
 
-        /*_buildAttentionRequired(
-          width: width,
-          height: height,
-        ),*/
-
-        _buildRecentTransactions(
+        /*_buildRecentTransactions(
           width: width,
           height: height,
         ),
 
-        SizedBox(height: height * 0.018),
+        SizedBox(height: height * 0.018),*/
 
-        // ==========================================================
-        // AI INSIGHT
-        // ==========================================================
-
-        /*_buildAiInsight(
-          width: width,
-          height: height,
-        ),*/
       ],
     );
   }
 
-
-// ================================================================
-// FINANCIAL CARD
-// ================================================================
+    // ================================================================
+    // FINANCIAL CARD
+    // ================================================================
 
   Widget _financialCard({
     required double width,
@@ -1055,10 +1041,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
-// ================================================================
-// QUICK ACTIONS
-// ================================================================
+  // ================================================================
+  // QUICK ACTIONS
+  // ================================================================
 
   Widget _buildQuickActions({
     required double width,
@@ -1181,10 +1166,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
-// ================================================================
-// QUICK ACTION ITEM
-// ================================================================
+  // ================================================================
+  // QUICK ACTION ITEM
+  // ================================================================
 
   Widget _quickActionItem({
     required double width,
@@ -1234,8 +1218,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   // ================================================================
-// OUTSTANDING AMOUNT
-// ================================================================
+  // OUTSTANDING AMOUNT
+  // ================================================================
 
   Widget _buildOutStandingAmount({
     required double width,
@@ -1372,14 +1356,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-// ================================================================
-// RECENT TRANSACTIONS
-// ================================================================
+  // ================================================================
+  // RECENT TRANSACTIONS
+  // ================================================================
 
   Widget _buildRecentTransactions({
     required double width,
     required double height,
-  }) {
+  })
+  {
     return Obx(() {
       final transactions =
           dashboardController.dashboardData.value?.recentTransactions ?? [];
@@ -1470,10 +1455,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-
-// ================================================================
-// ATTENTION ITEM
-// ================================================================
+  // ================================================================
+  // ATTENTION ITEM
+  // ================================================================
 
   Widget _attentionItem({
     required double width,
@@ -1555,14 +1539,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   // ================================================================
-// RECENT TRANSACTION ITEM
-// ================================================================
+  // RECENT TRANSACTION ITEM
+  // ================================================================
 
   Widget _recentTransactionItem({
     required double width,
     required RecentTransactionModel transaction,
     required bool showDivider,
-  }) {
+  })
+  {
     final type = transaction.type?.toLowerCase() ?? '';
 
     final bool isIncome =
@@ -1665,89 +1650,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-// ================================================================
-// AI INSIGHT
-// ================================================================
-
-  Widget _buildAiInsight({
-    required double width,
-    required double height,
-  })
-  {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: width * 0.030,
-        vertical: width * 0.028,
-      ),
-      decoration: BoxDecoration(
-        color: colorsList.cardColor,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: colorsList.cyan.withOpacity(0.25),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: width * 0.085,
-            height: width * 0.085,
-            decoration: BoxDecoration(
-              color: colorsList.cyan.withOpacity(0.10),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.auto_awesome_rounded,
-              color: colorsList.cyan,
-              size: width * 0.045,
-            ),
-          ),
-
-          SizedBox(width: width * 0.025),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "AI insight",
-                  style: TextStyle(
-                    color: colorsList.cyan,
-                    fontSize: width * 0.023,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-
-                SizedBox(height: width * 0.005),
-
-                Text(
-                  "Revenue increased 12% compared with last month.",
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorsList.primaryText,
-                    fontSize: width * 0.024,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Icon(
-            Icons.chevron_right_rounded,
-            color: colorsList.secondaryText,
-            size: width * 0.050,
-          ),
-        ],
-      ),
-    );
-  }
-
-
-// ================================================================
-// CURRENCY FORMAT
-// ================================================================
+  // ================================================================
+  // CURRENCY FORMAT
+  // ================================================================
 
   String _formatCurrency(dynamic value) {
     double amount = 0;
@@ -1763,184 +1668,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return "€ ${amount.toStringAsFixed(2)}";
   }
-  
-
-  // ================================================================
-  // TAX RETURN
-  // ================================================================
-
-  Widget _buildTaxReturn({
-    required double width,
-    required double height,
-  }) 
-  {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(
-        width * 0.045,
-      ),
-      decoration: BoxDecoration(
-        color: colorsList.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE5DDF0),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: width * 0.11,
-                height: width * 0.11,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2EAFF),
-                  borderRadius:
-                  BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.shield_outlined,
-                  color: colorsList.purple,
-                  size: width * 0.055,
-                ),
-              ),
-
-              SizedBox(
-                width: width * 0.035,
-              ),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "TAX RETURN",
-                      style: TextStyle(
-                        color:
-                        colorsList.secondaryText,
-                        fontSize: width * 0.026,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.004,
-                    ),
-
-                    Text(
-                      "\$00.0",
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width * 0.055,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: width * 0.025,
-                      vertical: height * 0.005,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2EAFF),
-                      borderRadius:
-                      BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      "FY 2026",
-                      style: TextStyle(
-                        color: colorsList.purple,
-                        fontSize: width * 0.027,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(
-                    height: height * 0.008,
-                  ),
-
-                  Text(
-                    "refund pending",
-                    style: TextStyle(
-                      color:
-                      colorsList.secondaryText,
-                      fontSize: width * 0.024,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          SizedBox(
-            height: height * 0.02,
-          ),
-
-          Row(
-            mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Filing status",
-                style: TextStyle(
-                  color: colorsList.secondaryText,
-                  fontSize: width * 0.026,
-                ),
-              ),
-
-              Text(
-                "0% processed",
-                style: TextStyle(
-                  color: colorsList.purple,
-                  fontSize: width * 0.027,
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(
-            height: height * 0.008,
-          ),
-
-          Container(
-            height: 4,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: colorsList.progressBackground,
-              borderRadius:
-              BorderRadius.circular(10),
-            ),
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: 0.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorsList.purple,
-                  borderRadius:
-                  BorderRadius.circular(10),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 
   // ================================================================
   // TRANSACTIONS TAB
@@ -2363,7 +2090,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   String _recentTransactionSubtitle(
       RecentTransactionModel transaction,
-      ) {
+      )
+  {
     final parts = <String>[];
 
     if (transaction.date?.trim().isNotEmpty == true) {
@@ -2384,11 +2112,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// ================================================================
-// PROFIT CHART PAINTER
-// ================================================================
+  // ================================================================
+  // PROFIT CHART PAINTER
+  // ================================================================
 
-class _ProfitChartPainter extends CustomPainter {
+  class _ProfitChartPainter extends CustomPainter {
   final Color lineColor;
 
   _ProfitChartPainter({
