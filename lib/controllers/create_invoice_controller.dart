@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
@@ -97,8 +99,21 @@ class CreateInvoiceController extends GetxController {
 
   final recurringInvoice = false.obs;
 
+  /*void toggleAutoGenerate(bool value) {
+    autoGenerate.value = value;
+  }*/
+
   void toggleAutoGenerate(bool value) {
     autoGenerate.value = value;
+
+    if (value) {
+      final invoiceDate = _getInvoiceDate();
+
+      invoiceNumberController.text =
+          generateInvoiceNumber(date: invoiceDate);
+    } else {
+      invoiceNumberController.clear();
+    }
   }
 
   void toggleEnableVat(bool value) {
@@ -152,6 +167,10 @@ class CreateInvoiceController extends GetxController {
     getCompanies();
     // Get List Units
     getUnits();
+
+    if (autoGenerate.value) {
+      invoiceNumberController.text = generateInvoiceNumber();
+    }
   }
 
   // ============================================================
@@ -775,6 +794,8 @@ class CreateInvoiceController extends GetxController {
 
     final invoiceNumber = invoiceNumberController.text.trim();
 
+    print('Auto Gene:---- $invoiceNumber');
+
     if (!autoGenerate.value && invoiceNumber.isEmpty) {
       AppSnackbar.error(
         title: 'Required',
@@ -825,7 +846,7 @@ class CreateInvoiceController extends GetxController {
         // If auto generation is enabled, backend should generate it.
         // If backend requires a string, send empty string.
         'invoice_number': autoGenerate.value
-            ? ''
+            ? invoiceNumberController.text.trim()
             : invoiceNumber,
 
         'issue_date': issueDate,
@@ -1322,4 +1343,48 @@ class CreateInvoiceController extends GetxController {
     debugPrint('Selected Unit Label: ${selected.label}');
     debugPrint('Selected Unit Code: ${selected.code}');
   }
+
+  DateTime _getInvoiceDate() {
+    final value = invoiceDateController.text.trim();
+
+    if (value.isEmpty) {
+      return DateTime.now();
+    }
+
+    try {
+      final parts = value.split('.');
+
+      if (parts.length == 3) {
+        return DateTime(
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
+        );
+      }
+    } catch (e) {
+      debugPrint('Invoice date parse error: $e');
+    }
+
+    return DateTime.now();
+  }
+
+  // ============================================================
+// GENERATE INVOICE NUMBER
+// ============================================================
+
+  String generateInvoiceNumber({DateTime? date}) {
+    final invoiceDate = date ?? DateTime.now();
+
+    final year = invoiceDate.year.toString().substring(2);
+    final month = invoiceDate.month.toString().padLeft(2, '0');
+    final day = invoiceDate.day.toString().padLeft(2, '0');
+
+    // Random 4-digit number
+    final random = Random();
+    final randomNumber =
+    random.nextInt(10000).toString().padLeft(4, '0');
+
+    return 'INVM-$year$month$day' '00-$randomNumber';
+  }
+
 }

@@ -475,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed:
                     profileController.saveChanges,
                     width: double.infinity,
-                    height: height * 0.070,
+                    height: height * 0.062,
                     backgroundColor:
                     colorsList.primaryBlue,
                     disabledBackgroundColor:

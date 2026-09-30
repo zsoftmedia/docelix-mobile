@@ -22,7 +22,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: colorsList.backgroundColor,
 
       // ============================================================
       // APP BAR

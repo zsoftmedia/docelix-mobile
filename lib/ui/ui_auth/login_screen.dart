@@ -256,7 +256,7 @@ class _LoginPageState extends State<LoginScreen> {
                     },
 
                     width: double.infinity,
-                    height: height * 0.070,
+                    height: height * 0.062,
 
                     backgroundColor: colorsList.primaryBlue,
                     disabledBackgroundColor: colorsList.primaryBlue,
@@ -385,14 +385,13 @@ class _LoginPageState extends State<LoginScreen> {
 
                       style: TextStyle(
                         fontSize: width * 0.037,
-                        color: colorsList.dividerColor,
+                        color: colorsList.textColor,
                       ),
 
                       children: [
 
                         TextSpan(
                           text: "Demo",
-
                           style: TextStyle(
                             fontSize: width * 0.037,
                             color: colorsList.green,

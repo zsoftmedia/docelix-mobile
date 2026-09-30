@@ -14,6 +14,7 @@ class AddClientScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -304,7 +305,7 @@ class AddClientScreen extends StatelessWidget {
                   () => AppButton(
                 text: 'Save Client',
                 icon: Icons.person_add_alt_1_rounded,
-                height: 52,
+                height: height * 0.062,
                 backgroundColor: colorsList.colorButton,
                 foregroundColor: Colors.white,
                 isLoading: controller.isLoading.value,

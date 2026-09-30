@@ -413,7 +413,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     // --------------------------------------------------
                     SizedBox(
                       width: double.infinity,
-                      height: height * 0.070,
+                      height: height * 0.062,
 
                       child: ElevatedButton(
                         onPressed: () async {

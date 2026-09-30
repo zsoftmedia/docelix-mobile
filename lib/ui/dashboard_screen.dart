@@ -1153,9 +1153,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   iconColor: colorsList.purple,
                   onTap: () {
                     // Get.toNamed('/AddExpenseScreen');
-                    AppSnackbar.info(
+
+                    Get.toNamed('/IncomingInvoicesScreen',
+                      arguments: 'Incoming Invoices Screen',
+                    );
+
+                   /* AppSnackbar.info(
                         title: 'Coming Soon',
-                        message: 'Add Expenses coming soon.');
+                        message: 'Add Expenses coming soon.');*/
                   },
                 ),
               ),
@@ -1666,7 +1671,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           0;
     }
 
-    return "€ ${amount.toStringAsFixed(2)}";
+    final parts = amount.toStringAsFixed(2).split('.');
+    final integerPart = parts[0];
+    final decimalPart = parts[1];
+
+    final formattedInteger = integerPart.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+          (match) => ',',
+    );
+
+    return '€ $formattedInteger.$decimalPart';
   }
 
   // ================================================================
