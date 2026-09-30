@@ -278,19 +278,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
             '/AddClientScreen',
             arguments: 'Add Client Screen',);
 
-          // Get.to(
-          //   () => const AddClientScreen(),
-          // );
-
-          // Temporary action
-          Get.snackbar(
-            "Add Client",
-            "Add Client page will open here.",
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(15),
-            backgroundColor: const Color(0xFF063C70),
-            colorText: Colors.white,
-          );
         },
 
         backgroundColor: const Color(0xFF063C70),

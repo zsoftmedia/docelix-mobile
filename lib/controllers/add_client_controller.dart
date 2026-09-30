@@ -92,20 +92,19 @@ class AddClientController extends GetxController {
     // ----------------------------------------------------------
 
     if (nameController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Validation',
-        'Please enter client name.',
-      );
+      AppSnackbar.error(
+          title: 'Validation',
+          message: 'Please enter client name.');
       return;
     }
 
     final email = emailController.text.trim();
 
     if (email.isNotEmpty && !GetUtils.isEmail(email)) {
-      Get.snackbar(
-        'Validation',
-        'Please enter a valid email address.',
-      );
+
+      AppSnackbar.error(
+          title: 'Validation',
+          message: 'Please enter a valid email address.');
       return;
     }
 
@@ -117,18 +116,20 @@ class AddClientController extends GetxController {
     final companyId = SessionManager.accessCompanyid;
 
     if (accessToken == null || accessToken.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Authentication token not found.',
-      );
+
+      AppSnackbar.error(
+          title: 'Error',
+          message: 'Authentication token not found.');
+
       return;
     }
 
     if (companyId == null) {
-      Get.snackbar(
-        'Error',
-        'Company ID not found.',
-      );
+
+      AppSnackbar.error(
+          title: 'Error',
+          message: 'Company ID not found.');
+
       return;
     }
 
@@ -204,6 +205,7 @@ class AddClientController extends GetxController {
 
         Get.back(result: true);
       } else {
+
         AppSnackbar.error(
           title: 'Error',
           message: 'Unable to create client.',

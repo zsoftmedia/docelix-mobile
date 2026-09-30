@@ -405,7 +405,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         ),
         const SizedBox(height: 12),
 
-        Row(
+        /*Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
@@ -424,31 +424,55 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
             const SizedBox(width: 12),
 
-            /*Expanded(
+            Expanded(
               child: Obx(
                     () => AppTextField(
                   isDropdown: true,
-                  hintText: 'Unit',
-                  prefixIcon:
-                  Icons.straighten_outlined,
+                  hintText: 'Select Unit',
+                  prefixIcon: Icons.straighten_outlined,
+                  dropdownItems: controllerCreateInvoice.unitNames,
+                  selectedValue: controllerCreateInvoice.selectedUnit.value?.label,
+                  onDropdownChanged: controllerCreateInvoice.selectUnit,
+                ),
+              ),
+            ),
+          ],
+        ),*/
+
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: AppTextField(
+                controller:
+                controllerCreateInvoice.quantityController,
+                hintText: 'Quantity',
+                prefixIcon: Icons.numbers_outlined,
+                keyboardType:
+                const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+              ),
+            ),
+
+            SizedBox(width: 7),
+
+            Expanded(
+              child: Obx(
+                    () => AppTextField(
+                  isDropdown: true,
+                  hintText: 'Select Unit',
+                  prefixIcon: Icons.straighten_outlined,
                   dropdownItems:
-                  controllerCreateInvoice.units,
+                  controllerCreateInvoice.unitNames,
                   selectedValue:
                   controllerCreateInvoice
                       .selectedUnit
-                      .value,
+                      .value
+                      ?.label,
                   onDropdownChanged:
-                  controllerCreateInvoice
-                      .selectUnit,
+                  controllerCreateInvoice.selectUnit,
                 ),
-              ),
-            ),*/
-
-            Expanded(
-              child: AppTextField(
-                controller: controllerCreateInvoice.unitController,
-                hintText: 'Unit',
-                prefixIcon: Icons.straighten_outlined,
               ),
             ),
           ],

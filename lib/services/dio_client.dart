@@ -291,8 +291,8 @@ class DioClient {
   }
 
   // ==============================
-// GET COMPANIES
-// ==============================
+  // GET COMPANIES
+  // ==============================
 
   Future<Response> getCompanies({
     required String accessToken,
@@ -309,8 +309,25 @@ class DioClient {
   }
 
   // ==============================
-// CREATE INVOICE
-// ==============================
+  // GET UNITS
+  // ==============================
+  Future<Response> getUnits({
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/units',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // CREATE INVOICE
+  // ==============================
   Future<Response> createInvoice({
     required String accessToken,
     required Map<String, dynamic> data,

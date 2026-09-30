@@ -186,7 +186,7 @@ class AppTextField extends StatelessWidget {
     if (isDropdown) {
       return DropdownButtonFormField<String>(
         value: selectedValue,
-
+        isExpanded: true,
         items: (dropdownItems ?? [])
             .map(
               (item) => DropdownMenuItem<String>(

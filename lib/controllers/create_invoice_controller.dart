@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
+import 'package:docelix_mobileapp/models/unit_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
@@ -11,51 +14,46 @@ import 'package:get/get.dart';
 class CreateInvoiceController extends GetxController {
 
   final DioClient dioClient = DioClient();
-
   final RxString sessionEmail = ''.obs;
-
   final RxString errorMessage = ''.obs;
   // Companies
   final RxList<CompanyModel> companies = <CompanyModel>[].obs;
-
   final RxList<String> companyNames = <String>[].obs;
-
   final Rxn<CompanyModel> selectedCompany = Rxn<CompanyModel>();
+
+  // ============================================================
+  // UNITS
+  // ============================================================
+  final RxList<UnitModel> units = <UnitModel>[].obs;
+  final RxList<String> unitNames = <String>[].obs;
+  final Rxn<UnitModel> selectedUnit = Rxn<UnitModel>();
 
   // ============================================================
   // CATALOG LIST
   // ============================================================
 
   final RxList<CatalogModel> catalogList = <CatalogModel>[].obs;
-
   final RxList<String> catalogNames = <String>[].obs;
-
   final Rxn<CatalogModel> selectedCatalogItem = Rxn<CatalogModel>();
 
   // ============================================================
   // GENERAL
   // ============================================================
-
   final isLoading = false.obs;
 
   // ============================================================
   // CLIENT LIST
   // ============================================================
-
-  final RxList<ClientScreenModel> clients =
-      <ClientScreenModel>[].obs;
+  final RxList<ClientScreenModel> clients = <ClientScreenModel>[].obs;
 
   /// Names shown inside dropdown
-  final RxList<String> clientNames =
-      <String>[].obs;
+  final RxList<String> clientNames = <String>[].obs;
 
   /// Selected client name
-  final RxnString selectedClientName =
-  RxnString();
+  final RxnString selectedClientName = RxnString();
 
   /// Complete selected client object
-  final Rxn<ClientScreenModel> selectedClient =
-  Rxn<ClientScreenModel>();
+  final Rxn<ClientScreenModel> selectedClient = Rxn<ClientScreenModel>();
 
   // ============================================================
   // PAGINATION
@@ -69,43 +67,27 @@ class CreateInvoiceController extends GetxController {
   // ============================================================
 
   final currentStep = 0.obs;
-
   final int totalSteps = 4;
 
   // ============================================================
   // CLIENT TEXT CONTROLLERS
   // ============================================================
 
-  final customerController =
-  TextEditingController();
-
-  final addressController =
-  TextEditingController();
-
-  final zipController =
-  TextEditingController();
-
-  final cityController =
-  TextEditingController();
-
-  final attnController =
-  TextEditingController();
-
-  final emailController =
-  TextEditingController();
-
-  final phoneController =
-  TextEditingController();
+  final customerController = TextEditingController();
+  final addressController = TextEditingController();
+  final zipController = TextEditingController();
+  final cityController = TextEditingController();
+  final attnController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
 
   // ============================================================
   // INVOICE
   // ============================================================
 
-  final invoiceNumberController =
-  TextEditingController();
+  final invoiceNumberController = TextEditingController();
 
-  final invoiceDateController =
-  TextEditingController();
+  final invoiceDateController = TextEditingController();
 
   final vatRateController = TextEditingController(text: '0');
 
@@ -127,7 +109,7 @@ class CreateInvoiceController extends GetxController {
     } else {
       if (vatRateController.text.trim().isEmpty ||
           vatRateController.text.trim() == '0') {
-        vatRateController.text = '20';
+        vatRateController.text = '';
       }
     }
   }
@@ -140,29 +122,18 @@ class CreateInvoiceController extends GetxController {
   // LINE ITEM
   // ============================================================
 
-  final descriptionController =
-  TextEditingController();
+  final descriptionController = TextEditingController();
+  final unitController = TextEditingController();
+  final quantityController = TextEditingController();
+  final unitPriceController = TextEditingController();
 
-  final unitController =
-  TextEditingController();
-
-  final quantityController =
-  TextEditingController(text: '1');
-
-  final unitPriceController =
-  TextEditingController(text: '0');
-
- // final selectedUnit = RxnString();
-
-  final lineItems =
-      <Map<String, dynamic>>[].obs;
+  final lineItems = <Map<String, dynamic>>[].obs;
 
   // ============================================================
   // CLOSING TEXT
   // ============================================================
 
-  final closingTextController =
-  TextEditingController();
+  final closingTextController = TextEditingController();
 
   // ============================================================
   // INIT
@@ -177,9 +148,10 @@ class CreateInvoiceController extends GetxController {
     getClients();
     // Get List Item
     getCatalog();
-
     // Get List Companies
     getCompanies();
+    // Get List Units
+    getUnits();
   }
 
   // ============================================================
@@ -202,7 +174,6 @@ class CreateInvoiceController extends GetxController {
       // ----------------------------------------------------------
       // ACCESS TOKEN
       // ----------------------------------------------------------
-
       if (accessToken == null ||
           accessToken.isEmpty) {
         isLoading.value = false;
@@ -218,9 +189,9 @@ class CreateInvoiceController extends GetxController {
       // ----------------------------------------------------------
       // COMPANY ID
       // ----------------------------------------------------------
-
       if (companyId == null) {
         isLoading.value = false;
+
         AppSnackbar.error(
           title: 'Error',
           message:
@@ -246,9 +217,7 @@ class CreateInvoiceController extends GetxController {
         pageSize: pageSize,
       );
 
-      print(
-        'Clients Response: ${response.data}',
-      );
+      print('Clients Response: ${response.data}',);
 
       // ----------------------------------------------------------
       // SUCCESS
@@ -653,9 +622,6 @@ class CreateInvoiceController extends GetxController {
 
     descriptionController.clear();
     unitController.clear();
-
-    quantityController.text = '1';
-    unitPriceController.text = '0';
   }
 
   // ============================================================
@@ -672,19 +638,6 @@ class CreateInvoiceController extends GetxController {
   // ============================================================
   // SUBTOTAL
   // ============================================================
-
-  /*double get subtotal {
-    return lineItems.fold(
-      0.0,
-          (sum, item) {
-        return sum +
-            ((item['total'] as num?)
-                ?.toDouble() ??
-                0.0);
-      },
-    );
-  }*/
-
   double get subtotal {
     return lineItems.fold(
       0.0,
@@ -895,6 +848,12 @@ class CreateInvoiceController extends GetxController {
 
         'items': items,
       };
+
+      /*debugPrint(
+        '========== INVOICE PAYLOAD ==========\n'
+            '${JsonEncoder.withIndent('  ').convert(payload)}\n'
+            '=====================================',
+      );*/
 
       // ============================================================
       // RECURRING SCHEDULE
@@ -1280,5 +1239,87 @@ class CreateInvoiceController extends GetxController {
     if (loadDashboard) {
       // Load dashboard if required
     }
+  }
+
+  // ============================================================
+  // GET UNITS
+  // ============================================================
+
+  Future<void> getUnits() async {
+    try {
+      final accessToken = SessionManager.accessToken;
+
+      if (accessToken == null || accessToken.isEmpty) {
+        return;
+      }
+
+      final response = await dioClient.getUnits(
+        accessToken: accessToken,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+
+        final loadedUnits = data
+            .map(
+              (json) => UnitModel.fromJson(
+            json as Map<String, dynamic>,
+          ),
+        )
+            .where(
+              (unit) =>
+          unit.code.trim().isNotEmpty &&
+              unit.label.trim().isNotEmpty,
+        )
+            .toList();
+
+        units.assignAll(loadedUnits);
+
+        // Remove duplicate labels.
+        final uniqueLabels = <String>[];
+
+        for (final unit in loadedUnits) {
+          final label = unit.label.trim();
+
+          if (!uniqueLabels.contains(label)) {
+            uniqueLabels.add(label);
+          }
+        }
+
+        unitNames.assignAll(uniqueLabels);
+      }
+    } catch (e) {
+      debugPrint('Get Units Error: $e');
+      units.clear();
+      unitNames.clear();
+    }
+  }
+
+  // ============================================================
+  // SELECT UNIT
+  // ============================================================
+  void selectUnit(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      selectedUnit.value = null;
+      unitController.clear();
+      return;
+    }
+
+    final selected = units.firstWhereOrNull(
+          (unit) => unit.label.trim() == value.trim(),
+    );
+
+    if (selected == null) {
+      debugPrint('Unit not found for label: $value');
+      return;
+    }
+
+    selectedUnit.value = selected;
+
+    // Store API code internally.
+    unitController.text = selected.code;
+
+    debugPrint('Selected Unit Label: ${selected.label}');
+    debugPrint('Selected Unit Code: ${selected.code}');
   }
 }
