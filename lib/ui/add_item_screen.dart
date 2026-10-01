@@ -1,4 +1,3 @@
-
 import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/add_item_controller.dart';
@@ -9,16 +8,14 @@ import 'package:get/get.dart';
 class AddItemScreen extends StatelessWidget {
   AddItemScreen({super.key});
 
-  static const Color _textColor = Color(0xFF172033);
-  static const Color _mutedColor = Color(0xFF667085);
+  //static const Color _textColor = Color(0xFF172033);
+ // static const Color _mutedColor = Color(0xFF667085);
 
   final AddItemController controller = Get.put(AddItemController());
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -61,7 +58,7 @@ class AddItemScreen extends StatelessWidget {
                       _buildStepHeading(step),
                       const SizedBox(height: 20),
                       if (step == 0) _buildBasicInformation(),
-                      if (step == 1) _buildUnitAndQuantity(),
+                      if (step == 1) _buildUnitAndQuantity(context),
                       if (step == 2) _buildPricing(),
                     ],
                   ),
@@ -72,7 +69,6 @@ class AddItemScreen extends StatelessWidget {
           ],
         ),
       ),
-
     );
   }
 
@@ -133,7 +129,7 @@ class AddItemScreen extends StatelessWidget {
                               : FontWeight.w500,
                           color: isActive || isCompleted
                               ? colorsList.colorButton
-                              : _mutedColor,
+                              : colorsList.textHintColor,
                         ),
                       ),
                     ],
@@ -188,7 +184,7 @@ class AddItemScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.w700,
-            color: _textColor,
+            color: colorsList.textColor,
           ),
         ),
         const SizedBox(height: 5),
@@ -196,7 +192,7 @@ class AddItemScreen extends StatelessWidget {
           descriptions[step],
           style: const TextStyle(
             fontSize: 13,
-            color: _mutedColor,
+            color: colorsList.textHintColor,
           ),
         ),
       ],
@@ -207,8 +203,7 @@ class AddItemScreen extends StatelessWidget {
     required String title,
     required IconData icon,
     required List<Widget> children,
-  })
-  {
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -234,7 +229,7 @@ class AddItemScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: _textColor,
+                    color: colorsList.textColor,
                   ),
                 ),
               ),
@@ -254,7 +249,7 @@ class AddItemScreen extends StatelessWidget {
         text: TextSpan(
           text: label,
           style: const TextStyle(
-            color: _textColor,
+            color: colorsList.textColor,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -276,8 +271,7 @@ class AddItemScreen extends StatelessWidget {
     required String hint,
     bool required = false,
     TextInputType? keyboardType,
-  })
-  {
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -324,7 +318,7 @@ class AddItemScreen extends StatelessWidget {
         const Text(
           'Shown in item suggestions and can be copied into offers/invoices.',
           style: TextStyle(
-            color: _mutedColor,
+            color: colorsList.textHintColor,
             fontSize: 12,
           ),
         ),
@@ -332,28 +326,58 @@ class AddItemScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUnitAndQuantity() {
+  Widget _buildUnitAndQuantity(BuildContext context) {
     return _section(
       title: 'Unit and Quantity',
       icon: Icons.straighten_rounded,
       children: [
         _fieldLabel('Unit', required: true),
-        Obx(
-              () => AppTextField(
-            isDropdown: true,
-            hintText: 'Select unit',
-            prefixIcon: Icons.straighten_rounded,
-            dropdownItems: controller.unitOptions,
-            selectedValue: controller.selectedUnit.value,
-            onDropdownChanged: controller.selectUnit,
-          ),
-        ),
-        const SizedBox(height: 18),
-        _textField(
-          label: 'Find Unit in List',
-          textController: controller.unitSearchController,
-          hint: 'e.g. hour, campaign, pallet, m2',
-        ),
+        Obx(() {
+          final selected = controller.currentSelectedUnit ?? 'Select unit';
+
+          return InkWell(
+            onTap: () => _showUnitBottomSheet(context),
+            borderRadius: BorderRadius.circular(7),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 15,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: const Color(0xFFD1D5DB),
+                  width: 1.2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.straighten_rounded,
+                    color: Color(0xFF4b4f57),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      selected,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF4b4f57),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Color(0xFF4b4f57),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
         const SizedBox(height: 18),
         _textField(
           label: 'Default Quantity',
@@ -367,7 +391,7 @@ class AddItemScreen extends StatelessWidget {
         const SizedBox(height: 18),
         _fieldLabel('Item Type'),
         Obx(
-              () => AppTextField(
+          () => AppTextField(
             isDropdown: true,
             hintText: 'Select item type',
             prefixIcon: Icons.category_outlined,
@@ -378,17 +402,17 @@ class AddItemScreen extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Obx(
-              () => SwitchListTile(
+          () => SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text(
               'Track stock in store',
               style: TextStyle(
                 fontSize: 14,
-                color: _textColor,
+                color: colorsList.textColor,
               ),
             ),
             value: controller.trackStock.value,
-            activeColor: colorsList.colorButton,
+            activeThumbColor: colorsList.colorButton,
             onChanged: controller.toggleStock,
           ),
         ),
@@ -405,7 +429,7 @@ class AddItemScreen extends StatelessWidget {
                 textController: controller.stockController,
                 hint: '1',
                 keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+                    const TextInputType.numberWithOptions(decimal: true),
               ),
               const SizedBox(height: 18),
               _textField(
@@ -413,13 +437,13 @@ class AddItemScreen extends StatelessWidget {
                 textController: controller.minimumStockController,
                 hint: '0',
                 keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+                    const TextInputType.numberWithOptions(decimal: true),
               ),
               const SizedBox(height: 8),
               const Text(
                 'Configure the minimum stock quantity for low-stock alerts.',
                 style: TextStyle(
-                  color: _mutedColor,
+                  color: colorsList.textHintColor,
                   fontSize: 12,
                 ),
               ),
@@ -427,6 +451,130 @@ class AddItemScreen extends StatelessWidget {
           );
         }),
       ],
+    );
+  }
+
+  void _showUnitBottomSheet(BuildContext context) {
+    controller.unitSearchController.clear();
+    controller.updateUnitSearchQuery('');
+
+    Get.bottomSheet(
+      Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colorsList.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Select Measurement Unit',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: colorsList.textColor,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: colorsList.iconColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: controller.unitSearchController,
+              hintText: 'Search unit (e.g. hour, kg, m²)...',
+              prefixIcon: Icons.search_rounded,
+              onChanged: controller.updateUnitSearchQuery,
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                final list = controller.filteredUnits;
+
+                if (list.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No matching units found.',
+                      style: TextStyle(
+                        color: colorsList.textHintColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  itemCount: list.length,
+                  separatorBuilder: (context, index) => const Divider(
+                    height: 1,
+                    thickness: 0.8,
+                    color: colorsList.borderColor,
+                  ),
+                  itemBuilder: (context, index) {
+                    final unitLabel = list[index];
+                    final isSelected =
+                        unitLabel == controller.currentSelectedUnit;
+
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      title: Text(
+                        unitLabel,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? colorsList.colorButton
+                              : colorsList.textColor,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              color: colorsList.colorButton,
+                              size: 22,
+                            )
+                          : null,
+                      onTap: () {
+                        controller.selectUnit(unitLabel);
+                        Get.back();
+                      },
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 
@@ -440,7 +588,7 @@ class AddItemScreen extends StatelessWidget {
           textController: controller.costPriceController,
           hint: '0',
           keyboardType:
-          const TextInputType.numberWithOptions(decimal: true),
+              const TextInputType.numberWithOptions(decimal: true),
         ),
         const SizedBox(height: 18),
         _textField(
@@ -448,7 +596,7 @@ class AddItemScreen extends StatelessWidget {
           textController: controller.salePriceController,
           hint: '0',
           keyboardType:
-          const TextInputType.numberWithOptions(decimal: true),
+              const TextInputType.numberWithOptions(decimal: true),
         ),
         const SizedBox(height: 18),
         _textField(
@@ -456,7 +604,7 @@ class AddItemScreen extends StatelessWidget {
           textController: controller.vatController,
           hint: '20',
           keyboardType:
-          const TextInputType.numberWithOptions(decimal: true),
+              const TextInputType.numberWithOptions(decimal: true),
         ),
         const SizedBox(height: 18),
         _textField(
@@ -464,7 +612,7 @@ class AddItemScreen extends StatelessWidget {
           textController: controller.discountController,
           hint: '0',
           keyboardType:
-          const TextInputType.numberWithOptions(decimal: true),
+              const TextInputType.numberWithOptions(decimal: true),
         ),
         const SizedBox(height: 18),
         _textField(
@@ -472,7 +620,7 @@ class AddItemScreen extends StatelessWidget {
           textController: controller.msrpController,
           hint: '0',
           keyboardType:
-          const TextInputType.numberWithOptions(decimal: true),
+              const TextInputType.numberWithOptions(decimal: true),
         ),
         const SizedBox(height: 16),
         _buildPriceSummary(),
@@ -501,7 +649,7 @@ class AddItemScreen extends StatelessWidget {
               'Prices are entered as net amounts. VAT and discount are stored separately.',
               style: TextStyle(
                 fontSize: 12,
-                color: _mutedColor,
+                color: colorsList.textHintColor,
               ),
             ),
           ),
@@ -555,7 +703,7 @@ class AddItemScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
                 isLoading: controller.isLoading.value,
                 onPressed:
-                step == 2 ? controller.saveItem : controller.nextStep,
+                    step == 2 ? controller.saveItem : controller.nextStep,
               ),
             ),
           ],

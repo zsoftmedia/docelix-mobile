@@ -110,16 +110,20 @@ class CatalogsScreen extends StatelessWidget {
       FloatingActionButtonLocation.endFloat,
 
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
 
           // ----------------------------------------------------------
           // OPEN ADD ITEM PAGE
           // ----------------------------------------------------------
 
-          Get.toNamed(
+          final result = await Get.toNamed(
             '/AddItemScreen',
-            arguments: 'Add Item Screen',);
+            arguments: 'Add Item Screen',
+          );
 
+          if (result == true) {
+            controller.refreshCatalog();
+          }
         },
 
         backgroundColor: colorsList.colorButton,

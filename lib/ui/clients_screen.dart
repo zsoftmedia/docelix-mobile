@@ -268,15 +268,20 @@ class _ClientsScreenState extends State<ClientsScreen> {
       FloatingActionButtonLocation.endFloat,
 
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
 
           // ----------------------------------------------------------
           // OPEN ADD CLIENT PAGE
           // ----------------------------------------------------------
 
-          Get.toNamed(
+          final result = await Get.toNamed(
             '/AddClientScreen',
-            arguments: 'Add Client Screen',);
+            arguments: 'Add Client Screen',
+          );
+
+          if (result == true) {
+            controller.refreshClients();
+          }
 
         },
 

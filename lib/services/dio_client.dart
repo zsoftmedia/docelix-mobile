@@ -346,33 +346,25 @@ class DioClient {
 
 
   // ==============================
-// GET PDF TEMPLATE SETTINGS
-// ==============================
+  // POST CATALOGUE ITEM
+  // ==============================
 
-  /*Future<Response> getPdfTemplateSettings({
-    required int companyId,
-    String docType = 'invoice',
-    String templateId = 'default',
-  }) async
-  {
-    return await _dio.get(
-      '${ApiConstants.supabaseUrl}/rest/v1/pdf_template_settings',
-      queryParameters: {
-        'select': 'settings',
-        'company_id': 'eq.$companyId',
-        'doc_type': 'eq.$docType',
-        'template_id': 'eq.$templateId',
-      },
+  Future<Response> createCatalogItem({
+    required Map<String, dynamic> data,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/catalog',
+      data: data,
       options: Options(
         headers: {
-          'apikey': ApiConstants.supabaseAnonKey,
-          'Authorization':
-          'Bearer ${ApiConstants.supabaseAnonKey}',
+          'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       ),
     );
-  }*/
+  }
 
 // ==============================
 // GET PDF TEMPLATE SETTINGS

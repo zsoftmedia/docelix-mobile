@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/controllers/clients_controller.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +102,6 @@ class AddClientController extends GetxController {
     final email = emailController.text.trim();
 
     if (email.isNotEmpty && !GetUtils.isEmail(email)) {
-
       AppSnackbar.error(
           title: 'Validation',
           message: 'Please enter a valid email address.');
@@ -116,20 +116,16 @@ class AddClientController extends GetxController {
     final companyId = SessionManager.accessCompanyid;
 
     if (accessToken == null || accessToken.isEmpty) {
-
       AppSnackbar.error(
           title: 'Error',
           message: 'Authentication token not found.');
-
       return;
     }
 
     if (companyId == null) {
-
       AppSnackbar.error(
           title: 'Error',
           message: 'Company ID not found.');
-
       return;
     }
 
@@ -146,31 +142,23 @@ class AddClientController extends GetxController {
 
       final Map<String, dynamic> clientData = {
         'name': nameController.text.trim(),
-
         'email': email.isEmpty ? null : email,
-
         'phone': phoneController.text.trim().isEmpty
             ? null
             : phoneController.text.trim(),
-
         'address_line1': address1Controller.text.trim().isEmpty
             ? null
             : address1Controller.text.trim(),
-
         'address_line2': address2Controller.text.trim().isEmpty
             ? null
             : address2Controller.text.trim(),
-
         'postal_code': zipController.text.trim().isEmpty
             ? null
             : zipController.text.trim(),
-
         'city': cityController.text.trim().isEmpty
             ? null
             : cityController.text.trim(),
-
         'country': selectedCountry.value,
-
         'vat_id': vatIdController.text.trim().isEmpty
             ? null
             : vatIdController.text.trim(),
@@ -196,38 +184,39 @@ class AddClientController extends GetxController {
           response.statusCode == 201) {
         debugPrint('CREATE CLIENT RESPONSE: ${response.data}');
 
-        Get.back();
+        clearForm();
+
+        Get.back(result: true);
 
         AppSnackbar.success(
           title: 'Success',
           message: 'Client created successfully.',
         );
 
-        Get.back(result: true);
+        if (Get.isRegistered<ClientsController>()) {
+          Get.find<ClientsController>().refreshClients();
+        }
       } else {
-
         AppSnackbar.error(
           title: 'Error',
           message: 'Unable to create client.',
         );
-
       }
     } on DioException catch (e) {
       debugPrint('CREATE CLIENT ERROR: ${e.response?.data}');
       debugPrint('STATUS CODE: ${e.response?.statusCode}');
 
-      AppSnackbar.success(
-        title: 'Erro',
+      AppSnackbar.error(
+        title: 'Error',
         message: e.response?.data?['detail']?.toString() ??
             'Unable to create client. Please try again.',
       );
-
     } catch (e) {
       debugPrint('CREATE CLIENT ERROR: $e');
 
       AppSnackbar.error(
         title: 'Error',
-        message:'Unable to create client. Please try again.',
+        message: 'Unable to create client. Please try again.',
       );
     } finally {
       isLoading.value = false;
