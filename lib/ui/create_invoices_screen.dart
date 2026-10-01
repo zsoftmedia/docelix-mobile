@@ -229,18 +229,63 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       children: [
         _sectionTitle('Client Details'),
         const SizedBox(height: 16),
-        Obx(
-              () => AppTextField(
-            isDropdown: true,
-            hintText: controllerCreateInvoice.isLoading.value
-                ? 'Loading clients...'
-                : 'Select client',
-            prefixIcon: Icons.person_search_outlined,
-            dropdownItems: controllerCreateInvoice.clientNames,
-            selectedValue: controllerCreateInvoice.selectedClientName.value,
-            onDropdownChanged: controllerCreateInvoice.selectClient,
-          ),
-        ),
+        Obx(() {
+          final client = controllerCreateInvoice.selectedClient.value;
+          final displayText = client != null
+              ? client.name
+              : (controllerCreateInvoice.isLoading.value
+                  ? 'Loading clients...'
+                  : 'Select client');
+
+          return InkWell(
+            onTap: () => _showClientSearchBottomSheet(context),
+            borderRadius: BorderRadius.circular(7),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 15,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: const Color(0xFFD1D5DB),
+                  width: 1.2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.person_search_outlined,
+                    color: Color(0xFF4b4f57),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      displayText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: client != null
+                            ? const Color(0xFF172033)
+                            : const Color(0xFFA8A8A8),
+                        fontWeight: client != null
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Color(0xFF4b4f57),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
         const SizedBox(height: 14),
         AppTextField(
           controller: controllerCreateInvoice.customerController,
@@ -406,40 +451,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         ),
         const SizedBox(height: 12),
 
-        /*Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: AppTextField(
-                controller:
-                controllerCreateInvoice.quantityController,
-                hintText: 'Quantity',
-                prefixIcon:
-                Icons.numbers_outlined,
-                keyboardType:
-                const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-              ),
-            ),
-
-            const SizedBox(width: 12),
-
-            Expanded(
-              child: Obx(
-                    () => AppTextField(
-                  isDropdown: true,
-                  hintText: 'Select Unit',
-                  prefixIcon: Icons.straighten_outlined,
-                  dropdownItems: controllerCreateInvoice.unitNames,
-                  selectedValue: controllerCreateInvoice.selectedUnit.value?.label,
-                  onDropdownChanged: controllerCreateInvoice.selectUnit,
-                ),
-              ),
-            ),
-          ],
-        ),*/
-
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -456,25 +467,59 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
               ),
             ),
 
-            SizedBox(width: 7),
+            const SizedBox(width: 8),
 
             Expanded(
-              child: Obx(
-                    () => AppTextField(
-                  isDropdown: true,
-                  hintText: 'Select Unit',
-                  prefixIcon: Icons.straighten_outlined,
-                  dropdownItems:
-                  controllerCreateInvoice.unitNames,
-                  selectedValue:
-                  controllerCreateInvoice
-                      .selectedUnit
-                      .value
-                      ?.label,
-                  onDropdownChanged:
-                  controllerCreateInvoice.selectUnit,
-                ),
-              ),
+              child: Obx(() {
+                final selected =
+                    controllerCreateInvoice.currentSelectedUnitLabel ??
+                        'Select Unit';
+
+                return InkWell(
+                  onTap: () => _showUnitSearchBottomSheet(context),
+                  borderRadius: BorderRadius.circular(7),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 15,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(7),
+                      border: Border.all(
+                        color: const Color(0xFFD1D5DB),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.straighten_outlined,
+                          color: Color(0xFF4b4f57),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            selected,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Color(0xFF4b4f57),
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Color(0xFF4b4f57),
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
             ),
           ],
         ),
@@ -542,13 +587,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
         const SizedBox(height: 16),
 
-        /*Obx(
-              () => _switchRow(
-            title: 'Recurring invoice',
-            value: controllerCreateInvoice.recurringInvoice.value,
-            onChanged: controllerCreateInvoice.toggleRecurringInvoice,
-          ),
-        ),*/
       ],
     );
   }
@@ -785,6 +823,292 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showUnitSearchBottomSheet(BuildContext context) {
+    final searchController = TextEditingController();
+    controllerCreateInvoice.updateUnitSearchQuery('');
+
+    Get.bottomSheet(
+      Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colorsList.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Select Unit',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: colorsList.textColor,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: colorsList.iconColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: searchController,
+              hintText: 'Search unit (e.g. hour, kg, pc)...',
+              prefixIcon: Icons.search_rounded,
+              onChanged: (val) {
+                controllerCreateInvoice.updateUnitSearchQuery(val);
+              },
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                final list = controllerCreateInvoice.filteredUnits;
+
+                if (list.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No matching units found.',
+                      style: TextStyle(
+                        color: colorsList.textHintColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  itemCount: list.length,
+                  separatorBuilder: (context, index) => const Divider(
+                    height: 1,
+                    thickness: 0.8,
+                    color: colorsList.borderColor,
+                  ),
+                  itemBuilder: (context, index) {
+                    final unitLabel = list[index];
+                    final isSelected =
+                        unitLabel == controllerCreateInvoice.currentSelectedUnitLabel;
+
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      title: Text(
+                        unitLabel,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? colorsList.primaryColor
+                              : colorsList.textColor,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              color: colorsList.primaryColor,
+                              size: 22,
+                            )
+                          : null,
+                      onTap: () {
+                        controllerCreateInvoice.selectUnit(unitLabel);
+                        Get.back();
+                      },
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  void _showClientSearchBottomSheet(BuildContext context) {
+    final searchController = TextEditingController();
+    controllerCreateInvoice.updateClientSearchQuery('');
+
+    Get.bottomSheet(
+      Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colorsList.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Select Client',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: colorsList.textColor,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: colorsList.iconColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: searchController,
+              hintText: 'Search client by name, email, city...',
+              prefixIcon: Icons.search_rounded,
+              onChanged: (val) {
+                controllerCreateInvoice.updateClientSearchQuery(val);
+              },
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                final list = controllerCreateInvoice.filteredClients;
+
+                if (list.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No matching clients found.',
+                      style: TextStyle(
+                        color: colorsList.textHintColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  itemCount: list.length,
+                  separatorBuilder: (context, index) => const Divider(
+                    height: 1,
+                    thickness: 0.8,
+                    color: colorsList.borderColor,
+                  ),
+                  itemBuilder: (context, index) {
+                    final client = list[index];
+                    final isSelected =
+                        client.id == controllerCreateInvoice.selectedClient.value?.id;
+
+                    final subtitleParts = <String>[];
+                    if (client.email != null && client.email!.trim().isNotEmpty) {
+                      subtitleParts.add(client.email!.trim());
+                    }
+                    if (client.city != null && client.city!.trim().isNotEmpty) {
+                      subtitleParts.add(client.city!.trim());
+                    }
+
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      leading: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: colorsList.colorBoxDecoration,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.person_outline_rounded,
+                          color: colorsList.iconColor,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        client.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? colorsList.primaryColor
+                              : colorsList.textColor,
+                        ),
+                      ),
+                      subtitle: subtitleParts.isNotEmpty
+                          ? Text(
+                              subtitleParts.join(' • '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: colorsList.textHintColor,
+                              ),
+                            )
+                          : null,
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              color: colorsList.primaryColor,
+                              size: 22,
+                            )
+                          : null,
+                      onTap: () {
+                        controllerCreateInvoice.selectClientByModel(client);
+                        Get.back();
+                      },
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 

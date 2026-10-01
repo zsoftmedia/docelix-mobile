@@ -27,6 +27,50 @@ class CreateInvoiceController extends GetxController {
   final RxList<UnitModel> units = <UnitModel>[].obs;
   final RxList<String> unitNames = <String>[].obs;
   final Rxn<UnitModel> selectedUnit = Rxn<UnitModel>();
+  final RxString unitSearchQuery = ''.obs;
+
+  final List<String> unitOptions = const [
+    'Ad set (adset)',
+    'Piece (pc)',
+    'Hour (h)',
+    'Day (day)',
+    'Month (month)',
+    'Kilogram (kg)',
+    'Gram (g)',
+    'Liter (l)',
+    'Meter (m)',
+    'Square meter (m²)',
+    'Cubic meter (m³)',
+    'Package (pkg)',
+    'Box (box)',
+    'Set (set)',
+    'Service (service)',
+  ];
+
+  List<String> get availableUnits {
+    if (unitNames.isNotEmpty) return unitNames;
+    return unitOptions;
+  }
+
+  String? get currentSelectedUnitLabel {
+    return selectedUnit.value?.label ??
+        (unitController.text.isNotEmpty ? unitController.text : null);
+  }
+
+  void updateUnitSearchQuery(String query) {
+    unitSearchQuery.value = query;
+  }
+
+  List<String> get filteredUnits {
+    final query = unitSearchQuery.value.trim().toLowerCase();
+    final listToFilter = availableUnits;
+
+    if (query.isEmpty) return listToFilter;
+
+    return listToFilter
+        .where((unit) => unit.toLowerCase().contains(query))
+        .toList();
+  }
 
   // ============================================================
   // CATALOG LIST
@@ -54,6 +98,45 @@ class CreateInvoiceController extends GetxController {
 
   /// Complete selected client object
   final Rxn<ClientScreenModel> selectedClient = Rxn<ClientScreenModel>();
+
+  /// Search query for client bottom sheet
+  final RxString clientSearchQuery = ''.obs;
+
+  void updateClientSearchQuery(String query) {
+    clientSearchQuery.value = query;
+  }
+
+  List<ClientScreenModel> get filteredClients {
+    final query = clientSearchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return clients;
+
+    return clients.where((client) {
+      final name = client.name.toLowerCase();
+      final email = client.email?.toLowerCase() ?? '';
+      final phone = client.phone?.toLowerCase() ?? '';
+      final city = client.city?.toLowerCase() ?? '';
+      final vatId = client.vatId?.toLowerCase() ?? '';
+
+      return name.contains(query) ||
+          email.contains(query) ||
+          phone.contains(query) ||
+          city.contains(query) ||
+          vatId.contains(query);
+    }).toList();
+  }
+
+  void selectClientByModel(ClientScreenModel client) {
+    selectedClient.value = client;
+    selectedClientName.value = '${client.name.trim()} - ${client.id}';
+
+    _setClientField(customerController, client.name);
+    _setClientField(addressController, client.addressLine1);
+    _setClientField(zipController, client.postalCode);
+    _setClientField(cityController, client.city);
+    _setClientField(attnController, client.contactName);
+    _setClientField(emailController, client.email);
+    _setClientField(phoneController, client.phone);
+  }
 
   // ============================================================
   // PAGINATION
@@ -1325,21 +1408,21 @@ class CreateInvoiceController extends GetxController {
     }
 
     final selected = units.firstWhereOrNull(
-          (unit) => unit.label.trim() == value.trim(),
+      (unit) =>
+          unit.label.trim().toLowerCase() == value.trim().toLowerCase() ||
+          unit.code.trim().toLowerCase() == value.trim().toLowerCase(),
     );
 
-    if (selected == null) {
-      debugPrint('Unit not found for label: $value');
-      return;
+    if (selected != null) {
+      selectedUnit.value = selected;
+      unitController.text = selected.code;
+    } else {
+      selectedUnit.value = null;
+      unitController.text = value.trim();
     }
 
-    selectedUnit.value = selected;
-
-    // Store API code internally.
-    unitController.text = selected.code;
-
-    debugPrint('Selected Unit Label: ${selected.label}');
-    debugPrint('Selected Unit Code: ${selected.code}');
+    debugPrint('Selected Unit Label: ${selected?.label ?? value}');
+    debugPrint('Selected Unit Code: ${unitController.text}');
   }
 
   DateTime _getInvoiceDate() {
