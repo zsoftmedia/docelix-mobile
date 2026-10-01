@@ -361,7 +361,8 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
     required IncomingInvoicesModel invoice,
     required double width,
     required double height,
-  }) {
+  })
+  {
     final String status = invoice.status.toLowerCase();
 
     Color statusColor;

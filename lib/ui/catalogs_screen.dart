@@ -17,19 +17,6 @@ class CatalogsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
 
-      /*appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        title: const Text(
-          'Items',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),*/
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -114,6 +101,46 @@ class CatalogsScreen extends StatelessWidget {
           ),
         );
       }),
+
+      // ============================================================
+      // ADD ITEM BUTTON
+      // ============================================================
+
+      floatingActionButtonLocation:
+      FloatingActionButtonLocation.endFloat,
+
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+
+          // ----------------------------------------------------------
+          // OPEN ADD ITEM PAGE
+          // ----------------------------------------------------------
+
+          Get.toNamed(
+            '/AddItemScreen',
+            arguments: 'Add Item Screen',);
+
+        },
+
+        backgroundColor: colorsList.colorButton,
+        foregroundColor: colorsList.colorWhite,
+
+        elevation: 4,
+
+        icon: const Icon(
+          Icons.add_rounded,
+        ),
+
+        label: Text(
+          "Add Item",
+          style: TextStyle(
+              fontSize: width * 0.038,
+              fontWeight: FontWeight.w700,
+              color: colorsList.colorWhite
+          ),
+        ),
+      ),
+
     );
   }
 
@@ -123,7 +150,8 @@ class CatalogsScreen extends StatelessWidget {
     required double width,
     required double height,
     required bool lowStock,
-  }) {
+  })
+  {
     return Container(
       color: colorsList.colorWhite,
       child: Column(

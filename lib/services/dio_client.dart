@@ -344,4 +344,62 @@ class DioClient {
     );
   }
 
+
+  // ==============================
+// GET PDF TEMPLATE SETTINGS
+// ==============================
+
+  /*Future<Response> getPdfTemplateSettings({
+    required int companyId,
+    String docType = 'invoice',
+    String templateId = 'default',
+  }) async
+  {
+    return await _dio.get(
+      '${ApiConstants.supabaseUrl}/rest/v1/pdf_template_settings',
+      queryParameters: {
+        'select': 'settings',
+        'company_id': 'eq.$companyId',
+        'doc_type': 'eq.$docType',
+        'template_id': 'eq.$templateId',
+      },
+      options: Options(
+        headers: {
+          'apikey': ApiConstants.supabaseAnonKey,
+          'Authorization':
+          'Bearer ${ApiConstants.supabaseAnonKey}',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }*/
+
+// ==============================
+// GET PDF TEMPLATE SETTINGS
+// ==============================
+
+  Future<Response> getPdfTemplateSettings({
+    required int companyId,
+    String docType = 'invoice',
+    String templateId = 'default',
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.supabaseUrl}/rest/v1/pdf_template_settings',
+      queryParameters: {
+        'select': 'settings',
+        'company_id': 'eq.$companyId',
+        'doc_type': 'eq.$docType',
+        'template_id': 'eq.$templateId',
+      },
+      options: Options(
+        headers: {
+          'apikey': ApiConstants.supabaseAnonKey,
+          'Authorization':
+          'Bearer ${ApiConstants.supabaseAnonKey}',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
 }

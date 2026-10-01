@@ -1,6 +1,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/config/api_constants.dart';
 import 'package:docelix_mobileapp/models/client_model.dart';
 import 'package:docelix_mobileapp/models/invoice_item_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
@@ -8,6 +9,10 @@ import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:typed_data';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class InvoicesDetailsController extends GetxController {
   final DioClient dioClient = DioClient();
@@ -458,4 +463,275 @@ class InvoicesDetailsController extends GetxController {
       ),
     );
   }
+
+  Future<void> downloadInvoice() async {
+    if (invoice.value == null) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Invoice information is not available.',
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      final invoiceData = invoice.value!;
+      final clientData = client.value;
+      final items = invoiceItems.toList();
+
+      // Get PDF template settings
+      final templateSettings =
+      await getPdfTemplateSettings();
+
+      if (templateSettings == null) {
+        AppSnackbar.error(
+          title: 'Error',
+          message:
+          'PDF template settings are not available.',
+        );
+        return;
+      }
+
+      // Generate PDF
+      final pdfBytes = await generateInvoicePdf(
+        invoice: invoiceData,
+        client: clientData,
+        items: items,
+        settings: templateSettings,
+      );
+
+      // Save PDF
+      await savePdf(
+        pdfBytes,
+        invoiceData,
+      );
+
+      AppSnackbar.success(
+        title: 'Success',
+        message: 'Invoice downloaded successfully.',
+      );
+    } catch (e) {
+      print('Download Invoice Error: $e');
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Unable to download invoice.',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getPdfTemplateSettings() async {
+    try {
+      final companyId = SessionManager.accessCompanyid;
+
+      if (companyId == null) {
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Company ID is not available.',
+        );
+        return null;
+      }
+
+      final int companyIdInt = int.parse(
+        companyId.toString(),
+      );
+
+      print(
+        'Getting PDF template settings for company: $companyIdInt',
+      );
+
+      final response = await dioClient.getPdfTemplateSettings(
+        companyId: companyIdInt,
+        docType: 'invoice',
+        templateId: 'default',
+      );
+
+      print(
+        'PDF Template Settings Response: ${response.data}',
+      );
+
+      if (response.statusCode == 200 &&
+          response.data is List &&
+          response.data.isNotEmpty) {
+
+        final firstItem = response.data.first;
+
+        if (firstItem is Map &&
+            firstItem['settings'] is Map) {
+
+          return Map<String, dynamic>.from(
+            firstItem['settings'],
+          );
+        }
+      }
+
+      print('PDF template settings not found.');
+
+      return null;
+    } on DioException catch (e) {
+      print(
+        'Get PDF Template Settings Dio Error: ${e.message}',
+      );
+
+      print(
+        'Response: ${e.response?.data}',
+      );
+
+      return null;
+    } catch (e) {
+      print(
+        'Get PDF Template Settings Error: $e',
+      );
+
+      return null;
+    }
+  }
+
+  Future<Uint8List> generateInvoicePdf({
+    required InvoicesModel invoice,
+    required ClientModel? client,
+    required List<InvoiceItemModel> items,
+    required Map<String, dynamic> settings,
+  }) async
+  {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) {
+          return [
+            // ------------------------------------------------------
+            // HEADER
+            // ------------------------------------------------------
+            pw.Row(
+              mainAxisAlignment:
+              pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text(
+                  'INVOICE',
+                  style: pw.TextStyle(
+                    fontSize: 26,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+
+                pw.Text(
+                  '#${invoice.id}',
+                  style: const pw.TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+
+            pw.SizedBox(height: 25),
+
+            // ------------------------------------------------------
+            // CLIENT
+            // ------------------------------------------------------
+            pw.Text(
+              'Bill To',
+              style: pw.TextStyle(
+                fontSize: 12,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+
+            pw.SizedBox(height: 5),
+
+            pw.Text(
+              client?.name ?? 'N/A',
+              style: const pw.TextStyle(
+                fontSize: 11,
+              ),
+            ),
+
+            if (client?.addressLine1 != null)
+              pw.Text(
+                client!.addressLine1!,
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+
+            if (client?.city != null)
+              pw.Text(
+                client!.city!,
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+
+            pw.SizedBox(height: 25),
+
+            // ------------------------------------------------------
+            // ITEMS
+            // ------------------------------------------------------
+            pw.TableHelper.fromTextArray(
+              headers: [
+                'Description',
+                'Qty',
+                'Unit',
+                'VAT',
+                'Total',
+              ],
+              data: items.map((item) {
+                return [
+                  item.itemDesc ?? '',
+                  item.quantity?.toString() ?? '0',
+                  item.unitPrice ?? '',
+                  item.vatRate?.toString() ?? '0',
+                  item.grossAmount?.toString() ?? '0',
+                ];
+              }).toList(),
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+              ),
+              cellStyle: const pw.TextStyle(
+                fontSize: 9,
+              ),
+              cellPadding: const pw.EdgeInsets.all(6),
+            ),
+
+            pw.SizedBox(height: 25),
+
+            // ------------------------------------------------------
+            // FOOTER
+            // ------------------------------------------------------
+            pw.Divider(),
+
+            pw.SizedBox(height: 8),
+
+            pw.Align(
+              alignment: pw.Alignment.centerRight,
+              child: pw.Text(
+                'Thank you for your business.',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ];
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  Future<void> savePdf(
+      Uint8List pdfBytes,
+      InvoicesModel invoice,
+      ) async {
+    await Printing.sharePdf(
+      bytes: pdfBytes,
+      filename: 'invoice_${invoice.id}.pdf',
+    );
+  }
+
 }

@@ -1,6 +1,7 @@
 import 'package:docelix_mobileapp/introPages/Intro_screen.dart';
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:docelix_mobileapp/ui/add_client_screen.dart';
+import 'package:docelix_mobileapp/ui/add_item_screen.dart';
 import 'package:docelix_mobileapp/ui/catalogs_screen.dart';
 import 'package:docelix_mobileapp/ui/client_details_screen.dart';
 import 'package:docelix_mobileapp/ui/clients_screen.dart';
@@ -88,6 +89,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/scanQrScreen', page: () => ScanQrScreen(),),
         GetPage(name: '/ProfileScreen', page: () => ProfileScreen(),),
         GetPage(name: '/NotificationScreen', page: () => NotificationScreen(),),
+        GetPage(name: '/AddItemScreen', page: () => AddItemScreen(),),
       ],
     );
   }

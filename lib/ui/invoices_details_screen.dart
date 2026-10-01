@@ -1081,9 +1081,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () {
-                  // TODO: Download
-                },
+                onPressed: controller.downloadInvoice,
 
                 icon: Icon(
                   Icons.download_outlined,
