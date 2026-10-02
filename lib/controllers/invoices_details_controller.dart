@@ -1,7 +1,7 @@
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
-import 'package:docelix_mobileapp/config/api_constants.dart';
 import 'package:docelix_mobileapp/models/client_model.dart';
 import 'package:docelix_mobileapp/models/invoice_item_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
@@ -9,7 +9,6 @@ import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -60,8 +59,8 @@ class InvoicesDetailsController extends GetxController {
   }
 
   // ============================================================
-// GET CLIENT
-// ============================================================
+  // GET CLIENT
+  // ============================================================
 
   Future<void> getClient() async {
     if (invoice.value == null) {
@@ -79,12 +78,10 @@ class InvoicesDetailsController extends GetxController {
       // ----------------------------------------------------------
 
       if (accessToken == null || accessToken.isEmpty) {
-
         AppSnackbar.error(
           title: 'Error',
-          message:  'Access token is not available.',
+          message: 'Access token is not available.',
         );
-
         return;
       }
 
@@ -93,12 +90,10 @@ class InvoicesDetailsController extends GetxController {
       // ----------------------------------------------------------
 
       if (companyId == null) {
-
         AppSnackbar.error(
           title: 'Error',
           message: 'Company ID is not available.',
         );
-
         return;
       }
 
@@ -107,9 +102,7 @@ class InvoicesDetailsController extends GetxController {
       // ----------------------------------------------------------
 
       final int clientId = invoice.value!.clientId;
-
-      final int companyIdInt =
-      int.parse(companyId.toString());
+      final int companyIdInt = int.parse(companyId.toString());
 
       print('Loading client ID: $clientId');
       print('Company ID: $companyIdInt');
@@ -135,9 +128,9 @@ class InvoicesDetailsController extends GetxController {
         final List<ClientModel> clients = data
             .map(
               (json) => ClientModel.fromJson(
-            json as Map<String, dynamic>,
-          ),
-        )
+                json as Map<String, dynamic>,
+              ),
+            )
             .toList();
 
         // --------------------------------------------------------
@@ -152,13 +145,9 @@ class InvoicesDetailsController extends GetxController {
         client.value = selectedClient;
 
         if (selectedClient != null) {
-          print(
-            'Client found: ${selectedClient.name}',
-          );
+          print('Client found: ${selectedClient.name}');
         } else {
-          print(
-            'Client not found for ID: $clientId',
-          );
+          print('Client not found for ID: $clientId');
         }
       } else {
         client.value = null;
@@ -167,7 +156,6 @@ class InvoicesDetailsController extends GetxController {
           title: 'Error',
           message: 'Unable to load client information.',
         );
-
       }
     } catch (e) {
       client.value = null;
@@ -178,7 +166,6 @@ class InvoicesDetailsController extends GetxController {
         title: 'Error',
         message: 'Unable to load client information.',
       );
-
     } finally {
       isLoading.value = false;
     }
@@ -199,26 +186,16 @@ class InvoicesDetailsController extends GetxController {
       final accessToken = SessionManager.accessToken;
 
       if (accessToken == null || accessToken.isEmpty) {
-
         AppSnackbar.error(
           title: 'Error',
           message: 'Access token is not available.',
         );
-
         return;
       }
-
-      // ----------------------------------------------------------
-      // INVOICE ID
-      // ----------------------------------------------------------
 
       final int invoiceId = invoice.value!.id;
 
       print('Loading items for Invoice ID: $invoiceId');
-
-      // ----------------------------------------------------------
-      // API CALL
-      // ----------------------------------------------------------
 
       final response = await dioClient.getInvoiceItems(
         invoiceId: invoiceId,
@@ -227,24 +204,18 @@ class InvoicesDetailsController extends GetxController {
 
       print('Invoice Items Response: ${response.data}');
 
-      // ----------------------------------------------------------
-      // SUCCESS
-      // ----------------------------------------------------------
-
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
 
         invoiceItems.assignAll(
           data.map(
-                (json) => InvoiceItemModel.fromJson(
+            (json) => InvoiceItemModel.fromJson(
               json as Map<String, dynamic>,
             ),
           ),
         );
 
-        print(
-          'Invoice Items Loaded: ${invoiceItems.length}',
-        );
+        print('Invoice Items Loaded: ${invoiceItems.length}');
       } else {
         invoiceItems.clear();
 
@@ -252,7 +223,6 @@ class InvoicesDetailsController extends GetxController {
           title: 'Error',
           message: 'Unable to load invoice items.',
         );
-
       }
     } catch (e) {
       invoiceItems.clear();
@@ -263,7 +233,6 @@ class InvoicesDetailsController extends GetxController {
         title: 'Error',
         message: 'Unable to load invoice items.',
       );
-
     } finally {
       isLoading.value = false;
     }
@@ -278,8 +247,8 @@ class InvoicesDetailsController extends GetxController {
   }
 
   // ==============================================================
-// DELETE INVOICE
-// ==============================================================
+  // DELETE INVOICE
+  // ==============================================================
 
   Future<void> deleteInvoice() async {
     if (invoice.value == null) return;
@@ -290,117 +259,74 @@ class InvoicesDetailsController extends GetxController {
       final accessToken = SessionManager.accessToken;
       final companyId = SessionManager.accessCompanyid;
 
-      // ----------------------------------------------------------
-      // ACCESS TOKEN
-      // ----------------------------------------------------------
-
       if (accessToken == null || accessToken.isEmpty) {
-
         AppSnackbar.error(
           title: 'Error',
           message: 'Access token is not available.',
         );
-
         return;
       }
 
-      // ----------------------------------------------------------
-      // COMPANY ID
-      // ----------------------------------------------------------
-
       if (companyId == null) {
-
         AppSnackbar.error(
           title: 'Error',
           message: 'Company ID is not available.',
         );
-
         return;
       }
 
       final int companyIdInt = int.parse(companyId.toString());
-
-      // ----------------------------------------------------------
-      // INVOICE ID
-      // ----------------------------------------------------------
 
       final int invoiceId = invoice.value!.id;
 
       print('Deleting Invoice ID: $invoiceId');
       print('Company ID: $companyIdInt');
 
-      // ==========================================================
-      // STEP 1: DELETE LEDGER JOURNAL ENTRIES
-      // ==========================================================
-
       print('Deleting invoice journal entries...');
 
-      final ledgerResponse =
-      await dioClient.deleteInvoiceJournalEntries(
+      final ledgerResponse = await dioClient.deleteInvoiceJournalEntries(
         companyId: companyIdInt,
         sourceId: invoiceId,
         sourceType: 'invoice_issue',
         accessToken: accessToken,
       );
 
-      print(
-        'Ledger Delete Response: ${ledgerResponse.data}',
-      );
+      print('Ledger Delete Response: ${ledgerResponse.data}');
 
       if (ledgerResponse.statusCode != 200) {
-
         AppSnackbar.error(
           title: 'Delete Failed',
           message: 'Unable to delete invoice ledger entries.',
         );
-
         return;
       }
 
-      // ==========================================================
-      // STEP 2: DELETE INVOICE
-      // ==========================================================
-
       print('Deleting invoice...');
 
-      final invoiceResponse =
-      await dioClient.deleteIncomingInvoice(
+      final invoiceResponse = await dioClient.deleteIncomingInvoice(
         invoiceId: invoiceId,
         accessToken: accessToken,
       );
 
-      print(
-        'Invoice Delete Response: ${invoiceResponse.data}',
-      );
+      print('Invoice Delete Response: ${invoiceResponse.data}');
 
       if (invoiceResponse.statusCode != 200) {
-
         AppSnackbar.error(
           title: 'Delete Failed',
           message: 'Unable to delete invoice.',
         );
-
         return;
       }
-
-      // ==========================================================
-      // SUCCESS
-      // ==========================================================
 
       AppSnackbar.success(
         title: 'Success',
         message: 'Invoice deleted successfully.',
       );
 
-      // ----------------------------------------------------------
-      // Return to Invoice List
-      // ----------------------------------------------------------
-
       isLoading.value = false;
 
       Get.back(result: true);
       return;
-
     } on DioException catch (e) {
       print('Delete Invoice Dio Error: ${e.message}');
       print('Response: ${e.response?.data}');
@@ -408,18 +334,15 @@ class InvoicesDetailsController extends GetxController {
       String message = 'Unable to delete invoice.';
 
       if (e.response?.data is Map) {
-        message =
-            e.response?.data['message'] ??
-                e.response?.data['error'] ??
-                message;
+        message = e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            message;
       }
 
       AppSnackbar.error(
         title: 'Error',
-        message: '$message',
+        message: message,
       );
-
-
     } catch (e) {
       print('Delete Invoice Error: $e');
 
@@ -427,7 +350,6 @@ class InvoicesDetailsController extends GetxController {
         title: 'Error',
         message: 'Something went wrong while deleting the invoice.',
       );
-
     } finally {
       isLoading.value = false;
     }
@@ -451,7 +373,6 @@ class InvoicesDetailsController extends GetxController {
             },
             child: const Text('Cancel'),
           ),
-
           ElevatedButton(
             onPressed: () {
               Get.back();
@@ -464,11 +385,27 @@ class InvoicesDetailsController extends GetxController {
     );
   }
 
-  Future<void> downloadInvoice() async {
-    if (invoice.value == null) {
+  // ============================================================
+  // DOWNLOAD INVOICE PDF
+  // ============================================================
+
+  Future<void> downloadInvoicePdf() async {
+    final selectedInvoice = invoice.value;
+
+    if (selectedInvoice == null) {
       AppSnackbar.error(
         title: 'Error',
-        message: 'Invoice information is not available.',
+        message: 'No invoice selected.',
+      );
+      return;
+    }
+
+    final accessToken = SessionManager.accessToken;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Access token is not available.',
       );
       return;
     }
@@ -476,247 +413,201 @@ class InvoicesDetailsController extends GetxController {
     try {
       isLoading.value = true;
 
-      final invoiceData = invoice.value!;
-      final clientData = client.value;
-      final items = invoiceItems.toList();
+      final invoiceId = selectedInvoice.id;
 
-      // Get PDF template settings
-      final templateSettings =
-      await getPdfTemplateSettings();
+      print('Downloading PDF for invoice ID: $invoiceId');
 
-      if (templateSettings == null) {
-        AppSnackbar.error(
-          title: 'Error',
-          message:
-          'PDF template settings are not available.',
+      Uint8List? pdfBytes;
+
+      try {
+        final response = await dioClient.downloadInvoicePdf(
+          invoiceId: invoiceId,
+          accessToken: accessToken,
         );
-        return;
+
+        if (response.statusCode == 200 &&
+            response.data != null &&
+            response.data!.isNotEmpty) {
+          pdfBytes = Uint8List.fromList(response.data!);
+        }
+      } catch (e) {
+        debugPrint(
+            'Server endpoint /invoices/$invoiceId/pdf unavailable ($e). Generating PDF locally...');
       }
 
-      // Generate PDF
-      final pdfBytes = await generateInvoicePdf(
-        invoice: invoiceData,
-        client: clientData,
-        items: items,
-        settings: templateSettings,
-      );
+      // If server returned 404 or endpoint unavailable, generate PDF document locally
+      pdfBytes ??= await _generateInvoicePdfLocally(selectedInvoice);
 
-      // Save PDF
-      await savePdf(
-        pdfBytes,
-        invoiceData,
-      );
-
-      AppSnackbar.success(
-        title: 'Success',
-        message: 'Invoice downloaded successfully.',
-      );
+      if (pdfBytes.isNotEmpty) {
+        _showDownloadSuccessDialog(pdfBytes, selectedInvoice);
+      } else {
+        AppSnackbar.error(
+          title: 'Download Failed',
+          message: 'Unable to generate or download invoice PDF.',
+        );
+      }
     } catch (e) {
-      print('Download Invoice Error: $e');
+      print('Unexpected PDF Download Error: $e');
 
       AppSnackbar.error(
         title: 'Error',
-        message: 'Unable to download invoice.',
+        message: 'Something went wrong while downloading the PDF.',
       );
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<Map<String, dynamic>?> getPdfTemplateSettings() async {
-    try {
-      final companyId = SessionManager.accessCompanyid;
+  // ============================================================
+  // LOCAL PDF GENERATION FALLBACK
+  // ============================================================
 
-      if (companyId == null) {
-        AppSnackbar.error(
-          title: 'Error',
-          message: 'Company ID is not available.',
-        );
-        return null;
-      }
-
-      final int companyIdInt = int.parse(
-        companyId.toString(),
-      );
-
-      print(
-        'Getting PDF template settings for company: $companyIdInt',
-      );
-
-      final response = await dioClient.getPdfTemplateSettings(
-        companyId: companyIdInt,
-        docType: 'invoice',
-        templateId: 'default',
-      );
-
-      print(
-        'PDF Template Settings Response: ${response.data}',
-      );
-
-      if (response.statusCode == 200 &&
-          response.data is List &&
-          response.data.isNotEmpty) {
-
-        final firstItem = response.data.first;
-
-        if (firstItem is Map &&
-            firstItem['settings'] is Map) {
-
-          return Map<String, dynamic>.from(
-            firstItem['settings'],
-          );
-        }
-      }
-
-      print('PDF template settings not found.');
-
-      return null;
-    } on DioException catch (e) {
-      print(
-        'Get PDF Template Settings Dio Error: ${e.message}',
-      );
-
-      print(
-        'Response: ${e.response?.data}',
-      );
-
-      return null;
-    } catch (e) {
-      print(
-        'Get PDF Template Settings Error: $e',
-      );
-
-      return null;
-    }
-  }
-
-  Future<Uint8List> generateInvoicePdf({
-    required InvoicesModel invoice,
-    required ClientModel? client,
-    required List<InvoiceItemModel> items,
-    required Map<String, dynamic> settings,
-  }) async
-  {
+  Future<Uint8List> _generateInvoicePdfLocally(InvoicesModel inv) async {
     final pdf = pw.Document();
 
+    final clientName = client.value?.name ?? 'Client';
+    final itemsList = invoiceItems;
+
     pdf.addPage(
-      pw.MultiPage(
+      pw.Page(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
-        build: (context) {
-          return [
-            // ------------------------------------------------------
-            // HEADER
-            // ------------------------------------------------------
-            pw.Row(
-              mainAxisAlignment:
-              pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text(
-                  'INVOICE',
-                  style: pw.TextStyle(
-                    fontSize: 26,
-                    fontWeight: pw.FontWeight.bold,
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Header
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'INVOICE',
+                        style: pw.TextStyle(
+                          fontSize: 24,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.blue900,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        '#${inv.invoiceNumber}',
+                        style: const pw.TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text('Date: ${inv.issueDate}'),
+                      pw.Text('Status: ${inv.status.toUpperCase()}'),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 24),
+              pw.Divider(),
+              pw.SizedBox(height: 12),
+
+              // Client Info
+              pw.Text(
+                'Billed To:',
+                style: pw.TextStyle(
+                  fontSize: 12,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.grey700,
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                clientName,
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              if (client.value?.email != null)
+                pw.Text(client.value!.email!),
+              if (client.value?.phone != null)
+                pw.Text(client.value!.phone!),
+
+              pw.SizedBox(height: 24),
+
+              // Items Table
+              pw.TableHelper.fromTextArray(
+                headers: ['Description', 'Qty', 'Unit Price', 'Total'],
+                data: itemsList.isNotEmpty
+                    ? itemsList.map((item) {
+                        return [
+                          item.itemDesc,
+                          '${item.quantity}',
+                          '€${item.unitPrice.toStringAsFixed(2)}',
+                          '€${item.grossAmount.toStringAsFixed(2)}',
+                        ];
+                      }).toList()
+                    : [
+                        [
+                          'Invoice Total',
+                          '1',
+                          '€${inv.paidAmount.toStringAsFixed(2)}',
+                          '€${inv.paidAmount.toStringAsFixed(2)}'
+                        ]
+                      ],
+                headerStyle: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.white,
+                ),
+                headerDecoration: const pw.BoxDecoration(
+                  color: PdfColors.blue900,
+                ),
+                rowDecoration: const pw.BoxDecoration(
+                  border: pw.Border(
+                    bottom: pw.BorderSide(color: PdfColors.grey300),
                   ),
                 ),
+                cellAlignment: pw.Alignment.centerLeft,
+                cellAlignments: {
+                  1: pw.Alignment.centerRight,
+                  2: pw.Alignment.centerRight,
+                  3: pw.Alignment.centerRight,
+                },
+              ),
 
-                pw.Text(
-                  '#${invoice.id}',
-                  style: const pw.TextStyle(
-                    fontSize: 12,
+              pw.SizedBox(height: 20),
+
+              // Total Summary
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.end,
+                children: [
+                  pw.Container(
+                    width: 200,
+                    child: pw.Column(
+                      children: [
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Text('Total Amount:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold)),
+                            pw.Text(
+                              '${inv.currencyCode.isEmpty ? '€' : inv.currencyCode} ${inv.paidAmount.toStringAsFixed(2)}',
+                              style: pw.TextStyle(
+                                fontSize: 14,
+                                fontWeight: pw.FontWeight.bold,
+                                color: PdfColors.blue900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-
-            pw.SizedBox(height: 25),
-
-            // ------------------------------------------------------
-            // CLIENT
-            // ------------------------------------------------------
-            pw.Text(
-              'Bill To',
-              style: pw.TextStyle(
-                fontSize: 12,
-                fontWeight: pw.FontWeight.bold,
+                ],
               ),
-            ),
-
-            pw.SizedBox(height: 5),
-
-            pw.Text(
-              client?.name ?? 'N/A',
-              style: const pw.TextStyle(
-                fontSize: 11,
-              ),
-            ),
-
-            if (client?.addressLine1 != null)
-              pw.Text(
-                client!.addressLine1!,
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                ),
-              ),
-
-            if (client?.city != null)
-              pw.Text(
-                client!.city!,
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                ),
-              ),
-
-            pw.SizedBox(height: 25),
-
-            // ------------------------------------------------------
-            // ITEMS
-            // ------------------------------------------------------
-            pw.TableHelper.fromTextArray(
-              headers: [
-                'Description',
-                'Qty',
-                'Unit',
-                'VAT',
-                'Total',
-              ],
-              data: items.map((item) {
-                return [
-                  item.itemDesc ?? '',
-                  item.quantity?.toString() ?? '0',
-                  item.unitPrice ?? '',
-                  item.vatRate?.toString() ?? '0',
-                  item.grossAmount?.toString() ?? '0',
-                ];
-              }).toList(),
-              headerStyle: pw.TextStyle(
-                fontWeight: pw.FontWeight.bold,
-              ),
-              cellStyle: const pw.TextStyle(
-                fontSize: 9,
-              ),
-              cellPadding: const pw.EdgeInsets.all(6),
-            ),
-
-            pw.SizedBox(height: 25),
-
-            // ------------------------------------------------------
-            // FOOTER
-            // ------------------------------------------------------
-            pw.Divider(),
-
-            pw.SizedBox(height: 8),
-
-            pw.Align(
-              alignment: pw.Alignment.centerRight,
-              child: pw.Text(
-                'Thank you for your business.',
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                ),
-              ),
-            ),
-          ];
+            ],
+          );
         },
       ),
     );
@@ -724,14 +615,110 @@ class InvoicesDetailsController extends GetxController {
     return pdf.save();
   }
 
+  // ============================================================
+  // SUCCESS DIALOG
+  // ============================================================
+
+  void _showDownloadSuccessDialog(Uint8List pdfBytes, InvoicesModel inv) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE6F4EA),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_circle_rounded,
+                  color: Color(0xFF16A34A),
+                  size: 38,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Invoice Downloaded Successfully!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF172033),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'invoice_${inv.invoiceNumber ?? inv.id}.pdf is ready to view or open.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF667085),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: const BorderSide(
+                          color: Color(0xFFD1D5DB),
+                        ),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Get.back();
+                        Printing.sharePdf(
+                          bytes: pdfBytes,
+                          filename:
+                              'invoice_${inv.invoiceNumber ?? inv.id}.pdf',
+                        );
+                      },
+                      icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                      label: const Text('Open PDF'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 46),
+                        backgroundColor: const Color(0xFF063C70),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> savePdf(
-      Uint8List pdfBytes,
-      InvoicesModel invoice,
-      ) async {
+    Uint8List pdfBytes,
+    InvoicesModel invoice,
+  ) async {
     await Printing.sharePdf(
       bytes: pdfBytes,
       filename: 'invoice_${invoice.id}.pdf',
     );
   }
-
 }

@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/invoices_details_controller.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +7,7 @@ import 'package:get/get.dart';
 class InvoicesDetailsScreen extends StatelessWidget {
   InvoicesDetailsScreen({super.key});
 
-  final InvoicesDetailsController controller =
-  Get.put(InvoicesDetailsController());
+  final InvoicesDetailsController controller = Get.put(InvoicesDetailsController());
 
   @override
   Widget build(BuildContext context) {
@@ -1079,35 +1079,43 @@ class InvoicesDetailsScreen extends StatelessWidget {
             // DOWNLOAD
             // ------------------------------------------------------
 
+
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: controller.downloadInvoice,
+              child: Obx(
+                    () => OutlinedButton.icon(
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : controller.downloadInvoicePdf,
 
-                icon: Icon(
-                  Icons.download_outlined,
-                  size: 19,
-                  color: colorsList.iconColor,
-                ),
-
-                label: const Text(
-                  'Download',
-                ),
-
-                style: OutlinedButton.styleFrom(
-                  foregroundColor:
-                  colorsList.textHintColor,
-
-                  side: const BorderSide(
-                    color: colorsList.borderColor,
+                  icon: controller.isLoading.value
+                      ? const SizedBox(
+                    width: 19,
+                    height: 19,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : Icon(
+                    Icons.download_outlined,
+                    size: 19,
+                    color: colorsList.iconColor,
                   ),
 
-                  minimumSize:
-                  const Size(0, 48),
+                  label: Text(
+                    controller.isLoading.value
+                        ? 'Downloading...'
+                        : 'Download',
+                  ),
 
-                  shape:
-                  RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(12),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colorsList.textHintColor,
+                    side: const BorderSide(
+                      color: colorsList.borderColor,
+                    ),
+                    minimumSize: const Size(0, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -1240,7 +1248,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
               icon: Icons.picture_as_pdf_outlined,
               title: 'Download ZUGFeRD PDF',
               onTap: () {
-                Get.back();
+                AppSnackbar.info(
+                    title: 'Inprogress',
+                    message: 'Download ZUGFeRD PDF Coming soon');
               },
             ),
 
@@ -1248,7 +1258,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               icon: Icons.description_outlined,
               title: 'Download e-invoice',
               onTap: () {
-                Get.back();
+                controller.downloadInvoicePdf;
               },
             ),
 
@@ -1256,7 +1266,11 @@ class InvoicesDetailsScreen extends StatelessWidget {
               icon: Icons.edit_outlined,
               title: 'Edit Invoice',
               onTap: () {
-                Get.back();
+                //Get.back();
+
+                AppSnackbar.info(
+                    title: 'Inprogress',
+                    message: 'Edit Invoice Coming soon');
               },
             ),
 
@@ -1265,7 +1279,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               title: 'Delete Invoice',
               color: const Color(0xFFDC2626),
               onTap: () {
-                Get.back();
+               // Get.back();
 
                 controller.showDeleteConfirmation();
               },

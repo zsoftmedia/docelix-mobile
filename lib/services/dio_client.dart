@@ -367,28 +367,21 @@ class DioClient {
   }
 
 // ==============================
-// GET PDF TEMPLATE SETTINGS
+// GET PDF
 // ==============================
 
-  Future<Response> getPdfTemplateSettings({
-    required int companyId,
-    String docType = 'invoice',
-    String templateId = 'default',
+
+  Future<Response<List<int>>> downloadInvoicePdf({
+    required int invoiceId,
+    required String accessToken,
   }) async {
-    return await _dio.get(
-      '${ApiConstants.supabaseUrl}/rest/v1/pdf_template_settings',
-      queryParameters: {
-        'select': 'settings',
-        'company_id': 'eq.$companyId',
-        'doc_type': 'eq.$docType',
-        'template_id': 'eq.$templateId',
-      },
+    return await _dio.get<List<int>>(
+      '${ApiConstants.baseUrl}/invoices/$invoiceId/pdf',
       options: Options(
+        responseType: ResponseType.bytes,
         headers: {
-          'apikey': ApiConstants.supabaseAnonKey,
-          'Authorization':
-          'Bearer ${ApiConstants.supabaseAnonKey}',
-          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/pdf',
         },
       ),
     );
