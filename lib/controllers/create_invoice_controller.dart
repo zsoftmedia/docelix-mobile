@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/controllers/invoices_controller.dart';
 import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
@@ -29,28 +30,7 @@ class CreateInvoiceController extends GetxController {
   final Rxn<UnitModel> selectedUnit = Rxn<UnitModel>();
   final RxString unitSearchQuery = ''.obs;
 
-  final List<String> unitOptions = const [
-    'Ad set (adset)',
-    'Piece (pc)',
-    'Hour (h)',
-    'Day (day)',
-    'Month (month)',
-    'Kilogram (kg)',
-    'Gram (g)',
-    'Liter (l)',
-    'Meter (m)',
-    'Square meter (m²)',
-    'Cubic meter (m³)',
-    'Package (pkg)',
-    'Box (box)',
-    'Set (set)',
-    'Service (service)',
-  ];
-
-  List<String> get availableUnits {
-    if (unitNames.isNotEmpty) return unitNames;
-    return unitOptions;
-  }
+  List<String> get availableUnits => unitNames;
 
   String? get currentSelectedUnitLabel {
     return selectedUnit.value?.label ??
@@ -993,22 +973,23 @@ class CreateInvoiceController extends GetxController {
         final responseData = response.data;
 
         print('Invoice created successfully.');
-        print('Invoice ID: ${responseData['id']}');
-        print(
-          'Invoice Number: ${responseData['invoice_number']}',
-        );
 
+        // 1. Clear full form
+        clearForm();
+
+        // 2. Go back to InvoicesScreen FIRST before showing snackbar
+        Get.back(result: responseData ?? true);
+
+        // 3. Show success snackbar message
         AppSnackbar.success(
           title: 'Success',
           message: 'Invoice created successfully.',
         );
 
-        // Small delay so the success message is visible
-        await Future.delayed(
-          const Duration(milliseconds: 500),
-        );
-
-        Get.back(result: responseData);
+        // 4. Refresh Invoices list in InvoicesScreen
+        if (Get.isRegistered<InvoicesController>()) {
+          Get.find<InvoicesController>().refreshInvoices();
+        }
       } else {
         AppSnackbar.error(
           title: 'Error',
@@ -1052,6 +1033,44 @@ class CreateInvoiceController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // ============================================================
+  // CLEAR FORM
+  // ============================================================
+
+  void clearForm() {
+    currentStep.value = 0;
+
+    selectedCompany.value = null;
+    selectedClient.value = null;
+    selectedClientName.value = null;
+
+    customerController.clear();
+    addressController.clear();
+    zipController.clear();
+    cityController.clear();
+    attnController.clear();
+    emailController.clear();
+    phoneController.clear();
+
+    autoGenerate.value = true;
+    invoiceNumberController.text = generateInvoiceNumber();
+    invoiceDateController.clear();
+
+    enableVat.value = false;
+    vatRateController.text = '0';
+    recurringInvoice.value = false;
+
+    descriptionController.clear();
+    unitController.clear();
+    quantityController.clear();
+    unitPriceController.clear();
+    selectedUnit.value = null;
+    selectedCatalogItem.value = null;
+    lineItems.clear();
+
+    closingTextController.clear();
   }
 
   // ============================================================

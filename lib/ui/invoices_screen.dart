@@ -277,32 +277,20 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       FloatingActionButtonLocation.endFloat,
 
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
 
           // ----------------------------------------------------------
           // OPEN ADD INVOICE PAGE
           // ----------------------------------------------------------
 
-          /*Get.toNamed(
-            '/VoiceRecognitionScreen',
-            arguments: 'Voice Recognition Invoices Screen',);*/
-          Get.toNamed(
+          final result = await Get.toNamed(
             '/CreateInvoiceScreen',
-            arguments: 'Create Invoices Screen',);
+            arguments: 'Create Invoices Screen',
+          );
 
-          // Get.to(
-          //   () => const AddInvoiceScreen(),
-          // );
-
-          // Temporary action
-          /*Get.snackbar(
-            "Add Invoice",
-            "Add Invoice page will open here.",
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(15),
-            backgroundColor: const Color(0xFF063C70),
-            colorText: Colors.white,
-          );*/
+          if (result != null) {
+            invoicesController.refreshInvoices();
+          }
         },
 
         backgroundColor: const Color(0xFF063C70),
