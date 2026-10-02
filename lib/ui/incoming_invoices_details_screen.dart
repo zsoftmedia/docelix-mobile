@@ -1,15 +1,14 @@
+import 'package:docelix_mobileapp/components/app_button.dart';
+import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/incoming_invoices_details_controller.dart';
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class IncomingInvoicesDetailsScreen extends StatefulWidget {
   final IncomingInvoicesModel invoice;
-  // const InvoicesDetailsScreen({super.key});
 
   const IncomingInvoicesDetailsScreen({
     super.key,
@@ -154,7 +153,6 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                               style: TextStyle(
                                 color: controller.statusColor,
                                 fontSize: width * 0.032,
-                                //fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],
@@ -379,7 +377,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                             ),
                           ],
                         ),
-                      )
+                      ),
                     ),
 
                     SizedBox(
@@ -401,8 +399,6 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
 
                     GestureDetector(
                       onTap: () {
-                        // Open full document
-
                         final previewUrl = controller.invoice.previewUrl;
 
                         if (previewUrl == null || previewUrl.isEmpty) {
@@ -518,46 +514,18 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                     ),
 
                     Center(
-                      child: SizedBox(
+                      child: AppButton(
+                        text: 'Save Changes',
+                        icon: Icons.save_outlined,
                         width: width * 0.55,
                         height: height * 0.058,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            // Save functionality will be implemented later.
-                          },
-
-                          icon: Icon(
-                            Icons.save_outlined,
-                            size: width * 0.05,
-                          ),
-
-                          label: Text(
-                            'Save Changes',
-                            style: TextStyle(
-                              fontSize: width * 0.035,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF063C70),
-                            foregroundColor: Colors.white,
-                            elevation: 2,
-
-                            shadowColor: const Color(0xFF063C70)
-                                .withOpacity(0.25),
-
-                            padding: EdgeInsets.symmetric(
-                              horizontal: width * 0.04,
-                            ),
-
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                width * 0.035,
-                              ),
-                            ),
-                          ),
-                        ),
+                        backgroundColor: colorsList.colorButton,
+                        foregroundColor: Colors.white,
+                        borderRadius: width * 0.035,
+                        fontSize: width * 0.035,
+                        onPressed: () {
+                          // Save functionality will be implemented later.
+                        },
                       ),
                     ),
 
@@ -598,42 +566,20 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                 children: [
                   Expanded(
                     child: Obx(
-                          () => OutlinedButton.icon(
-                        onPressed: controller.isDeleting.value
-                            ? null
-                            : controller.deleteInvoice,
-                        icon: controller.isDeleting.value
-                            ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFFD64545),
-                          ),
-                        )
-                            : const Icon(
-                          Icons.delete_outline_rounded,
-                        ),
-                        label: Text(
-                          controller.isDeleting.value
-                              ? 'Deleting...'
-                              : 'Delete',
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFD64545),
-                          disabledForegroundColor:
-                          const Color(0xFFD64545),
-                          side: const BorderSide(
-                            color: Color(0xFFD64545),
-                          ),
-                          minimumSize: Size(
-                            0,
-                            height * 0.055,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
+                          () => AppButton(
+                        text: controller.isDeleting.value
+                            ? 'Deleting...'
+                            : 'Delete',
+                        icon: Icons.delete_outline_rounded,
+                        height: height * 0.055,
+                        backgroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFFD64545),
+                        borderColor: const Color(0xFFD64545),
+                        loadingColor: const Color(0xFFD64545),
+                        borderRadius: 12,
+                        isLoading: controller.isDeleting.value,
+                        onPressed: controller.deleteInvoice,
                       ),
                     ),
                   ),
@@ -643,26 +589,14 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                   ),
 
                   Expanded(
-                    child: ElevatedButton.icon(
+                    child: AppButton(
+                      text: 'Mark Paid',
+                      icon: Icons.check_circle_outline_rounded,
+                      height: height * 0.055,
+                      backgroundColor: const Color(0xFF12A150),
+                      foregroundColor: Colors.white,
+                      borderRadius: 12,
                       onPressed: () {},
-                      icon: const Icon(
-                        Icons.check_circle_outline_rounded,
-                      ),
-                      label: const Text('Mark Paid'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        const Color(0xFF12A150),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        minimumSize: Size(
-                          0,
-                          height * 0.055,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(12),
-                        ),
-                      ),
                     ),
                   ),
                 ],
@@ -688,7 +622,6 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
       style: TextStyle(
         color: colorsList.textColor,
         fontSize: width * 0.038,
-      //  fontWeight: FontWeight.w700,
       ),
     );
   }
@@ -750,7 +683,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
     required TextEditingController controller,
     required IconData icon,
     required double width,
-    bool readOnly = true,
+    bool readOnly = false,
     TextInputType keyboardType = TextInputType.text,
     VoidCallback? onTap,
   })
@@ -763,7 +696,6 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           style: TextStyle(
             color: colorsList.textHintColor,
             fontSize: width * 0.030,
-           // fontWeight: FontWeight.w500,
           ),
         ),
 
@@ -771,58 +703,15 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           height: width * 0.018,
         ),
 
-        TextFormField(
+        AppTextField(
           controller: controller,
+          prefixIcon: icon,
+          readOnly: readOnly,
           onTap: onTap,
           keyboardType: keyboardType,
-
-          style: TextStyle(
-            color: colorsList.textColor,
-            fontSize: width * 0.034,
-           // fontWeight: FontWeight.w600,
-          ),
-
-          decoration: InputDecoration(
-            prefixIcon: Icon(
-              icon,
-              color: colorsList.iconColor,
-              size: width * 0.050,
-            ),
-            filled: true,
-            fillColor: const Color(0xFFF9FAFC),
-
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: width * 0.035,
-              vertical: width * 0.035,
-            ),
-
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                width * 0.03,
-              ),
-              borderSide: const BorderSide(
-                color: colorsList.borderColor,
-              ),
-            ),
-
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                width * 0.03,
-              ),
-              borderSide: const BorderSide(
-                color: colorsList.borderColor,
-              ),
-            ),
-
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                width * 0.03,
-              ),
-              borderSide: const BorderSide(
-                color: colorsList.textColor,
-              ),
-            ),
-          ),
+          fillColor: const Color(0xFFF9FAFC),
+          borderRadius: width * 0.03,
+          fontSize: width * 0.034,
         ),
       ],
     );
@@ -962,7 +851,7 @@ void showInvoiceDocumentDialog({
                     // ------------------------------------------------
 
                     Material(
-                      color: Color(0xFFF3F5F8),
+                      color: const Color(0xFFF3F5F8),
                       shape: const CircleBorder(),
 
                       child: InkWell(
