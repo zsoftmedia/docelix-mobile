@@ -236,11 +236,15 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       invoicesController.filteredInvoices[index];
 
                       return InkWell(
-                        onTap: () {
-                          Get.toNamed(
+                        onTap: () async {
+                          final result = await Get.toNamed(
                             '/InvoicesDetailsScreen',
                             arguments: invoice,
                           );
+
+                          if (result == true) {
+                            await invoicesController.refreshInvoices();
+                          }
                         },
 
                         child: Column(

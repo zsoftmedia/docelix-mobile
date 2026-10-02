@@ -246,6 +246,24 @@ class DioClient {
   // ==============================
   // DELETE INVOICE
   // ==============================
+  Future<Response> deleteInvoice({
+    required int invoiceId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/invoices/$invoiceId',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // DELETE JOURNAL ENTRIES INVOICE
+  // ==============================
   Future<Response> deleteInvoiceJournalEntries({
     required int companyId,
     required int sourceId,
@@ -382,6 +400,37 @@ class DioClient {
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Accept': 'application/pdf',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // SEND INVOICE REMINDER
+  // ==============================
+
+  Future<Response> sendInvoice({
+    required int invoiceId,
+    required int companyId,
+    required String to,
+    required String subject,
+    required String text,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/invoices/$invoiceId/send',
+      data: {
+        'to': to,
+        'subject': subject,
+        'text': text,
+        'company_id': companyId,
+        'file': '',
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
       ),
     );

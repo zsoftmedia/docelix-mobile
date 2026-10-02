@@ -1,11 +1,15 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/components/app_textfield.dart';
+import 'package:docelix_mobileapp/controllers/invoices_controller.dart';
 import 'package:docelix_mobileapp/models/client_model.dart';
 import 'package:docelix_mobileapp/models/invoice_item_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,6 +21,7 @@ class InvoicesDetailsController extends GetxController {
   final DioClient dioClient = DioClient();
 
   final RxBool isLoading = false.obs;
+  final RxBool isSendingEmail = false.obs;
 
   /// Selected invoice
   final Rxn<InvoicesModel> invoice = Rxn<InvoicesModel>();
@@ -73,10 +78,6 @@ class InvoicesDetailsController extends GetxController {
       final accessToken = SessionManager.accessToken;
       final companyId = SessionManager.accessCompanyid;
 
-      // ----------------------------------------------------------
-      // ACCESS TOKEN
-      // ----------------------------------------------------------
-
       if (accessToken == null || accessToken.isEmpty) {
         AppSnackbar.error(
           title: 'Error',
@@ -84,10 +85,6 @@ class InvoicesDetailsController extends GetxController {
         );
         return;
       }
-
-      // ----------------------------------------------------------
-      // COMPANY ID
-      // ----------------------------------------------------------
 
       if (companyId == null) {
         AppSnackbar.error(
@@ -97,19 +94,11 @@ class InvoicesDetailsController extends GetxController {
         return;
       }
 
-      // ----------------------------------------------------------
-      // INVOICE CLIENT ID
-      // ----------------------------------------------------------
-
       final int clientId = invoice.value!.clientId;
       final int companyIdInt = int.parse(companyId.toString());
 
       print('Loading client ID: $clientId');
       print('Company ID: $companyIdInt');
-
-      // ----------------------------------------------------------
-      // API CALL
-      // ----------------------------------------------------------
 
       final response = await dioClient.getClients(
         companyId: companyIdInt,
@@ -117,10 +106,6 @@ class InvoicesDetailsController extends GetxController {
       );
 
       print('Clients Response: ${response.data}');
-
-      // ----------------------------------------------------------
-      // SUCCESS
-      // ----------------------------------------------------------
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
@@ -132,10 +117,6 @@ class InvoicesDetailsController extends GetxController {
               ),
             )
             .toList();
-
-        // --------------------------------------------------------
-        // FIND CLIENT FOR CURRENT INVOICE
-        // --------------------------------------------------------
 
         final ClientModel? selectedClient = clients.cast<ClientModel?>().firstWhere(
               (item) => item!.id == clientId,
@@ -276,57 +257,54 @@ class InvoicesDetailsController extends GetxController {
       }
 
       final int companyIdInt = int.parse(companyId.toString());
-
       final int invoiceId = invoice.value!.id;
 
       print('Deleting Invoice ID: $invoiceId');
       print('Company ID: $companyIdInt');
 
-      print('Deleting invoice journal entries...');
-
-      final ledgerResponse = await dioClient.deleteInvoiceJournalEntries(
-        companyId: companyIdInt,
-        sourceId: invoiceId,
-        sourceType: 'invoice_issue',
-        accessToken: accessToken,
-      );
-
-      print('Ledger Delete Response: ${ledgerResponse.data}');
-
-      if (ledgerResponse.statusCode != 200) {
-        AppSnackbar.error(
-          title: 'Delete Failed',
-          message: 'Unable to delete invoice ledger entries.',
+      try {
+        final ledgerResponse = await dioClient.deleteInvoiceJournalEntries(
+          companyId: companyIdInt,
+          sourceId: invoiceId,
+          sourceType: 'invoice_issue',
+          accessToken: accessToken,
         );
-        return;
+        print('Ledger Delete Response: ${ledgerResponse.data}');
+      } catch (e) {
+        debugPrint('Ledger journal entries delete warning: $e');
       }
 
-      print('Deleting invoice...');
-
-      final invoiceResponse = await dioClient.deleteIncomingInvoice(
+      final invoiceResponse = await dioClient.deleteInvoice(
         invoiceId: invoiceId,
         accessToken: accessToken,
       );
 
       print('Invoice Delete Response: ${invoiceResponse.data}');
 
-      if (invoiceResponse.statusCode != 200) {
+      if (invoiceResponse.statusCode == 200 ||
+          invoiceResponse.statusCode == 201 ||
+          invoiceResponse.statusCode == 204) {
+
+        while (Get.isDialogOpen == true || Get.isBottomSheetOpen == true) {
+          Get.back();
+        }
+
+        Get.back(result: true);
+
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Invoice deleted successfully.',
+        );
+
+        if (Get.isRegistered<InvoicesController>()) {
+          Get.find<InvoicesController>().refreshInvoices();
+        }
+      } else {
         AppSnackbar.error(
           title: 'Delete Failed',
           message: 'Unable to delete invoice.',
         );
-        return;
       }
-
-      AppSnackbar.success(
-        title: 'Success',
-        message: 'Invoice deleted successfully.',
-      );
-
-      isLoading.value = false;
-
-      Get.back(result: true);
-      return;
     } on DioException catch (e) {
       print('Delete Invoice Dio Error: ${e.message}');
       print('Response: ${e.response?.data}');
@@ -386,6 +364,290 @@ class InvoicesDetailsController extends GetxController {
   }
 
   // ============================================================
+  // SHOW SEND INVOICE EMAIL DIALOG
+  // ============================================================
+
+  void showSendInvoiceDialog() {
+    final selectedInvoice = invoice.value;
+
+    if (selectedInvoice == null) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'No invoice selected.',
+      );
+      return;
+    }
+
+    final toEmailController = TextEditingController(
+      text: client.value?.email?.trim() ?? '',
+    );
+
+    final subjectController = TextEditingController(
+      text: 'Invoice #${selectedInvoice.invoiceNumber}',
+    );
+
+    final companyName = SessionManager.accessCompanyname?.toString() ?? '';
+
+    final bodyController = TextEditingController(
+      text: 'Hello,\n\n'
+          'Please find your invoice #${selectedInvoice.invoiceNumber}.\n\n'
+          'Best regards,\n'
+          '$companyName',
+    );
+
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.email_outlined,
+                    color: colorsList.iconColor,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Send Invoice Email',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: colorsList.textColor,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: colorsList.iconColor,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              const Text(
+                'To Email *',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: colorsList.textColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+              AppTextField(
+                controller: toEmailController,
+                hintText: 'client@example.com',
+                prefixIcon: Icons.alternate_email_rounded,
+                keyboardType: TextInputType.emailAddress,
+              ),
+
+              const SizedBox(height: 14),
+
+              const Text(
+                'Subject *',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: colorsList.textColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+              AppTextField(
+                controller: subjectController,
+                hintText: 'Email subject',
+                prefixIcon: Icons.subject_rounded,
+              ),
+
+              const SizedBox(height: 14),
+
+              const Text(
+                'Message *',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: colorsList.textColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+              AppTextField(
+                controller: bodyController,
+                hintText: 'Email message body...',
+                prefixIcon: Icons.notes_rounded,
+                maxLines: 4,
+              ),
+
+              const SizedBox(height: 22),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: const BorderSide(
+                          color: colorsList.borderColor,
+                        ),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Obx(
+                      () => AppButton(
+                        text: isSendingEmail.value
+                            ? 'Sending...'
+                            : 'Send Email',
+                        icon: Icons.send_rounded,
+                        height: 48,
+                        backgroundColor: colorsList.colorButton,
+                        foregroundColor: Colors.white,
+                        borderRadius: 10,
+                        isLoading: isSendingEmail.value,
+                        onPressed: () {
+                          sendCustomInvoiceEmail(
+                            invoiceId: selectedInvoice.id,
+                            to: toEmailController.text.trim(),
+                            subject: subjectController.text.trim(),
+                            body: bodyController.text.trim(),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  // ============================================================
+  // SEND INVOICE EMAIL API
+  // ============================================================
+
+  Future<void> sendCustomInvoiceEmail({
+    required int invoiceId,
+    required String to,
+    required String subject,
+    required String body,
+  }) async {
+    if (to.isEmpty || subject.isEmpty || body.isEmpty) {
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Missing email, subject OR message.',
+      );
+      return;
+    }
+
+    if (!GetUtils.isEmail(to)) {
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Please enter a valid email address.',
+      );
+      return;
+    }
+
+    final accessToken = SessionManager.accessToken;
+    final companyId = SessionManager.accessCompanyid;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Access token is not available.',
+      );
+      return;
+    }
+
+    if (companyId == null) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Company ID is not available.',
+      );
+      return;
+    }
+
+    try {
+      isSendingEmail.value = true;
+
+      final int companyIdInt = int.parse(companyId.toString());
+
+      print('Sending invoice email to: $to');
+
+      final response = await dioClient.sendInvoice(
+        invoiceId: invoiceId,
+        companyId: companyIdInt,
+        to: to,
+        subject: subject,
+        text: body,
+        accessToken: accessToken,
+      );
+
+      print('Send Invoice Response Status: ${response.statusCode}');
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 202 ||
+          response.statusCode == 204) {
+        Get.back();
+
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Invoice email sent successfully.',
+        );
+      } else {
+        AppSnackbar.error(
+          title: 'Send Failed',
+          message: 'Unable to send invoice email.',
+        );
+      }
+    } on DioException catch (e) {
+      print('Send Invoice Dio Error: ${e.message}');
+      print('Response: ${e.response?.data}');
+
+      String message = 'Unable to send invoice email.';
+
+      if (e.response?.data is Map) {
+        message = e.response?.data['message']?.toString() ??
+            e.response?.data['error']?.toString() ??
+            message;
+      }
+
+      AppSnackbar.error(
+        title: 'Send Failed',
+        message: message,
+      );
+    } catch (e) {
+      print('Send Invoice Exception: $e');
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Something went wrong while sending invoice email.',
+      );
+    } finally {
+      isSendingEmail.value = false;
+    }
+  }
+
+  // ============================================================
   // DOWNLOAD INVOICE PDF
   // ============================================================
 
@@ -435,7 +697,6 @@ class InvoicesDetailsController extends GetxController {
             'Server endpoint /invoices/$invoiceId/pdf unavailable ($e). Generating PDF locally...');
       }
 
-      // If server returned 404 or endpoint unavailable, generate PDF document locally
       pdfBytes ??= await _generateInvoicePdfLocally(selectedInvoice);
 
       if (pdfBytes.isNotEmpty) {
@@ -476,7 +737,6 @@ class InvoicesDetailsController extends GetxController {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // Header
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -511,7 +771,6 @@ class InvoicesDetailsController extends GetxController {
               pw.Divider(),
               pw.SizedBox(height: 12),
 
-              // Client Info
               pw.Text(
                 'Billed To:',
                 style: pw.TextStyle(
@@ -528,14 +787,11 @@ class InvoicesDetailsController extends GetxController {
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
-              if (client.value?.email != null)
-                pw.Text(client.value!.email!),
-              if (client.value?.phone != null)
-                pw.Text(client.value!.phone!),
+              if (client.value?.email != null) pw.Text(client.value!.email!),
+              if (client.value?.phone != null) pw.Text(client.value!.phone!),
 
               pw.SizedBox(height: 24),
 
-              // Items Table
               pw.TableHelper.fromTextArray(
                 headers: ['Description', 'Qty', 'Unit Price', 'Total'],
                 data: itemsList.isNotEmpty
@@ -577,7 +833,6 @@ class InvoicesDetailsController extends GetxController {
 
               pw.SizedBox(height: 20),
 
-              // Total Summary
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.end,
                 children: [
@@ -655,7 +910,7 @@ class InvoicesDetailsController extends GetxController {
               ),
               const SizedBox(height: 8),
               Text(
-                'invoice_${inv.invoiceNumber ?? inv.id}.pdf is ready to view or open.',
+                'invoice_${inv.invoiceNumber}.pdf is ready to view or open.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 13,
@@ -687,8 +942,7 @@ class InvoicesDetailsController extends GetxController {
                         Get.back();
                         Printing.sharePdf(
                           bytes: pdfBytes,
-                          filename:
-                              'invoice_${inv.invoiceNumber ?? inv.id}.pdf',
+                          filename: 'invoice_${inv.invoiceNumber}.pdf',
                         );
                       },
                       icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),

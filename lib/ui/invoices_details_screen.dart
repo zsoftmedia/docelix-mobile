@@ -1103,7 +1103,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                   label: Text(
                     controller.isLoading.value
-                        ? 'Downloading...'
+                        ? 'Download'
                         : 'Download',
                   ),
 
@@ -1130,14 +1130,12 @@ class InvoicesDetailsScreen extends StatelessWidget {
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // TODO: Send invoice
+                  controller.showSendInvoiceDialog();
                 },
-
-                icon: Icon(
+                icon: const Icon(
                   Icons.send_outlined,
                   size: 18,
                 ),
-
                 label: const Text(
                   'Send',
                 ),
@@ -1248,6 +1246,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               icon: Icons.picture_as_pdf_outlined,
               title: 'Download ZUGFeRD PDF',
               onTap: () {
+                Get.back();
                 AppSnackbar.info(
                     title: 'Inprogress',
                     message: 'Download ZUGFeRD PDF Coming soon');
@@ -1258,7 +1257,8 @@ class InvoicesDetailsScreen extends StatelessWidget {
               icon: Icons.description_outlined,
               title: 'Download e-invoice',
               onTap: () {
-                controller.downloadInvoicePdf;
+                controller.downloadInvoicePdf();
+                Get.back();
               },
             ),
 
@@ -1266,7 +1266,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               icon: Icons.edit_outlined,
               title: 'Edit Invoice',
               onTap: () {
-                //Get.back();
+                Get.back();
 
                 AppSnackbar.info(
                     title: 'Inprogress',
