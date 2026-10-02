@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/controllers/incoming_invoices_controller.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:file_picker/file_picker.dart';
@@ -26,7 +25,7 @@ class CreateIncomingInvoiceController extends GetxController {
 
   /// Uploaded invoice response
   final Rxn<Map<String, dynamic>> uploadedInvoice =
-  Rxn<Map<String, dynamic>>();
+      Rxn<Map<String, dynamic>>();
 
   // ============================================================
   // CAPTURE IMAGE USING CAMERA
@@ -47,12 +46,10 @@ class CreateIncomingInvoiceController extends GetxController {
 
       // Automatically upload after camera capture
       await uploadInvoice();
-
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Error',
+        message: e.toString(),
       );
     }
   }
@@ -81,17 +78,14 @@ class CreateIncomingInvoiceController extends GetxController {
       final PlatformFile selectedFile = result.first;
 
       if (selectedFile.path == null) {
-
         AppSnackbar.error(
           title: 'Error',
-          message:'Unable to access selected file.',
+          message: 'Unable to access selected file.',
         );
-
         return;
       }
 
-      final String? extension =
-      selectedFile.extension?.toLowerCase();
+      final String? extension = selectedFile.extension?.toLowerCase();
 
       filePath.value = selectedFile.path!;
       fileName.value = selectedFile.name;
@@ -104,14 +98,11 @@ class CreateIncomingInvoiceController extends GetxController {
 
       // Automatically upload after file selection
       await uploadInvoice();
-
     } catch (e) {
-
       AppSnackbar.error(
         title: 'Error',
-        message:'${e.toString()}',
+        message: e.toString(),
       );
-
     }
   }
 
@@ -120,16 +111,11 @@ class CreateIncomingInvoiceController extends GetxController {
   // ============================================================
 
   Future<void> uploadInvoice() async {
-
-    isLoading.value = true;
-
     if (filePath.value.isEmpty) {
-
       AppSnackbar.info(
         title: 'File Required',
-        message:'Please select or capture an invoice first.',
+        message: 'Please select or capture an invoice first.',
       );
-
       return;
     }
 
@@ -140,22 +126,18 @@ class CreateIncomingInvoiceController extends GetxController {
       final companyId = SessionManager.accessCompanyid;
 
       if (accessToken == null || accessToken.isEmpty) {
-
         AppSnackbar.error(
           title: 'Error',
-          message:'Access token is not available.',
+          message: 'Access token is not available.',
         );
-
         return;
       }
 
       if (companyId == null) {
-
         AppSnackbar.error(
           title: 'Error',
-          message:'Company ID is not available.',
+          message: 'Company ID is not available.',
         );
-
         return;
       }
 
@@ -168,58 +150,44 @@ class CreateIncomingInvoiceController extends GetxController {
       );
 
       if (response.data['ok'] == true) {
-
         isLoading.value = false;
 
-        final data = response.data['data'];
+        clearFile();
 
-        /*print('================================');
-        print('INVOICE UPLOAD SUCCESS');
-        print('Invoice ID: ${data['id']}');
-        print('Company ID: ${data['companyId']}');
-        print('Status: ${data['status']}');
-        print('Supplier: ${data['extracted']?['supplier']?['name']}');
-        print('Invoice Number: ${data['extracted']?['invoiceNumber']}');
-        print('Invoice Date: ${data['extracted']?['invoiceDate']}');
-        print('Currency: ${data['extracted']?['currency']}');
-        print('Total: ${data['extracted']?['totalAmount']}');
-        print('================================');*/
+        Get.back(result: true);
 
         AppSnackbar.success(
           title: 'Success',
-          message:'Invoice uploaded successfully.',
+          message: 'Invoice uploaded successfully.',
         );
 
+        if (Get.isRegistered<IncomingInvoicesController>()) {
+          Get.find<IncomingInvoicesController>().refreshInvoices();
+        }
       } else {
-
         isLoading.value = false;
 
-        AppSnackbar.success(
+        AppSnackbar.error(
           title: 'Error',
-          message:'Invoice upload failed.',
+          message: 'Invoice upload failed.',
         );
-
       }
     } on DioException catch (e) {
-
       isLoading.value = false;
 
       AppSnackbar.error(
         title: 'Upload Error',
-        message:e.response?.data?['message']?.toString() ??
+        message: e.response?.data?['message']?.toString() ??
             e.message ??
             'Unable to upload invoice.',
       );
-
     } catch (e) {
-
       isLoading.value = false;
 
       AppSnackbar.error(
         title: 'Error',
-        message:e.toString(),
+        message: e.toString(),
       );
-
     } finally {
       isLoading.value = false;
     }

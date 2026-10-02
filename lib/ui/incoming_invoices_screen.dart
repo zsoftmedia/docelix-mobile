@@ -318,15 +318,20 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
       FloatingActionButtonLocation.endFloat,
 
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
 
           // ----------------------------------------------------------
           // OPEN ADD INVOICE PAGE
           // ----------------------------------------------------------
 
-          Get.toNamed(
+          final result = await Get.toNamed(
             '/CreateIncomingInvoicesScreen',
-            arguments: 'Create Incoming Invoices Screen',);
+            arguments: 'Create Incoming Invoices Screen',
+          );
+
+          if (result == true) {
+            await incomingInvoicesController.refreshInvoices();
+          }
 
         },
 
