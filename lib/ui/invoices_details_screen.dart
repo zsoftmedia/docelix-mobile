@@ -1242,7 +1242,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            _bottomSheetAction(
+            /*_bottomSheetAction(
               icon: Icons.picture_as_pdf_outlined,
               title: 'Download ZUGFeRD PDF',
               onTap: () {
@@ -1251,7 +1251,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     title: 'Inprogress',
                     message: 'Download ZUGFeRD PDF Coming soon');
               },
-            ),
+            ),*/
 
             _bottomSheetAction(
               icon: Icons.description_outlined,
@@ -1262,7 +1262,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               },
             ),
 
-            _bottomSheetAction(
+            /*_bottomSheetAction(
               icon: Icons.edit_outlined,
               title: 'Edit Invoice',
               onTap: () {
@@ -1272,7 +1272,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     title: 'Inprogress',
                     message: 'Edit Invoice Coming soon');
               },
-            ),
+            ),*/
 
             _bottomSheetAction(
               icon: Icons.delete_outline,

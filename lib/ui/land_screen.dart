@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/controllers/create_incoming_invoice_controller.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
@@ -14,6 +15,9 @@ class LandScreen extends StatefulWidget {
 
 class _LandScreenState extends State<LandScreen> {
   bool checkLoginProgressbar = false;
+
+  final CreateIncomingInvoiceController incomingInvoiceController =
+  Get.put(CreateIncomingInvoiceController());
 
   // ============================================================
   // BOTTOM NAVIGATION
@@ -402,7 +406,67 @@ class _LandScreenState extends State<LandScreen> {
       // ============================================================
 
       body: SafeArea(
-        child: _pages[_selectedIndex],
+        child: Stack(
+          children: [
+            _pages[_selectedIndex],
+
+            // Progress overlay during upload
+            Obx(() {
+              if (!incomingInvoiceController.isLoading.value) {
+                return const SizedBox.shrink();
+              }
+
+              return Container(
+                color: Colors.black.withOpacity(0.4),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.12),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(
+                          color: colorsList.colorButton,
+                          strokeWidth: 3,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Uploading invoice...',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: colorsList.textColor,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Please wait a moment',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorsList.textHintColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
       ),
 
       // ============================================================
@@ -605,54 +669,69 @@ class _LandScreenState extends State<LandScreen> {
   Widget _scanBottomButton() {
     final width = MediaQuery.of(context).size.width;
 
-    return InkWell(
-      onTap: _openScan,
-      borderRadius: BorderRadius.circular(50),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: width * 0.125,
-            height: width * 0.125,
-            transform: Matrix4.translationValues(
-              0,
-              -width * 0.035,
-              0,
-            ),
-            decoration: BoxDecoration(
-              color: colorsList.green,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: colorsList.green.withOpacity(0.30),
-                  blurRadius: 12,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.document_scanner_outlined,
-              color: Colors.white,
-              size: width * 0.060,
-            ),
-          ),
+    return Obx(() {
+      final isLoading = incomingInvoiceController.isLoading.value;
 
-          Transform.translate(
-            offset: Offset(
-              0,
-              -width * 0.030,
+      return InkWell(
+        onTap: isLoading
+            ? null
+            : incomingInvoiceController.captureFromCamera,
+        borderRadius: BorderRadius.circular(50),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: width * 0.125,
+              height: width * 0.125,
+              transform: Matrix4.translationValues(
+                0,
+                -width * 0.035,
+                0,
+              ),
+              decoration: BoxDecoration(
+                color: isLoading ? Colors.grey : colorsList.green,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: (isLoading ? Colors.grey : colorsList.green)
+                        .withOpacity(0.30),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: isLoading
+                  ? Padding(
+                      padding: EdgeInsets.all(width * 0.032),
+                      child: const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : Icon(
+                      Icons.camera_alt_outlined,
+                      color: Colors.white,
+                      size: width * 0.060,
+                    ),
             ),
-            child: Text(
-              "Scan",
-              style: TextStyle(
-                color: const Color(0xFF71829A),
-                fontSize: width * 0.022,
-                fontWeight: FontWeight.w400,
+
+            Transform.translate(
+              offset: Offset(
+                0,
+                -width * 0.030,
+              ),
+              child: Text(
+                isLoading ? "Uploading..." : "Scan Invoice",
+                style: TextStyle(
+                  color: const Color(0xFF71829A),
+                  fontSize: width * 0.022,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 }

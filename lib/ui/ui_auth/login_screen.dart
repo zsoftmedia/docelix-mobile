@@ -378,7 +378,7 @@ class _LoginPageState extends State<LoginScreen> {
                   height: height * 0.035,
                 ),*/
 
-                Center(
+                /*Center(
                   child: RichText(
                     text: TextSpan(
                       text: "Request for ",
@@ -413,7 +413,7 @@ class _LoginPageState extends State<LoginScreen> {
 
                 SizedBox(
                   height: height * 0.045,
-                ),
+                ),*/
               ],
             ),
           ),

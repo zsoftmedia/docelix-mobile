@@ -150,11 +150,11 @@ class CreateIncomingInvoiceController extends GetxController {
       );
 
       if (response.data['ok'] == true) {
-        isLoading.value = false;
-
         clearFile();
 
-        Get.back(result: true);
+        if (Get.currentRoute == '/CreateIncomingInvoicesScreen') {
+          Get.back(result: true);
+        }
 
         AppSnackbar.success(
           title: 'Success',
@@ -165,8 +165,6 @@ class CreateIncomingInvoiceController extends GetxController {
           Get.find<IncomingInvoicesController>().refreshInvoices();
         }
       } else {
-        isLoading.value = false;
-
         AppSnackbar.error(
           title: 'Error',
           message: 'Invoice upload failed.',
