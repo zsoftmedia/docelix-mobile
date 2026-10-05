@@ -169,7 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            IconButton(
+            /*IconButton(
               onPressed: () {
                 // Notification click functionality
                 Get.toNamed('/NotificationScreen',
@@ -209,40 +209,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ],
               ),
-            ),
-
-            /*Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(
-                  Icons.notifications_none_rounded,
-                  color: colorsList.primaryText,
-                  size: width * 0.065,
-                ),
-
-                Positioned(
-                  right: -2,
-                  top: -4,
-                  child: Container(
-                    width: width * 0.042,
-                    height: width * 0.042,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colorsList.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      "",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.020,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),*/
+
           ],
         ),
 

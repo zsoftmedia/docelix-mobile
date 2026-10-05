@@ -22,4 +22,8 @@ class ApiConstants {
   static const String createUser = '/users';
 
   static const String me = '/me';
+
+  // Google Web Client ID for Native Android/iOS Google Sign-In
+  // Get this from Supabase Dashboard -> Auth -> Providers -> Google -> Client ID (for mobile)
+  static const String googleServerClientId = '687402749429-b6v62hvnf562t9a5ldjihhpbtetka4lm.apps.googleusercontent.com';
 }

@@ -320,55 +320,50 @@ class _LoginPageState extends State<LoginScreen> {
                   height: height * 0.025,
                 ),
 
-                /*SizedBox(
-                  width: double.infinity,
-                  height: height * 0.070,
-
-                  child: OutlinedButton(
-                    onPressed: () {
-                      // Google login
-                    },
-
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
-
-                      side: const BorderSide(
-                        color: Color(0xFFD0D0D0),
-                        width: 1.2,
-                      ),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-
-                      children: [
-
-                        Image.asset(
-                          'assets/google_logo.png',
-                          width: width * 0.055,
-                          height: width * 0.055,
+                Obx(
+                  () => SizedBox(
+                    width: double.infinity,
+                    height: height * 0.070,
+                    child: OutlinedButton(
+                      onPressed: loginController.isLoading.value
+                          ? null
+                          : () {
+                              loginController.loginWithGoogle();
+                            },
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(
+                          color: Color(0xFFD0D0D0),
+                          width: 1.2,
                         ),
-
-                        SizedBox(
-                          width: width * 0.025,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
                         ),
-
-                        Text(
-                          "Continue with Google",
-                          style: TextStyle(
-                            fontSize: width * 0.040,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF333333),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/google_logo.png',
+                            width: width * 0.055,
+                            height: width * 0.055,
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            width: width * 0.025,
+                          ),
+                          Text(
+                            "Continue with Google",
+                            style: TextStyle(
+                              fontSize: width * 0.040,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF333333),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),*/
+                ),
 
                 // ======================================================
                 // REQUEST DEMO
