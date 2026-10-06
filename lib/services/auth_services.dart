@@ -61,7 +61,6 @@ class AuthServices {
       }
 
       // Get authorization/access token for Supabase.
-      //
       // Supabase requires the Google access token as well
       // for Google signInWithIdToken().
       final GoogleSignInClientAuthorization authorization =

@@ -2,77 +2,79 @@ import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
+import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:docelix_mobileapp/services/dio_client.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:intl/intl.dart';
 
-
 class DashboardController extends GetxController {
-
   final dioClient = DioClient();
   final isLoading = false.obs;
   final isCompaniesLoading = false.obs;
 
   final dashboardData = Rxn<DashboardModel>();
-  // Companies
   final companies = <CompanyModel>[].obs;
   final selectedCompany = Rxn<CompanyModel>();
 
-  // Selected month
-  final selectedDate = DateTime.now().obs;
+  // ============================================================
+  // DATE RANGE SELECTION
+  // ============================================================
 
-  // Display month
-  String get selectedMonthText {
-    return DateFormat('MMMM yyyy').format(selectedDate.value);
-  }
+  late Rx<DateTime> fromDate;
+  late Rx<DateTime> toDate;
 
-  /*@override
-  void onInit() {
-    super.onInit();
-    getDashboard();
-    getCompanies();
-  }*/
+  // Display date formatting
+  String get fromDateText => DateFormat('dd MMM yyyy').format(fromDate.value);
+  String get toDateText => DateFormat('dd MMM yyyy').format(toDate.value);
 
   @override
   void onInit() {
     super.onInit();
 
+    final now = DateTime.now();
+    toDate = now.obs;
+    fromDate = DateTime(now.year,now.month - 1, now.day).obs;
+
     getCompanies();
   }
 
-  // Open month picker
-  Future<void> selectMonth() async {
+  // Select From Date
+  Future<void> selectFromDate() async {
     final DateTime? picked = await showDatePicker(
       context: Get.context!,
-      initialDate: selectedDate.value,
+      initialDate: fromDate.value,
       firstDate: DateTime(2020),
-      lastDate: DateTime(2035),
-      initialDatePickerMode: DatePickerMode.year,
+      lastDate: toDate.value,
     );
 
     if (picked == null) return;
 
-    selectedDate.value = DateTime(
-      picked.year,
-      picked.month,
-      1,
-    );
-
+    fromDate.value = picked;
     await getDashboard();
   }
 
+  // Select To Date
+  Future<void> selectToDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: Get.context!,
+      initialDate: toDate.value,
+      firstDate: fromDate.value,
+      lastDate: DateTime(2035),
+    );
+
+    if (picked == null) return;
+
+    toDate.value = picked;
+    await getDashboard();
+  }
 
   // ============================================================
-  // GET COMPANIES
+  // GET COMPANIES & INITIALIZE COMPANY ID
   // ============================================================
 
   Future<void> getCompanies() async {
-
     try {
-
       isCompaniesLoading.value = true;
 
       final accessToken = SessionManager.accessToken;
@@ -87,30 +89,23 @@ class DashboardController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-
         final List<dynamic> data = response.data;
 
         companies.value = data
             .map(
               (json) => CompanyModel.fromJson(
-            json as Map<String, dynamic>,
-          ),
-        )
+                json as Map<String, dynamic>,
+              ),
+            )
             .toList();
 
         print("Companies loaded: ${companies.length}");
 
-        // --------------------------------------------------------
-        // Select company from SessionManager if available
-        // --------------------------------------------------------
-
-        final sessionCompanyId =
-            SessionManager.accessCompanyid;
+        final sessionCompanyId = SessionManager.accessCompanyid;
 
         if (sessionCompanyId != null) {
-
           final company = companies.firstWhereOrNull(
-                (company) => company.id == sessionCompanyId,
+            (company) => company.id == sessionCompanyId,
           );
 
           if (company != null) {
@@ -118,13 +113,7 @@ class DashboardController extends GetxController {
           }
         }
 
-        // --------------------------------------------------------
-        // If no company is selected, select first company
-        // --------------------------------------------------------
-
-        if (selectedCompany.value == null &&
-            companies.isNotEmpty) {
-
+        if (selectedCompany.value == null && companies.isNotEmpty) {
           selectedCompany.value = companies.first;
 
           await selectCompany(
@@ -133,15 +122,9 @@ class DashboardController extends GetxController {
           );
         }
 
-        // --------------------------------------------------------
-        // Load dashboard
-        // --------------------------------------------------------
-
         await getDashboard();
       }
-
     } on DioException catch (e) {
-
       print("Companies API Error: ${e.message}");
 
       AppSnackbar.error(
@@ -150,41 +133,34 @@ class DashboardController extends GetxController {
             e.message ??
             'Unable to load companies',
       );
-
     } catch (e) {
-
       print("Companies Error: $e");
 
       AppSnackbar.error(
         title: 'Error',
         message: e.toString(),
       );
-
     } finally {
-
       isCompaniesLoading.value = false;
     }
   }
 
-
   // ============================================================
-  // SELECT COMPANY
+  // DYNAMICALLY SELECT COMPANY
   // ============================================================
 
   Future<void> selectCompany(
-      CompanyModel company, {
-        bool loadDashboard = true,
-      }) async
-  {
-
+    CompanyModel company, {
+    bool loadDashboard = true,
+  }) async {
     selectedCompany.value = company;
 
-    // Save selected company ID
+    // Save dynamic Company ID, Name & Currency to SessionManager
     await SessionManager.saveCompanyid(company.id);
-    //SessionManager.accessCompanyid = company.id;
+    await SessionManager.saveCompanyname(company.name);
 
-    print("Selected company: ${company.name}");
-    print("Selected company ID: ${company.id}");
+    print("Selected Company Name: ${company.name}");
+    print("Selected Company ID: ${company.id}");
 
     if (loadDashboard) {
       await getDashboard();
@@ -192,72 +168,77 @@ class DashboardController extends GetxController {
   }
 
   // ============================================================
-  // GET DASHBOARD
+  // GET DASHBOARD BY DYNAMIC COMPANY ID & DATE RANGE
   // ============================================================
 
   Future<void> getDashboard() async {
     try {
       isLoading.value = true;
-      // Get values from SessionManager
+
       final accessToken = SessionManager.accessToken;
-      final companyId = SessionManager.accessCompanyid;
+      final int? companyId =
+          selectedCompany.value?.id ?? SessionManager.accessCompanyid;
+
       if (accessToken == null || accessToken.isEmpty) {
-        print("Access token not found"); return;
+        print("Access token not found");
+        return;
       }
-      if (companyId == null)
-      {
+      if (companyId == null) {
         print("Company ID not found");
         return;
       }
+
+      final fromStr = DateFormat('yyyy-MM-dd').format(fromDate.value);
+      final toStr = DateFormat('yyyy-MM-dd').format(toDate.value);
+
+      final prevMonthFrom = DateTime(
+        fromDate.value.year,
+        fromDate.value.month - 1,
+        fromDate.value.day,
+      );
+      final prevMonthTo = fromDate.value.subtract(const Duration(days: 1));
+
+      final compareFromStr = DateFormat('yyyy-MM-dd').format(prevMonthFrom);
+      final compareToStr = DateFormat('yyyy-MM-dd').format(prevMonthTo);
+
+      print("Loading Dashboard for Company ID: $companyId, Date Range: $fromStr to $toStr");
+
       final response = await dioClient.getDashboardAccounting(
         companyId: companyId,
-        from: '2026-08-31',
-        to: '2026-09-29',
-        compareFrom: '2026-07-31',
-        compareTo: '2026-08-30',
+        from: fromStr,
+        to: toStr,
+        compareFrom: compareFromStr,
+        compareTo: compareToStr,
         groupBy: 'month',
         accessToken: accessToken,
       );
+
       if (response.statusCode == 200) {
         dashboardData.value = DashboardModel.fromJson(response.data);
-        final dateString = dashboardData.value?.period?.from;
 
-        print("Dashboard loaded successfully");
-        print( "Revenue: " "${dashboardData.value?.kpis?.revenue?.value}", );
-        print( "Expenses: " "${dashboardData.value?.kpis?.expenses?.value}", );
-        print( "Net Result: " "${dashboardData.value?.kpis?.netResult?.value}", );
-        print( "Cash Balance: " "${dashboardData.value?.kpis?.cashBalance?.value}",);
-
+        print("Dashboard loaded successfully for Company ID $companyId");
+        print("Revenue: ${dashboardData.value?.kpis?.revenue?.value}");
+        print("Expenses: ${dashboardData.value?.kpis?.expenses?.value}");
+        print("Net Result: ${dashboardData.value?.kpis?.netResult?.value}");
+        print("Cash Balance: ${dashboardData.value?.kpis?.cashBalance?.value}");
       }
     } on DioException catch (e) {
-
       AppSnackbar.error(
         title: 'Error',
-        message:e.toString(),
+        message: e.response?.data?.toString() ??
+            e.message ??
+            'Unable to load dashboard',
       );
-
       print("Dashboard API Error: ${e.message}");
-      if (e.response != null) {
-        print("Status Code: ${e.response?.statusCode}");
-        print("Response: ${e.response?.data}");
-
-        AppSnackbar.error(
-          title: 'Error',
-          message:'${e.response?.data}',
-        );
-
-      }
     } catch (e) {
       print("Dashboard Error: $e");
 
       AppSnackbar.error(
         title: 'Error',
-        message:'${e}',
+        message: '$e',
       );
-
     } finally {
       isLoading.value = false;
     }
   }
-
 }

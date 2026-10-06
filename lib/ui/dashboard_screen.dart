@@ -236,15 +236,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            SizedBox(width: width * 0.025),
+            /*SizedBox(width: width * 0.025),
 
-            /*Expanded(
+            Expanded(
               child: _headerDropdown(
                 width: width,
                 icon: Icons.calendar_today_outlined,
                 text: "September 2026",
               ),
-            ),*/
+            ),
 
             Expanded(
               child: Obx(
@@ -253,6 +253,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   icon: Icons.calendar_today_outlined,
                   text: dashboardController.selectedMonthText,
                   onTap: dashboardController.selectMonth,
+                ),
+              ),
+            ),*/
+          ],
+        ),
+
+        SizedBox(height: height * 0.007),
+
+        Row(
+          children: [
+            Expanded(
+              child: Obx(
+                () => _headerDropdown(
+                  width: width,
+                  icon: Icons.calendar_today_outlined,
+                  text: "From: ${dashboardController.fromDateText}",
+                  onTap: dashboardController.selectFromDate,
+                ),
+              ),
+            ),
+
+            SizedBox(width: width * 0.025),
+
+            Expanded(
+              child: Obx(
+                () => _headerDropdown(
+                  width: width,
+                  icon: Icons.calendar_today_outlined,
+                  text: "To: ${dashboardController.toDateText}",
+                  onTap: dashboardController.selectToDate,
                 ),
               ),
             ),
@@ -1043,7 +1073,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
 
-              GestureDetector(
+              /*GestureDetector(
                 onTap: () {
                   // Open your complete quick actions screen here.
                 },
@@ -1065,7 +1095,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
-              ),
+              ),*/
             ],
           ),
 
@@ -1090,7 +1120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
 
-              SizedBox(width: width * 0.020),
+              /*SizedBox(width: width * 0.020),
 
               Expanded(
                 child: _quickActionItem(
@@ -1108,11 +1138,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   },
                 ),
-              ),
+              ),*/
 
               SizedBox(width: width * 0.020),
 
-              Expanded(
+              /*Expanded(
                 child: _quickActionItem(
                   width: width,
                   icon: Icons.add_circle_outline_rounded,
@@ -1126,12 +1156,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       arguments: 'Incoming Invoices Screen',
                     );
 
-                   /* AppSnackbar.info(
+                   *//* AppSnackbar.info(
                         title: 'Coming Soon',
-                        message: 'Add Expenses coming soon.');*/
+                        message: 'Add Expenses coming soon.');*//*
                   },
                 ),
-              ),
+              ),*/
             ],
           ),
         ],
