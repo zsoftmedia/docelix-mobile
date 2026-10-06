@@ -406,6 +406,26 @@ class DioClient {
   }
 
   // ==============================
+  // GET e Invoice PDF
+  // ==============================
+
+  Future<Response<List<int>>> downloadEInvoice({
+    required int invoiceId,
+    required String accessToken,
+  }) async {
+    return await _dio.get<List<int>>(
+      '${ApiConstants.baseUrl}/invoices/$invoiceId/items',
+      options: Options(
+        responseType: ResponseType.bytes,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/xml',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // SEND INVOICE REMINDER
   // ==============================
 

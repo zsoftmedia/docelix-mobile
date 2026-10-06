@@ -1180,8 +1180,8 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                   label: Text(
                     controller.isLoading.value
-                        ? 'Download'
-                        : 'Download',
+                        ? 'PDF Download'
+                        : 'PDF Download',
                   ),
 
                   style: OutlinedButton.styleFrom(
@@ -1332,9 +1332,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
             _bottomSheetAction(
               icon: Icons.description_outlined,
-              title: 'Download e-invoice',
+              title: 'Download e-invoice (ZUGFerd)',
               onTap: () {
-                controller.downloadInvoicePdf();
+                controller.downloadEInvoice();
                 Get.back();
               },
             ),

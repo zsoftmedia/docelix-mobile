@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -13,6 +14,7 @@ import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -687,7 +689,7 @@ class InvoicesDetailsController extends GetxController {
         message: message,
       );
     } catch (e) {
-      print('Send Invoice Exception: $e');
+      // print('Send Invoice Exception: $e');
 
       AppSnackbar.error(
         title: 'Error',
@@ -768,6 +770,207 @@ class InvoicesDetailsController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // ============================================================
+  // DOWNLOAD e-INVOICE (ZUGFeRD) XML
+  // ============================================================
+
+  Future<void> downloadEInvoice() async {
+    final selectedInvoice = invoice.value;
+
+    if (selectedInvoice == null) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'No invoice selected.',
+      );
+      return;
+    }
+
+    final accessToken = SessionManager.accessToken;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Access token is not available.',
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      final invoiceId = selectedInvoice.id;
+
+      debugPrint(
+        'Downloading e-Invoice XML for invoice ID: $invoiceId',
+      );
+
+      final response = await dioClient.downloadEInvoice(
+        invoiceId: invoiceId,
+        accessToken: accessToken,
+      );
+
+      debugPrint('e-Invoice status: ${response.statusCode}');
+
+      if (response.data != null && response.data!.isNotEmpty) {
+        final xmlBytes = Uint8List.fromList(response.data!);
+
+        final directory = await getApplicationDocumentsDirectory();
+
+        final invoiceNumber =
+            selectedInvoice.invoiceNumber?.toString() ?? invoiceId.toString();
+
+        final filePath = '${directory.path}/INV-$invoiceNumber.xml';
+        final file = File(filePath);
+
+        await file.writeAsBytes(xmlBytes);
+
+        debugPrint('e-Invoice saved at: $filePath');
+
+        _showXmlSuccessDialog(filePath, invoiceNumber, xmlBytes);
+      } else {
+        AppSnackbar.error(
+          title: 'Download Failed',
+          message: 'e-Invoice file is empty.',
+        );
+      }
+    } on DioException catch (e) {
+      debugPrint('e-Invoice API Error: ${e.response?.statusCode}');
+      debugPrint('e-Invoice API URL: ${e.requestOptions.uri}');
+      debugPrint('e-Invoice API Response: ${e.response?.data}');
+
+      AppSnackbar.error(
+        title: 'Download Failed',
+        message: 'Unable to download e-Invoice.',
+      );
+    } catch (e) {
+      debugPrint('e-Invoice Download Error: $e');
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Something went wrong while downloading the e-Invoice.',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ============================================================
+  // XML SUCCESS DIALOG
+  // ============================================================
+
+  void _showXmlSuccessDialog(
+      String filePath, String invoiceNumber, Uint8List xmlBytes) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE6F4EA),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.code_rounded,
+                  color: Color(0xFF16A34A),
+                  size: 36,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'e-Invoicen (ZUGFeRD) Downloaded Successfully!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF172033),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Storage Location:',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF667085),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2F4F7),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE4E7EC)),
+                ),
+                child: Text(
+                  filePath,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                    color: Color(0xFF344054),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: const BorderSide(
+                          color: Color(0xFFD1D5DB),
+                        ),
+                      ),
+                      child: const Text('Close'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Get.back();
+                        Printing.sharePdf(
+                          bytes: xmlBytes,
+                          filename: 'INV-$invoiceNumber.xml',
+                        );
+                      },
+                      icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                      label: const Text('Open XML'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 46),
+                        backgroundColor: const Color(0xFF063C70),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // ============================================================
