@@ -1325,6 +1325,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             subtitle:
                 "Total receivables amount ${dashboardController.currencySymbol} ${recievableAmount.toStringAsFixed(2)}",
             showDivider: true,
+            onTap: () {
+              Get.toNamed(
+                '/InvoicesScreen',
+                arguments: 'Invoices Screen',
+              );
+            },
           ),
 
           // ==============================
@@ -1339,6 +1345,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             subtitle:
                 "Total payables amount ${dashboardController.currencySymbol} ${payableAmount.toStringAsFixed(2)}",
             showDivider: true,
+            onTap: () {
+              Get.toNamed(
+                '/IncomingInvoicesScreen',
+                arguments: 'Incoming Invoices Screen',
+              );
+            },
           ),
 
           // ==============================
@@ -1353,6 +1365,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             subtitle:
                 "Total amount ${dashboardController.currencySymbol} ${overdueAmount.toStringAsFixed(2)}",
             showDivider: false,
+            onTap: () {
+              /*Get.toNamed(
+                '/IncomingInvoicesScreen',
+                arguments: 'Incoming Invoices Screen',
+              );*/
+            },
           ),
         ],
       ),
@@ -1469,65 +1487,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String title,
     required String subtitle,
     required bool showDivider,
-  })
-  {
+    VoidCallback? onTap,
+  }) {
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: width * 0.030,
-            vertical: width * 0.025,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: width * 0.085,
-                height: width * 0.085,
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.10),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: width * 0.045,
-                ),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: width * 0.030,
+                vertical: width * 0.025,
               ),
-
-              SizedBox(width: width * 0.025),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width * 0.026,
-                        fontWeight: FontWeight.w600,
-                      ),
+              child: Row(
+                children: [
+                  Container(
+                    width: width * 0.085,
+                    height: width * 0.085,
+                    decoration: BoxDecoration(
+                      color: iconColor.withOpacity(0.10),
+                      shape: BoxShape.circle,
                     ),
-
-                    SizedBox(height: width * 0.006),
-
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: colorsList.secondaryText,
-                        fontSize: width * 0.022,
-                      ),
+                    child: Icon(
+                      icon,
+                      color: iconColor,
+                      size: width * 0.045,
                     ),
-                  ],
-                ),
-              ),
+                  ),
 
-              Icon(
-                Icons.chevron_right_rounded,
-                color: colorsList.secondaryText,
-                size: width * 0.050,
+                  SizedBox(width: width * 0.025),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontSize: width * 0.026,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+
+                        SizedBox(height: width * 0.006),
+
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            color: colorsList.secondaryText,
+                            fontSize: width * 0.022,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: colorsList.secondaryText,
+                    size: width * 0.050,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
 
