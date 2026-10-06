@@ -53,6 +53,57 @@ class InvoicesDetailsController extends GetxController {
   }
 
   // ============================================================
+  // CURRENCY & FORMATTING
+  // ============================================================
+
+  String getCurrencySymbol(String? code) {
+    final String rawCode = (code != null && code.trim().isNotEmpty)
+        ? code.trim().toUpperCase()
+        : (invoice.value?.currencyCode?.trim().toUpperCase() ??
+            SessionManager.accessCorrencycode?.trim().toUpperCase() ??
+            'EUR');
+
+    switch (rawCode) {
+      case 'EUR':
+        return '€';
+      case 'USD':
+        return '\$';
+      case 'GBP':
+        return '£';
+      case 'INR':
+        return '₹';
+      case 'CAD':
+        return 'CA\$';
+      case 'AUD':
+        return 'A\$';
+      case 'CHF':
+        return 'CHF';
+      case 'JPY':
+        return '¥';
+      case 'PKR':
+        return 'Rs.';
+      default:
+        return rawCode;
+    }
+  }
+
+  String formatCurrency(num? amount, [String? currencyCode]) {
+    final double value = (amount ?? 0).toDouble();
+    final String symbol = getCurrencySymbol(currencyCode);
+
+    final parts = value.toStringAsFixed(2).split('.');
+    final integerPart = parts[0];
+    final decimalPart = parts[1];
+
+    final formattedInteger = integerPart.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+
+    return '$symbol $formattedInteger.$decimalPart';
+  }
+
+  // ============================================================
   // SET INVOICE
   // ============================================================
 
@@ -847,7 +898,7 @@ class InvoicesDetailsController extends GetxController {
                                 style: pw.TextStyle(
                                     fontWeight: pw.FontWeight.bold)),
                             pw.Text(
-                              '${inv.currencyCode.isEmpty ? '€' : inv.currencyCode} ${inv.paidAmount.toStringAsFixed(2)}',
+                              formatCurrency(inv.paidAmount, inv.currencyCode),
                               style: pw.TextStyle(
                                 fontSize: 14,
                                 fontWeight: pw.FontWeight.bold,

@@ -159,9 +159,12 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                     Expanded(
                       child: _infoCard(
-                        icon: Icons.euro,
+                        icon: Icons.payments_outlined,
                         title: 'Total',
-                        value: controller.client.value?.totalInvoicedAmount.toStringAsFixed(2) ?? '0.00',
+                        value: controller.formatCurrency(
+                          invoice.paidAmount,
+                          invoice.currencyCode,
+                        ),
                       ),
                     ),
 
@@ -659,6 +662,19 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
         child: Column(
           children: [
+            // ------------------------------------------------------
+            // TABLE HEADER
+            // ------------------------------------------------------
+
+            _itemsHeader(),
+
+            const Divider(
+              height: 1,
+              thickness: 1,
+              indent: 0,
+              endIndent: 0,
+              color: colorsList.dividerColor,
+            ),
 
             // ------------------------------------------------------
             // ITEM LIST
@@ -666,8 +682,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
             ...List.generate(
               items.length,
-                  (index) {
-
+              (index) {
                 final item = items[index];
 
                 return _itemRow(
@@ -682,7 +697,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     controller.invoice.value!.currencyCode,
                     item.grossAmount,
                   ),
-                  isLast: false,
+                  isLast: index == items.length - 1,
                 );
               },
             ),
@@ -744,6 +759,68 @@ class InvoicesDetailsScreen extends StatelessWidget {
         ),
       );
     });
+  }
+
+  // ==============================================================
+  // ITEMS HEADER
+  // ==============================================================
+
+  Widget _itemsHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 11,
+      ),
+      decoration: const BoxDecoration(
+        color: colorsList.colorBoxDecoration,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: const [
+          Expanded(
+            flex: 5,
+            child: Text(
+              'Product Name',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: colorsList.textColor,
+              ),
+            ),
+          ),
+          SizedBox(width: 16),
+          SizedBox(
+            width: 36,
+            child: Text(
+              'Stock',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: colorsList.textColor,
+              ),
+            ),
+          ),
+          SizedBox(width: 16),
+          SizedBox(
+            width: 82,
+            child: Text(
+              'Amount',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: colorsList.textColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ==============================================================
@@ -1361,7 +1438,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       String currency,
       double amount,
       ) {
-    return '$currency ${amount.toStringAsFixed(2)}';
+    return controller.formatCurrency(amount, currency);
   }
 }
 

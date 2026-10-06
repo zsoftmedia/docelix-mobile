@@ -430,11 +430,13 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               SizedBox(height: height * 0.006),
 
               Text(
-                '${invoice.currencyCode ?? ''} ${invoice.paidAmount ?? 0}',
+                invoicesController.formatCurrency(
+                  invoice.paidAmount,
+                  invoice.currencyCode,
+                ),
                 style: TextStyle(
                   color: colorsList.textColor,
                   fontSize: width * 0.043,
-                  //fontWeight: FontWeight.w800, // Bold amount
                 ),
               ),
             ],
