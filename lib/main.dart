@@ -16,6 +16,7 @@ import 'package:docelix_mobileapp/ui/land_screen.dart';
 import 'package:docelix_mobileapp/ui/notification_screen.dart';
 import 'package:docelix_mobileapp/ui/profile_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
+import 'package:docelix_mobileapp/ui/transaction_screen.dart';
 import 'package:docelix_mobileapp/ui/ui_auth/login_screen.dart';
 import 'package:docelix_mobileapp/ui/ui_auth/signup_screen.dart';
 import 'package:docelix_mobileapp/ui/splash_screen.dart';
@@ -90,6 +91,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/ProfileScreen', page: () => ProfileScreen(),),
         GetPage(name: '/NotificationScreen', page: () => NotificationScreen(),),
         GetPage(name: '/AddItemScreen', page: () => AddItemScreen(),),
+        GetPage(name: '/TransactionScreen', page: () => TransationScreen(),),
       ],
     );
   }

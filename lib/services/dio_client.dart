@@ -506,6 +506,34 @@ class DioClient {
     );
   }
 
+  // ============================================================
+  // GET GENERAL LEDGER TRANSACTION
+  // ============================================================
+
+  Future<Response> getGeneralLedger({
+    required int companyId,
+    required String fromDate,
+    required String toDate,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/accounting/reports/general-ledger',
+      queryParameters: {
+        'company_id': companyId,
+        'companyId': companyId,
+        'fromDate': fromDate,
+        'toDate': toDate,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
   // ==============================
   // SEND INVOICE REMINDER
   // ==============================

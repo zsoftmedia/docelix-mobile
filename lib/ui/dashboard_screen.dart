@@ -1726,18 +1726,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
       key: const ValueKey("transactions_tab"),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+
         // ==========================================================
-        // TITLE
+        // TITLE + SEE ALL ROW
         // ==========================================================
 
-        Text(
-          "RECENT TRANSACTIONS",
-          style: TextStyle(
-            color: colorsList.secondaryText,
-            fontSize: width * 0.027,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.1,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "RECENT TRANSACTIONS",
+              style: TextStyle(
+                color: colorsList.secondaryText,
+                fontSize: width * 0.027,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.1,
+              ),
+            ),
+
+            GestureDetector(
+              onTap: () {
+                Get.toNamed(
+                  '/TransactionScreen',
+                  arguments: 'Transaction Screen',
+                );
+              },
+              child: Row(
+                children: [
+                  Text(
+                    "See all",
+                    style: TextStyle(
+                      color: colorsList.green,
+                      fontSize: width * 0.023,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: colorsList.green,
+                    size: width * 0.045,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
 
         SizedBox(
