@@ -376,6 +376,8 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
       statusColor = const Color(0xFF00B894);
     } else if (status == "pending" || status == "unpaid") {
       statusColor = const Color(0xFFF39C12);
+    } else if (status == "draft" || status == "draft") {
+      statusColor = const Color(0xFF71829A);
     } else if (status == "overdue") {
       statusColor = Colors.red;
     } else {

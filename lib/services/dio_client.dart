@@ -244,6 +244,28 @@ class DioClient {
   }
 
   // ==============================
+  // UPDATE INCOMING INVOICE
+  // ==============================
+
+  Future<Response> updateIncomingInvoice({
+    required int invoiceId,
+    required Map<String, dynamic> data,
+    required String accessToken,
+  }) async {
+    return await _dio.patch(
+      '${ApiConstants.baseUrl}/incoming-invoices/$invoiceId',
+      data: data,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // DELETE INVOICE
   // ==============================
   Future<Response> deleteInvoice({
@@ -382,6 +404,65 @@ class DioClient {
         },
       ),
     );
+  }
+
+  // ==============================
+  // UPDATE INVOICE STATUS
+  // ==============================
+
+  Future<Response> updateInvoiceStatus({
+    required int invoiceId,
+    required dynamic companyId,
+    required String status,
+    required String accessToken,
+    bool isIncoming = false,
+  }) async
+  {
+    final int companyIdInt = int.parse(companyId.toString());
+
+    final String primaryEndpoint = isIncoming
+        ? '${ApiConstants.baseUrl}/incoming-invoices/$invoiceId'
+        : '${ApiConstants.baseUrl}/invoices/$invoiceId';
+
+    final String fallbackEndpoint = isIncoming
+        ? '${ApiConstants.baseUrl}/invoices/$invoiceId'
+        : '${ApiConstants.baseUrl}/incoming-invoices/$invoiceId';
+
+    final options = Options(
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+
+    final payload = {
+      'company_id': companyIdInt,
+      'status': status,
+    };
+
+    final queryParams = {
+      'company_id': companyIdInt,
+    };
+
+    try {
+      return await _dio.patch(
+        primaryEndpoint,
+        data: payload,
+        queryParameters: queryParams,
+        options: options,
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return await _dio.patch(
+          fallbackEndpoint,
+          data: payload,
+          queryParameters: queryParams,
+          options: options,
+        );
+      }
+      rethrow;
+    }
   }
 
 // ==============================

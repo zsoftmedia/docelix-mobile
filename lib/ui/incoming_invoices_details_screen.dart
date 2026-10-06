@@ -119,13 +119,13 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // ------------------------------------------------
-                    // STATUS + AMOUNT CARD
+                    // STATUS CHIP
                     // ------------------------------------------------
 
                     Obx(
-                          () => Container(
+                      () => Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: width * 0.03,
+                          horizontal: width * 0.035,
                           vertical: height * 0.008,
                         ),
                         decoration: BoxDecoration(
@@ -143,16 +143,15 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                                 shape: BoxShape.circle,
                               ),
                             ),
-
                             SizedBox(
                               width: width * 0.015,
                             ),
-
                             Text(
                               controller.displayStatus,
                               style: TextStyle(
                                 color: controller.statusColor,
                                 fontSize: width * 0.032,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
@@ -513,19 +512,22 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                       height: height * 0.025,
                     ),
 
-                    Center(
-                      child: AppButton(
+                    Obx(
+                      () => AppButton(
                         text: 'Save Changes',
-                        icon: Icons.save_outlined,
-                        width: width * 0.55,
-                        height: height * 0.058,
-                        backgroundColor: colorsList.colorButton,
-                        foregroundColor: Colors.white,
-                        borderRadius: width * 0.035,
-                        fontSize: width * 0.035,
+                        isLoading: controller.isSaving.value,
                         onPressed: () {
-                          // Save functionality will be implemented later.
+                          controller.saveChanges();
                         },
+                        width: double.infinity,
+                        height: height * 0.062,
+                        backgroundColor: colorsList.primaryBlue,
+                        disabledBackgroundColor: colorsList.primaryBlue,
+                        foregroundColor: Colors.white,
+                        loadingColor: Colors.white,
+                        borderRadius: 4,
+                        fontSize: width * 0.043,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
 
@@ -589,14 +591,21 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
                   ),
 
                   Expanded(
-                    child: AppButton(
-                      text: 'Mark Paid',
-                      icon: Icons.check_circle_outline_rounded,
-                      height: height * 0.055,
-                      backgroundColor: const Color(0xFF12A150),
-                      foregroundColor: Colors.white,
-                      borderRadius: 12,
-                      onPressed: () {},
+                    child: Obx(
+                      () => AppButton(
+                        text: controller.isUpdatingStatus.value
+                            ? 'Updating...'
+                            : 'Change Status',
+                        icon: Icons.swap_horiz_rounded,
+                        height: height * 0.055,
+                        backgroundColor: colorsList.colorButton,
+                        foregroundColor: Colors.white,
+                        borderRadius: 12,
+                        isLoading: controller.isUpdatingStatus.value,
+                        onPressed: () {
+                          controller.showStatusSelectionSheet();
+                        },
+                      ),
                     ),
                   ),
                 ],
