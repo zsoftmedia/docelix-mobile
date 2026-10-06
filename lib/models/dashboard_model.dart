@@ -167,7 +167,8 @@ class CompanyDashboardModel {
 
       country: json['country']?.toString(),
 
-      currencyCode: json['currency_code']?.toString(),
+      currencyCode: json['currency_code']?.toString() ??
+          json['currencyCode']?.toString(),
 
       customIndustryName:
       json['custom_industry_name']?.toString(),

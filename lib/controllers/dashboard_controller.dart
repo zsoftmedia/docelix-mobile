@@ -28,13 +28,49 @@ class DashboardController extends GetxController {
   String get fromDateText => DateFormat('dd MMM yyyy').format(fromDate.value);
   String get toDateText => DateFormat('dd MMM yyyy').format(toDate.value);
 
+  // ============================================================
+  // DYNAMIC CURRENCY
+  // ============================================================
+
+  String get currencyCode {
+    return dashboardData.value?.company?.currencyCode?.trim().toUpperCase() ??
+        SessionManager.accessCorrencycode?.trim().toUpperCase() ??
+        'EUR';
+  }
+
+  String get currencySymbol {
+    final code = currencyCode;
+    switch (code) {
+      case 'EUR':
+        return '€';
+      case 'USD':
+        return '\$';
+      case 'GBP':
+        return '£';
+      case 'INR':
+        return '₹';
+      case 'CAD':
+        return 'CA\$';
+      case 'AUD':
+        return 'A\$';
+      case 'CHF':
+        return 'CHF';
+      case 'JPY':
+        return '¥';
+      case 'PKR':
+        return 'Rs.';
+      default:
+        return code;
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
 
     final now = DateTime.now();
     toDate = now.obs;
-    fromDate = DateTime(now.year,now.month - 1, now.day).obs;
+    fromDate = DateTime(now.year, now.month - 1, now.day).obs;
 
     getCompanies();
   }
@@ -216,7 +252,13 @@ class DashboardController extends GetxController {
       if (response.statusCode == 200) {
         dashboardData.value = DashboardModel.fromJson(response.data);
 
+        final serverCurrency = dashboardData.value?.company?.currencyCode;
+        if (serverCurrency != null && serverCurrency.isNotEmpty) {
+          await SessionManager.saveCorrencycode(serverCurrency);
+        }
+
         print("Dashboard loaded successfully for Company ID $companyId");
+        print("Currency: $currencyCode ($currencySymbol)");
         print("Revenue: ${dashboardData.value?.kpis?.revenue?.value}");
         print("Expenses: ${dashboardData.value?.kpis?.expenses?.value}");
         print("Net Result: ${dashboardData.value?.kpis?.netResult?.value}");

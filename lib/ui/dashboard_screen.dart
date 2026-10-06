@@ -541,7 +541,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _formatCurrency(netProfit),
+                      '${_formatCurrency(revenue)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1323,7 +1323,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             iconColor: colorsList.green,
             title: "$recievableCount receivables invoices",
             subtitle:
-            "Total receivables amount € ${recievableAmount.toStringAsFixed(2)}",
+                "Total receivables amount ${dashboardController.currencySymbol} ${recievableAmount.toStringAsFixed(2)}",
             showDivider: true,
           ),
 
@@ -1337,7 +1337,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             iconColor: colorsList.red,
             title: "$payableCount payables invoices",
             subtitle:
-            "Total payables amount € ${payableAmount.toStringAsFixed(2)}",
+                "Total payables amount ${dashboardController.currencySymbol} ${payableAmount.toStringAsFixed(2)}",
             showDivider: true,
           ),
 
@@ -1351,7 +1351,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             iconColor: colorsList.orange,
             title: "$overdueCount overdue invoices",
             subtitle:
-            "Total amount € ${overdueAmount.toStringAsFixed(2)}",
+                "Total amount ${dashboardController.currencySymbol} ${overdueAmount.toStringAsFixed(2)}",
             showDivider: false,
           ),
         ],
@@ -1631,7 +1631,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // Amount
               Text(
-                "${isIncome ? '+' : '-'} € ${amount.abs().toStringAsFixed(2)}",
+                "${isIncome ? '+' : '-'} ${dashboardController.currencySymbol} ${amount.abs().toStringAsFixed(2)}",
                 style: TextStyle(
                   color: iconColor,
                   fontSize: width * 0.024,
@@ -1664,8 +1664,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       amount = value.toDouble();
     } else {
       amount = double.tryParse(
-        value?.toString().replaceAll(',', '') ?? '',
-      ) ??
+            value?.toString().replaceAll(',', '') ?? '',
+          ) ??
           0;
     }
 
@@ -1675,10 +1675,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final formattedInteger = integerPart.replaceAllMapped(
       RegExp(r'\B(?=(\d{3})+(?!\d))'),
-          (match) => ',',
+      (match) => ',',
     );
 
-    return '€ $formattedInteger.$decimalPart';
+    final symbol = dashboardController.currencySymbol;
+    return '$symbol $formattedInteger.$decimalPart';
   }
 
   // ================================================================

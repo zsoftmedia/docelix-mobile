@@ -37,7 +37,7 @@ class _CreateIncomingInvoicesScreenState
           ),
         ),
         title: Text(
-          "Create Invoice",
+          "Create Incoming Invoice",
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: width * 0.055,
@@ -62,7 +62,7 @@ class _CreateIncomingInvoicesScreenState
                   children: [
                     const SizedBox(height: 15),
                     const Text(
-                      'Capture an invoice using your camera or select an image or PDF file.',
+                      'Capture an incoming invoice using your camera or select an image or PDF file.',
                       style: TextStyle(
                         fontSize: 14,
                         color: colorsList.textHintColor,
