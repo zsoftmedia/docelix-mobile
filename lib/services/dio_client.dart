@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/config/api_constants.dart';
 
@@ -196,7 +198,51 @@ class DioClient {
     );
   }
 
-    // ==============================
+  // ==============================
+  // PROFILE UPDATE
+  // ==============================
+
+  Future<Response> updateProfile({
+    required String endpoint,
+    required String accessToken,
+    required String username,
+    String? email,
+    File? avatar,
+  }) async {
+    final Map<String, dynamic> data = {
+      'username': username,
+    };
+
+    if (email != null && email.trim().isNotEmpty) {
+      data['email'] = email.trim();
+    }
+
+    // Add avatar only when user selected a new image.
+    if (avatar != null) {
+      data['avatar'] = await MultipartFile.fromFile(
+        avatar.path,
+        filename: avatar.path.split('/').last,
+      );
+    }
+
+    final formData = FormData.fromMap(data);
+
+    final String url = endpoint.startsWith('http')
+        ? endpoint
+        : '${ApiConstants.baseUrl}$endpoint';
+
+    return await _dio.patch(
+      url,
+      data: formData,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      ),
+    );
+  }
+
+  // ==============================
     // GET CLIENTS
     // ==============================
 

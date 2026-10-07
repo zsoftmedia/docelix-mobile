@@ -1,3 +1,5 @@
+import 'package:docelix_mobileapp/models/avatar_model.dart';
+
 class UserModel {
   int? id;
   String? userId;
@@ -7,7 +9,7 @@ class UserModel {
   String? createdAt;
   String? updatedAt;
   Role? role;
-  dynamic avatar;
+  AvatarModel? avatar;
   List<Company>? companies;
   dynamic avatarData;
   dynamic avatarMimeType;
@@ -37,18 +39,18 @@ class UserModel {
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
 
-      role: json['role'] != null
-          ? Role.fromJson(json['role'])
-          : null,
+      role: json['role'] != null ? Role.fromJson(json['role']) : null,
 
-      avatar: json['avatar'],
+      avatar: json['avatar'] is Map<String, dynamic>
+          ? AvatarModel.fromJson(json['avatar'] as Map<String, dynamic>)
+          : null,
 
       companies: json['companies'] != null
           ? List<Company>.from(
-        json['companies'].map(
-              (x) => Company.fromJson(x),
-        ),
-      )
+              json['companies'].map(
+                (x) => Company.fromJson(x),
+              ),
+            )
           : [],
 
       avatarData: json['avatar_data'],
@@ -66,14 +68,13 @@ class UserModel {
       'created_at': createdAt,
       'updated_at': updatedAt,
       'role': role?.toJson(),
-      'avatar': avatar,
+      'avatar': avatar?.toJson(),
       'companies': companies?.map((x) => x.toJson()).toList(),
       'avatar_data': avatarData,
       'avatar_mime_type': avatarMimeType,
     };
   }
 }
-
 
 // ============================================================
 // ROLE
@@ -102,7 +103,6 @@ class Role {
     };
   }
 }
-
 
 // ============================================================
 // COMPANY
@@ -252,7 +252,6 @@ class Company {
       accountingMethod: json['accounting_method'],
       vatAccountingMethod: json['vat_accounting_method'],
       myRole: json['my_role'],
-
       myPlanFeatures: json['my_plan_features'] != null
           ? MyPlanFeatures.fromJson(json['my_plan_features'])
           : null,
@@ -311,7 +310,6 @@ class Company {
   }
 }
 
-
 // ============================================================
 // MY PLAN FEATURES
 // ============================================================
@@ -367,4 +365,3 @@ class MyPlanFeatures {
     };
   }
 }
-

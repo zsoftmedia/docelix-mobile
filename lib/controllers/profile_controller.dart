@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/user_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -9,7 +11,6 @@ import 'package:image_picker/image_picker.dart';
 
 class ProfileController extends GetxController {
   final DioClient dioClient = DioClient();
-
   final ImagePicker imagePicker = ImagePicker();
 
   final isLoading = false.obs;
@@ -20,14 +21,9 @@ class ProfileController extends GetxController {
   // TEXT CONTROLLERS
   // ============================================================
 
-  final TextEditingController nameController =
-  TextEditingController();
-
-  final TextEditingController usernameController =
-  TextEditingController();
-
-  final TextEditingController emailController =
-  TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   // ============================================================
   // PROFILE DATA
@@ -45,7 +41,6 @@ class ProfileController extends GetxController {
   // ============================================================
 
   final Rxn<File> selectedProfileImage = Rxn<File>();
-
   final profileImageUrl = ''.obs;
 
   // ============================================================
@@ -58,20 +53,18 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
     getProfileData();
   }
 
   // ============================================================
-// SELECT PROFILE IMAGE
-// ============================================================
+  // SELECT PROFILE IMAGE
+  // ============================================================
 
   Future<void> pickProfileImage({
     ImageSource source = ImageSource.gallery,
   }) async {
     try {
-      final XFile? pickedFile =
-      await imagePicker.pickImage(
+      final XFile? pickedFile = await imagePicker.pickImage(
         source: source,
         imageQuality: 85,
         maxWidth: 1200,
@@ -82,18 +75,14 @@ class ProfileController extends GetxController {
         return;
       }
 
-      selectedProfileImage.value =
-          File(pickedFile.path);
+      selectedProfileImage.value = File(pickedFile.path);
 
-      print(
-        'Selected profile image: ${pickedFile.path}',
-      );
+      debugPrint('Selected profile image: ${pickedFile.path}');
     } catch (e) {
-      print('pickProfileImage error: $e');
-
-      Get.snackbar(
-        'Error',
-        'Unable to select profile picture',
+      debugPrint('pickProfileImage error: $e');
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Unable to select profile picture.',
       );
     }
   }
@@ -101,12 +90,7 @@ class ProfileController extends GetxController {
   Future<void> changeProfilePicture() async {
     await Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          25,
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 25),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(
@@ -122,13 +106,10 @@ class ProfileController extends GetxController {
                 height: 4,
                 decoration: BoxDecoration(
                   color: const Color(0xFFD0D5DD),
-                  borderRadius:
-                  BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-
               const SizedBox(height: 18),
-
               const Text(
                 'Profile Picture',
                 style: TextStyle(
@@ -137,72 +118,47 @@ class ProfileController extends GetxController {
                   color: Color(0xFF172033),
                 ),
               ),
-
               const SizedBox(height: 18),
-
               ListTile(
-                contentPadding:
-                const EdgeInsets.symmetric(
-                  horizontal: 4,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                 leading: Container(
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
                     color: const Color(0xFFEAF4FF),
-                    borderRadius:
-                    BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.camera_alt_outlined,
                     color: Color(0xFF1769AA),
                   ),
                 ),
-                title: const Text(
-                  'Take a photo',
-                ),
-                subtitle: const Text(
-                  'Use your camera',
-                ),
+                title: const Text('Take a photo'),
+                subtitle: const Text('Use your camera'),
                 onTap: () async {
                   Get.back();
-
-                  await pickProfileImage(
-                    source: ImageSource.camera,
-                  );
+                  await pickProfileImage(source: ImageSource.camera);
                 },
               ),
-
               ListTile(
-                contentPadding:
-                const EdgeInsets.symmetric(
-                  horizontal: 4,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                 leading: Container(
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
                     color: const Color(0xFFEAF4FF),
-                    borderRadius:
-                    BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.photo_library_outlined,
                     color: Color(0xFF1769AA),
                   ),
                 ),
-                title: const Text(
-                  'Choose from gallery',
-                ),
-                subtitle: const Text(
-                  'Select an existing photo',
-                ),
+                title: const Text('Choose from gallery'),
+                subtitle: const Text('Select an existing photo'),
                 onTap: () async {
                   Get.back();
-
-                  await pickProfileImage(
-                    source: ImageSource.gallery,
-                  );
+                  await pickProfileImage(source: ImageSource.gallery);
                 },
               ),
             ],
@@ -224,59 +180,31 @@ class ProfileController extends GetxController {
       final accessToken = SessionManager.accessToken;
 
       if (accessToken == null || accessToken.isEmpty) {
-        print('Access token not found');
+        debugPrint('Access token not found');
         return;
       }
 
-      final meResponse = await dioClient.getMe(
-        '/me',
-        accessToken,
-      );
+      final meResponse = await dioClient.getMe('/me', accessToken);
 
       if (meResponse.statusCode != 200) {
-        print(
-          'Failed to get profile. '
-              'Status: ${meResponse.statusCode}',
-        );
+        debugPrint('Failed to get profile. Status: ${meResponse.statusCode}');
         return;
       }
 
-      final UserModel user = UserModel.fromJson(
-        meResponse.data,
-      );
-
-      // ==========================================================
-      // USER DATA
-      // ==========================================================
+      final UserModel user = UserModel.fromJson(meResponse.data);
 
       profileName.value = user.username ?? '';
       profileUsername.value = user.username ?? '';
       profileEmail.value = user.email ?? '';
       profileRole.value = user.role?.name ?? '';
 
-      // ==========================================================
-      // ACCOUNT CREATED DATE
-      // ==========================================================
-
       accountCreatedDate.value = user.createdAt != null
-          ? DateTime.parse(
-        user.createdAt!,
-      ).toString().split(' ').first
+          ? DateTime.parse(user.createdAt!).toString().split(' ').first
           : '';
 
-      // ==========================================================
-      // PROFILE IMAGE
-      // ==========================================================
-
-      // IMPORTANT:
-      // Replace `user.profileImage` with the actual field
-      // from your UserModel/API response.
-      //
-      // profileImageUrl.value = user.profileImage ?? '';
-
-      // ==========================================================
-      // COMPANY
-      // ==========================================================
+      if (user.avatar?.url != null && user.avatar!.url!.isNotEmpty) {
+        profileImageUrl.value = user.avatar!.url!;
+      }
 
       final company = user.companies?.isNotEmpty == true
           ? user.companies!.first
@@ -284,39 +212,28 @@ class ProfileController extends GetxController {
 
       if (company != null) {
         companyName.value = company.name ?? '';
-        companyCurrency.value =
-            company.currencyCode ?? '';
+        companyCurrency.value = company.currencyCode ?? '';
       }
-
-      // ==========================================================
-      // SET TEXT CONTROLLERS
-      // ==========================================================
 
       nameController.text = profileName.value;
       usernameController.text = profileUsername.value;
       emailController.text = profileEmail.value;
 
-      print('Profile loaded successfully');
-      print('ID: ${user.id}');
-      print('Name: ${profileName.value}');
-      print('Email: ${profileEmail.value}');
-      print('Username: ${profileUsername.value}');
-      print('Role: ${profileRole.value}');
-      print('Created: ${accountCreatedDate.value}');
-      print('Company: ${companyName.value}');
-      print('Currency: ${companyCurrency.value}');
+      debugPrint('Profile loaded successfully');
+      debugPrint('ID: ${user.id}');
+      debugPrint('Name: ${profileName.value}');
+      debugPrint('Email: ${profileEmail.value}');
+      debugPrint('Avatar URL: ${profileImageUrl.value}');
     } catch (e) {
-      print('getProfileData error: $e');
-
-      Get.snackbar(
-        'Error',
-        'Unable to load profile information',
+      debugPrint('getProfileData error: $e');
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Unable to load profile information.',
       );
     } finally {
       isLoading.value = false;
     }
   }
-
 
   // ============================================================
   // REMOVE SELECTED IMAGE
@@ -327,22 +244,19 @@ class ProfileController extends GetxController {
   }
 
   // ============================================================
-  // SAVE PROFILE
+  // SAVE PROFILE (PATCH /api/me)
   // ============================================================
 
   Future<void> saveChanges() async {
-    if (nameController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter your name',
-      );
-      return;
-    }
+    final String nameInput = nameController.text.trim();
+    final String usernameInput = usernameController.text.trim();
 
-    if (emailController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter your email',
+    final String username = nameInput.isNotEmpty ? nameInput : usernameInput;
+
+    if (username.isEmpty) {
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Please enter your name/username.',
       );
       return;
     }
@@ -350,58 +264,112 @@ class ProfileController extends GetxController {
     try {
       isSaving.value = true;
 
-      // ==========================================================
-      // TODO:
-      // Upload profile data + selectedProfileImage here.
-      // ==========================================================
+      final accessToken = SessionManager.accessToken;
 
-      /*
-      await dioClient.updateProfile(
-        accessToken: SessionManager.accessToken!,
-        name: nameController.text.trim(),
-        email: emailController.text.trim(),
-        profileImage: selectedProfileImage.value,
+      if (accessToken == null || accessToken.isEmpty) {
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Authentication token not found.',
+        );
+        return;
+      }
+
+      final String email = emailController.text.trim();
+
+      debugPrint('========================================');
+      debugPrint('PATCH /api/me REQUEST');
+      debugPrint('Username: $username');
+      debugPrint('Email: $email');
+      debugPrint('Avatar File Selected: ${selectedProfileImage.value != null}');
+      if (selectedProfileImage.value != null) {
+        debugPrint('Avatar File Path: ${selectedProfileImage.value!.path}');
+      }
+      debugPrint('========================================');
+
+      final response = await dioClient.updateProfile(
+        endpoint: '/me',
+        accessToken: accessToken,
+        username: username,
+        email: email,
+        avatar: selectedProfileImage.value,
       );
-      */
 
-      await Future.delayed(
-        const Duration(seconds: 1),
-      );
+      debugPrint('========================================');
+      debugPrint('PATCH /api/me RESPONSE');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Data: ${response.data}');
+      debugPrint('========================================');
 
-      profileName.value =
-          nameController.text.trim();
+      if (response.statusCode == 200 && response.data != null) {
+        final UserModel updatedUser = UserModel.fromJson(response.data);
 
-      profileEmail.value =
-          emailController.text.trim();
+        profileName.value = updatedUser.username ?? '';
+        profileUsername.value = updatedUser.username ?? '';
+        profileEmail.value = updatedUser.email ?? '';
+        profileRole.value = updatedUser.role?.name ?? '';
 
-      Get.snackbar(
-        'Success',
-        'Profile updated successfully',
+        if (updatedUser.avatar?.url != null && updatedUser.avatar!.url!.isNotEmpty) {
+          profileImageUrl.value = updatedUser.avatar!.url!;
+        }
+
+        nameController.text = profileName.value;
+        usernameController.text = profileUsername.value;
+        emailController.text = profileEmail.value;
+
+        selectedProfileImage.value = null;
+
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Profile updated successfully.',
+        );
+
+        debugPrint('Profile updated successfully!');
+      } else {
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Failed to update profile. Status: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      debugPrint('========================================');
+      debugPrint('PATCH /api/me DIO EXCEPTION');
+      debugPrint('Status Code: ${e.response?.statusCode}');
+      debugPrint('Response Data: ${e.response?.data}');
+      debugPrint('Error Message: ${e.message}');
+      debugPrint('========================================');
+
+      String message = 'Unable to update profile';
+
+      if (e.response?.data is Map) {
+        final data = e.response?.data as Map;
+        message = data['message']?.toString() ??
+            data['detail']?.toString() ??
+            data['error']?.toString() ??
+            message;
+      } else if (e.response?.data is String) {
+        message = e.response!.data.toString();
+      }
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: message,
       );
     } catch (e) {
-      print('saveChanges error: $e');
-
-      Get.snackbar(
-        'Error',
-        'Unable to update profile',
+      debugPrint('saveChanges error: $e');
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Unable to update profile: $e',
       );
     } finally {
       isSaving.value = false;
     }
   }
 
-
-
-  // ============================================================
-  // DISPOSE
-  // ============================================================
-
   @override
   void onClose() {
     nameController.dispose();
     usernameController.dispose();
     emailController.dispose();
-
     super.onClose();
   }
 }
