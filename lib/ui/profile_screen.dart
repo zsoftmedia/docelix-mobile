@@ -23,7 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: colorsList.backgroundColor,
 
       /*appBar: AppBar(
         elevation: 0,
@@ -212,7 +212,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 20,
-                            fontWeight: FontWeight.w600,
+                          //  fontWeight: FontWeight.w600,
                             color: colorsList.textColor,
                           ),
                         ),

@@ -323,7 +323,7 @@ class _LoginPageState extends State<LoginScreen> {
                 Obx(
                   () => SizedBox(
                     width: double.infinity,
-                    height: height * 0.070,
+                    height: height * 0.062,
                     child: OutlinedButton(
                       onPressed: loginController.isLoading.value
                           ? null
