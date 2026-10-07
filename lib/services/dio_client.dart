@@ -134,6 +134,28 @@ class DioClient {
   }
 
   // ==============================
+  // GET RECEIVALBLE INVOICES
+  // ==============================
+
+  Future<Response> getReceivableInvoices({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/accounting/receivables/invoices',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET INVOICE ITEMS
   // ==============================
 

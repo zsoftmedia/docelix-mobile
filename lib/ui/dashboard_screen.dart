@@ -1327,8 +1327,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             showDivider: true,
             onTap: () {
               Get.toNamed(
-                '/InvoicesScreen',
-                arguments: 'Invoices Screen',
+                '/AccountReceivableScreen',
+                arguments: 'Receivable Screen',
               );
             },
           ),
