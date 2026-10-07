@@ -1,5 +1,6 @@
 import 'package:docelix_mobileapp/introPages/Intro_screen.dart';
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/ui/accounts_payable_screen.dart';
 import 'package:docelix_mobileapp/ui/accounts_receivable_screen.dart';
 import 'package:docelix_mobileapp/ui/add_client_screen.dart';
 import 'package:docelix_mobileapp/ui/add_item_screen.dart';
@@ -94,6 +95,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/AddItemScreen', page: () => AddItemScreen(),),
         GetPage(name: '/TransactionScreen', page: () => TransationScreen(),),
         GetPage(name: '/AccountReceivableScreen', page: () => AccountsReceivableScreen(),),
+        GetPage(name: '/AccountsPayableScreen', page: () => AccountsPayableScreen(),),
       ],
     );
   }

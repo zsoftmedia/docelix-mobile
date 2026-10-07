@@ -155,6 +155,28 @@ class DioClient {
     );
   }
 
+  // ============================================================
+// GET PAYABLE BILLS
+// ============================================================
+
+  Future<Response> getPayableBills({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/accounting/payables/bills',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
   // ==============================
   // GET INVOICE ITEMS
   // ==============================
