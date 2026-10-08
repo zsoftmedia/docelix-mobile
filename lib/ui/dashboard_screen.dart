@@ -1368,10 +1368,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 "Total amount ${dashboardController.currencySymbol} ${overdueAmount.toStringAsFixed(2)}",
             showDivider: false,
             onTap: () {
-              /*Get.toNamed(
-                '/IncomingInvoicesScreen',
-                arguments: 'Incoming Invoices Screen',
-              );*/
+              Get.toNamed(
+                '/ReceivablesDashboardScreen',
+                arguments: 'Receivables Invoices Screen',
+              );
             },
           ),
         ],

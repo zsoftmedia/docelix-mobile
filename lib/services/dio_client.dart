@@ -199,6 +199,32 @@ class DioClient {
   }
 
   // ==============================
+  // GET RECEIVABLE
+  // ==============================
+
+  Future<Response> getReceivablesDashboard({
+    required int companyId,
+    required String from,
+    required String to,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/accounting/receivables/dashboard',
+      queryParameters: {
+        'company_id': companyId,
+        'from': from,
+        'to': to,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // PROFILE UPDATE
   // ==============================
 
