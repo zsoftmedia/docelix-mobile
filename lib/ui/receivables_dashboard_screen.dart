@@ -1,5 +1,6 @@
 import 'package:docelix_mobileapp/controllers/receivables_dashboard_controller.dart';
 import 'package:docelix_mobileapp/models/receivables_dashboard_model.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,7 +33,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 20,
-            color: Color(0xFF0A2342),
+            color: colorsList.textColor,
           ),
           onPressed: () {
             Get.back();
@@ -42,9 +43,9 @@ class ReceivablesDashboardScreen extends StatelessWidget {
         title: const Text(
           'Receivables',
           style: TextStyle(
-            color: Color(0xFF0A2342),
+            color: colorsList.textColor,
             fontSize: 20,
-            fontWeight: FontWeight.w600,
+           // fontWeight: FontWeight.w600,
           ),
         ),
 
@@ -58,7 +59,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
                   .getReceivablesDashboard,
               icon: const Icon(
                 Icons.refresh_rounded,
-                color: Color(0xFF063C70),
+                color: colorsList.iconColor,
               ),
             ),
           ),
@@ -76,7 +77,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
               .value) {
             return const Center(
               child: CircularProgressIndicator(
-                color: Color(0xFF063C70),
+                color: colorsList.textColor,
               ),
             );
           }
@@ -87,7 +88,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
                   .value;
 
           return RefreshIndicator(
-            color: const Color(0xFF063C70),
+            color: colorsList.textColor,
 
             onRefresh:
             dashboardController
@@ -287,9 +288,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
           BorderRadius.circular(10),
 
           border: Border.all(
-            color: const Color(
-              0xFFE8EDF3,
-            ),
+            color: colorsList.borderColor,
           ),
         ),
 
@@ -298,9 +297,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
             Icon(
               icon,
               size: 18,
-              color: const Color(
-                0xFF344E6F,
-              ),
+              color: colorsList.iconColor,
             ),
 
             const SizedBox(width: 8),
@@ -315,9 +312,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
                 TextOverflow.ellipsis,
 
                 style: const TextStyle(
-                  color: Color(
-                    0xFF0A2342,
-                  ),
+                  color: colorsList.textColor,
                   fontSize: 12,
                   fontWeight:
                   FontWeight.w500,
@@ -331,9 +326,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
               Icons
                   .keyboard_arrow_down_rounded,
               size: 20,
-              color: Color(
-                0xFF344E6F,
-              ),
+              color: colorsList.iconColor,
             ),
           ],
         ),
@@ -350,9 +343,9 @@ class ReceivablesDashboardScreen extends StatelessWidget {
       title,
 
       style: const TextStyle(
-        color: Color(0xFF0A2342),
+        color: colorsList.textColor,
         fontSize: 17,
-        fontWeight: FontWeight.w600,
+       // fontWeight: FontWeight.w600,
       ),
     );
   }
@@ -454,9 +447,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
         BorderRadius.circular(12),
 
         border: Border.all(
-          color: const Color(
-            0xFFE8EDF3,
-          ),
+          color: colorsList.borderColor,
         ),
       ),
 
@@ -477,7 +468,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
                   TextOverflow.ellipsis,
 
                   style: const TextStyle(
-                    color: Colors.grey,
+                    color: colorsList.textHintColor,
                     fontSize: 12,
                   ),
                 ),
@@ -486,9 +477,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
               Icon(
                 icon,
                 size: 21,
-                color: const Color(
-                  0xFF063C70,
-                ),
+                color: colorsList.iconColor,
               ),
             ],
           ),
@@ -505,9 +494,9 @@ class ReceivablesDashboardScreen extends StatelessWidget {
             TextOverflow.ellipsis,
 
             style: const TextStyle(
-              color: Color(0xFF0A2342),
+              color: colorsList.textColor,
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+             // fontWeight: FontWeight.bold,
             ),
           ),
 
@@ -517,7 +506,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
             '$count invoice${count == 1 ? '' : 's'}',
 
             style: const TextStyle(
-              color: Colors.grey,
+              color: colorsList.textHintColor,
               fontSize: 11,
             ),
           ),
@@ -596,7 +585,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
               title,
 
               style: const TextStyle(
-                color: Color(0xFF0A2342),
+                color: colorsList.textColor,
                 fontSize: 13,
               ),
             ),
@@ -609,9 +598,9 @@ class ReceivablesDashboardScreen extends StatelessWidget {
             ),
 
             style: const TextStyle(
-              color: Color(0xFF0A2342),
+              color: colorsList.textColor,
               fontSize: 13,
-              fontWeight: FontWeight.w600,
+             // fontWeight: FontWeight.w600,
             ),
           ),
 
@@ -626,7 +615,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
               textAlign: TextAlign.right,
 
               style: const TextStyle(
-                color: Colors.grey,
+                color: colorsList.textHintColor,
                 fontSize: 11,
               ),
             ),
@@ -665,7 +654,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
           decoration:
           BoxDecoration(
-            color: Colors.white,
+            color: colorsList.colorBoxDecoration,
 
             borderRadius:
             BorderRadius.circular(
@@ -673,9 +662,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
             ),
 
             border: Border.all(
-              color: const Color(
-                0xFFE8EDF3,
-              ),
+              color: colorsList.borderColor,
             ),
           ),
 
@@ -692,12 +679,9 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
                       style:
                       const TextStyle(
-                        color: Color(
-                          0xFF0A2342,
-                        ),
+                        color: colorsList.textColor,
                         fontSize: 14,
-                        fontWeight:
-                        FontWeight.w600,
+                       // fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -710,12 +694,9 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
                     style:
                     const TextStyle(
-                      color: Color(
-                        0xFF0A2342,
-                      ),
+                      color: colorsList.textColor,
                       fontSize: 14,
-                      fontWeight:
-                      FontWeight.bold,
+                     // fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -728,7 +709,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
                 style:
                 const TextStyle(
-                  color: Colors.grey,
+                  color: colorsList.textHintColor,
                   fontSize: 11,
                 ),
               ),
@@ -748,7 +729,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
                     style:
                     const TextStyle(
-                      color: Colors.grey,
+                      color: colorsList.textHintColor,
                       fontSize: 11,
                     ),
                   ),
@@ -839,7 +820,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
               const Icon(
                 Icons.shield_outlined,
                 size: 22,
-                color: Color(0xFF063C70),
+                color: colorsList.iconColor,
               ),
 
               const SizedBox(width: 10),
@@ -847,7 +828,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
               const Text(
                 'Risk Level',
                 style: TextStyle(
-                  color: Colors.grey,
+                  color: colorsList.textHintColor,
                   fontSize: 13,
                 ),
               ),
@@ -884,10 +865,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
                     size: 18,
 
-                    color:
-                    const Color(
-                      0xFF063C70,
-                    ),
+                    color: colorsList.iconColor,
                   ),
 
                   const SizedBox(width: 8),
@@ -898,9 +876,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
                       style:
                       const TextStyle(
-                        color: Color(
-                          0xFF0A2342,
-                        ),
+                        color: colorsList.textColor,
                         fontSize: 13,
                       ),
                     ),
@@ -983,7 +959,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorsList.colorBoxDecoration,
 
         borderRadius:
         BorderRadius.circular(12),
@@ -1014,7 +990,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
             title,
 
             style: const TextStyle(
-              color: Colors.grey,
+              color: colorsList.textHintColor,
               fontSize: 13,
             ),
           ),
@@ -1024,9 +1000,9 @@ class ReceivablesDashboardScreen extends StatelessWidget {
           value,
 
           style: const TextStyle(
-            color: Color(0xFF0A2342),
+            color: colorsList.textColor,
             fontSize: 13,
-            fontWeight: FontWeight.w600,
+            //fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -1048,9 +1024,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
       ),
 
       decoration: BoxDecoration(
-        color: const Color(
-          0xFFE9EEF4,
-        ),
+        color: Color(0xFFE9EEF4),
 
         borderRadius:
         BorderRadius.circular(6),
@@ -1062,7 +1036,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
         style: const TextStyle(
           color: Color(0xFF063C70),
           fontSize: 10,
-          fontWeight: FontWeight.w600,
+         // fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -1096,7 +1070,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
         style: const TextStyle(
           fontSize: 10,
-          fontWeight: FontWeight.bold,
+         // fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -1109,7 +1083,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   Widget _divider() {
     return const Divider(
       height: 1,
-      color: Color(0xFFE8EDF3),
+      color: colorsList.dividerColor,
     );
   }
 
@@ -1128,9 +1102,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
       decoration: BoxDecoration(
         border: Border.all(
-          color: const Color(
-            0xFFE8EDF3,
-          ),
+          color: colorsList.colorBoxDecoration,
         ),
 
         borderRadius:
@@ -1142,7 +1114,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
           message,
 
           style: const TextStyle(
-            color: Colors.grey,
+            color: colorsList.textHintColor,
             fontSize: 13,
           ),
         ),
@@ -1176,7 +1148,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
           Text(
             'No receivables data available.',
             style: TextStyle(
-              color: Colors.grey,
+              color: colorsList.textHintColor,
               fontSize: 14,
             ),
           ),
