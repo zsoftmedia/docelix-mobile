@@ -8,23 +8,19 @@ class AccountsPayableScreen extends StatefulWidget {
   const AccountsPayableScreen({super.key});
 
   @override
-  State<AccountsPayableScreen> createState() =>
-      _AccountsPayableScreenState();
+  State<AccountsPayableScreen> createState() => _AccountsPayableScreenState();
 }
 
-class _AccountsPayableScreenState
-    extends State<AccountsPayableScreen> {
+class _AccountsPayableScreenState extends State<AccountsPayableScreen> {
 
   final AccountsPayableController billsController =
   Get.put(AccountsPayableController());
 
   @override
   Widget build(BuildContext context) {
-    final double width =
-        MediaQuery.of(context).size.width;
+    final double width = MediaQuery.of(context).size.width;
 
-    final double height =
-        MediaQuery.of(context).size.height;
+    final double height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor:
@@ -35,8 +31,7 @@ class _AccountsPayableScreenState
       // ==========================================================
 
       appBar: AppBar(
-        backgroundColor:
-        colorsList.colorWhite,
+        backgroundColor: colorsList.colorWhite,
 
         elevation: 0,
 
@@ -117,10 +112,8 @@ class _AccountsPayableScreenState
 
               icon: Icon(
                 Icons.search_rounded,
-                color:
-                colorsList.iconColor,
-                size:
-                width * 0.065,
+                color: colorsList.iconColor,
+                size: width * 0.065,
               ),
             );
           }),
@@ -158,12 +151,9 @@ class _AccountsPayableScreenState
                   Text(
                     'Payable Bills',
                     style: TextStyle(
-                      color:
-                      colorsList.textColor,
-                      fontSize:
-                      width * 0.045,
-                      fontWeight:
-                      FontWeight.w600,
+                      color: colorsList.textColor,
+                      fontSize: width * 0.045,
+                     // fontWeight: FontWeight.w600,
                     ),
                   ),
 
@@ -188,8 +178,7 @@ class _AccountsPayableScreenState
                       child: Text(
                         '${billsController.totalPayableBills.value} Bills',
                         style: TextStyle(
-                          color:
-                          colorsList.textColor,
+                          color: colorsList.textColor,
                           fontSize:
                           width * 0.032,
                         ),
@@ -234,9 +223,7 @@ class _AccountsPayableScreenState
                           .isNotEmpty;
 
                   return RefreshIndicator(
-                    onRefresh:
-                    billsController
-                        .refreshPayableBills,
+                    onRefresh: billsController.refreshPayableBills,
 
                     child: ListView(
                       physics:
@@ -547,8 +534,7 @@ class _AccountsPayableScreenState
                         colorsList.textColor,
                         fontSize:
                         width * 0.039,
-                        fontWeight:
-                        FontWeight.w600,
+                        //fontWeight: FontWeight.w600,
                       ),
                     ),
 
@@ -808,8 +794,7 @@ class _AccountsPayableScreenState
             style: TextStyle(
               color:
               colorsList.textHintColor,
-              fontSize:
-              width * 0.029,
+              fontSize: width * 0.029,
             ),
           ),
 
@@ -831,10 +816,8 @@ class _AccountsPayableScreenState
             style: TextStyle(
               color:
               colorsList.textColor,
-              fontSize:
-              width * 0.036,
-              fontWeight:
-              FontWeight.w600,
+              fontSize: width * 0.036,
+              //fontWeight: FontWeight.w600,
             ),
           ),
         ],
