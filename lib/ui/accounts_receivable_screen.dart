@@ -141,7 +141,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
                     style: TextStyle(
                       color: colorsList.textColor,
                       fontSize: width * 0.045,
-                      fontWeight: FontWeight.w600,
+                     // fontWeight: FontWeight.w600,
                     ),
                   ),
 
@@ -168,7 +168,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
                         style: TextStyle(
                           color: colorsList.textColor,
                           fontSize: width * 0.032,
-                          fontWeight: FontWeight.w500,
+                         // fontWeight: FontWeight.w500,
                         ),
                       ),
                     );

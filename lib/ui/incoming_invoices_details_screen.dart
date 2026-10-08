@@ -86,7 +86,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
           ],
         ),
 
-        actions: [
+        /*actions: [
           IconButton(
             onPressed: () {},
             icon: Icon(
@@ -94,7 +94,7 @@ class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
               color: colorsList.iconColor,
             ),
           ),
-        ],
+        ],*/
       ),
 
       // ----------------------------------------------------------
