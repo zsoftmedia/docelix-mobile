@@ -1331,8 +1331,8 @@ class InvoicesDetailsScreen extends StatelessWidget {
             ),*/
 
             _bottomSheetAction(
-              icon: Icons.description_outlined,
-              title: 'Download e-invoice (ZUGFerd)',
+              icon: Icons.code,
+              title: 'Download XML',
               onTap: () {
                 controller.downloadEInvoice();
                 Get.back();

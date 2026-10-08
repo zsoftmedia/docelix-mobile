@@ -178,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 width: 34,
                                 height: 34,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1769AA),
+                                  color: colorsList.colorButton,
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     color: Colors.white,
@@ -288,7 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(
                             color: colorsList.textColor,
                             fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            //fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -520,7 +520,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: TextStyle(
           color: textColor,
           fontSize: 12,
-          fontWeight: FontWeight.w500,
+          //fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -537,7 +537,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         text,
         style: TextStyle(
           fontSize: 13,
-          fontWeight: FontWeight.w500,
+          //fontWeight: FontWeight.w500,
           color: colorsList.textColor,
         ),
       ),
