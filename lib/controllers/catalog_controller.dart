@@ -44,7 +44,8 @@ class CatalogController extends GetxController {
   Future<void> getCatalog({
     int page = 1,
     int pageSize = 20,
-  }) async {
+  }) async
+  {
     try {
       isLoading.value = true;
       errorMessage.value = '';

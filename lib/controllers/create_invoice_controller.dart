@@ -68,6 +68,14 @@ class CreateInvoiceController extends GetxController {
   // ============================================================
   // CLIENT LIST
   // ============================================================
+
+  final RxInt totalClients = 0.obs;
+
+  final Rxn<ClientsPagination> pagination = Rxn<ClientsPagination>();
+
+  final RxInt currentPage = 1.obs;
+  final RxInt pageSize = 20.obs;
+
   final RxList<ClientScreenModel> clients = <ClientScreenModel>[].obs;
 
   /// Names shown inside dropdown
@@ -122,8 +130,8 @@ class CreateInvoiceController extends GetxController {
   // PAGINATION
   // ============================================================
 
-  final RxInt currentPage = 1.obs;
-  final RxInt pageSize = 10.obs;
+  /*final RxInt currentPage = 1.obs;
+  final RxInt pageSize = 10.obs;*/
 
   // ============================================================
   // STEPPER
@@ -240,130 +248,110 @@ class CreateInvoiceController extends GetxController {
 
   Future<void> getClients({
     int page = 1,
-    int pageSize = 10,
+    int pageSize = 20,
   }) async {
     try {
       isLoading.value = true;
 
-      final accessToken =
-          SessionManager.accessToken;
+      final accessToken = SessionManager.accessToken;
+      final companyId = SessionManager.accessCompanyid;
 
-      final companyId =
-          SessionManager.accessCompanyid;
-
-      // ----------------------------------------------------------
-      // ACCESS TOKEN
-      // ----------------------------------------------------------
-      if (accessToken == null ||
-          accessToken.isEmpty) {
+      if (accessToken == null || accessToken.isEmpty) {
         isLoading.value = false;
         AppSnackbar.error(
           title: 'Error',
-          message:
-          'Access token is not available.',
+          message: 'Access token is not available.',
         );
-
         return;
       }
 
-      // ----------------------------------------------------------
-      // COMPANY ID
-      // ----------------------------------------------------------
       if (companyId == null) {
         isLoading.value = false;
-
         AppSnackbar.error(
           title: 'Error',
-          message:
-          'Company ID is not available.',
+          message: 'Company ID is not available.',
         );
-
         return;
       }
 
-      final int companyIdInt =
-      int.parse(companyId.toString());
+      final int companyIdInt = int.parse(companyId.toString());
 
-
-      // ----------------------------------------------------------
-      // API
-      // ----------------------------------------------------------
-
-      final response =
-      await dioClient.getClientsScreen(
+      final response = await dioClient.getClientsScreen(
         companyId: companyIdInt,
         accessToken: accessToken,
         page: page,
         pageSize: pageSize,
       );
 
-      print('Clients Response: ${response.data}',);
+      print('Clients Response: ${response.data}');
 
-      // ----------------------------------------------------------
-      // SUCCESS
-      // ----------------------------------------------------------
-
-      if (response.statusCode == 200) {
-
+      if (response.statusCode == 200 && response.data != null) {
         isLoading.value = false;
 
-        final List<dynamic> data = response.data;
+        List<dynamic> data = [];
+        if (response.data is Map) {
+          final Map<String, dynamic> responseData =
+              Map<String, dynamic>.from(response.data);
+          data = responseData['data'] as List<dynamic>? ?? [];
 
-        final List<ClientScreenModel> fetchedClients =
-        data
-            .map(
-              (json) => ClientScreenModel.fromJson(
-            json as Map<String, dynamic>,
-          ),
-        )
-            .toList();
+          final paginationJson = responseData['pagination'];
+          if (paginationJson is Map) {
+            pagination.value = ClientsPagination.fromJson(
+              Map<String, dynamic>.from(paginationJson),
+            );
+            totalClients.value = pagination.value!.total;
+            currentPage.value = pagination.value!.page;
+            this.pageSize.value = pagination.value!.pageSize;
+          }
+        } else if (response.data is List) {
+          data = response.data as List<dynamic>;
+          totalClients.value = data.length;
+          currentPage.value = page;
+          this.pageSize.value = pageSize;
+        }
 
-        // Save all clients
+        final List<ClientScreenModel> fetchedClients = data.map((json) {
+          return ClientScreenModel.fromJson(
+            Map<String, dynamic>.from(json as Map),
+          );
+        }).toList();
+
         clients.assignAll(fetchedClients);
 
         clientNames.assignAll(
           fetchedClients
               .where(
-                (client) =>
-            (client.name ?? '').trim().isNotEmpty,
-          )
+                (client) => (client.name ?? '').trim().isNotEmpty,
+              )
               .map(
-                (client) =>
-            '${client.name!.trim()} - ${client.id}',
-          )
+                (client) => '${client.name!.trim()} - ${client.id}',
+              )
               .toList(),
         );
 
-        currentPage.value = page;
-        this.pageSize.value = pageSize;
+        print('Clients loaded: ${clients.length}');
+        print('Client names: ${clientNames.length}');
       } else {
         clients.clear();
-
         clientNames.clear();
-
         isLoading.value = false;
 
         AppSnackbar.error(
           title: 'Error',
-          message:
-          'Unable to load clients.',
+          message: 'Unable to load clients.',
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       clients.clear();
-
       clientNames.clear();
-
       isLoading.value = false;
 
-      print(
-        'Get Clients Error: $e',
-      );
+      debugPrint('Get Clients Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
 
       AppSnackbar.error(
         title: 'Error',
-        message:
-        'Unable to load clients.',
+        message: 'Unable to load clients.',
       );
     } finally {
       isLoading.value = false;
@@ -1106,9 +1094,8 @@ class CreateInvoiceController extends GetxController {
 
   Future<void> getCatalog({
     int page = 1,
-    int pageSize = 10,
-  }) async
-  {
+    int pageSize = 20,
+  }) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
@@ -1118,23 +1105,19 @@ class CreateInvoiceController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token is not available.';
-
         AppSnackbar.error(
           title: 'Error',
-          message: 'Access token is not available.',
+          message: errorMessage.value,
         );
-
         return;
       }
 
       if (companyId == null) {
         errorMessage.value = 'Company ID is not available.';
-
         AppSnackbar.error(
           title: 'Error',
-          message: 'Company ID is not available.',
+          message: errorMessage.value,
         );
-
         return;
       }
 
@@ -1147,16 +1130,25 @@ class CreateInvoiceController extends GetxController {
         pageSize: pageSize,
       );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
+      print('Catalog Status Code: ${response.statusCode}');
+      print('Catalog Response: ${response.data}');
 
-        final fetchedCatalog = data
-            .map(
-              (json) => CatalogModel.fromJson(
-            json as Map<String, dynamic>,
-          ),
-        )
-            .toList();
+      if (response.statusCode == 200 && response.data != null) {
+        List<dynamic> data = [];
+
+        if (response.data is Map) {
+          final Map<String, dynamic> responseData =
+              Map<String, dynamic>.from(response.data as Map);
+          data = responseData['data'] as List<dynamic>? ?? [];
+        } else if (response.data is List) {
+          data = response.data as List<dynamic>;
+        }
+
+        final List<CatalogModel> fetchedCatalog = data.map((json) {
+          return CatalogModel.fromJson(
+            Map<String, dynamic>.from(json as Map),
+          );
+        }).toList();
 
         catalogList.assignAll(fetchedCatalog);
 
@@ -1169,28 +1161,29 @@ class CreateInvoiceController extends GetxController {
 
         currentPage.value = page;
         this.pageSize.value = pageSize;
+
+        print('Catalog loaded: ${catalogList.length}');
       } else {
         catalogList.clear();
         catalogNames.clear();
-
         errorMessage.value = 'Unable to load items.';
 
         AppSnackbar.error(
           title: 'Error',
-          message: 'Unable to load items.',
+          message: errorMessage.value,
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       catalogList.clear();
       catalogNames.clear();
-
       errorMessage.value = 'Unable to load items.';
 
-      print('Get Catalog Error: $e');
+      debugPrint('Get Catalog Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
 
       AppSnackbar.error(
         title: 'Error',
-        message: 'Unable to load items.',
+        message: errorMessage.value,
       );
     } finally {
       isLoading.value = false;

@@ -64,7 +64,9 @@ class ClientsController extends GetxController {
   Future<void> getClients({
     int page = 1,
     int pageSize = 20,
-  }) async {
+  }) async
+  {
+
     try {
       isLoading.value = true;
 
