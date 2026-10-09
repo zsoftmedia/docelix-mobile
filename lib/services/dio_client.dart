@@ -298,6 +298,32 @@ class DioClient {
     required int companyId,
     required String accessToken,
     int page = 1,
+    int pageSize = 20,
+    String sort = 'name',
+    String dir = 'asc',
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/clients',
+      queryParameters: {
+        'company_id': companyId,
+        'sort': sort,
+        'dir': dir,
+        'page': page,
+        'pageSize': pageSize,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  /*Future<Response> getClientsScreen({
+    required int companyId,
+    required String accessToken,
+    int page = 1,
     int pageSize = 10,
   }) async {
     return await _dio.get(
@@ -314,7 +340,7 @@ class DioClient {
         },
       ),
     );
-  }
+  }*/
 
   // ==============================
   // GET CATALOG LIST
@@ -322,19 +348,24 @@ class DioClient {
   Future<Response> getCatalog({
     required int companyId,
     required String accessToken,
-    required int page,
-    required int pageSize,
+    int page = 1,
+    int pageSize = 20,
+    String sort = 'article_name',
+    String dir = 'asc',
   }) async {
     return await _dio.get(
       '${ApiConstants.baseUrl}/catalog',
       queryParameters: {
         'company_id': companyId,
+        'sort': sort,
+        'dir': dir,
         'page': page,
         'pageSize': pageSize,
       },
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
         },
       ),
     );

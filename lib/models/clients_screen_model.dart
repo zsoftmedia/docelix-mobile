@@ -60,12 +60,36 @@ class ClientScreenModel {
       country: json['country'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
+      lastInvoiceTotal: (json['last_invoice_total'] as num?)?.toDouble(),
+      invoicesCount: (json['invoices_count'] as num?)?.toInt(),
+      totalInvoicedAmount: (json['total_invoiced_amount'] as num?)?.toDouble(),
       lastInvoiceNumber: json['last_invoice_number'],
       lastInvoiceDate: json['last_invoice_date'],
-      lastInvoiceTotal: (json['last_invoice_total'] as num?)?.toDouble(),
-      invoicesCount: json['invoices_count'],
-      totalInvoicedAmount:
-      (json['total_invoiced_amount'] as num?)?.toDouble(),
+     // lastInvoiceTotal: (json['last_invoice_total'] as num?)?.toDouble(),
+      // invoicesCount: json['invoices_count'],
+      // totalInvoicedAmount: (json['total_invoiced_amount'] as num?)?.toDouble(),
+    );
+  }
+}
+
+class ClientsPagination {
+  final int page;
+  final int pageSize;
+  final int total;
+
+  ClientsPagination({
+    required this.page,
+    required this.pageSize,
+    required this.total,
+  });
+
+  factory ClientsPagination.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return ClientsPagination(
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      pageSize: (json['pageSize'] as num?)?.toInt() ?? 20,
+      total: (json['total'] as num?)?.toInt() ?? 0,
     );
   }
 }

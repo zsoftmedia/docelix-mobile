@@ -3,6 +3,7 @@ import 'package:docelix_mobileapp/models/client_model.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ClientsController extends GetxController {
@@ -37,9 +38,12 @@ class ClientsController extends GetxController {
   // PAGINATION
   // ============================================================
 
-  final RxInt currentPage = 1.obs;
+  final RxInt totalClients = 0.obs;
 
-  final RxInt pageSize = 10.obs;
+  final Rxn<ClientsPagination> pagination = Rxn<ClientsPagination>();
+
+  final RxInt currentPage = 1.obs;
+  final RxInt pageSize = 20.obs;
 
   // ============================================================
   // INIT
@@ -56,19 +60,16 @@ class ClientsController extends GetxController {
   // GET CLIENTS
   // ============================================================
 
+
   Future<void> getClients({
     int page = 1,
-    int pageSize = 10,
+    int pageSize = 20,
   }) async {
     try {
       isLoading.value = true;
 
       final accessToken = SessionManager.accessToken;
       final companyId = SessionManager.accessCompanyid;
-
-      // ----------------------------------------------------------
-      // ACCESS TOKEN
-      // ----------------------------------------------------------
 
       if (accessToken == null || accessToken.isEmpty) {
         AppSnackbar.error(
@@ -78,10 +79,6 @@ class ClientsController extends GetxController {
         return;
       }
 
-      // ----------------------------------------------------------
-      // COMPANY ID
-      // ----------------------------------------------------------
-
       if (companyId == null) {
         AppSnackbar.error(
           title: 'Error',
@@ -90,86 +87,72 @@ class ClientsController extends GetxController {
         return;
       }
 
-      final int companyIdInt =
-      int.parse(companyId.toString());
-
-      print('Loading clients...');
-      print('Company ID: $companyIdInt');
-      print('Page: $page');
-      print('Page Size: $pageSize');
-
-      // ----------------------------------------------------------
-      // API CALL
-      // ----------------------------------------------------------
-
-      final response =
-      await dioClient.getClientsScreen(
-        companyId: companyIdInt,
+      final response = await dioClient.getClientsScreen(
+        companyId: int.parse(companyId.toString()),
         accessToken: accessToken,
         page: page,
         pageSize: pageSize,
+        sort: 'name',
+        dir: 'asc',
       );
-
-      print(
-        'Clients Response: ${response.data}',
-      );
-
-      // ----------------------------------------------------------
-      // SUCCESS
-      // ----------------------------------------------------------
 
       if (response.statusCode == 200) {
+        // API response is an object, not a list.
+        final Map<String, dynamic> responseData =
+        Map<String, dynamic>.from(response.data);
+
+        // Extract client records.
         final List<dynamic> data =
-            response.data;
+            responseData['data'] as List<dynamic>? ?? [];
 
-        final List<ClientScreenModel>
-        fetchedClients = data
-            .map(
-              (json) =>
-              ClientScreenModel.fromJson(
-                json as Map<String, dynamic>,
-              ),
-        )
-            .toList();
+        final fetchedClients = data.map((json) {
+          return ClientScreenModel.fromJson(
+            Map<String, dynamic>.from(json as Map),
+          );
+        }).toList();
 
-        // --------------------------------------------------------
-        // STORE ORIGINAL LIST
-        // --------------------------------------------------------
+        // Extract pagination metadata.
+        final paginationJson = responseData['pagination'];
 
-        clients.assignAll(
-          fetchedClients,
-        );
+        if (paginationJson is Map) {
+          pagination.value = ClientsPagination.fromJson(
+            Map<String, dynamic>.from(paginationJson),
+          );
 
-        // --------------------------------------------------------
-        // DISPLAY ALL CLIENTS INITIALLY
-        // --------------------------------------------------------
+          totalClients.value = pagination.value!.total;
+          currentPage.value = pagination.value!.page;
+          this.pageSize.value = pagination.value!.pageSize;
+        } else {
+          pagination.value = null;
+          totalClients.value = fetchedClients.length;
+          currentPage.value = page;
+          this.pageSize.value = pageSize;
+        }
 
-        filteredClients.assignAll(
-          fetchedClients,
-        );
+        // Update original and displayed lists.
+        clients.assignAll(fetchedClients);
 
-        currentPage.value = page;
-        this.pageSize.value = pageSize;
+        // Preserve the active search after reloading.
+        if (isSearching.value &&
+            searchQuery.value.trim().isNotEmpty) {
+          searchClients(searchQuery.value);
+        } else {
+          filteredClients.assignAll(fetchedClients);
+        }
 
-        print(
-          'Clients loaded: ${clients.length}',
-        );
+        print('Clients loaded: ${clients.length}');
+        print('Total clients: ${totalClients.value}');
+        print('Current page: ${currentPage.value}');
+        print('Page size: ${this.pageSize.value}');
       } else {
-        clients.clear();
-        filteredClients.clear();
-
         AppSnackbar.error(
           title: 'Error',
           message: 'Unable to load clients.',
         );
       }
-    } catch (e) {
-      clients.clear();
-      filteredClients.clear();
-
-      print(
-        'Get Clients Error: $e',
-      );
+    } catch (e, stackTrace) {
+      debugPrint('Get Clients Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
 
       AppSnackbar.error(
         title: 'Error',

@@ -49,32 +49,62 @@ class CatalogModel {
     this.minStock,
   });
 
+
   factory CatalogModel.fromJson(Map<String, dynamic> json) {
     return CatalogModel(
-      id: json['id'],
-      companyId: json['company_id'],
-      createdBy: json['created_by'],
-      articleName: json['article_name'],
-      description: json['description'],
+      id: (json['id'] as num?)?.toInt(),
+      companyId: (json['company_id'] as num?)?.toInt(),
+      createdBy: json['created_by']?.toString(),
+      articleName: json['article_name']?.toString(),
+      description: json['description']?.toString(),
+
       defaultQty: (json['default_qty'] as num?)?.toDouble(),
       unitPriceNet: (json['unit_price_net'] as num?)?.toDouble(),
       vatRate: (json['vat_rate'] as num?)?.toDouble(),
-      isActive: json['is_active'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      unitCode: json['unit_code'],
-      unitPriceGross: (json['unit_price_gross'] as num?)?.toDouble(),
+
+      isActive: json['is_active'] as bool?,
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+      unitCode: json['unit_code']?.toString(),
+
+      unitPriceGross:
+      (json['unit_price_gross'] as num?)?.toDouble(),
       discount: (json['discount'] as num?)?.toDouble(),
-      groupCode: json['group_code'],
+      groupCode: json['group_code']?.toString(),
       priceMsrp: (json['price_msrp'] as num?)?.toDouble(),
-      articleNumber: json['article_number'],
-      articleNameLc: json['article_name_lc'],
+
+      articleNumber: json['article_number']?.toString(),
+      articleNameLc: json['article_name_lc']?.toString(),
+
       purchasePriceNet:
       (json['purchase_price_net'] as num?)?.toDouble(),
       stockQty: (json['stock_qty'] as num?)?.toDouble(),
-      trackStock: json['track_stock'],
-      itemType: json['item_type'],
+
+      trackStock: json['track_stock'] as bool?,
+      itemType: json['item_type']?.toString(),
       minStock: (json['min_stock'] as num?)?.toDouble(),
+    );
+  }
+}
+
+class CatalogPaginationModel {
+  final int page;
+  final int pageSize;
+  final int total;
+
+  CatalogPaginationModel({
+    required this.page,
+    required this.pageSize,
+    required this.total,
+  });
+
+  factory CatalogPaginationModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return CatalogPaginationModel(
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      pageSize: (json['pageSize'] as num?)?.toInt() ?? 20,
+      total: (json['total'] as num?)?.toInt() ?? 0,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CatalogController extends GetxController {
@@ -20,7 +21,12 @@ class CatalogController extends GetxController {
   // ============================================================
 
   final RxInt currentPage = 1.obs;
-  final RxInt pageSize = 10.obs;
+  final RxInt pageSize = 20.obs;
+  final RxInt totalItems = 0.obs;
+
+  final Rxn<CatalogPaginationModel> pagination =
+  Rxn<CatalogPaginationModel>();
+
 
   final RxString errorMessage = ''.obs;
 
@@ -37,9 +43,8 @@ class CatalogController extends GetxController {
 
   Future<void> getCatalog({
     int page = 1,
-    int pageSize = 10,
-  }) async
-  {
+    int pageSize = 20,
+  }) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
@@ -47,107 +52,98 @@ class CatalogController extends GetxController {
       final accessToken = SessionManager.accessToken;
       final companyId = SessionManager.accessCompanyid;
 
-      // ----------------------------------------------------------
-      // ACCESS TOKEN
-      // ----------------------------------------------------------
-
       if (accessToken == null || accessToken.isEmpty) {
         errorMessage.value = 'Access token is not available.';
 
         AppSnackbar.error(
           title: 'Error',
-          message:'Access token is not available.',
+          message: errorMessage.value,
         );
-
-
         return;
       }
-
-      // ----------------------------------------------------------
-      // COMPANY ID
-      // ----------------------------------------------------------
 
       if (companyId == null) {
         errorMessage.value = 'Company ID is not available.';
 
         AppSnackbar.error(
           title: 'Error',
-          message:'Company ID is not available.',
+          message: errorMessage.value,
         );
-
-
         return;
       }
 
-      final int companyIdInt = int.parse(companyId.toString());
-
-      print('======================================');
-      print('Loading Catalog...');
-      print('Company ID: $companyIdInt');
-      print('Page: $page');
-      print('Page Size: $pageSize');
-      print('======================================');
-
-      // ----------------------------------------------------------
-      // API CALL
-      // ----------------------------------------------------------
-
       final response = await dioClient.getCatalog(
-        companyId: companyIdInt,
+        companyId: int.parse(companyId.toString()),
         accessToken: accessToken,
         page: page,
         pageSize: pageSize,
+        sort: 'article_name',
+        dir: 'asc',
       );
 
       print('Catalog Status Code: ${response.statusCode}');
       print('Catalog Response: ${response.data}');
 
-      // ----------------------------------------------------------
-      // SUCCESS
-      // ----------------------------------------------------------
-
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
+        // The API response is a JSON object.
+        final Map<String, dynamic> responseData =
+        Map<String, dynamic>.from(response.data as Map);
 
-        final List<CatalogModel> fetchedCatalog = data
-            .map(
-              (json) => CatalogModel.fromJson(
-            json as Map<String, dynamic>,
-          ),
-        )
-            .toList();
+        // Extract the catalog records.
+        final List<dynamic> data =
+            responseData['data'] as List<dynamic>? ?? [];
+
+        final List<CatalogModel> fetchedCatalog =
+        data.map((json) {
+          return CatalogModel.fromJson(
+            Map<String, dynamic>.from(json as Map),
+          );
+        }).toList();
+
+        // Extract pagination.
+        final paginationData = responseData['pagination'];
+
+        if (paginationData is Map) {
+          final parsedPagination =
+          CatalogPaginationModel.fromJson(
+            Map<String, dynamic>.from(paginationData),
+          );
+
+          pagination.value = parsedPagination;
+          currentPage.value = parsedPagination.page;
+          this.pageSize.value = parsedPagination.pageSize;
+          totalItems.value = parsedPagination.total;
+        } else {
+          pagination.value = null;
+          currentPage.value = page;
+          this.pageSize.value = pageSize;
+          totalItems.value = fetchedCatalog.length;
+        }
 
         catalogList.assignAll(fetchedCatalog);
 
-        currentPage.value = page;
-        this.pageSize.value = pageSize;
-
         print('Catalog loaded: ${catalogList.length}');
+        print('Total items: ${totalItems.value}');
+        print('Current page: ${currentPage.value}');
+        print('Page size: ${this.pageSize.value}');
       } else {
-        catalogList.clear();
-
         errorMessage.value = 'Unable to load items.';
 
         AppSnackbar.error(
           title: 'Error',
-          message:'Unable to load items.',
+          message: errorMessage.value,
         );
       }
     } catch (e, stackTrace) {
-      catalogList.clear();
-
       errorMessage.value = 'Unable to load items.';
 
-      print('======================================');
-      print('Get Catalog Error: $e');
-      print('Stack Trace: $stackTrace');
-      print('======================================');
+      debugPrint('Get Catalog Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
 
       AppSnackbar.error(
         title: 'Error',
-        message:'Unable to load items.',
+        message: errorMessage.value,
       );
-
     } finally {
       isLoading.value = false;
     }
@@ -158,8 +154,6 @@ class CatalogController extends GetxController {
   // ============================================================
 
   Future<void> refreshCatalog() async {
-    currentPage.value = 1;
-
     await getCatalog(
       page: 1,
       pageSize: pageSize.value,
