@@ -4,15 +4,10 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-
-	<!-- Camera permission for QR scanning -->
-    <key>NSCameraUsageDescription</key>
-    <string>Docelix needs camera access to scan QR codes.</string>
-
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Docelix Mobileapp</string>
+	<string>Docelix</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -31,6 +26,16 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Docelix needs camera access to scan QR codes and capture invoices or receipts.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Docelix needs photo library access to select invoice, receipt, and profile images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Docelix may save images related to invoices and documents.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Docelix needs microphone access for voice recognition while creating invoices.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Docelix uses speech recognition to convert your voice into invoice text.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
