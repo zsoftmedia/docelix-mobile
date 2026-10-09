@@ -622,34 +622,6 @@ class DioClient {
     );
   }
 
-  // ============================================================
-  // GET GENERAL LEDGER TRANSACTION
-  // ============================================================
-
-  Future<Response> getGeneralLedger({
-    required int companyId,
-    required String fromDate,
-    required String toDate,
-    required String accessToken,
-  }) async {
-    return await _dio.get(
-      '${ApiConstants.baseUrl}/accounting/reports/general-ledger',
-      queryParameters: {
-        'company_id': companyId,
-        'companyId': companyId,
-        'fromDate': fromDate,
-        'toDate': toDate,
-      },
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-          'x-company-id': companyId.toString(),
-        },
-      ),
-    );
-  }
-
   // ==============================
   // SEND INVOICE REMINDER
   // ==============================
@@ -676,6 +648,869 @@ class DioClient {
           'Authorization': 'Bearer $accessToken',
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // ASSETS
+  // ==============================
+
+  Future<Response> getAssets({
+    required int companyId,
+    required String accessToken,
+    String? name,
+    String? status,
+    int? assetCategoryId,
+    int? assetAccountId,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/assets',
+      queryParameters: {
+        'company_id': companyId,
+        if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
+        if (assetCategoryId != null) 'asset_category_id': assetCategoryId,
+        if (assetAccountId != null) 'asset_account_id': assetAccountId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getAssetCategories({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/assets/categories',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getLedgerAccounts({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/ledger/accounts',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> searchDepreciationEngine({
+    required String query,
+    required String accessToken,
+    int? companyId,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/assets/depreciation-engine/search',
+      queryParameters: {
+        'query': query,
+        if (companyId != null) 'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          if (companyId != null) 'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createAsset({
+    required Map<String, dynamic> body,
+    required String accessToken,
+    required int companyId,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/assets',
+      data: body,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getAssetById({
+    required int assetId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/assets/$assetId',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getAssetDocuments({
+    required int assetId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/assets/$assetId/documents',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> uploadAssetDocument({
+    required int assetId,
+    required int companyId,
+    required String accessToken,
+    required String filePath,
+    required String fileName,
+    required String documentType,
+  }) async {
+    final formData = FormData.fromMap({
+      'company_id': companyId,
+      'document_type': documentType,
+      'file': await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+      ),
+    });
+
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/assets/$assetId/documents',
+      data: formData,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+        contentType: 'multipart/form-data',
+      ),
+    );
+  }
+
+  Future<Response> deleteAssetDocument({
+    required int assetId,
+    required int documentId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/assets/$assetId/documents/$documentId',
+      data: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getAssetHistory({
+    required int assetId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/assets/$assetId/history',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getAssetJournalEntries({
+    required int companyId,
+    required int sourceId,
+    required String accessToken,
+    int page = 1,
+    int limit = 100,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/ledger/journal-entries',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'limit': limit,
+        'source_id': sourceId,
+        'source_type':
+            'asset_purchase,asset_depreciation,asset_disposal',
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // ACCOUNTING REPORTS
+  // ==============================
+
+  Future<Response> getGeneralLedger({
+    required int companyId,
+    required String accessToken,
+    required String fromDate,
+    required String toDate,
+    int? accountId,
+    String? search,
+    String? sourceType,
+    int page = 1,
+    int pageSize = 50,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/accounting/reports/general-ledger',
+      queryParameters: {
+        'company_id': companyId,
+        'fromDate': fromDate,
+        'toDate': toDate,
+        'page': page,
+        'pageSize': pageSize,
+        if (accountId != null) 'accountId': accountId,
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (sourceType != null && sourceType.trim().isNotEmpty)
+          'sourceType': sourceType.trim(),
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // INVENTORY
+  // ==============================
+
+  Future<Response> getInventoryItems({
+    required int companyId,
+    required String accessToken,
+    int page = 1,
+    int limit = 25,
+    String? search,
+  }) async {
+    final query = search?.trim();
+    final params = <String, dynamic>{
+      'company_id': companyId,
+      'page': page,
+      'limit': limit,
+    };
+    if (query != null && query.isNotEmpty) {
+      params['q'] = query;
+    }
+
+    final response = await _dio.get(
+      '${ApiConstants.baseUrl}/inventory/items',
+      queryParameters: params,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+    print('[Inventory Dio] ${response.requestOptions.uri}');
+    return response;
+  }
+
+  Future<Response> getInventoryMovements({
+    required int itemId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/inventory/items/$itemId/movements',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createInventoryMovement({
+    required int itemId,
+    required Map<String, dynamic> body,
+    required String accessToken,
+    required int companyId,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/inventory/items/$itemId/movements',
+      data: body,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // VEHICLES
+  // ==============================
+
+  Future<Response> getVehicles({
+    required int companyId,
+    required String accessToken,
+    int page = 1,
+    int limit = 25,
+    String? search,
+  }) async {
+    final query = search?.trim();
+    final params = <String, dynamic>{
+      'company_id': companyId,
+      'page': page,
+      'limit': limit,
+    };
+    if (query != null && query.isNotEmpty) {
+      params['q'] = query;
+    }
+
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles',
+      queryParameters: params,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getVehicleById({
+    required int vehicleId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createVehicle({
+    required Map<String, dynamic> body,
+    required String accessToken,
+    required int companyId,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles',
+      data: {
+        'company_id': companyId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getVehiclesDashboard({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/dashboard',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getVehicleTrips({
+    required int vehicleId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/trips',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> calculateVehicleDistance({
+    required String startAddress,
+    required String destination,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/calculate-distance',
+      data: {
+        'company_id': companyId,
+        'start_address': startAddress,
+        'destination': destination,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getVehicleLocations({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/locations',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createVehicleLocation({
+    required String name,
+    required String address,
+    required int companyId,
+    required String accessToken,
+    String placeId = '',
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/locations',
+      data: {
+        'company_id': companyId,
+        'name': name,
+        'address': address,
+        'place_id': placeId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createVehicleTrip({
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/trips',
+      data: {
+        'company_id': companyId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> deleteVehicleTrip({
+    required int vehicleId,
+    required String tripId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/trips/$tripId',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getVehicleFuelLogs({
+    required int vehicleId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/fuel',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createVehicleFuelLog({
+    required int vehicleId,
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/fuel',
+      data: {
+        'company_id': companyId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> uploadVehicleFuelReceipt({
+    required int vehicleId,
+    required int companyId,
+    required String accessToken,
+    required String filePath,
+    required String fileName,
+  }) async {
+    final formData = FormData.fromMap({
+      'company_id': companyId,
+      'file': await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+      ),
+    });
+
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/fuel-receipt',
+      data: formData,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+        contentType: 'multipart/form-data',
+      ),
+    );
+  }
+
+  Future<Response> getVehicleServices({
+    required int vehicleId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/services',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createVehicleService({
+    required int vehicleId,
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/services',
+      data: {
+        'company_id': companyId,
+        'vehicle_id': vehicleId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getVehicleInsurance({
+    required int vehicleId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/insurance',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createVehicleInsurance({
+    required int vehicleId,
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/insurance',
+      data: {
+        'company_id': companyId,
+        'vehicle_id': vehicleId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getVehicleDocuments({
+    required int vehicleId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/documents',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createVehicleDocument({
+    required int vehicleId,
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/documents',
+      data: {
+        'company_id': companyId,
+        'vehicle_id': vehicleId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> getVehicleDrivers({
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/drivers',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> createVehicleDriver({
+    required String name,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/drivers',
+      data: {
+        'company_id': companyId,
+        'name': name,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> assignVehicleDriver({
+    required int vehicleId,
+    required int driverId,
+    required bool isPrimary,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/assignments',
+      data: {
+        'company_id': companyId,
+        'driver_id': driverId,
+        'is_primary': isPrimary,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> deleteVehicleAssignment({
+    required int vehicleId,
+    required int assignmentId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/assignments/$assignmentId',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
         },
       ),
     );

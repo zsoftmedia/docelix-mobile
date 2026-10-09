@@ -16,375 +16,46 @@ class LandScreen extends StatefulWidget {
 }
 
 class _LandScreenState extends State<LandScreen> {
-  bool checkLoginProgressbar = false;
-
-  final CreateIncomingInvoiceController incomingInvoiceController =
-  Get.put(CreateIncomingInvoiceController());
-
-  // ============================================================
-  // BOTTOM NAVIGATION
-  // ============================================================
+  final CreateIncomingInvoiceController incomingInvoiceController = Get.put(
+    CreateIncomingInvoiceController(),
+  );
 
   int _selectedIndex = 0;
+  bool _assetsExpanded = false;
 
-  // Main bottom navigation pages
-  final List<Widget> _pages = [
-    const DashboardScreen(),
-
-    const SizedBox(),
-
-    const SizedBox(),
-
-    const Center(
-      child: Text(
-        "Notifications",
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-
-    const SizedBox(),
+  final List<Widget> _pages = const [
+    DashboardScreen(),
+    SizedBox.shrink(),
+    SizedBox.shrink(),
+    SizedBox.shrink(),
+    SizedBox.shrink(),
   ];
 
-  // ============================================================
-  // BOTTOM NAVIGATION CHANGE
-  // ============================================================
-
   void _onItemTapped(int index) {
-    // MORE
-    if (index == 4) {
-      _showMoreMenu();
-      return;
+    switch (index) {
+      case 1:
+        Get.toNamed('/InvoicesScreen');
+        return;
+      case 2:
+        _openScan();
+        return;
+      case 3:
+        Get.toNamed('/IncomingInvoicesScreen');
+        return;
+      case 4:
+        _showMoreMenu();
+        return;
+      default:
+        setState(() => _selectedIndex = index);
     }
-
-    // INVOICES
-    if (index == 1) {
-      Get.toNamed(
-        '/InvoicesScreen',
-        arguments: 'Invoices Screen',
-      );
-      return;
-    }
-
-    // SCAN
-    if (index == 2) {
-      _openScan();
-      return;
-    }
-
-    // ============================================================
-    // INCOMING INVOICES
-    // ============================================================
-
-    if (index == 3) {
-      Get.toNamed(
-        '/IncomingInvoicesScreen',
-        arguments: 'Incoming Invoices Screen',
-      );
-
-      return;
-    }
-
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
-  // ============================================================
-  // SCAN
-  // ============================================================
+  Future<void> _openScan() async {
+    final result = await Get.to(() => const ScanQrScreen());
+    if (result == null) return;
 
-  void _openScan() async {
-    final result = await Get.to(
-          () => const ScanQrScreen(),
-    );
-
-    if (result == null) {
-      return;
-    }
-
-    final qrData = result.toString();
-
-    debugPrint("QR DATA: $qrData");
-
-    AppSnackbar.success(
-      title: "QR Code Scanned",
-      message: qrData,
-    );
+    AppSnackbar.success(title: 'QR Code Scanned', message: result.toString());
   }
-
-  // ============================================================
-  // MORE MENU
-  // ============================================================
-
-  void _showMoreMenu() {
-    final width = MediaQuery.of(context).size.width;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) {
-        return SafeArea(
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(
-              width * 0.05,
-              width * 0.025,
-              width * 0.05,
-              width * 0.04,
-            ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ------------------------------------------------
-                // HANDLE
-                // ------------------------------------------------
-
-                Container(
-                  width: width * 0.10,
-                  height: 4,
-                  margin: EdgeInsets.only(
-                    bottom: width * 0.035,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD7DDE5),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-
-                // ------------------------------------------------
-                // TITLE
-                // ------------------------------------------------
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "More",
-                        style: TextStyle(
-                          color: colorsList.primaryText,
-                          fontSize: width * 0.045,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(
-                        Icons.close_rounded,
-                        color: colorsList.secondaryText,
-                        size: width * 0.055,
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: width * 0.015),
-
-                // ------------------------------------------------
-                // EXTRA MENU
-                // ------------------------------------------------
-
-                _moreMenuItem(
-                  icon: Icons.dashboard_outlined,
-                  title: "Items",
-                  subtitle: "Manage your products and services",
-                  iconColor: colorsList.blue,
-                  onTap: () {
-                    Navigator.pop(context);
-
-                    Get.toNamed(
-                      '/CatalogsScreen',
-                      arguments: 'Catalogs Screen',
-                    );
-                  },
-                ),
-
-                _moreMenuItem(
-                  icon: Icons.people_outline_rounded,
-                  title: "Clients",
-                  subtitle: "Manage your clients",
-                  iconColor: colorsList.green,
-                  onTap: () {
-                    Navigator.pop(context);
-
-                    Get.toNamed(
-                      '/ClientsScreen',
-                      arguments: 'Clients Screen',
-                    );
-                  },
-                ),
-
-                /*_moreMenuItem(
-                  icon: Icons.factory_outlined,
-                  title: "Company",
-                  subtitle: "Manage company information",
-                  iconColor: colorsList.cyan,
-                  onTap: () {
-                    Navigator.pop(context);
-
-                    AppSnackbar.info(
-                      title: 'Company',
-                      message: 'Company management coming soon',
-                    );
-                  },
-                ),*/
-
-                _moreMenuItem(
-                  icon: Icons.person_outline_rounded,
-                  title: "Profile",
-                  subtitle: "Manage your profile",
-                  iconColor: colorsList.cyan,
-                  onTap: () {
-
-                    Get.toNamed(
-                      '/ProfileScreen',
-                      arguments: 'Profile Screen',
-                    );
-                  },
-                ),
-
-                SizedBox(height: width * 0.015),
-
-                Divider(
-                  color: colorsList.borderColor,
-                  height: 1,
-                ),
-
-                SizedBox(height: width * 0.015),
-
-                // ------------------------------------------------
-                // LOGOUT
-                // ------------------------------------------------
-
-                _moreMenuItem(
-                  icon: Icons.logout_rounded,
-                  title: "Logout",
-                  subtitle: "Sign out from your account",
-                  iconColor: Colors.red,
-                  textColor: Colors.red,
-                  onTap: () {
-                   // Navigator.pop(context);
-
-                    _logout();
-                  },
-                ),
-
-                SizedBox(height: width * 0.015),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ============================================================
-  // MORE MENU ITEM
-  // ============================================================
-
-  Widget _moreMenuItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color iconColor,
-    required VoidCallback onTap,
-    Color? textColor,
-  }) {
-    final width = MediaQuery.of(context).size.width;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: width * 0.025,
-          ),
-          child: Row(
-            children: [
-              // ------------------------------------------------
-              // ICON
-              // ------------------------------------------------
-
-              Container(
-                width: width * 0.105,
-                height: width * 0.105,
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: width * 0.050,
-                ),
-              ),
-
-              SizedBox(width: width * 0.030),
-
-              // ------------------------------------------------
-              // TEXT
-              // ------------------------------------------------
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color:
-                        textColor ?? colorsList.primaryText,
-                        fontSize: width * 0.031,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-
-                    SizedBox(height: width * 0.006),
-
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colorsList.secondaryText,
-                        fontSize: width * 0.022,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Icon(
-                Icons.chevron_right_rounded,
-                color: colorsList.secondaryText,
-                size: width * 0.050,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // LOGOUT
-  // ============================================================
 
   Future<void> _logout() async {
     try {
@@ -399,9 +70,143 @@ class _LandScreenState extends State<LandScreen> {
     Get.offAllNamed('/LoginScreen');
   }
 
-  // ============================================================
-  // BUILD
-  // ============================================================
+  void _openAssetRoute(String route) {
+    Navigator.pop(context);
+    Get.toNamed(route);
+  }
+
+  void _showMoreMenu() {
+    _assetsExpanded = false;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useSafeArea: false,
+      builder: (sheetContext) {
+        final width = MediaQuery.of(sheetContext).size.width;
+
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final bottomInset = MediaQuery.of(context).padding.bottom;
+
+            return Container(
+              width: double.infinity,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.82,
+              ),
+              padding: EdgeInsets.fromLTRB(
+                width * 0.05,
+                width * 0.03,
+                width * 0.05,
+                width * 0.045 + bottomInset,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD7DDE5),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    SizedBox(height: width * 0.035),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'More',
+                            style: TextStyle(
+                              color: colorsList.primaryText,
+                              fontSize: width * 0.048,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: colorsList.secondaryText,
+                            size: width * 0.055,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: width * 0.01),
+                    _MoreMenuItem(
+                      icon: Icons.grid_view_rounded,
+                      title: 'Items',
+                      subtitle: 'Manage your products and services',
+                      iconColor: colorsList.blue,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Get.toNamed('/CatalogsScreen');
+                      },
+                    ),
+                    _MoreMenuItem(
+                      icon: Icons.people_outline_rounded,
+                      title: 'Clients',
+                      subtitle: 'Manage your clients',
+                      iconColor: colorsList.green,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Get.toNamed('/ClientsScreen');
+                      },
+                    ),
+                    _AssetsExpandableSection(
+                      expanded: _assetsExpanded,
+                      onToggle: () {
+                        setSheetState(() {
+                          _assetsExpanded = !_assetsExpanded;
+                        });
+                      },
+                      onFixedAssets: () =>
+                          _openAssetRoute('/FixedAssetsScreen'),
+                      onInventory: () => _openAssetRoute('/InventoryScreen'),
+                      onVehicles: () =>
+                          _openAssetRoute('/VehiclesLogbookScreen'),
+                    ),
+                    _MoreMenuItem(
+                      icon: Icons.person_outline_rounded,
+                      title: 'Profile',
+                      subtitle: 'Manage your profile',
+                      iconColor: colorsList.cyan,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Get.toNamed('/ProfileScreen');
+                      },
+                    ),
+                    SizedBox(height: width * 0.02),
+                    const Divider(color: colorsList.borderColor, height: 1),
+                    SizedBox(height: width * 0.01),
+                    _MoreMenuItem(
+                      icon: Icons.logout_rounded,
+                      title: 'Logout',
+                      subtitle: 'Sign out from your account',
+                      iconColor: colorsList.red,
+                      textColor: colorsList.red,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _logout();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -409,24 +214,17 @@ class _LandScreenState extends State<LandScreen> {
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-
-      // ============================================================
-      // BODY
-      // ============================================================
-
       body: SafeArea(
         child: Stack(
           children: [
             _pages[_selectedIndex],
-
-            // Progress overlay during upload
             Obx(() {
               if (!incomingInvoiceController.isLoading.value) {
                 return const SizedBox.shrink();
               }
 
               return Container(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
                 child: Center(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -438,7 +236,7 @@ class _LandScreenState extends State<LandScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
+                          color: Colors.black.withValues(alpha: 0.12),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -477,30 +275,17 @@ class _LandScreenState extends State<LandScreen> {
           ],
         ),
       ),
-
-      // ============================================================
-      // BOTTOM NAVIGATION
-      // ============================================================
-
-      bottomNavigationBar: _buildBottomNavigation(
-        width: width,
-      ),
+      bottomNavigationBar: _buildBottomNavigation(width: width),
     );
   }
 
-  // ============================================================
-  // BOTTOM NAVIGATION
-  // ============================================================
-
-  Widget _buildBottomNavigation({
-    required double width,
-  }) {
+  Widget _buildBottomNavigation({required double width}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, -3),
           ),
@@ -508,68 +293,50 @@ class _LandScreenState extends State<LandScreen> {
       ),
       child: SafeArea(
         top: false,
-        child: SizedBox(
-          height: width * 0.18,
+        child: Padding(
+          padding: EdgeInsets.only(top: width * 0.015, bottom: width * 0.01),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // ==================================================
-              // HOME
-              // ==================================================
-
               Expanded(
-                child: _bottomNavItem(
+                child: _BottomNavItem(
                   index: 0,
+                  selectedIndex: _selectedIndex,
                   icon: Icons.home_outlined,
                   activeIcon: Icons.home_rounded,
-                  label: "Home",
+                  label: 'Home',
+                  onTap: _onItemTapped,
                 ),
               ),
-
-              // ==================================================
-              // INVOICES
-              // ==================================================
-
               Expanded(
-                child: _bottomNavItem(
+                child: _BottomNavItem(
                   index: 1,
+                  selectedIndex: _selectedIndex,
                   icon: Icons.receipt_long_outlined,
                   activeIcon: Icons.receipt_long_rounded,
-                  label: "Invoices",
+                  label: 'Invoices',
+                  onTap: _onItemTapped,
                 ),
               ),
-
-              // ==================================================
-              // SCAN - CENTER BUTTON
-              // ==================================================
-
+              Expanded(child: _ScanBottomButton()),
               Expanded(
-                child: _scanBottomButton(),
-              ),
-
-              // ==================================================
-              // INCOMING
-              // ==================================================
-
-              Expanded(
-                child: _bottomNavItem(
+                child: _BottomNavItem(
                   index: 3,
+                  selectedIndex: _selectedIndex,
                   icon: Icons.upcoming_outlined,
                   activeIcon: Icons.upcoming_rounded,
-                  label: "Incoming",
-                  showBadge: false,
+                  label: 'Incoming',
+                  onTap: _onItemTapped,
                 ),
               ),
-
-              // ==================================================
-              // MORE
-              // ==================================================
-
               Expanded(
-                child: _bottomNavItem(
+                child: _BottomNavItem(
                   index: 4,
+                  selectedIndex: _selectedIndex,
                   icon: Icons.more_horiz_rounded,
                   activeIcon: Icons.more_horiz_rounded,
-                  label: "More",
+                  label: 'More',
+                  onTap: _onItemTapped,
                 ),
               ),
             ],
@@ -578,162 +345,426 @@ class _LandScreenState extends State<LandScreen> {
       ),
     );
   }
+}
 
-  // ============================================================
-  // NORMAL BOTTOM NAV ITEM
-  // ============================================================
+class _MoreMenuItem extends StatelessWidget {
+  const _MoreMenuItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.iconColor,
+    required this.onTap,
+    this.textColor,
+  });
 
-  Widget _bottomNavItem({
-    required int index,
-    required IconData icon,
-    required IconData activeIcon,
-    required String label,
-    bool showBadge = false,
-  }) {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color iconColor;
+  final VoidCallback onTap;
+  final Color? textColor;
+
+  @override
+  Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
-    final bool isSelected = _selectedIndex == index;
-
-    return InkWell(
-      onTap: () {
-        _onItemTapped(index);
-      },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: width * 0.028),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(
-                isSelected ? activeIcon : icon,
-                color: isSelected
-                    ? colorsList.green
-                    : const Color(0xFF71829A),
-                size: width * 0.060,
+              Container(
+                width: width * 0.112,
+                height: width * 0.112,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor, size: width * 0.052),
               ),
-
-              if (showBadge)
-                Positioned(
-                  right: -width * 0.010,
-                  top: -width * 0.015,
-                  child: Container(
-                    width: width * 0.038,
-                    height: width * 0.038,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colorsList.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      "3",
+              SizedBox(width: width * 0.035),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.018,
-                        fontWeight: FontWeight.w700,
+                        color: textColor ?? colorsList.primaryText,
+                        fontSize: width * 0.038,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
                       ),
                     ),
-                  ),
+                    SizedBox(height: width * 0.008),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: colorsList.secondaryText,
+                        fontSize: width * 0.030,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              SizedBox(width: width * 0.02),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: colorsList.secondaryText,
+                size: width * 0.055,
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
 
-          SizedBox(
-            height: width * 0.008,
-          ),
+class _AssetsExpandableSection extends StatelessWidget {
+  const _AssetsExpandableSection({
+    required this.expanded,
+    required this.onToggle,
+    required this.onFixedAssets,
+    required this.onInventory,
+    required this.onVehicles,
+  });
 
-          Text(
-            label,
-            style: TextStyle(
-              color: isSelected
-                  ? colorsList.green
-                  : const Color(0xFF71829A),
-              fontSize: width * 0.022,
-              fontWeight: isSelected
-                  ? FontWeight.w600
-                  : FontWeight.w400,
+  final bool expanded;
+  final VoidCallback onToggle;
+  final VoidCallback onFixedAssets;
+  final VoidCallback onInventory;
+  final VoidCallback onVehicles;
+
+  static const Color _accent = Color(0xFFC47A52);
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    return Column(
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onToggle,
+            borderRadius: BorderRadius.circular(14),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOut,
+              padding: EdgeInsets.symmetric(vertical: width * 0.028),
+              decoration: BoxDecoration(
+                color: expanded ? const Color(0xFF1B2A41) : Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+                border: expanded
+                    ? const Border(left: BorderSide(color: _accent, width: 3.5))
+                    : null,
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: expanded ? width * 0.02 : 0,
+                  right: expanded ? width * 0.02 : 0,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: width * 0.112,
+                      height: width * 0.112,
+                      decoration: BoxDecoration(
+                        color: expanded
+                            ? _accent.withValues(alpha: 0.18)
+                            : _accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.inventory_outlined,
+                        color: _accent,
+                        size: width * 0.052,
+                      ),
+                    ),
+                    SizedBox(width: width * 0.035),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Assets',
+                            style: TextStyle(
+                              color: expanded
+                                  ? Colors.white
+                                  : colorsList.primaryText,
+                              fontSize: width * 0.038,
+                              fontWeight: FontWeight.w600,
+                              height: 1.2,
+                            ),
+                          ),
+                          SizedBox(height: width * 0.008),
+                          Text(
+                            'Fixed assets, inventory & vehicles',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: expanded
+                                  ? Colors.white70
+                                  : colorsList.secondaryText,
+                              fontSize: width * 0.030,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: width * 0.02),
+                    AnimatedRotation(
+                      turns: expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 220),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: expanded
+                            ? Colors.white70
+                            : colorsList.secondaryText,
+                        size: width * 0.055,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox(width: double.infinity),
+          secondChild: Padding(
+            padding: EdgeInsets.only(
+              left: width * 0.056,
+              top: width * 0.01,
+              bottom: width * 0.01,
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: 2,
+                    margin: EdgeInsets.symmetric(vertical: width * 0.01),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD7DEE8),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  SizedBox(width: width * 0.035),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _AssetSubItem(
+                          icon: Icons.computer_rounded,
+                          title: 'Fixed Assets',
+                          onTap: onFixedAssets,
+                        ),
+                        _AssetSubItem(
+                          icon: Icons.inventory_2_outlined,
+                          title: 'Inventory',
+                          onTap: onInventory,
+                        ),
+                        _AssetSubItem(
+                          icon: Icons.directions_car_outlined,
+                          title: 'Vehicles & Logbook',
+                          onTap: onVehicles,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          crossFadeState: expanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 220),
+        ),
+      ],
+    );
+  }
+}
 
+class _AssetSubItem extends StatelessWidget {
+  const _AssetSubItem({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: width * 0.028,
+            horizontal: width * 0.01,
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: width * 0.048, color: colorsList.secondaryText),
+              SizedBox(width: width * 0.03),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: colorsList.primaryText,
+                    fontSize: width * 0.036,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: colorsList.secondaryText,
+                size: width * 0.05,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomNavItem extends StatelessWidget {
+  const _BottomNavItem({
+    required this.index,
+    required this.selectedIndex,
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final int index;
+  final int selectedIndex;
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isSelected = selectedIndex == index;
+
+    return InkWell(
+      onTap: () => onTap(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isSelected ? activeIcon : icon,
+            color: isSelected ? colorsList.green : const Color(0xFF71829A),
+            size: width * 0.058,
+          ),
+          SizedBox(height: width * 0.008),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: isSelected ? colorsList.green : const Color(0xFF71829A),
+              fontSize: width * 0.026,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
           if (isSelected)
             Container(
-              margin: EdgeInsets.only(
-                top: width * 0.008,
-              ),
+              margin: EdgeInsets.only(top: width * 0.008),
               width: width * 0.065,
               height: 2,
               decoration: BoxDecoration(
                 color: colorsList.green,
                 borderRadius: BorderRadius.circular(10),
               ),
-            ),
+            )
+          else
+            SizedBox(height: width * 0.016),
         ],
       ),
     );
   }
+}
 
-  // ============================================================
-  // CENTER SCAN BUTTON
-  // ============================================================
-
-  Widget _scanBottomButton() {
+class _ScanBottomButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final controller = Get.find<CreateIncomingInvoiceController>();
 
     return Obx(() {
-      final isLoading = incomingInvoiceController.isLoading.value;
+      final isLoading = controller.isLoading.value;
 
       return InkWell(
-        onTap: isLoading
-            ? null
-            : incomingInvoiceController.captureFromCamera,
+        onTap: isLoading ? null : controller.captureFromCamera,
         borderRadius: BorderRadius.circular(50),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: width * 0.125,
-              height: width * 0.125,
-              transform: Matrix4.translationValues(
-                0,
-                -width * 0.035,
-                0,
-              ),
-              decoration: BoxDecoration(
-                color: isLoading ? Colors.grey : colorsList.green,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: (isLoading ? Colors.grey : colorsList.green)
-                        .withOpacity(0.30),
-                    blurRadius: 12,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: isLoading
-                  ? Padding(
-                      padding: EdgeInsets.all(width * 0.032),
-                      child: const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2.5,
-                      ),
-                    )
-                  : Icon(
-                      Icons.camera_alt_outlined,
-                      color: Colors.white,
-                      size: width * 0.060,
-                    ),
-            ),
-
             Transform.translate(
-              offset: Offset(
-                0,
-                -width * 0.030,
+              offset: Offset(0, -width * 0.028),
+              child: Container(
+                width: width * 0.125,
+                height: width * 0.125,
+                decoration: BoxDecoration(
+                  color: isLoading ? Colors.grey : colorsList.green,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isLoading ? Colors.grey : colorsList.green)
+                          .withValues(alpha: 0.30),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: isLoading
+                    ? Padding(
+                        padding: EdgeInsets.all(width * 0.032),
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : Icon(
+                        Icons.camera_alt_outlined,
+                        color: Colors.white,
+                        size: width * 0.06,
+                      ),
               ),
+            ),
+            Transform.translate(
+              offset: Offset(0, -width * 0.018),
               child: Text(
-                isLoading ? "Uploading..." : "Scan Invoice",
+                isLoading ? 'Uploading...' : 'Scan',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: const Color(0xFF71829A),
-                  fontSize: width * 0.022,
+                  fontSize: width * 0.026,
                   fontWeight: FontWeight.w400,
                 ),
               ),
