@@ -67,6 +67,8 @@ class CreateIncomingInvoiceController extends GetxController {
           'jpeg',
           'png',
           'webp',
+          'heic',
+          'heif',
           'pdf',
         ],
       );
