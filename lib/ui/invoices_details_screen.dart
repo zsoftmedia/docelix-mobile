@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 class InvoicesDetailsScreen extends StatelessWidget {
   InvoicesDetailsScreen({super.key});
 
-  final InvoicesDetailsController controller = Get.put(InvoicesDetailsController());
+  final InvoicesDetailsController controller = Get.put(
+    InvoicesDetailsController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,6 @@ class InvoicesDetailsScreen extends StatelessWidget {
       // ==========================================================
       // APP BAR
       // ==========================================================
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -59,24 +60,16 @@ class InvoicesDetailsScreen extends StatelessWidget {
       // ==========================================================
       // BODY
       // ==========================================================
-
       body: Obx(() {
-
-        if (controller.isLoading.value &&
-            controller.invoice.value == null) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+        if (controller.isLoading.value && controller.invoice.value == null) {
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (controller.invoice.value == null) {
           return const Center(
             child: Text(
               'Invoice not found.',
-              style: TextStyle(
-                fontSize: 16,
-                color: colorsList.textHintColor,
-              ),
+              style: TextStyle(fontSize: 16, color: colorsList.textHintColor),
             ),
           );
         }
@@ -89,18 +82,12 @@ class InvoicesDetailsScreen extends StatelessWidget {
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
 
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              12,
-              16,
-              110,
-            ),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
-
                 // ==================================================
                 // INVOICE HEADER CARD
                 // ==================================================
@@ -117,21 +104,17 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 // ==================================================
                 // INVOICE INFORMATION
                 // ==================================================
-
                 _sectionTitle('Invoice Information'),
 
                 const SizedBox(height: 10),
 
                 Row(
                   children: [
-
                     Expanded(
                       child: _infoCard(
                         icon: Icons.calendar_today_outlined,
                         title: 'Issue Date: ',
-                        value: _formatDate(
-                          invoice.issueDate,
-                        ),
+                        value: _formatDate(invoice.issueDate),
                       ),
                     ),
 
@@ -141,12 +124,10 @@ class InvoicesDetailsScreen extends StatelessWidget {
                       child: _infoCard(
                         icon: Icons.event_outlined,
                         title: 'Due Date',
-                        value: invoice.dueDate == null ||
-                            invoice.dueDate!.isEmpty
+                        value:
+                            invoice.dueDate == null || invoice.dueDate!.isEmpty
                             ? '—'
-                            : _formatDate(
-                          invoice.dueDate!,
-                        ),
+                            : _formatDate(invoice.dueDate!),
                       ),
                     ),
                   ],
@@ -156,7 +137,6 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                 Row(
                   children: [
-
                     Expanded(
                       child: _infoCard(
                         icon: Icons.payments_outlined,
@@ -185,7 +165,6 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 // ==================================================
                 // CLIENT
                 // ==================================================
-
                 _sectionTitle('Client'),
 
                 const SizedBox(height: 10),
@@ -197,7 +176,6 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 // ==================================================
                 // ITEMS
                 // ==================================================
-
                 _sectionTitle('Items'),
 
                 const SizedBox(height: 10),
@@ -209,7 +187,6 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 // ==================================================
                 // NOTES
                 // ==================================================
-
                 if ((invoice.notes ?? '').isNotEmpty)
                   _notesCard(invoice.notes!),
               ],
@@ -221,9 +198,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       // ==========================================================
       // BOTTOM ACTION BAR
       // ==========================================================
-
       bottomNavigationBar: Obx(() {
-
         if (controller.invoice.value == null) {
           return const SizedBox.shrink();
         }
@@ -238,11 +213,11 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // ==============================================================
 
   Widget _invoiceHeader(
-      String invoiceNumber,
-      String status,
-      String currency,
-      double amount,
-      ) {
+    String invoiceNumber,
+    String status,
+    String currency,
+    double amount,
+  ) {
     final bool isPaid = status.toLowerCase() == 'paid';
 
     return Column(
@@ -265,10 +240,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 children: [
                   const Text(
                     'Invoice',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF64748B),
-                    ),
+                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                   ),
 
                   const SizedBox(height: 2),
@@ -299,17 +271,14 @@ class InvoicesDetailsScreen extends StatelessWidget {
           children: [
             const Text(
               'Total Amount',
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF64748B),
-              ),
+              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
             ),
 
             Text(
               _amount(currency, amount),
               style: const TextStyle(
                 fontSize: 22,
-               // fontWeight: FontWeight.w800,
+                // fontWeight: FontWeight.w800,
                 color: Color(0xFF172033),
               ),
             ),
@@ -318,10 +287,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        const Divider(
-          height: 1,
-          color: Color(0xFFE5E7EB),
-        ),
+        const Divider(height: 1, color: Color(0xFFE5E7EB)),
       ],
     );
   }
@@ -354,11 +320,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 9),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 18,
-            color: colorsList.iconColor,
-          ),
+          Icon(icon, size: 18, color: colorsList.iconColor),
 
           const SizedBox(width: 10),
 
@@ -368,7 +330,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 color: colorsList.textHintColor,
-               // fontWeight: FontWeight.w400,
+                // fontWeight: FontWeight.w400,
               ),
             ),
           ),
@@ -380,7 +342,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 14,
-             // fontWeight: FontWeight.w700,
+              // fontWeight: FontWeight.w700,
               color: colorsList.textColor,
             ),
           ),
@@ -395,17 +357,14 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   Widget _clientCard() {
     return Obx(() {
-      if (controller.client.value == null &&
-          controller.isLoading.value) {
+      if (controller.client.value == null && controller.isLoading.value) {
         return const Padding(
           padding: EdgeInsets.symmetric(vertical: 20),
           child: Center(
             child: SizedBox(
               width: 22,
               height: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
         );
@@ -475,14 +434,12 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      client.name.isEmpty
-                          ? 'Client'
-                          : client.name,
+                      client.name.isEmpty ? 'Client' : client.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 15,
-                     //   fontWeight: FontWeight.w700,
+                        //   fontWeight: FontWeight.w700,
                         color: colorsList.textColor,
                       ),
                     ),
@@ -529,8 +486,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         [
-                          if ((client.city ?? '').isNotEmpty)
-                            client.city!,
+                          if ((client.city ?? '').isNotEmpty) client.city!,
                           if ((client.country ?? '').isNotEmpty)
                             client.country!,
                         ].join(', '),
@@ -548,10 +504,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          Divider(
-            height: 1,
-            color: colorsList.dividerColor,
-          ),
+          Divider(height: 1, color: colorsList.dividerColor),
         ],
       );
     });
@@ -563,13 +516,11 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   Widget _itemsCard() {
     return Obx(() {
-
       // ==========================================================
       // LOADING
       // ==========================================================
 
-      if (controller.isLoading.value &&
-          controller.invoiceItems.isEmpty) {
+      if (controller.isLoading.value && controller.invoiceItems.isEmpty) {
         return Container(
           width: double.infinity,
 
@@ -580,14 +531,10 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
             borderRadius: BorderRadius.circular(16),
 
-            border: Border.all(
-              color: colorsList.borderColor,
-            ),
+            border: Border.all(color: colorsList.borderColor),
           ),
 
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: const Center(child: CircularProgressIndicator()),
         );
       }
 
@@ -606,14 +553,11 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
             borderRadius: BorderRadius.circular(16),
 
-            border: Border.all(
-              color: colorsList.borderColor,
-            ),
+            border: Border.all(color: colorsList.borderColor),
           ),
 
           child: Column(
             children: const [
-
               Icon(
                 Icons.inventory_2_outlined,
                 size: 36,
@@ -644,7 +588,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       // Calculate total from items
       final double itemsTotal = items.fold(
         0.0,
-            (sum, item) => sum + item.grossAmount,
+        (sum, item) => sum + item.grossAmount,
       );
 
       return Container(
@@ -655,9 +599,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
           borderRadius: BorderRadius.circular(16),
 
-          border: Border.all(
-            color: colorsList.colorWhite,
-          ),
+          border: Border.all(color: colorsList.colorWhite),
         ),
 
         child: Column(
@@ -679,40 +621,32 @@ class InvoicesDetailsScreen extends StatelessWidget {
             // ------------------------------------------------------
             // ITEM LIST
             // ------------------------------------------------------
+            ...List.generate(items.length, (index) {
+              final item = items[index];
 
-            ...List.generate(
-              items.length,
-              (index) {
-                final item = items[index];
-
-                return _itemRow(
-                  description: item.itemDesc,
-                  quantity: _formatNumber(item.quantity),
-                  unit: _amount(
-                    controller.invoice.value!.currencyCode,
-                    item.unitPrice,
-                  ),
-                  vat: '${_formatNumber(item.vatRate)}%',
-                  total: _amount(
-                    controller.invoice.value!.currencyCode,
-                    item.grossAmount,
-                  ),
-                  isLast: index == items.length - 1,
-                );
-              },
-            ),
+              return _itemRow(
+                description: item.itemDesc,
+                quantity: _formatNumber(item.quantity),
+                unit: _amount(
+                  controller.invoice.value!.currencyCode,
+                  item.unitPrice,
+                ),
+                vat: '${_formatNumber(item.vatRate)}%',
+                total: _amount(
+                  controller.invoice.value!.currencyCode,
+                  item.grossAmount,
+                ),
+                isLast: index == items.length - 1,
+              );
+            }),
 
             // ------------------------------------------------------
             // TOTAL
             // ------------------------------------------------------
-
             Container(
               width: double.infinity,
 
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 15,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
 
               decoration: const BoxDecoration(
                 color: colorsList.colorBoxDecoration,
@@ -724,11 +658,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
               ),
 
               child: Row(
-                mainAxisAlignment:
-                MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
 
                 children: [
-
                   const Text(
                     'Total',
                     style: TextStyle(
@@ -741,10 +673,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   const SizedBox(width: 16),
 
                   Text(
-                    _amount(
-                      controller.invoice.value!.currencyCode,
-                      itemsTotal,
-                    ),
+                    _amount(controller.invoice.value!.currencyCode, itemsTotal),
 
                     style: const TextStyle(
                       fontSize: 16,
@@ -767,10 +696,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   Widget _itemsHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 11,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
       decoration: const BoxDecoration(
         color: colorsList.colorBoxDecoration,
         borderRadius: BorderRadius.only(
@@ -836,15 +762,11 @@ class InvoicesDetailsScreen extends StatelessWidget {
     required bool isLast,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 13,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 13),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -888,7 +810,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     textAlign: TextAlign.right,
                     style: const TextStyle(
                       fontSize: 14,
-                  //    fontWeight: FontWeight.w600,
+                      //    fontWeight: FontWeight.w600,
                       color: colorsList.textColor,
                     ),
                   ),
@@ -914,22 +836,14 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // ITEM DETAIL
   // ==============================================================
 
-  Widget _itemDetail(
-      String title,
-      String value,
-      ) {
+  Widget _itemDetail(String title, String value) {
     return Column(
-      crossAxisAlignment:
-      CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
-
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 11,
-            color: Color(0xFF94A3B8),
-          ),
+          style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
         ),
 
         const SizedBox(height: 2),
@@ -966,42 +880,26 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
         borderRadius: BorderRadius.circular(16),
 
-        border: Border.all(
-          color: const Color(0xFFE3E8EF),
-        ),
+        border: Border.all(color: const Color(0xFFE3E8EF)),
       ),
 
       child: Column(
         children: [
-
-          _summaryRow(
-            'Invoice Total',
-            _amount(currency, total),
-          ),
+          _summaryRow('Invoice Total', _amount(currency, total)),
 
           const SizedBox(height: 12),
 
-          _summaryRow(
-            'Paid Amount',
-            _amount(currency, paidAmount),
-          ),
+          _summaryRow('Paid Amount', _amount(currency, paidAmount)),
 
           const SizedBox(height: 12),
 
-          const Divider(
-            color: Color(0xFFE8ECF1),
-          ),
+          const Divider(color: Color(0xFFE8ECF1)),
 
           const SizedBox(height: 12),
 
           _summaryRow(
             'Remaining',
-            remainingAmount == null
-                ? '—'
-                : _amount(
-              currency,
-              remainingAmount,
-            ),
+            remainingAmount == null ? '—' : _amount(currency, remainingAmount),
             bold: true,
           ),
         ],
@@ -1013,14 +911,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // SUMMARY ROW
   // ==============================================================
 
-  Widget _summaryRow(
-      String title,
-      String value, {
-        bool bold = false,
-      }) {
+  Widget _summaryRow(String title, String value, {bool bold = false}) {
     return Row(
       children: [
-
         Expanded(
           child: Text(
             title,
@@ -1028,9 +921,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               color: colorsList.textHintColor,
-              fontWeight: bold
-                  ? FontWeight.w600
-                  : FontWeight.normal,
+              fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ),
@@ -1041,9 +932,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: bold ? 17 : 14,
             color: colorsList.textColor,
-            fontWeight: bold
-                ? FontWeight.w700
-                : FontWeight.w500,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
       ],
@@ -1080,10 +969,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        Divider(
-          height: 1,
-          color: colorsList.dividerColor,
-        ),
+        Divider(height: 1, color: colorsList.dividerColor),
       ],
     );
   }
@@ -1096,26 +982,17 @@ class InvoicesDetailsScreen extends StatelessWidget {
     final bool isPaid = status.toLowerCase() == 'paid';
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isPaid
-            ? const Color(0xFFE8F7EE)
-            : const Color(0xFFFFF7E6),
+        color: isPaid ? const Color(0xFFE8F7EE) : const Color(0xFFFFF7E6),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        status.isEmpty
-            ? 'Pending'
-            : status.capitalizeFirst ?? status,
+        status.isEmpty ? 'Pending' : status.capitalizeFirst ?? status,
         style: TextStyle(
           fontSize: 11,
-        //  fontWeight: FontWeight.w600,
-          color: isPaid
-              ? const Color(0xFF15803D)
-              : const Color(0xFFD97706),
+          //  fontWeight: FontWeight.w600,
+          color: isPaid ? const Color(0xFF15803D) : const Color(0xFFD97706),
         ),
       ),
     );
@@ -1127,12 +1004,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   Widget _bottomActions() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(
-        16,
-        10,
-        16,
-        12,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
 
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1151,32 +1023,28 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
         child: Row(
           children: [
-
             // ------------------------------------------------------
             // DOWNLOAD
             // ------------------------------------------------------
 
-
             Expanded(
               child: Obx(
-                    () => OutlinedButton.icon(
+                () => OutlinedButton.icon(
                   onPressed: controller.isLoading.value
                       ? null
                       : controller.downloadInvoicePdf,
 
                   icon: controller.isLoading.value
                       ? const SizedBox(
-                    width: 19,
-                    height: 19,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
-                  )
+                          width: 19,
+                          height: 19,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : Icon(
-                    Icons.download_outlined,
-                    size: 19,
-                    color: colorsList.iconColor,
-                  ),
+                          Icons.download_outlined,
+                          size: 19,
+                          color: colorsList.iconColor,
+                        ),
 
                   label: Text(
                     controller.isLoading.value
@@ -1186,9 +1054,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
                   style: OutlinedButton.styleFrom(
                     foregroundColor: colorsList.textHintColor,
-                    side: const BorderSide(
-                      color: colorsList.borderColor,
-                    ),
+                    side: const BorderSide(color: colorsList.borderColor),
                     minimumSize: const Size(0, 48),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1203,36 +1069,25 @@ class InvoicesDetailsScreen extends StatelessWidget {
             // ------------------------------------------------------
             // SEND
             // ------------------------------------------------------
-
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: () {
                   controller.showSendInvoiceDialog();
                 },
-                icon: const Icon(
-                  Icons.send_outlined,
-                  size: 18,
-                ),
-                label: const Text(
-                  'Send',
-                ),
+                icon: const Icon(Icons.send_outlined, size: 18),
+                label: const Text('Send'),
 
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                  colorsList.colorButton,
+                  backgroundColor: colorsList.colorButton,
 
-                  foregroundColor:
-                  Colors.white,
+                  foregroundColor: Colors.white,
 
                   elevation: 0,
 
-                  minimumSize:
-                  const Size(0, 48),
+                  minimumSize: const Size(0, 48),
 
-                  shape:
-                  RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
@@ -1243,7 +1098,6 @@ class InvoicesDetailsScreen extends StatelessWidget {
             // ------------------------------------------------------
             // MORE
             // ------------------------------------------------------
-
             SizedBox(
               width: 48,
               height: 48,
@@ -1256,21 +1110,14 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.zero,
 
-                  side: const BorderSide(
-                    color: colorsList.borderColor,
-                  ),
+                  side: const BorderSide(color: colorsList.borderColor),
 
-                  shape:
-                  RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
 
-                child: Icon(
-                  Icons.more_horiz,
-                  color: colorsList.iconColor,
-                ),
+                child: Icon(Icons.more_horiz, color: colorsList.iconColor),
               ),
             ),
           ],
@@ -1286,34 +1133,25 @@ class InvoicesDetailsScreen extends StatelessWidget {
   void _showMoreActions() {
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          12,
-          20,
-          25,
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 25),
 
         decoration: const BoxDecoration(
           color: Colors.white,
 
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(22),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
         ),
 
         child: Column(
           mainAxisSize: MainAxisSize.min,
 
           children: [
-
             Container(
               width: 40,
               height: 4,
 
               decoration: BoxDecoration(
                 color: colorsList.colorBoxDecoration,
-                borderRadius:
-                BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
 
@@ -1329,7 +1167,6 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     message: 'Download ZUGFeRD PDF Coming soon');
               },
             ),*/
-
             _bottomSheetAction(
               icon: Icons.code,
               title: 'Download XML',
@@ -1350,13 +1187,12 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     message: 'Edit Invoice Coming soon');
               },
             ),*/
-
             _bottomSheetAction(
               icon: Icons.delete_outline,
               title: 'Delete Invoice',
               color: const Color(0xFFDC2626),
               onTap: () {
-               // Get.back();
+                // Get.back();
 
                 controller.showDeleteConfirmation();
               },
@@ -1389,11 +1225,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
 
-        child: Icon(
-          icon,
-          color: color,
-          size: 20,
-        ),
+        child: Icon(icon, color: color, size: 20),
       ),
 
       title: Text(
@@ -1434,10 +1266,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // AMOUNT
   // ==============================================================
 
-  String _amount(
-      String currency,
-      double amount,
-      ) {
+  String _amount(String currency, double amount) {
     return controller.formatCurrency(amount, currency);
   }
 }
