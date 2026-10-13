@@ -101,7 +101,7 @@ class colorsList {
   // LIGHT THEME COLORS
   // ================================================================
 
-  static const Color backgroundColor = Color(0xFFF7F9FC);
+  static const Color backgroundColor = Color(0xFFFFFFFF);
   static const Color cardColor = Colors.white;
 
  // static const Color textColor = Color(0xFF172033);
@@ -114,7 +114,7 @@ class colorsList {
   static const Color secondaryText = Color(0xFF71829A);
   static const Color lightText = Color(0xFF52657D);
 
-  static const Color borderColor = Color(0xFFE8EDF3);
+  static const Color borderColor = Color(0xFFE8EAED);
   static const Color focusedBorderColor = Color(0xFF5f626a);
   static const Color iconColor = Color(0xFF344E6F);
   static const Color dividerColor = Color(0xFFD5D5D5);

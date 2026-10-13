@@ -383,7 +383,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colorsList.textColor,
-                    fontSize: width * 0.04,
+                    fontSize: 14,
                    // fontWeight: FontWeight.w700, // Bold
                   ),
                 ),
@@ -394,7 +394,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   invoice.issueDate ?? 'N/A',
                   style: TextStyle(
                     color: colorsList.textHintColor,
-                    fontSize: width * 0.033,
+                    fontSize: 12,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -436,7 +436,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 ),
                 style: TextStyle(
                   color: colorsList.textColor,
-                  fontSize: width * 0.043,
+                  fontSize: 12,
                 ),
               ),
             ],
