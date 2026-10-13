@@ -22,7 +22,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: colorsList.backgroundColor,
 
       // ============================================================
       // APP BAR
@@ -297,8 +297,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
         label: Text(
           "Add Client",
           style: TextStyle(
-            fontSize: width * 0.038,
-            fontWeight: FontWeight.w700,
+            fontSize: 14,
+          //  fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -389,7 +389,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: colorsList.textColor,
-                            fontSize: 18,
+                            fontSize: 14,
                           //  fontWeight: FontWeight.w600,
                             height: 1.2,
                           ),
@@ -406,7 +406,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                     children: [
                                       const Icon(
                                         Icons.email_outlined,
-                                        size: 14,
+                                        size: 12,
                                         color: colorsList.iconColor,
                                       ),
                                       const SizedBox(width: 5),

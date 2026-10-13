@@ -297,7 +297,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           }
         },
 
-        backgroundColor: const Color(0xFF063C70),
+        backgroundColor: colorsList.colorButton,
         foregroundColor: Colors.white,
 
         elevation: 4,
@@ -309,8 +309,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         label: Text(
           "Add Invoice",
           style: TextStyle(
-            fontSize: width * 0.038,
-            fontWeight: FontWeight.w700,
+            fontSize: 14,
+          //  fontWeight: FontWeight.w700,
           ),
         ),
       ),

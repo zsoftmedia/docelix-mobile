@@ -11,7 +11,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
   );
 
  // static const Color _background = Color(0xFFFFFFFF);
-  static const Color _surface = Color(0xFFFFFFFF);
+//  static const Color _surface = Color(0xFFFFFFFF);
  // static const Color _border = Color(0xFFE8EAED);
   static const Color _heading = Color(0xFF30343B);
  // static const Color _secondary = Color(0xFF777E87);
@@ -184,7 +184,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: _surface,
+        color: colorsList.backgroundColor,
         border: Border.all(color: colorsList.borderColor),
         borderRadius: BorderRadius.circular(_radius),
       ),
@@ -278,7 +278,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _surface,
+        color: colorsList.backgroundColor,
         border: Border.all(color: colorsList.borderColor),
         borderRadius: BorderRadius.circular(_radius),
       ),
@@ -504,7 +504,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: _surface,
+          color: colorsList.backgroundColor,
           border: Border.all(color: colorsList.borderColor),
           borderRadius: BorderRadius.circular(_radius),
         ),
@@ -702,7 +702,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: const BoxDecoration(
-        color: colorsList.colorBoxDecoration,
+        color: colorsList.backgroundColor,
         border: Border(
           top: BorderSide(color: colorsList.borderColor),
         ),
@@ -818,7 +818,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD0D5DD),
+                  color: colorsList.colorBoxDecoration,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),

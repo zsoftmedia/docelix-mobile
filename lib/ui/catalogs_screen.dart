@@ -138,8 +138,8 @@ class CatalogsScreen extends StatelessWidget {
         label: Text(
           "Add Item",
           style: TextStyle(
-              fontSize: width * 0.038,
-              fontWeight: FontWeight.w700,
+              fontSize: 14,
+             // fontWeight: FontWeight.w700,
               color: colorsList.colorWhite
           ),
         ),
@@ -188,7 +188,7 @@ class CatalogsScreen extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: colorsList.textColor,
-                          fontSize: width * 0.043,
+                          fontSize: 14,
                         //  fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -201,7 +201,7 @@ class CatalogsScreen extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: colorsList.textColor,
-                          fontSize: width * 0.032,
+                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -218,7 +218,7 @@ class CatalogsScreen extends StatelessWidget {
                       item.unitPriceNet?.toStringAsFixed(2) ?? '0.00',
                       style: TextStyle(
                         color: colorsList.textColor,
-                        fontSize: width * 0.037,
+                        fontSize: 14,
                       //  fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -229,7 +229,7 @@ class CatalogsScreen extends StatelessWidget {
                       item.unitCode ?? '',
                       style: TextStyle(
                         color: colorsList.textColor,
-                        fontSize: width * 0.029,
+                        fontSize: 10,
                       ),
                     ),
                   ],

@@ -347,8 +347,8 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
         label: Text(
           "Add Invoice",
           style: TextStyle(
-            fontSize: width * 0.038,
-            fontWeight: FontWeight.w700,
+            fontSize: 14,
+           // fontWeight: FontWeight.w700,
             color: colorsList.colorWhite
           ),
         ),
@@ -425,7 +425,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colorsList.textColor,
-                    fontSize: width * 0.04,
+                    fontSize: 14,
                   //  fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -438,7 +438,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colorsList.textHintColor,
-                    fontSize: width * 0.033,
+                    fontSize: 12,
                    // fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -480,7 +480,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                 ),
                 style: TextStyle(
                   color: colorsList.textColor,
-                  fontSize: width * 0.043,
+                  fontSize: 12,
                 ),
               ),
             ],

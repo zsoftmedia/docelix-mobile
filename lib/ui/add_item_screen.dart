@@ -182,8 +182,8 @@ class AddItemScreen extends StatelessWidget {
         Text(
           headings[step],
           style: const TextStyle(
-            fontSize: 21,
-            fontWeight: FontWeight.w700,
+            fontSize: 16,
+       //     fontWeight: FontWeight.w700,
             color: colorsList.textColor,
           ),
         ),
@@ -191,7 +191,7 @@ class AddItemScreen extends StatelessWidget {
         Text(
           descriptions[step],
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 12,
             color: colorsList.textHintColor,
           ),
         ),
@@ -228,7 +228,7 @@ class AddItemScreen extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                  //  fontWeight: FontWeight.w700,
                     color: colorsList.textColor,
                   ),
                 ),
@@ -250,8 +250,8 @@ class AddItemScreen extends StatelessWidget {
           text: label,
           style: const TextStyle(
             color: colorsList.textColor,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+            fontSize: 14,
+           // fontWeight: FontWeight.w600,
           ),
           children: [
             if (required)

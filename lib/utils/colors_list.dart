@@ -102,6 +102,7 @@ class colorsList {
   // ================================================================
 
   static const Color backgroundColor = Color(0xFFFFFFFF);
+  static const Color surfaceColor = Color(0xFFFFFFFF);
   static const Color cardColor = Colors.white;
 
  // static const Color textColor = Color(0xFF172033);
@@ -109,6 +110,7 @@ class colorsList {
   static const Color textHintColor = Color(0xFF60728D);
   static const Color primaryColor = Color(0xFF0A2342);
   static const Color secondaryTextColor = Color(0xFF64748B);
+
 
   static const Color primaryText = Color(0xFF0A2342);
   static const Color secondaryText = Color(0xFF71829A);

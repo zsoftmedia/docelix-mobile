@@ -85,7 +85,7 @@ class _CreateIncomingInvoicesScreenState
                         // CAMERA BUTTON
                         Expanded(
                           child: SizedBox(
-                            height: 52,
+                            height: 50,
                             child: ElevatedButton.icon(
                               onPressed:
                                   incomingInvoiceController.isLoading.value
@@ -94,13 +94,12 @@ class _CreateIncomingInvoicesScreenState
                                           .captureFromCamera,
                               icon: const Icon(
                                 Icons.camera_alt_outlined,
-                                size: 21,
                               ),
                               label: const Text(
                                 'Camera',
                                 style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  //fontWeight: FontWeight.w600,
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
@@ -119,7 +118,7 @@ class _CreateIncomingInvoicesScreenState
                         // SELECT FILE BUTTON
                         Expanded(
                           child: SizedBox(
-                            height: 52,
+                            height: 50,
                             child: OutlinedButton.icon(
                               onPressed:
                                   incomingInvoiceController.isLoading.value
@@ -127,13 +126,12 @@ class _CreateIncomingInvoicesScreenState
                                       : incomingInvoiceController.pickFile,
                               icon: const Icon(
                                 Icons.attach_file_outlined,
-                                size: 21,
                               ),
                               label: const Text(
                                 'Select File',
                                 style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                 // fontWeight: FontWeight.w600,
                                 ),
                               ),
                               style: OutlinedButton.styleFrom(
