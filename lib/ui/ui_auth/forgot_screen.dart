@@ -1,20 +1,21 @@
 import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
+import 'package:docelix_mobileapp/controllers/controller_auth/forgotpassword_controller.dart';
 import 'package:docelix_mobileapp/controllers/controller_auth/login_controller.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginPageState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginPageState extends State<LoginScreen> {
-  final LoginController loginController = Get.put(LoginController());
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final ForgotPasswordController forgotController = Get.put(ForgotPasswordController());
 
   bool checkLoginProgressbar = false;
   bool _obscureText = true;
@@ -62,7 +63,7 @@ class _LoginPageState extends State<LoginScreen> {
                 ),
 
                 // ======================================================
-                // WELCOME BACK
+                // RESET YOUR PASSWORD
                 // ======================================================
 
                 SizedBox(
@@ -70,7 +71,7 @@ class _LoginPageState extends State<LoginScreen> {
                 ),
 
                 Text(
-                  "WELCOME BACK",
+                  "Reset your password",
                   style: TextStyle(
                     fontSize: width * 0.085,
                     fontWeight: FontWeight.w900,
@@ -101,7 +102,7 @@ class _LoginPageState extends State<LoginScreen> {
                 ),
 
                 AppTextField(
-                  controller: loginController.emailController,
+                  controller: forgotController.emailController,
                   hintText: 'Email address',
                   keyboardType: TextInputType.emailAddress,
 
@@ -115,130 +116,7 @@ class _LoginPageState extends State<LoginScreen> {
                 ),
 
                 // ======================================================
-                // PASSWORD LABEL
-                // ======================================================
-
-                SizedBox(
-                  height: height * 0.022,
-                ),
-
-                Text(
-                  "Password",
-                  style: TextStyle(
-                    fontSize: width * 0.040,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF333333),
-                  ),
-                ),
-
-                SizedBox(
-                  height: height * 0.012,
-                ),
-
-                // ======================================================
-                // PASSWORD
-                // ======================================================
-
-
-                Obx(
-                      () => AppTextField(
-                    controller: loginController.passwordController,
-                    hintText: 'Password',
-
-                    obscureText: !loginController.isPasswordVisible.value,
-
-                    keyboardType: TextInputType.visiblePassword,
-
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        loginController.isPasswordVisible.value
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: loginController.togglePasswordVisibility,
-                    ),
-
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-
-                      return null;
-                    },
-                  ),
-                ),
-
-                // ======================================================
-                // FORGOT PASSWORD
-                // ======================================================
-
-                SizedBox(
-                  height: height * 0.015,
-                ),
-
-                GestureDetector(
-                  onTap: () {
-                    // Forgot password
-                  },
-
-                  child: Text(
-                    "Forgot your password?",
-                    style: TextStyle(
-                      fontSize: width * 0.037,
-                      color: const Color(0xFF198754),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-
-                // ======================================================
-                // REMEMBER ME
-                // ======================================================
-
-                SizedBox(
-                  height: height * 0.025,
-                ),
-
-                Row(
-                  children: [
-                    Obx(
-                          () => SizedBox(
-                        width: width * 0.055,
-                        height: width * 0.055,
-                        child: Checkbox(
-                          value: loginController.rememberMe.value,
-                          onChanged: (value) {
-                            loginController.rememberMe.value = value ?? false;
-                          },
-                          side: const BorderSide(
-                            color: colorsList.textColor,
-                            width: 1.4,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          materialTapTargetSize:
-                          MaterialTapTargetSize.shrinkWrap,
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(
-                      width: width * 0.018,
-                    ),
-
-                    Text(
-                      "Remember me",
-                      style: TextStyle(
-                        fontSize: width * 0.037,
-                        color: colorsList.textColor,
-                      ),
-                    ),
-                  ],
-                ),
-
-                // ======================================================
-                // SIGN IN BUTTON
+                // FORGOT PASSWORD BUTTON
                 // ======================================================
 
                 SizedBox(
@@ -247,12 +125,12 @@ class _LoginPageState extends State<LoginScreen> {
 
                 Obx(
                       () => AppButton(
-                    text: 'Sign in',
+                    text: 'Send Reset Link',
 
-                    isLoading: loginController.isLoading.value,
+                    isLoading: forgotController.isLoading.value,
 
                     onPressed: () {
-                      loginController.login();
+                      forgotController.login();
                     },
 
                     width: double.infinity,
@@ -310,59 +188,6 @@ class _LoginPageState extends State<LoginScreen> {
                       ),
                     ),
                   ],
-                ),
-
-                // ======================================================
-                // GOOGLE
-                // ======================================================
-
-                SizedBox(
-                  height: height * 0.025,
-                ),
-
-                Obx(
-                  () => SizedBox(
-                    width: double.infinity,
-                    height: height * 0.062,
-                    child: OutlinedButton(
-                      onPressed: loginController.isLoading.value
-                          ? null
-                          : () {
-                              loginController.loginWithGoogle();
-                            },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(
-                          color: Color(0xFFD0D0D0),
-                          width: 1.2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/google_logo.png',
-                            width: width * 0.055,
-                            height: width * 0.055,
-                          ),
-                          SizedBox(
-                            width: width * 0.025,
-                          ),
-                          Text(
-                            "Continue with Google",
-                            style: TextStyle(
-                              fontSize: width * 0.040,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF333333),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ),
 
                 // ======================================================

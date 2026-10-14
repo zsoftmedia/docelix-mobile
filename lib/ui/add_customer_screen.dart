@@ -6,8 +6,8 @@ import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AddClientScreen extends StatelessWidget {
-  AddClientScreen({super.key});
+class AddCustomerScreen extends StatelessWidget {
+  AddCustomerScreen({super.key});
 
   final AddClientController controller = Get.put(AddClientController());
 
@@ -38,7 +38,7 @@ class AddClientScreen extends StatelessWidget {
         ),
 
         title: const Text(
-          'Add Client',
+          'Add Customer',
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: 20,
@@ -64,7 +64,7 @@ class AddClientScreen extends StatelessWidget {
           children: [
 
             Text(
-              'Create a new client and manage their information.',
+              'Create a new customer and manage their information.',
               style: TextStyle(
                 fontSize: width * 0.040,
                 color: colorsList.textHintColor,
@@ -90,7 +90,7 @@ class AddClientScreen extends StatelessWidget {
 
             AppTextField(
               controller: controller.nameController,
-              hintText: 'Client name',
+              hintText: 'Customer name',
               prefixIcon: Icons.business_outlined,
             ),
 
@@ -200,7 +200,7 @@ class AddClientScreen extends StatelessWidget {
 
             AppTextField(
               controller: controller.emailController,
-              hintText: 'client@example.com',
+              hintText: 'customer@example.com',
               prefixIcon: Icons.mail_outline_rounded,
               keyboardType: TextInputType.emailAddress,
             ),
@@ -303,7 +303,7 @@ class AddClientScreen extends StatelessWidget {
 
             Obx(
                   () => AppButton(
-                text: 'Save Client',
+                text: 'Save Customer',
                 icon: Icons.person_add_alt_1_rounded,
                 height: height * 0.062,
                 backgroundColor: colorsList.colorButton,

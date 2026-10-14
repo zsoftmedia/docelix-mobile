@@ -34,13 +34,14 @@ class _LandScreenState extends State<LandScreen> {
   void _onItemTapped(int index) {
     switch (index) {
       case 1:
-        Get.toNamed('/InvoicesScreen');
+        _showSalesMenu();
         return;
       case 2:
         _openScan();
         return;
       case 3:
-        Get.toNamed('/IncomingInvoicesScreen');
+        _showPurchaseMenu();
+
         return;
       case 4:
         _showMoreMenu();
@@ -48,6 +49,206 @@ class _LandScreenState extends State<LandScreen> {
       default:
         setState(() => _selectedIndex = index);
     }
+  }
+
+  void _showSalesMenu() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useSafeArea: false,
+      builder: (sheetContext) {
+        final width = MediaQuery.of(sheetContext).size.width;
+        final bottomInset = MediaQuery.of(sheetContext).padding.bottom;
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.fromLTRB(
+            width * 0.05,
+            width * 0.03,
+            width * 0.05,
+            width * 0.045 + bottomInset,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD7DDE5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              SizedBox(height: width * 0.035),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Sales',
+                      style: TextStyle(
+                        color: colorsList.primaryText,
+                        fontSize: width * 0.048,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: colorsList.secondaryText,
+                      size: width * 0.055,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: width * 0.01),
+              _MoreMenuItem(
+                icon: Icons.receipt_long_rounded,
+                title: 'Invoices',
+                subtitle: 'View and manage all sales invoices',
+                iconColor: colorsList.blue,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Get.toNamed('/InvoicesScreen');
+                },
+              ),
+              _MoreMenuItem(
+                icon: Icons.request_quote_outlined,
+                title: 'Quotation',
+                subtitle: 'Create and manage sales quotes & offers',
+                iconColor: colorsList.orange,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  AppSnackbar.info(
+                    title: 'Coming Soon',
+                    message: 'Quotation feature is coming soon.',
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showPurchaseMenu() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useSafeArea: false,
+      builder: (sheetContext) {
+        final width = MediaQuery.of(sheetContext).size.width;
+        final bottomInset = MediaQuery.of(sheetContext).padding.bottom;
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.fromLTRB(
+            width * 0.05,
+            width * 0.03,
+            width * 0.05,
+            width * 0.045 + bottomInset,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD7DDE5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              SizedBox(height: width * 0.035),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Purchases',
+                      style: TextStyle(
+                        color: colorsList.primaryText,
+                        fontSize: width * 0.048,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: colorsList.secondaryText,
+                      size: width * 0.055,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: width * 0.01),
+              _MoreMenuItem(
+                icon: Icons.request_quote_outlined,
+                title: 'Purchase Invoices',
+                subtitle: 'Upload and manage supplier invoices, receipts, and credit notes.',
+                iconColor: colorsList.orange,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  AppSnackbar.info(
+                    title: 'Coming Soon',
+                    message: 'Purchase Invoices feature is coming soon.',
+                  );
+                },
+              ),
+              _MoreMenuItem(
+                icon: Icons.request_quote_outlined,
+                title: 'Suppliers',
+                subtitle: 'Who you buy from, what you have purchased and what is still open.',
+                iconColor: colorsList.orange,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  AppSnackbar.info(
+                    title: 'Coming Soon',
+                    message: 'Suppliers feature is coming soon.',
+                  );
+                },
+              ),
+              _MoreMenuItem(
+                icon: Icons.inventory_2_rounded,
+                title: 'Invoice Archive',
+                subtitle: 'View and manage all incoming invoices',
+                iconColor: colorsList.blue,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Get.toNamed('/IncomingInvoicesScreen');
+                },
+              ),
+              /*_MoreMenuItem(
+                icon: Icons.request_quote_outlined,
+                title: 'Quotation',
+                subtitle: 'Create and manage sales quotes & offers',
+                iconColor: colorsList.orange,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  AppSnackbar.info(
+                    title: 'Coming Soon',
+                    message: 'Quotation feature is coming soon.',
+                  );
+                },
+              ),*/
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _openScan() async {
@@ -153,12 +354,12 @@ class _LandScreenState extends State<LandScreen> {
                     ),
                     _MoreMenuItem(
                       icon: Icons.people_outline_rounded,
-                      title: 'Clients',
-                      subtitle: 'Manage your clients',
+                      title: 'Customers',
+                      subtitle: 'Manage your customers',
                       iconColor: colorsList.green,
                       onTap: () {
                         Navigator.pop(context);
-                        Get.toNamed('/ClientsScreen');
+                        Get.toNamed('/CustomersScreen');
                       },
                     ),
                     _AssetsExpandableSection(
@@ -312,9 +513,9 @@ class _LandScreenState extends State<LandScreen> {
                 child: _BottomNavItem(
                   index: 1,
                   selectedIndex: _selectedIndex,
-                  icon: Icons.receipt_long_outlined,
-                  activeIcon: Icons.receipt_long_rounded,
-                  label: 'Invoices',
+                  icon: Icons.auto_graph_outlined,
+                  activeIcon: Icons.auto_graph_rounded,
+                  label: 'Sales',
                   onTap: _onItemTapped,
                 ),
               ),
@@ -323,9 +524,9 @@ class _LandScreenState extends State<LandScreen> {
                 child: _BottomNavItem(
                   index: 3,
                   selectedIndex: _selectedIndex,
-                  icon: Icons.upcoming_outlined,
-                  activeIcon: Icons.upcoming_rounded,
-                  label: 'Incoming',
+                  icon: Icons.shopping_bag_outlined,
+                  activeIcon: Icons.shopping_bag_rounded,
+                  label: 'Purchases',
                   onTap: _onItemTapped,
                 ),
               ),

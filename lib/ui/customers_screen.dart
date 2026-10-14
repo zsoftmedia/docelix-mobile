@@ -4,14 +4,14 @@ import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ClientsScreen extends StatefulWidget {
-  const ClientsScreen({super.key});
+class CustomersScreen extends StatefulWidget {
+  const CustomersScreen({super.key});
 
   @override
-  State<ClientsScreen> createState() => _ClientsScreenState();
+  State<CustomersScreen> createState() => _CustomersScreenState();
 }
 
-class _ClientsScreenState extends State<ClientsScreen> {
+class _CustomersScreenState extends State<CustomersScreen> {
 
   final ClientsController controller = Get.put(ClientsController());
 
@@ -78,7 +78,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
               ),
 
               decoration: const InputDecoration(
-                hintText: 'Search clients...',
+                hintText: 'Search customers...',
                 hintStyle: TextStyle(
                   color: colorsList.textHintColor,
                 ),
@@ -89,7 +89,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
           }
 
           return Text(
-            "Clients",
+            "Customers",
             style: TextStyle(
               color: colorsList.textColor,
               fontSize: width * 0.055,
@@ -150,7 +150,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 children: [
 
                   Text(
-                    "All Clients",
+                    "All Customers",
                     style: TextStyle(
                       color: colorsList.textColor,
                       fontSize: width * 0.045,
@@ -170,7 +170,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                       ),
 
                       child: Text(
-                        "${controller.clients.length} Clients",
+                        "${controller.clients.length} Customers",
                         style: TextStyle(
                           color: colorsList.textColor,
                           fontSize: width * 0.032,
@@ -216,8 +216,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   return Center(
                     child: Text(
                       searching
-                          ? 'No clients found.'
-                          : 'No clients found.',
+                          ? 'No customers found.'
+                          : 'No customers found.',
                       style: const TextStyle(
                         fontSize: 14,
                         color: colorsList.textHintColor,
@@ -275,8 +275,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
           // ----------------------------------------------------------
 
           final result = await Get.toNamed(
-            '/AddClientScreen',
-            arguments: 'Add Client Screen',
+            '/AddCustomersScreen',
+            arguments: 'Add Customers Screen',
           );
 
           if (result == true) {
@@ -295,7 +295,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
         ),
 
         label: Text(
-          "Add Client",
+          "Add Customer",
           style: TextStyle(
             fontSize: 14,
           //  fontWeight: FontWeight.w700,
@@ -317,7 +317,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
   }) {
     final String name = client.name.trim().isNotEmpty
         ? client.name.trim()
-        : "Unnamed Client";
+        : "Unnamed Customer";
 
     final String? email = client.email?.trim().isNotEmpty == true
         ? client.email!.trim()
@@ -341,7 +341,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           Get.toNamed(
-            '/ClientDetailsScreen',
+            '/CustomerDetailsScreen',
             arguments: client,
           );
         },

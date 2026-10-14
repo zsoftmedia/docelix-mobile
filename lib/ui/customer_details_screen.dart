@@ -4,16 +4,16 @@ import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ClientDetailsScreen extends StatefulWidget {
-  const ClientDetailsScreen({super.key});
+class CustomerDetailsScreen extends StatefulWidget {
+  const CustomerDetailsScreen({super.key});
 
   @override
-  State<ClientDetailsScreen> createState() => _ClientDetailsScreenState();
+  State<CustomerDetailsScreen> createState() => _CustomerDetailsScreenState();
 }
 
-class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
-  final ClientDetailsController controller =
-  Get.put(ClientDetailsController());
+class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
+
+  final ClientDetailsController controller =  Get.put(ClientDetailsController());
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
 
     final String clientName = client.name.trim().isNotEmpty
         ? client.name.trim()
-        : 'Unnamed Client';
+        : 'Unnamed Customer';
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -42,7 +42,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
         ),
 
         title: const Text(
-          'Client Details',
+          'Customer Details',
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: 20,

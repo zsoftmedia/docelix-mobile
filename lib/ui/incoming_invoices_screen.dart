@@ -80,7 +80,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
               ),
 
               decoration: const InputDecoration(
-                hintText: 'Search incoming invoices...',
+                hintText: 'Search invoice archive...',
                 hintStyle: TextStyle(
                   color: colorsList.textHintColor,
                 ),
@@ -91,7 +91,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
           }
 
           return Text(
-            "Incoming Invoices",
+            "Invoice Archive",
             style: TextStyle(
               color: colorsList.textColor,
               fontSize: width * 0.055,
@@ -153,7 +153,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                 children: [
 
                   Text(
-                    "All Invoices",
+                    "All Invoice Archive",
                     style: TextStyle(
                       color: colorsList.textColor,
                       fontSize: width * 0.045,
