@@ -4,6 +4,7 @@ import 'package:docelix_mobileapp/controllers/incoming_invoices_controller.dart'
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 
@@ -143,15 +144,16 @@ class CreateIncomingInvoiceController extends GetxController {
         return;
       }
 
-      final response = await dioClient.uploadIncomingInvoice(
+      final response = await dioClient.scanPurchaseInvoice(
         companyId: int.parse(companyId.toString()),
         filePath: filePath.value,
         fileName: fileName.value,
         accessToken: accessToken,
-        expenseCategory: 'other',
       );
 
-      if (response.data['ok'] == true) {
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.data != null) {
         clearFile();
 
         if (Get.currentRoute == '/CreateIncomingInvoicesScreen') {
@@ -160,7 +162,7 @@ class CreateIncomingInvoiceController extends GetxController {
 
         AppSnackbar.success(
           title: 'Success',
-          message: 'Invoice uploaded successfully.',
+          message: 'Invoice scanned and uploaded successfully.',
         );
 
         if (Get.isRegistered<IncomingInvoicesController>()) {
@@ -175,11 +177,41 @@ class CreateIncomingInvoiceController extends GetxController {
     } on DioException catch (e) {
       isLoading.value = false;
 
+      debugPrint('========================================');
+      debugPrint('PURCHASE SCAN DIO ERROR');
+      debugPrint('Status Code: ${e.response?.statusCode}');
+      debugPrint('Response Data: ${e.response?.data}');
+      debugPrint('Message: ${e.message}');
+      debugPrint('========================================');
+
+      String errorMessage = 'Unable to upload invoice.';
+
+      if (e.response?.statusCode == 409) {
+        errorMessage =
+            'This invoice document has already been uploaded (duplicate file).';
+        if (e.response?.data is Map) {
+          final data = e.response?.data as Map;
+          if (data['message'] != null) {
+            errorMessage = data['message'].toString();
+          } else if (data['error'] != null) {
+            errorMessage = data['error'].toString();
+          }
+        }
+      } else if (e.response?.data is Map) {
+        final data = e.response?.data as Map;
+        errorMessage = data['message']?.toString() ??
+            data['detail']?.toString() ??
+            data['error']?.toString() ??
+            errorMessage;
+      } else if (e.response?.data is String) {
+        errorMessage = e.response!.data.toString();
+      }
+
       AppSnackbar.error(
-        title: 'Upload Error',
-        message: e.response?.data?['message']?.toString() ??
-            e.message ??
-            'Unable to upload invoice.',
+        title: e.response?.statusCode == 409
+            ? 'Duplicate Invoice'
+            : 'Upload Error',
+        message: errorMessage,
       );
     } catch (e) {
       isLoading.value = false;

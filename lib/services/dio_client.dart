@@ -35,7 +35,8 @@ class DioClient {
     required String compareTo,
     required String groupBy,
     required String accessToken,
-  }) async {
+  }) async
+  {
     return await _dio.get( '${ApiConstants.baseUrl}/dashboard/accounting',
       queryParameters: {
       'company_id': companyId,
@@ -55,15 +56,14 @@ class DioClient {
   }
 
 // ==============================
-// UPLOAD INCOMING INVOICE
+// SCAN / UPLOAD PURCHASE INVOICE
 // ==============================
 
-  Future<Response> uploadIncomingInvoice({
+  Future<Response> scanPurchaseInvoice({
     required int companyId,
     required String filePath,
     required String fileName,
     required String accessToken,
-    String expenseCategory = 'other',
   }) async {
     final formData = FormData.fromMap({
       'company_id': companyId,
@@ -71,15 +71,15 @@ class DioClient {
         filePath,
         filename: fileName,
       ),
-      'expense_category': expenseCategory,
     });
 
     return await _dio.post(
-      '${ApiConstants.baseUrl}/incoming-invoices/upload',
+      '${ApiConstants.baseUrl}/purchases/scan',
       data: formData,
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
         },
         contentType: 'multipart/form-data',
       ),
