@@ -87,6 +87,35 @@ class DioClient {
   }
 
   // ==============================
+  // GET PURCHASES (INCOMING INVOICES)
+  // ==============================
+
+  Future<Response> getPurchases({
+    required int companyId,
+    required int page,
+    required int pageSize,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/purchases',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'pageSize': pageSize,
+        'sort': 'purchase_date',
+        'dir': 'desc',
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET INCOMING INVOICES
   // ==============================
 

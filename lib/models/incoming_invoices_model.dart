@@ -80,58 +80,69 @@ class IncomingInvoicesModel {
   });
 
   factory IncomingInvoicesModel.fromJson(
-      Map<String, dynamic> json,
-      ) {
+    Map<String, dynamic> json,
+  ) {
     return IncomingInvoicesModel(
       id: json['id'] ?? 0,
       companyId: json['company_id'] ?? 0,
-      userId: json['user_id'] ?? '',
-      fileName: json['file_name'] ?? '',
-      fileUrl: json['file_url'] ?? '',
-      fileType: json['file_type'] ?? '',
-      mimeType: json['mime_type'] ?? '',
-      sizeBytes: json['size_bytes'] ?? 0,
+      userId: json['created_by']?.toString() ?? json['user_id']?.toString() ?? '',
+      fileName: json['attachment_name']?.toString() ?? json['file_name']?.toString() ?? '',
+      fileUrl: json['attachment_path']?.toString() ?? json['file_url']?.toString() ?? '',
+      fileType: json['document_type']?.toString() ?? json['file_type']?.toString() ?? '',
+      mimeType: json['attachment_mime']?.toString() ?? json['mime_type']?.toString() ?? '',
+      sizeBytes: json['size_bytes'] is num
+          ? (json['size_bytes'] as num).toInt()
+          : 0,
 
-      supplierName: json['supplier_name'],
-      supplierEmail: json['supplier_email'],
-      supplierPhone: json['supplier_phone'],
-      supplierAddressLine1:
-      json['supplier_address_line1'],
-      supplierAddressLine2:
-      json['supplier_address_line2'],
-      supplierCity: json['supplier_city'],
-      supplierPostal: json['supplier_postal'],
-      supplierCountry: json['supplier_country'],
+      supplierName: json['supplier_name']?.toString() ?? json['suggested_supplier_name']?.toString(),
+      supplierEmail: json['supplier_email']?.toString(),
+      supplierPhone: json['supplier_phone']?.toString(),
+      supplierAddressLine1: json['supplier_address_line1']?.toString(),
+      supplierAddressLine2: json['supplier_address_line2']?.toString(),
+      supplierCity: json['supplier_city']?.toString(),
+      supplierPostal: json['supplier_postal']?.toString(),
+      supplierCountry: json['supplier_country']?.toString(),
 
-      invoiceNumber: json['invoice_number'],
-      invoiceDate: json['invoice_date'],
-      currency: json['currency'],
-      totalAmount: json['total_amount'],
-      vatRatePercent: json['vat_rate_percent'],
+      invoiceNumber: json['supplier_invoice_number']?.toString() ??
+          json['purchase_number']?.toString() ??
+          json['invoice_number']?.toString(),
+      invoiceDate: json['purchase_date']?.toString() ??
+          json['supplier_invoice_date']?.toString() ??
+          json['invoice_date']?.toString(),
+      currency: json['currency']?.toString(),
+      totalAmount: json['total'] is num
+          ? (json['total'] as num)
+          : (json['total_amount'] is num ? (json['total_amount'] as num) : 0),
+      vatRatePercent: json['tax_total'] is num
+          ? (json['tax_total'] as num)
+          : (json['vat_rate_percent'] is num ? (json['vat_rate_percent'] as num) : 0),
 
-      ocrText: json['ocr_text'],
+      ocrText: json['ocr_text']?.toString(),
 
-      uploadedAt: json['uploaded_at'],
-      updatedAt: json['updated_at'],
+      uploadedAt: json['created_at']?.toString() ?? json['uploaded_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
 
-      status: json['status'] ?? '',
-      expenseCategory: json['expense_category'],
+      status: json['status']?.toString() ?? 'draft',
+      expenseCategory: json['expense_category']?.toString() ?? json['purchase_type']?.toString(),
 
-      expenseAccountId: json['expense_account_id'],
-      expenseAccountCode:
-      json['expense_account_code'],
+      expenseAccountId: json['account'] is Map && (json['account'] as Map)['id'] is num
+          ? ((json['account'] as Map)['id'] as num).toInt()
+          : (json['expense_account_id'] is num ? (json['expense_account_id'] as num).toInt() : null),
+      expenseAccountCode: json['account'] is Map
+          ? (json['account'] as Map)['code']?.toString()
+          : json['expense_account_code']?.toString(),
 
-      bankTransactionId:
-      json['bank_transaction_id'],
+      bankTransactionId: json['bank_transaction_id'] is num
+          ? (json['bank_transaction_id'] as num).toInt()
+          : null,
 
-      vatReviewStatus:
-      json['vat_review_status'],
-      vatTreatment:
-      json['vat_treatment'],
-      vatDeductibilityPercent:
-      json['vat_deductibility_percent'],
+      vatReviewStatus: json['vat_review_status']?.toString(),
+      vatTreatment: json['vat_treatment']?.toString(),
+      vatDeductibilityPercent: json['vat_deductibility_percent'] is num
+          ? (json['vat_deductibility_percent'] as num)
+          : null,
 
-      previewUrl: json['preview_url'],
+      previewUrl: json['file_url']?.toString() ?? json['attachment_path']?.toString(),
     );
   }
 }

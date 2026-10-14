@@ -105,7 +105,7 @@ class IncomingInvoicesController extends GetxController {
   }
 
   // ============================================================
-  // GET INCOMING INVOICES
+  // GET INCOMING INVOICES (GET /api/purchases)
   // ============================================================
 
   Future<void> getIncomingInvoices() async {
@@ -131,41 +131,64 @@ class IncomingInvoicesController extends GetxController {
         return;
       }
 
-      final response = await dioClient.getIncomingInvoices(
-        companyId: int.parse(
-          companyId.toString(),
-        ),
+      final response = await dioClient.getPurchases(
+        companyId: int.parse(companyId.toString()),
         page: currentPage.value,
-        limit: limit.value,
+        pageSize: limit.value,
         accessToken: accessToken,
       );
 
-      if (response.data != null) {
-        final data = response.data;
-        final List<dynamic> items = data['items'] ?? [];
-        totalInvoices.value = data['total'] ?? 0;
+      if (response.statusCode == 200 && response.data != null) {
+        List<dynamic> items = [];
+
+        if (response.data is Map) {
+          final Map<String, dynamic> responseData =
+              Map<String, dynamic>.from(response.data as Map);
+
+          items = responseData['data'] as List<dynamic>? ?? [];
+
+          if (responseData['pagination'] is Map) {
+            final paginationMap = responseData['pagination'] as Map;
+            totalInvoices.value = paginationMap['total'] is num
+                ? (paginationMap['total'] as num).toInt()
+                : items.length;
+          } else {
+            totalInvoices.value = items.length;
+          }
+        } else if (response.data is List) {
+          items = response.data as List<dynamic>;
+          totalInvoices.value = items.length;
+        }
 
         final List<IncomingInvoicesModel> loadedInvoices = items
             .map(
               (item) => IncomingInvoicesModel.fromJson(
-                Map<String, dynamic>.from(item),
+                Map<String, dynamic>.from(item as Map),
               ),
             )
             .toList();
 
         invoices.assignAll(loadedInvoices);
-        filteredInvoices.assignAll(loadedInvoices);
+
+        if (isSearching.value && searchQuery.value.trim().isNotEmpty) {
+          searchIncomingInvoices(searchQuery.value);
+        } else {
+          filteredInvoices.assignAll(loadedInvoices);
+        }
 
         print('================================');
-        print('INCOMING INVOICES LOADED');
+        print('PURCHASES INVOICES LOADED: ${invoices.length}');
         print('Total: ${totalInvoices.value}');
         print('Current Page: ${currentPage.value}');
-        print('Items: ${invoices.length}');
         print('================================');
+      } else {
+        invoices.clear();
+        filteredInvoices.clear();
+        totalInvoices.value = 0;
       }
     } on DioException catch (e) {
       print('================================');
-      print('GET INCOMING INVOICES ERROR');
+      print('GET PURCHASES ERROR');
       print('Status Code: ${e.response?.statusCode}');
       print('Response: ${e.response?.data}');
       print('Message: ${e.message}');
@@ -175,7 +198,7 @@ class IncomingInvoicesController extends GetxController {
         title: 'Error',
         message: e.response?.data?['message']?.toString() ??
             e.message ??
-            'Unable to load invoices.',
+            'Unable to load incoming invoices.',
       );
     } catch (e) {
       AppSnackbar.error(
@@ -203,7 +226,9 @@ class IncomingInvoicesController extends GetxController {
     final List<IncomingInvoicesModel> results = invoices.where((invoice) {
       final String invoiceNumber =
           invoice.invoiceNumber?.toString().toLowerCase() ?? '';
-      final String status = invoice.status?.toString().toLowerCase() ?? '';
+      final String supplierName =
+          invoice.supplierName?.toString().toLowerCase() ?? '';
+      final String status = invoice.status.toLowerCase();
       final String issueDate =
           invoice.invoiceDate?.toString().toLowerCase() ?? '';
       final String currency =
@@ -212,6 +237,7 @@ class IncomingInvoicesController extends GetxController {
           invoice.totalAmount?.toString().toLowerCase() ?? '';
 
       return invoiceNumber.contains(query) ||
+          supplierName.contains(query) ||
           status.contains(query) ||
           issueDate.contains(query) ||
           currency.contains(query) ||
@@ -248,9 +274,5 @@ class IncomingInvoicesController extends GetxController {
   Future<void> refreshInvoices() async {
     currentPage.value = 1;
     await getIncomingInvoices();
-
-    if (isSearching.value && searchQuery.value.trim().isNotEmpty) {
-      searchIncomingInvoices(searchQuery.value);
-    }
   }
 }
