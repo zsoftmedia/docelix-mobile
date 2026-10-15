@@ -517,8 +517,8 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
             child: InkWell(
               onTap: () {
                 Get.toNamed(
-                  '/IncomingInvoicesDetailsScreen',
-                  arguments: purchase,
+                  '/PurchaseDetailsScreen',
+                  arguments: purchase.id,
                 );
               },
               borderRadius: BorderRadius.circular(14),
@@ -738,11 +738,24 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                 ),
               ],
             ),
-            child: Padding(
-              padding: EdgeInsets.all(width * 0.04),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+              child: InkWell(
+                onTap: () {
+                  if (entry.purchaseId > 0) {
+                    Get.toNamed(
+                      '/PurchaseDetailsScreen',
+                      arguments: entry.purchaseId,
+                    );
+                  }
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: EdgeInsets.all(width * 0.04),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   Row(
                     children: [
                       Container(
@@ -835,10 +848,12 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                 ],
               ),
             ),
-          );
-        }).toList(),
-      ],
-    );
+          ),
+        ),
+      );
+    }),
+  ],
+);
   }
 
   // ================================================================

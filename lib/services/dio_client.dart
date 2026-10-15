@@ -173,6 +173,30 @@ class DioClient {
   }
 
   // ==============================
+  // GET PURCHASE DETAILS BY ID
+  // ==============================
+
+  Future<Response> getPurchaseDetails({
+    required int companyId,
+    required int purchaseId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/purchases/$purchaseId',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET INCOMING INVOICES
   // ==============================
 
