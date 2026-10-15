@@ -95,11 +95,44 @@ class DioClient {
     required int page,
     required int pageSize,
     required String accessToken,
+  }) async
+  {
+
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/purchases',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'pageSize': pageSize,
+        'sort': 'purchase_date',
+        'dir': 'desc',
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // GET SUPPLIER PURCHASES
+  // ==============================
+
+  Future<Response> getSupplierPurchases({
+    required int companyId,
+    required int supplierId,
+    int page = 1,
+    int pageSize = 100,
+    required String accessToken,
   }) async {
     return await _dio.get(
       '${ApiConstants.baseUrl}/purchases',
       queryParameters: {
         'company_id': companyId,
+        'supplier_id': supplierId,
         'page': page,
         'pageSize': pageSize,
         'sort': 'purchase_date',
@@ -292,6 +325,36 @@ class DioClient {
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // GET SUPPLIERS
+  // ==============================
+
+  Future<Response> getSuppliers({
+    required int companyId,
+    required int page,
+    required int pageSize,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/purchases/suppliers',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'pageSize': pageSize,
+        'active': true,
+        'sort': 'name',
+        'dir': 'asc',
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
         },
       ),
     );

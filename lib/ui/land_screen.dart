@@ -215,10 +215,7 @@ class _LandScreenState extends State<LandScreen> {
                 iconColor: colorsList.orange,
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  AppSnackbar.info(
-                    title: 'Coming Soon',
-                    message: 'Suppliers feature is coming soon.',
-                  );
+                  Get.toNamed('/SuppliersScreen');
                 },
               ),
               _MoreMenuItem(
@@ -231,6 +228,7 @@ class _LandScreenState extends State<LandScreen> {
                   Get.toNamed('/IncomingInvoicesScreen');
                 },
               ),
+
               /*_MoreMenuItem(
                 icon: Icons.request_quote_outlined,
                 title: 'Quotation',
@@ -244,6 +242,7 @@ class _LandScreenState extends State<LandScreen> {
                   );
                 },
               ),*/
+
             ],
           ),
         );

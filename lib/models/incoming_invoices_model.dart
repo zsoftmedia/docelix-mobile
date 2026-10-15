@@ -18,11 +18,15 @@ class IncomingInvoicesModel {
   final String? supplierPostal;
   final String? supplierCountry;
 
+  final String? purchaseNumber;
+  final String? supplierInvoiceNumber;
   final String? invoiceNumber;
   final String? invoiceDate;
+  final String? dueDate;
   final String? currency;
   final num? totalAmount;
   final num? vatRatePercent;
+  final num? outstandingAmount;
 
   final String? ocrText;
 
@@ -30,6 +34,7 @@ class IncomingInvoicesModel {
   final String? updatedAt;
 
   final String status;
+  final String? paymentStatus;
   final String? expenseCategory;
 
   final int? expenseAccountId;
@@ -60,15 +65,20 @@ class IncomingInvoicesModel {
     this.supplierCity,
     this.supplierPostal,
     this.supplierCountry,
+    this.purchaseNumber,
+    this.supplierInvoiceNumber,
     this.invoiceNumber,
     this.invoiceDate,
+    this.dueDate,
     this.currency,
     this.totalAmount,
     this.vatRatePercent,
+    this.outstandingAmount,
     this.ocrText,
     this.uploadedAt,
     this.updatedAt,
     required this.status,
+    this.paymentStatus,
     this.expenseCategory,
     this.expenseAccountId,
     this.expenseAccountCode,
@@ -82,6 +92,14 @@ class IncomingInvoicesModel {
   factory IncomingInvoicesModel.fromJson(
     Map<String, dynamic> json,
   ) {
+    final String pNum = json['purchase_number']?.toString() ?? '';
+    final String suppInvNum = json['supplier_invoice_number']?.toString() ?? '';
+    final String invNum = json['invoice_number']?.toString() ?? '';
+
+    final String computedInvNumber = pNum.isNotEmpty
+        ? pNum
+        : (suppInvNum.isNotEmpty ? suppInvNum : invNum);
+
     return IncomingInvoicesModel(
       id: json['id'] ?? 0,
       companyId: json['company_id'] ?? 0,
@@ -103,12 +121,13 @@ class IncomingInvoicesModel {
       supplierPostal: json['supplier_postal']?.toString(),
       supplierCountry: json['supplier_country']?.toString(),
 
-      invoiceNumber: json['supplier_invoice_number']?.toString() ??
-          json['purchase_number']?.toString() ??
-          json['invoice_number']?.toString(),
+      purchaseNumber: pNum.isNotEmpty ? pNum : null,
+      supplierInvoiceNumber: suppInvNum.isNotEmpty ? suppInvNum : null,
+      invoiceNumber: computedInvNumber,
       invoiceDate: json['purchase_date']?.toString() ??
           json['supplier_invoice_date']?.toString() ??
           json['invoice_date']?.toString(),
+      dueDate: json['due_date']?.toString(),
       currency: json['currency']?.toString(),
       totalAmount: json['total'] is num
           ? (json['total'] as num)
@@ -116,6 +135,7 @@ class IncomingInvoicesModel {
       vatRatePercent: json['tax_total'] is num
           ? (json['tax_total'] as num)
           : (json['vat_rate_percent'] is num ? (json['vat_rate_percent'] as num) : 0),
+      outstandingAmount: double.tryParse(json['outstanding']?.toString() ?? '') ?? 0.0,
 
       ocrText: json['ocr_text']?.toString(),
 
@@ -123,6 +143,7 @@ class IncomingInvoicesModel {
       updatedAt: json['updated_at']?.toString(),
 
       status: json['status']?.toString() ?? 'draft',
+      paymentStatus: json['payment_status']?.toString(),
       expenseCategory: json['expense_category']?.toString() ?? json['purchase_type']?.toString(),
 
       expenseAccountId: json['account'] is Map && (json['account'] as Map)['id'] is num
