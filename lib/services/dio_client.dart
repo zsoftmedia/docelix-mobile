@@ -87,7 +87,7 @@ class DioClient {
   }
 
   // ==============================
-  // GET PURCHASES (INCOMING INVOICES)
+  // GET PURCHASES
   // ==============================
 
   Future<Response> getPurchases({
@@ -97,7 +97,6 @@ class DioClient {
     required String accessToken,
   }) async
   {
-
     return await _dio.get(
       '${ApiConstants.baseUrl}/purchases',
       queryParameters: {
@@ -205,7 +204,8 @@ class DioClient {
     required int page,
     required int limit,
     required String accessToken,
-  }) async {
+  }) async
+  {
     return await _dio.get(
       '${ApiConstants.baseUrl}/incoming-invoices',
       queryParameters: {

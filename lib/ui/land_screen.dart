@@ -223,10 +223,11 @@ class _LandScreenState extends State<LandScreen> {
                 iconColor: colorsList.blue,
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  AppSnackbar.info(
+                  Get.toNamed('/InvoiceArchiveScreen');
+                  /*AppSnackbar.info(
                     title: 'Coming Soon',
                     message: 'Invoice Archive feature is coming soon.',
-                  );
+                  );*/
                 },
               ),
 
@@ -598,7 +599,7 @@ class _MoreMenuItem extends StatelessWidget {
                       style: TextStyle(
                         color: textColor ?? colorsList.primaryText,
                         fontSize: width * 0.038,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.normal,
                         height: 1.2,
                       ),
                     ),
