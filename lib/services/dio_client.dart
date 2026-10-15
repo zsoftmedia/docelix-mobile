@@ -149,6 +149,30 @@ class DioClient {
   }
 
   // ==============================
+  // GET SUPPLIER LEDGER
+  // ==============================
+
+  Future<Response> getSupplierLedger({
+    required int companyId,
+    required int supplierId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/purchases/suppliers/$supplierId/ledger',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET INCOMING INVOICES
   // ==============================
 

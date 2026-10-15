@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/models/supplier_ledger_model.dart';
 import 'package:docelix_mobileapp/models/supplier_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -14,6 +15,9 @@ class SupplierDetailsController extends GetxController {
   final RxList<IncomingInvoicesModel> purchases = <IncomingInvoicesModel>[].obs;
   final RxBool isLoadingPurchases = false.obs;
 
+  final Rxn<SupplierLedgerModel> supplierLedger = Rxn<SupplierLedgerModel>();
+  final RxBool isLoadingLedger = false.obs;
+
   final List<String> tabs = const [
     'Overview',
     'Purchases',
@@ -28,6 +32,7 @@ class SupplierDetailsController extends GetxController {
     if (Get.arguments is SupplierModel) {
       supplier.value = Get.arguments as SupplierModel;
       fetchSupplierPurchases();
+      fetchSupplierLedger();
     }
   }
 
@@ -35,6 +40,8 @@ class SupplierDetailsController extends GetxController {
     selectedTab.value = index;
     if (index == 1 && purchases.isEmpty && !isLoadingPurchases.value) {
       fetchSupplierPurchases();
+    } else if (index == 3 && supplierLedger.value == null && !isLoadingLedger.value) {
+      fetchSupplierLedger();
     }
   }
 
@@ -95,6 +102,52 @@ class SupplierDetailsController extends GetxController {
       purchases.clear();
     } finally {
       isLoadingPurchases.value = false;
+    }
+  }
+
+  Future<void> fetchSupplierLedger() async {
+    final currentSupplier = supplier.value;
+    if (currentSupplier == null) return;
+
+    try {
+      isLoadingLedger.value = true;
+
+      final accessToken = SessionManager.accessToken;
+      final companyId = SessionManager.accessCompanyid;
+
+      if (accessToken == null || accessToken.isEmpty || companyId == null) {
+        return;
+      }
+
+      final companyIdInt = int.parse(companyId.toString());
+
+      debugPrint(
+          'Fetching supplier ledger for ID ${currentSupplier.id}, company: $companyIdInt');
+
+      final response = await dioClient.getSupplierLedger(
+        companyId: companyIdInt,
+        supplierId: currentSupplier.id,
+        accessToken: accessToken,
+      );
+
+      debugPrint('Supplier Ledger Status: ${response.statusCode}');
+
+      if (response.statusCode == 200 && response.data != null) {
+        final Map<String, dynamic> data =
+            Map<String, dynamic>.from(response.data as Map);
+
+        supplierLedger.value = SupplierLedgerModel.fromJson(data);
+
+        debugPrint(
+            'Supplier Ledger Entries Loaded: ${supplierLedger.value?.entries.length}');
+      } else {
+        supplierLedger.value = null;
+      }
+    } catch (e) {
+      debugPrint('Fetch Supplier Ledger Error: $e');
+      supplierLedger.value = null;
+    } finally {
+      isLoadingLedger.value = false;
     }
   }
 

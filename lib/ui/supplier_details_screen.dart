@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/supplier_details_controller.dart';
+import 'package:docelix_mobileapp/models/supplier_ledger_model.dart';
 import 'package:docelix_mobileapp/models/supplier_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -226,7 +227,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                     color: supplier.isActive
                         ? const Color(0xFF2E7D32)
                         : colorsList.secondaryText,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -431,10 +432,28 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
         );
 
       case 3:
-        return _buildEmptyTab(
-          icon: Icons.receipt_long_outlined,
-          title: 'No Supplier Ledger Found',
-          subtitle: 'There are no ledger entries available for this supplier.',
+        if (controller.isLoadingLedger.value) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(40),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (controller.supplierLedger.value == null ||
+            controller.supplierLedger.value!.entries.isEmpty) {
+          return _buildEmptyTab(
+            icon: Icons.receipt_long_outlined,
+            title: 'No Supplier Ledger Found',
+            subtitle: 'There are no ledger entries available for this supplier.',
+            width: width,
+            height: height,
+          );
+        }
+
+        return _buildSupplierLedgerView(
+          ledger: controller.supplierLedger.value!,
           width: width,
           height: height,
         );
@@ -508,7 +527,6 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // TOP ROW: Purchase No. + Supplier Invoice No. + Total + Badges
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -519,7 +537,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                               Text(
                                 purchaseNo,
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: width * 0.038,
                                   fontWeight: FontWeight.normal,
                                   color: const Color(0xFF063C70),
                                 ),
@@ -542,7 +560,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                             Text(
                               totalStr,
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: width * 0.038,
                                 fontWeight: FontWeight.normal,
                                 color: colorsList.textColor,
                               ),
@@ -551,7 +569,6 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                // Payment Badge
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 7,
@@ -576,7 +593,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                                       Text(
                                         paymentStatusStr.capitalizeFirst ?? paymentStatusStr,
                                         style: TextStyle(
-                                          fontSize: 11,
+                                          fontSize: width * 0.025,
                                           fontWeight: FontWeight.normal,
                                           color: const Color(0xFF16A34A),
                                         ),
@@ -587,7 +604,6 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
 
                                 const SizedBox(width: 5),
 
-                                // Status Badge
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 7,
@@ -612,7 +628,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                                       Text(
                                         statusStr.capitalizeFirst ?? statusStr,
                                         style: TextStyle(
-                                          fontSize: 11,
+                                          fontSize: width * 0.025,
                                           fontWeight: FontWeight.normal,
                                           color: const Color(0xFF16A34A),
                                         ),
@@ -631,7 +647,6 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                     const Divider(height: 1, color: Color(0xFFF0F4F8)),
                     SizedBox(height: height * 0.010),
 
-                    // BOTTOM DETAILS ROW: Date | Due Date | Outstanding
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -650,26 +665,178 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
     );
   }
 
-  Widget _miniDetail(String label, String value, double width, {bool isBold = false}) {
+  // ================================================================
+  // SUPPLIER LEDGER TAB VIEW
+  // ================================================================
+
+  Widget _buildSupplierLedgerView({
+    required SupplierLedgerModel ledger,
+    required double width,
+    required double height,
+  }) {
     return Column(
+      key: const ValueKey('supplier_ledger_tab'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: width * 0.026,
-            color: colorsList.textHintColor,
+        // Balance Summary Card
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(width * 0.040),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE4EAF1)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Supplier Balance',
+                style: TextStyle(
+                  fontSize: width * 0.035,
+                  fontWeight: FontWeight.w600,
+                  color: colorsList.textColor,
+                ),
+              ),
+              Text(
+                controller.formatCurrency(ledger.balance, null),
+                style: TextStyle(
+                  fontSize: width * 0.040,
+                  fontWeight: FontWeight.w800,
+                  color: ledger.balance > 0
+                      ? const Color(0xFFD64545)
+                      : const Color(0xFF12A150),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: width * 0.030,
-            fontWeight: FontWeight.normal,
-            color: colorsList.textColor,
-          ),
-        ),
+
+        SizedBox(height: height * 0.018),
+
+        _sectionTitle('Ledger Entries', width),
+
+        SizedBox(height: height * 0.010),
+
+        ...ledger.entries.map((entry) {
+          final isPurchase = entry.type.toLowerCase() == 'purchase';
+          final typeColor = isPurchase
+              ? const Color(0xFFD64545)
+              : const Color(0xFF12A150);
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE4EAF1)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(width * 0.04),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: width * 0.10,
+                        height: width * 0.10,
+                        decoration: BoxDecoration(
+                          color: typeColor.withOpacity(0.10),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          isPurchase
+                              ? Icons.shopping_bag_outlined
+                              : Icons.payments_outlined,
+                          color: typeColor,
+                          size: width * 0.052,
+                        ),
+                      ),
+                      SizedBox(width: width * 0.03),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.description.isNotEmpty
+                                  ? entry.description
+                                  : entry.reference,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: width * 0.036,
+                                fontWeight: FontWeight.normal,
+                                color: colorsList.textColor,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Ref: ${entry.reference} • ${entry.date}',
+                              style: TextStyle(
+                                fontSize: width * 0.028,
+                                color: colorsList.textHintColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: typeColor.withOpacity(0.10),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          entry.type.capitalizeFirst ?? entry.type,
+                          style: TextStyle(
+                            fontSize: width * 0.026,
+                            fontWeight: FontWeight.normal,
+                            color: typeColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: height * 0.012),
+                  const Divider(height: 1, color: Color(0xFFF0F4F8)),
+                  SizedBox(height: height * 0.010),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _miniDetail(
+                        'Debit',
+                        controller.formatCurrency(entry.debit, null),
+                        width,
+                      ),
+                      _miniDetail(
+                        'Credit',
+                        controller.formatCurrency(entry.credit, null),
+                        width,
+                      ),
+                      _miniDetail(
+                        'Balance',
+                        controller.formatCurrency(entry.balance, null),
+                        width,
+                        isBold: true,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
       ],
     );
   }
@@ -837,6 +1004,30 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
             fontSize: 14,
             fontWeight: FontWeight.normal,
             color: valueColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _miniDetail(String label, String value, double width, {bool isBold = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: width * 0.026,
+            color: colorsList.textHintColor,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: width * 0.030,
+            fontWeight: FontWeight.normal,
+            color: colorsList.textColor,
           ),
         ),
       ],
