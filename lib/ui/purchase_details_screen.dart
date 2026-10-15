@@ -57,7 +57,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                 style: TextStyle(
                   color: colorsList.textHintColor,
                   fontSize: width * 0.030,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ],
@@ -191,7 +191,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                   item.purchaseNumber.isNotEmpty ? item.purchaseNumber : 'PURCHASE',
                   style: TextStyle(
                     fontSize: width * 0.052,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.normal,
                     color: const Color(0xFF063C70),
                   ),
                 ),
@@ -306,8 +306,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Tax & totals',
             style: TextStyle(
-              fontSize: width * 0.038,
-              fontWeight: FontWeight.w700,
+              fontSize: width * 0.04,
+              fontWeight: FontWeight.normal,
               color: colorsList.textColor,
             ),
           ),
@@ -348,8 +348,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'History',
             style: TextStyle(
-              fontSize: width * 0.038,
-              fontWeight: FontWeight.w700,
+              fontSize: width * 0.04,
+              fontWeight: FontWeight.normal,
               color: colorsList.textColor,
             ),
           ),
@@ -381,8 +381,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Purchased items / services',
             style: TextStyle(
-              fontSize: width * 0.038,
-              fontWeight: FontWeight.w700,
+              fontSize: width * 0.04,
+              fontWeight: FontWeight.normal,
               color: colorsList.textColor,
             ),
           ),
@@ -416,8 +416,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                           child: Text(
                             line.description.isNotEmpty ? line.description : 'Item',
                             style: TextStyle(
-                              fontSize: width * 0.036,
-                              fontWeight: FontWeight.w700,
+                              fontSize: width * 0.037,
+                              fontWeight: FontWeight.normal,
                               color: colorsList.textColor,
                             ),
                           ),
@@ -425,8 +425,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                         Text(
                           controller.formatCurrency(line.totalAmount, item.currency),
                           style: TextStyle(
-                            fontSize: width * 0.036,
-                            fontWeight: FontWeight.w700,
+                            fontSize: width * 0.037,
+                            fontWeight: FontWeight.normal,
                             color: colorsList.textColor,
                           ),
                         ),
@@ -488,8 +488,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Payments',
             style: TextStyle(
-              fontSize: width * 0.038,
-              fontWeight: FontWeight.w700,
+              fontSize: width * 0.04,
+              fontWeight: FontWeight.normal,
               color: colorsList.textColor,
             ),
           ),
@@ -538,7 +538,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                             _formatDate(payment.paymentDate),
                             style: TextStyle(
                               fontSize: width * 0.032,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.normal,
                               color: colorsList.textColor,
                             ),
                           ),
@@ -556,7 +556,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                       controller.formatCurrency(payment.amount, item.currency),
                       style: TextStyle(
                         fontSize: width * 0.035,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.normal,
                         color: const Color(0xFF16A34A),
                       ),
                     ),
@@ -588,8 +588,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Ledger entries',
             style: TextStyle(
-              fontSize: width * 0.038,
-              fontWeight: FontWeight.w700,
+              fontSize: width * 0.04,
+              fontWeight: FontWeight.normal,
               color: colorsList.textColor,
             ),
           ),
@@ -631,8 +631,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                         Text(
                           '$entryType · ${_formatDate(entry.entryDate)}',
                           style: TextStyle(
-                            fontSize: width * 0.032,
-                            fontWeight: FontWeight.w700,
+                            fontSize: width * 0.035,
+                            fontWeight: FontWeight.normal,
                             color: const Color(0xFF063C70),
                           ),
                         ),
@@ -733,7 +733,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
             text.capitalizeFirst ?? text,
             style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.normal,
               color: color,
             ),
           ),
@@ -748,7 +748,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: width * 0.027, color: colorsList.textHintColor),
+          style: TextStyle(fontSize: width * 0.027,
+              color: colorsList.textHintColor),
         ),
         const SizedBox(height: 2),
         Text(
@@ -756,8 +757,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: width * 0.032,
-            fontWeight: isPrimary ? FontWeight.w700 : FontWeight.w500,
+            fontSize: width * 0.035,
+            fontWeight: FontWeight.normal,
             color: isPrimary ? const Color(0xFF063C70) : colorsList.textColor,
           ),
         ),
@@ -774,8 +775,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             label,
             style: TextStyle(
-              fontSize: width * 0.031,
-              fontWeight: isBold ? FontWeight.w700 : FontWeight.w400,
+              fontSize: width * 0.035,
+              fontWeight: FontWeight.normal,
               color: isBold ? colorsList.textColor : colorsList.textHintColor,
             ),
           ),
@@ -783,7 +784,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
             value,
             style: TextStyle(
               fontSize: width * 0.033,
-              fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+              fontWeight: isBold ? FontWeight.normal : FontWeight.normal,
               color: valueColor ?? colorsList.textColor,
             ),
           ),
@@ -815,9 +816,11 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: width * 0.025, color: colorsList.textHintColor)),
+        Text(label, style: TextStyle(fontSize: width * 0.025,
+            color: colorsList.textHintColor)),
         const SizedBox(height: 2),
-        Text(value, style: TextStyle(fontSize: width * 0.029, fontWeight: FontWeight.w600, color: colorsList.textColor)),
+        Text(value, style: TextStyle(fontSize: width * 0.032,
+            fontWeight: FontWeight.normal, color: colorsList.textColor)),
       ],
     );
   }

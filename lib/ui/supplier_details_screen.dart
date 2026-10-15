@@ -693,8 +693,8 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
               Text(
                 'Supplier Balance',
                 style: TextStyle(
-                  fontSize: width * 0.035,
-                  fontWeight: FontWeight.w600,
+                  fontSize: width * 0.04,
+                  fontWeight: FontWeight.normal,
                   color: colorsList.textColor,
                 ),
               ),
@@ -702,7 +702,7 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
                 controller.formatCurrency(ledger.balance, null),
                 style: TextStyle(
                   fontSize: width * 0.040,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.normal,
                   color: ledger.balance > 0
                       ? const Color(0xFFD64545)
                       : const Color(0xFF12A150),
