@@ -1,19 +1,19 @@
-import 'package:docelix_mobileapp/controllers/incoming_invoices_controller.dart';
-import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/controllers/purchase_invoices_controller.dart';
+import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class IncomingInvoicesScreen extends StatefulWidget {
-  const IncomingInvoicesScreen({super.key});
+class PurchaseInvoicesScreen extends StatefulWidget {
+  const PurchaseInvoicesScreen({super.key});
 
   @override
-  State<IncomingInvoicesScreen> createState() => _IncomingInvoicesScreenState();
+  State<PurchaseInvoicesScreen> createState() => _PurchaseInvoicesScreenState();
 }
 
-class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
+class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
 
-  final IncomingInvoicesController incomingInvoicesController = Get.put(IncomingInvoicesController());
+  final PurchaseInvoicesController incomingInvoicesController = Get.put(PurchaseInvoicesController());
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
               ),
 
               decoration: const InputDecoration(
-                hintText: 'Search invoice archive...',
+                hintText: 'Search purchase invoice...',
                 hintStyle: TextStyle(
                   color: colorsList.textHintColor,
                 ),
@@ -91,11 +91,11 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
           }
 
           return Text(
-            "Invoice Archive",
+            "Purchase Invoice",
             style: TextStyle(
               color: colorsList.textColor,
               fontSize: width * 0.055,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           );
         }),
@@ -153,11 +153,11 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
                 children: [
 
                   Text(
-                    "All Invoice Archive",
+                    "All Purchase Invoices",
                     style: TextStyle(
                       color: colorsList.textColor,
                       fontSize: width * 0.045,
-                  //    fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
 
@@ -363,7 +363,7 @@ class _IncomingInvoicesScreenState extends State<IncomingInvoicesScreen> {
 
   Widget _invoiceCard({
     required BuildContext context,
-    required IncomingInvoicesModel invoice,
+    required PurchaseInvoicesModel invoice,
     required double width,
     required double height,
   })

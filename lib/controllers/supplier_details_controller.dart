@@ -1,4 +1,4 @@
-import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/models/supplier_ledger_model.dart';
 import 'package:docelix_mobileapp/models/supplier_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
@@ -12,7 +12,7 @@ class SupplierDetailsController extends GetxController {
   final Rxn<SupplierModel> supplier = Rxn<SupplierModel>();
   final RxInt selectedTab = 0.obs;
 
-  final RxList<IncomingInvoicesModel> purchases = <IncomingInvoicesModel>[].obs;
+  final RxList<PurchaseInvoicesModel> purchases = <PurchaseInvoicesModel>[].obs;
   final RxBool isLoadingPurchases = false.obs;
 
   final Rxn<SupplierLedgerModel> supplierLedger = Rxn<SupplierLedgerModel>();
@@ -83,9 +83,9 @@ class SupplierDetailsController extends GetxController {
           items = response.data as List<dynamic>;
         }
 
-        final List<IncomingInvoicesModel> loadedPurchases = items
+        final List<PurchaseInvoicesModel> loadedPurchases = items
             .map(
-              (item) => IncomingInvoicesModel.fromJson(
+              (item) => PurchaseInvoicesModel.fromJson(
                 Map<String, dynamic>.from(item as Map),
               ),
             )

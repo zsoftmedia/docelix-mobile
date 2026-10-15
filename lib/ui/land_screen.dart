@@ -1,5 +1,5 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
-import 'package:docelix_mobileapp/controllers/create_incoming_invoice_controller.dart';
+import 'package:docelix_mobileapp/controllers/create_purchase_invoice_controller.dart';
 import 'package:docelix_mobileapp/services/auth_services.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
@@ -16,8 +16,8 @@ class LandScreen extends StatefulWidget {
 }
 
 class _LandScreenState extends State<LandScreen> {
-  final CreateIncomingInvoiceController incomingInvoiceController = Get.put(
-    CreateIncomingInvoiceController(),
+  final CreatePurchaseInvoiceController incomingInvoiceController = Get.put(
+    CreatePurchaseInvoiceController(),
   );
 
   int _selectedIndex = 0;
@@ -202,10 +202,8 @@ class _LandScreenState extends State<LandScreen> {
                 iconColor: colorsList.orange,
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  AppSnackbar.info(
-                    title: 'Coming Soon',
-                    message: 'Purchase Invoices feature is coming soon.',
-                  );
+                  Get.toNamed('/IncomingInvoicesScreen');
+
                 },
               ),
               _MoreMenuItem(
@@ -225,7 +223,10 @@ class _LandScreenState extends State<LandScreen> {
                 iconColor: colorsList.blue,
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  Get.toNamed('/IncomingInvoicesScreen');
+                  AppSnackbar.info(
+                    title: 'Coming Soon',
+                    message: 'Invoice Archive feature is coming soon.',
+                  );
                 },
               ),
 
@@ -913,7 +914,7 @@ class _ScanBottomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final controller = Get.find<CreateIncomingInvoiceController>();
+    final controller = Get.find<CreatePurchaseInvoiceController>();
 
     return Obx(() {
       final isLoading = controller.isLoading.value;

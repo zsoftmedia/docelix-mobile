@@ -1,5 +1,5 @@
 import 'package:docelix_mobileapp/introPages/Intro_screen.dart';
-import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/ui/accounts_payable_screen.dart';
 import 'package:docelix_mobileapp/ui/accounts_receivable_screen.dart';
 import 'package:docelix_mobileapp/ui/add_customer_screen.dart';
@@ -16,11 +16,11 @@ import 'package:docelix_mobileapp/ui/assets/vehicles_screen.dart';
 import 'package:docelix_mobileapp/ui/catalogs_screen.dart';
 import 'package:docelix_mobileapp/ui/customer_details_screen.dart';
 import 'package:docelix_mobileapp/ui/customers_screen.dart';
-import 'package:docelix_mobileapp/ui/create_incoming_invoices_screen.dart';
+import 'package:docelix_mobileapp/ui/create_purchase_invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/create_invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
-import 'package:docelix_mobileapp/ui/incoming_invoices_details_screen.dart';
-import 'package:docelix_mobileapp/ui/incoming_invoices_screen.dart';
+import 'package:docelix_mobileapp/ui/purchase_invoices_details_screen.dart';
+import 'package:docelix_mobileapp/ui/purchase_invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/invoices_details_screen.dart';
 import 'package:docelix_mobileapp/ui/invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/land_screen.dart';
@@ -81,13 +81,13 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/RegisterScreen', page: () => SignUpScreen()),
         GetPage(name: '/LandScreen', page: () => LandScreen()),
         GetPage(name: '/DashboardScreen', page: () => DashboardScreen()),
-        GetPage(name: '/IncomingInvoicesScreen', page: () => IncomingInvoicesScreen(),),
-        GetPage(name: '/CreateIncomingInvoicesScreen', page: () => CreateIncomingInvoicesScreen(),),
+        GetPage(name: '/IncomingInvoicesScreen', page: () => PurchaseInvoicesScreen(),),
+        GetPage(name: '/CreateIncomingInvoicesScreen', page: () => CreatePurchaseInvoicesScreen(),),
         GetPage(name: '/CustomersScreen', page: () => CustomersScreen()),
         GetPage(name: '/ForgotPasswordScreen', page: () => ForgotPasswordScreen()),
         GetPage(name: '/CustomerDetailsScreen', page: () => CustomerDetailsScreen(),),
         GetPage(name: '/AddCustomersScreen', page: () => AddCustomerScreen()),
-        GetPage(name: '/IncomingInvoicesDetailsScreen', page: () => IncomingInvoicesDetailsScreen(invoice: Get.arguments as IncomingInvoicesModel,),),
+        GetPage(name: '/IncomingInvoicesDetailsScreen', page: () => PurchaseInvoicesDetailsScreen(invoice: Get.arguments as PurchaseInvoicesModel,),),
         GetPage(name: '/InvoicesScreen', page: () => InvoicesScreen()),
         GetPage(name: '/InvoicesDetailsScreen', page: () => InvoicesDetailsScreen(),),
         GetPage(name: '/CreateInvoiceScreen', page: () => CreateInvoiceScreen(),),

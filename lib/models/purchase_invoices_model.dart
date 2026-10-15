@@ -1,4 +1,4 @@
-class IncomingInvoicesModel {
+class PurchaseInvoicesModel {
   final int id;
   final int companyId;
   final String userId;
@@ -48,7 +48,7 @@ class IncomingInvoicesModel {
 
   final String? previewUrl;
 
-  IncomingInvoicesModel({
+  PurchaseInvoicesModel({
     required this.id,
     required this.companyId,
     required this.userId,
@@ -89,7 +89,7 @@ class IncomingInvoicesModel {
     this.previewUrl,
   });
 
-  factory IncomingInvoicesModel.fromJson(
+  factory PurchaseInvoicesModel.fromJson(
     Map<String, dynamic> json,
   ) {
     final String pNum = json['purchase_number']?.toString() ?? '';
@@ -100,7 +100,7 @@ class IncomingInvoicesModel {
         ? pNum
         : (suppInvNum.isNotEmpty ? suppInvNum : invNum);
 
-    return IncomingInvoicesModel(
+    return PurchaseInvoicesModel(
       id: json['id'] ?? 0,
       companyId: json['company_id'] ?? 0,
       userId: json['created_by']?.toString() ?? json['user_id']?.toString() ?? '',

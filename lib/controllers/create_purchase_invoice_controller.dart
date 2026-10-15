@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
-import 'package:docelix_mobileapp/controllers/incoming_invoices_controller.dart';
+import 'package:docelix_mobileapp/controllers/purchase_invoices_controller.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:file_picker/file_picker.dart';
@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 
-class CreateIncomingInvoiceController extends GetxController {
+class CreatePurchaseInvoiceController extends GetxController {
   final ImagePicker _imagePicker = ImagePicker();
 
   final dioClient = DioClient();
@@ -165,8 +165,8 @@ class CreateIncomingInvoiceController extends GetxController {
           message: 'Invoice scanned and uploaded successfully.',
         );
 
-        if (Get.isRegistered<IncomingInvoicesController>()) {
-          Get.find<IncomingInvoicesController>().refreshInvoices();
+        if (Get.isRegistered<PurchaseInvoicesController>()) {
+          Get.find<PurchaseInvoicesController>().refreshInvoices();
         }
       } else {
         AppSnackbar.error(

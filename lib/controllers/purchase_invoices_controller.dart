@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
-import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:get/get.dart';
 
-class IncomingInvoicesController extends GetxController {
+class PurchaseInvoicesController extends GetxController {
   final dioClient = DioClient();
   final sessionManager = SessionManager();
 
@@ -15,15 +15,15 @@ class IncomingInvoicesController extends GetxController {
   // ALL INCOMING INVOICES
   // ============================================================
 
-  final RxList<IncomingInvoicesModel> invoices =
-      <IncomingInvoicesModel>[].obs;
+  final RxList<PurchaseInvoicesModel> invoices =
+      <PurchaseInvoicesModel>[].obs;
 
   // ============================================================
   // FILTERED / SEARCHED INVOICES
   // ============================================================
 
-  final RxList<IncomingInvoicesModel> filteredInvoices =
-      <IncomingInvoicesModel>[].obs;
+  final RxList<PurchaseInvoicesModel> filteredInvoices =
+      <PurchaseInvoicesModel>[].obs;
 
   // ============================================================
   // SEARCH
@@ -160,9 +160,9 @@ class IncomingInvoicesController extends GetxController {
           totalInvoices.value = items.length;
         }
 
-        final List<IncomingInvoicesModel> loadedInvoices = items
+        final List<PurchaseInvoicesModel> loadedInvoices = items
             .map(
-              (item) => IncomingInvoicesModel.fromJson(
+              (item) => PurchaseInvoicesModel.fromJson(
                 Map<String, dynamic>.from(item as Map),
               ),
             )
@@ -223,7 +223,7 @@ class IncomingInvoicesController extends GetxController {
       return;
     }
 
-    final List<IncomingInvoicesModel> results = invoices.where((invoice) {
+    final List<PurchaseInvoicesModel> results = invoices.where((invoice) {
       final String invoiceNumber =
           invoice.invoiceNumber?.toString().toLowerCase() ?? '';
       final String supplierName =

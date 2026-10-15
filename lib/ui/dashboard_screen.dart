@@ -1,5 +1,5 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
-import 'package:docelix_mobileapp/controllers/create_incoming_invoice_controller.dart';
+import 'package:docelix_mobileapp/controllers/create_purchase_invoice_controller.dart';
 import 'package:docelix_mobileapp/controllers/dashboard_controller.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
@@ -22,7 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // ============================================================
 
   final DashboardController dashboardController = Get.put(DashboardController());
-  final CreateIncomingInvoiceController incomingInvoiceController = Get.put(CreateIncomingInvoiceController());
+  final CreatePurchaseInvoiceController incomingInvoiceController = Get.put(CreatePurchaseInvoiceController());
 
   // ============================================================
   // TAB

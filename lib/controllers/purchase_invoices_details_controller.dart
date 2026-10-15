@@ -1,18 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
-import 'package:docelix_mobileapp/controllers/incoming_invoices_controller.dart';
-import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/controllers/purchase_invoices_controller.dart';
+import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class IncomingInvoicesDetailsController extends GetxController {
+class PurchaseInvoicesDetailsController extends GetxController {
   // ----------------------------------------------------------
   // INVOICE
   // ----------------------------------------------------------
 
-  late IncomingInvoicesModel invoice;
+  late PurchaseInvoicesModel invoice;
 
   // ----------------------------------------------------------
   // STATUS / CATEGORY
@@ -48,7 +48,7 @@ class IncomingInvoicesDetailsController extends GetxController {
   // INIT
   // ----------------------------------------------------------
 
-  void initialize(IncomingInvoicesModel data) {
+  void initialize(PurchaseInvoicesModel data) {
     invoice = data;
 
     invoiceNumberController = TextEditingController(
@@ -230,8 +230,8 @@ class IncomingInvoicesDetailsController extends GetxController {
           message: 'Invoice changes saved successfully.',
         );
 
-        if (Get.isRegistered<IncomingInvoicesController>()) {
-          Get.find<IncomingInvoicesController>().refreshInvoices();
+        if (Get.isRegistered<PurchaseInvoicesController>()) {
+          Get.find<PurchaseInvoicesController>().refreshInvoices();
         }
       } else {
         AppSnackbar.error(
@@ -340,8 +340,8 @@ class IncomingInvoicesDetailsController extends GetxController {
           message: 'Invoice status updated to $displayStatus.',
         );
 
-        if (Get.isRegistered<IncomingInvoicesController>()) {
-          Get.find<IncomingInvoicesController>().refreshInvoices();
+        if (Get.isRegistered<PurchaseInvoicesController>()) {
+          Get.find<PurchaseInvoicesController>().refreshInvoices();
         }
       } else {
         AppSnackbar.error(
@@ -580,8 +580,8 @@ class IncomingInvoicesDetailsController extends GetxController {
               : 'Invoice deleted successfully.',
         );
 
-        if (Get.isRegistered<IncomingInvoicesController>()) {
-          Get.find<IncomingInvoicesController>().refreshInvoices();
+        if (Get.isRegistered<PurchaseInvoicesController>()) {
+          Get.find<PurchaseInvoicesController>().refreshInvoices();
         }
       } else {
         AppSnackbar.error(
@@ -617,7 +617,7 @@ class IncomingInvoicesDetailsController extends GetxController {
   // ----------------------------------------------------------
 
   String _buildSupplierAddress(
-    IncomingInvoicesModel invoice,
+      PurchaseInvoicesModel invoice,
   ) {
     final parts = [
       invoice.supplierAddressLine1,

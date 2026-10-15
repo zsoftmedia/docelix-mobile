@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
-import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/models/purchase_details_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -21,8 +21,8 @@ class PurchaseDetailsController extends GetxController {
 
     if (Get.arguments is int) {
       purchaseId = Get.arguments as int;
-    } else if (Get.arguments is IncomingInvoicesModel) {
-      purchaseId = (Get.arguments as IncomingInvoicesModel).id;
+    } else if (Get.arguments is PurchaseInvoicesModel) {
+      purchaseId = (Get.arguments as PurchaseInvoicesModel).id;
     } else if (Get.arguments is Map && Get.arguments['id'] != null) {
       purchaseId = int.tryParse(Get.arguments['id'].toString());
     }

@@ -1,35 +1,35 @@
 import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
-import 'package:docelix_mobileapp/controllers/incoming_invoices_details_controller.dart';
-import 'package:docelix_mobileapp/models/incoming_invoices_model.dart';
+import 'package:docelix_mobileapp/controllers/purchase_invoices_details_controller.dart';
+import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-class IncomingInvoicesDetailsScreen extends StatefulWidget {
-  final IncomingInvoicesModel invoice;
+class PurchaseInvoicesDetailsScreen extends StatefulWidget {
+  final PurchaseInvoicesModel invoice;
 
-  const IncomingInvoicesDetailsScreen({
+  const PurchaseInvoicesDetailsScreen({
     super.key,
     required this.invoice,
   });
 
   @override
-  State<IncomingInvoicesDetailsScreen> createState() =>
+  State<PurchaseInvoicesDetailsScreen> createState() =>
       _InvoicesDetailsScreenState();
 }
 
-class _InvoicesDetailsScreenState extends State<IncomingInvoicesDetailsScreen> {
+class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
 
-  late IncomingInvoicesDetailsController controller;
+  late PurchaseInvoicesDetailsController controller;
 
   @override
   void initState() {
     super.initState();
 
     controller = Get.put(
-      IncomingInvoicesDetailsController(),
+      PurchaseInvoicesDetailsController(),
     );
 
     controller.initialize(widget.invoice);

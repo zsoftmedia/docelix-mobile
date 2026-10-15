@@ -1,20 +1,20 @@
 import 'dart:io';
-import 'package:docelix_mobileapp/controllers/create_incoming_invoice_controller.dart';
+import 'package:docelix_mobileapp/controllers/create_purchase_invoice_controller.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class CreateIncomingInvoicesScreen extends StatefulWidget {
-  const CreateIncomingInvoicesScreen({super.key});
+class CreatePurchaseInvoicesScreen extends StatefulWidget {
+  const CreatePurchaseInvoicesScreen({super.key});
   @override
-  State<CreateIncomingInvoicesScreen> createState() =>
-      _CreateIncomingInvoicesScreenState();
+  State<CreatePurchaseInvoicesScreen> createState() =>
+      _CreatePurchaseInvoicesScreenState();
 }
 
-class _CreateIncomingInvoicesScreenState
-    extends State<CreateIncomingInvoicesScreen> {
-  final CreateIncomingInvoiceController incomingInvoiceController =
-      Get.put(CreateIncomingInvoiceController());
+class _CreatePurchaseInvoicesScreenState
+    extends State<CreatePurchaseInvoicesScreen> {
+  final CreatePurchaseInvoiceController incomingInvoiceController =
+      Get.put(CreatePurchaseInvoiceController());
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +37,11 @@ class _CreateIncomingInvoicesScreenState
           ),
         ),
         title: Text(
-          "Create Incoming Invoice",
+          "Create Purchase Invoice",
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: width * 0.055,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
       ),
@@ -62,7 +62,7 @@ class _CreateIncomingInvoicesScreenState
                   children: [
                     const SizedBox(height: 15),
                     const Text(
-                      'Capture an incoming invoice using your camera or select an image or PDF file.',
+                      'Capture an purchase invoice using your camera or select an image or PDF file.',
                       style: TextStyle(
                         fontSize: 14,
                         color: colorsList.textHintColor,
