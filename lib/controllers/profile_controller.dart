@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/user_model.dart';
+import 'package:docelix_mobileapp/services/auth_services.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
@@ -181,6 +182,7 @@ class ProfileController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         debugPrint('Access token not found');
+        _logout();
         return;
       }
 
@@ -363,6 +365,19 @@ class ProfileController extends GetxController {
     } finally {
       isSaving.value = false;
     }
+  }
+
+  Future<void> _logout() async {
+    try {
+      await AuthServices().signOut();
+      await SessionManager.saveAccessToken('');
+      await SessionManager.saveEmail('');
+      await SessionManager.saveCompanyid(0);
+    } catch (e) {
+      debugPrint('Logout error: $e');
+    }
+
+    Get.offAllNamed('/LoginScreen');
   }
 
   @override

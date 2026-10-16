@@ -64,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: width * 0.055,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
 
@@ -212,7 +212,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 20,
-                          //  fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.normal,
                             color: colorsList.textColor,
                           ),
                         ),
@@ -227,8 +227,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               .profileEmail
                               .value,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 14,
+                            fontWeight: FontWeight.normal,
                             color: colorsList.textHintColor,
                           ),
                         ),
@@ -269,8 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   .value,
                               backgroundColor:
                               colorsList.backgroundColor,
-                              textColor:
-                              colorsList.textColor,
+                              textColor: colorsList.textColor,
                             )
                                 : const SizedBox(),
                           ),
@@ -288,7 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(
                             color: colorsList.textColor,
                             fontSize: 14,
-                            //fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -305,7 +305,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const Text(
                   'Account Information',
                   style: TextStyle(
-                    fontSize: 17,
+                    fontSize: 16,
                     //fontWeight: FontWeight.w600,
                     color: colorsList.textColor,
                   ),
@@ -536,8 +536,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 13,
-          //fontWeight: FontWeight.w500,
+          fontSize: 14,
+          fontWeight: FontWeight.normal,
           color: colorsList.textColor,
         ),
       ),
@@ -601,6 +601,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title,
               style: TextStyle(
                 fontSize: 14,
+                fontWeight: FontWeight.normal,
                 color: colorsList.textHintColor,
               ),
             ),
@@ -614,7 +615,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.normal,
                 color: colorsList.textColor,
               ),
             ),

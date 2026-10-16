@@ -316,7 +316,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                         displayStatus,
                         style: TextStyle(
                           fontSize: width * 0.027,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.normal,
                           color: statusColor,
                         ),
                       ),
