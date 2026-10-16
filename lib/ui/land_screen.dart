@@ -125,10 +125,7 @@ class _LandScreenState extends State<LandScreen> {
                 iconColor: colorsList.orange,
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  AppSnackbar.info(
-                    title: 'Coming Soon',
-                    message: 'Quotation feature is coming soon.',
-                  );
+                  Get.toNamed('/QuotationScreen');
                 },
               ),
             ],
