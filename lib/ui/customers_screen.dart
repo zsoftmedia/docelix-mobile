@@ -92,8 +92,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
             "Customers",
             style: TextStyle(
               color: colorsList.textColor,
-              fontSize: width * 0.055,
-              fontWeight: FontWeight.w700,
+              fontSize: 20,
+              fontWeight: FontWeight.normal,
             ),
           );
         }),

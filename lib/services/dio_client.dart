@@ -3,10 +3,30 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/config/api_constants.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
+import 'package:flutter/foundation.dart';
 
 class DioClient {
 
   final Dio _dio = Dio();
+
+  DioClient() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (DioException error, ErrorInterceptorHandler handler) async {
+          if (error.response?.statusCode == 401) {
+            debugPrint('========================================');
+            debugPrint('[DioClient] 401 Unauthorized: Session/Token expired.');
+            debugPrint('Triggering automatic logout...');
+            debugPrint('========================================');
+
+            await SessionManager.logout();
+          }
+          return handler.next(error);
+        },
+      ),
+    );
+  }
 
   // ==============================
   // GET USER

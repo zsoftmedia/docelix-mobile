@@ -36,7 +36,7 @@ class AddItemScreen extends StatelessWidget {
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: 20,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
         centerTitle: false,

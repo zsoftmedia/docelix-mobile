@@ -182,7 +182,7 @@ class ProfileController extends GetxController {
 
       if (accessToken == null || accessToken.isEmpty) {
         debugPrint('Access token not found');
-        _logout();
+        //_logout();
         return;
       }
 
@@ -365,19 +365,6 @@ class ProfileController extends GetxController {
     } finally {
       isSaving.value = false;
     }
-  }
-
-  Future<void> _logout() async {
-    try {
-      await AuthServices().signOut();
-      await SessionManager.saveAccessToken('');
-      await SessionManager.saveEmail('');
-      await SessionManager.saveCompanyid(0);
-    } catch (e) {
-      debugPrint('Logout error: $e');
-    }
-
-    Get.offAllNamed('/LoginScreen');
   }
 
   @override

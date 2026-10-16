@@ -70,8 +70,8 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
               'Incoming Invoice Details',
               style: TextStyle(
                 color: colorsList.textColor,
-                fontSize: width * 0.045,
-                fontWeight: FontWeight.w700,
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
               ),
             ),
 
@@ -80,7 +80,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
               style: TextStyle(
                 color: colorsList.textHintColor,
                 fontSize: width * 0.030,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ],
@@ -457,13 +457,9 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                                   Text(
                                     'Invoice Document',
                                     style: TextStyle(
-                                      color: const Color(
-                                        0xFF0A2342,
-                                      ),
-                                      fontSize:
-                                      width * 0.034,
-                                      fontWeight:
-                                      FontWeight.w600,
+                                      color: const Color(0xFF0A2342,),
+                                      fontSize: width * 0.034,
+                                      fontWeight: FontWeight.normal,
                                     ),
                                   ),
 
@@ -491,8 +487,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                                         ),
                                         fontSize:
                                         width * 0.03,
-                                        fontWeight:
-                                        FontWeight.w600,
+                                        fontWeight: FontWeight.normal,
                                       ),
                                     ),
                                   ),
@@ -679,7 +674,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
             style: TextStyle(
               color: colorsList.textColor,
               fontSize: width * 0.031,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],
@@ -833,7 +828,7 @@ void showInvoiceDocumentDialog({
                               color:
                               colorsList.textColor,
                               fontSize: width * 0.040,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
 

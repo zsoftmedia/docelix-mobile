@@ -40,7 +40,7 @@ class _CreatePurchaseInvoicesScreenState
           "Create Purchase Invoice",
           style: TextStyle(
             color: colorsList.textColor,
-            fontSize: width * 0.055,
+            fontSize: 20,
             fontWeight: FontWeight.normal,
           ),
         ),

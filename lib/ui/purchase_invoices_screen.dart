@@ -94,7 +94,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
             "Purchase Invoice",
             style: TextStyle(
               color: colorsList.textColor,
-              fontSize: width * 0.055,
+              fontSize: 20,
               fontWeight: FontWeight.normal,
             ),
           );
@@ -140,7 +140,6 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
             // --------------------------------------------------------
             // HEADER
             // --------------------------------------------------------
-
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: width * 0.05,
@@ -149,9 +148,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
 
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                 children: [
-
                   Text(
                     "All Purchase Invoices",
                     style: TextStyle(
@@ -166,7 +163,6 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                       horizontal: width * 0.035,
                       vertical: height * 0.008,
                     ),
-
                     decoration: BoxDecoration(
                       color: const Color(0xFFEAF3FB),
                       borderRadius: BorderRadius.circular(20),

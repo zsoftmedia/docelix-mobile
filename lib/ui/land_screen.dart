@@ -1,6 +1,5 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/create_purchase_invoice_controller.dart';
-import 'package:docelix_mobileapp/services/auth_services.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
@@ -257,16 +256,7 @@ class _LandScreenState extends State<LandScreen> {
   }
 
   Future<void> _logout() async {
-    try {
-      await AuthServices().signOut();
-      await SessionManager.saveAccessToken('');
-      await SessionManager.saveEmail('');
-      await SessionManager.saveCompanyid(0);
-    } catch (e) {
-      debugPrint('Logout error: $e');
-    }
-
-    Get.offAllNamed('/LoginScreen');
+    await SessionManager.logout();
   }
 
   void _openAssetRoute(String route) {

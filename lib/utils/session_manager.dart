@@ -1,8 +1,10 @@
+import 'package:docelix_mobileapp/services/auth_services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class SessionManager {
-
   static final GetStorage _storage = GetStorage();
 
   // Storage keys
@@ -12,7 +14,6 @@ class SessionManager {
   static const String _emailKey = 'email';
   static const String _usernameKey = 'username';
   static const String _roleKey = 'role';
-  static const String _roleId = 'role_id';
   static const String _rolenameKey = 'role_name';
   static const String _roledescriptionKey = 'role_description';
   static const String _companynameKey = 'company_name';
@@ -20,10 +21,28 @@ class SessionManager {
   static const String _userDataKey = 'user_data';
   static const String _accCreatedDateKey = 'created_at';
 
-  // Shared Prefrences
+  // Shared Preferences
   static const String _rememberMeKey = 'remember_me';
   static const String _rememberEmailKey = 'remember_email';
   static const String _rememberPasswordKey = 'remember_password';
+
+  // ==============================
+  // CENTRALIZED LOGOUT & AUTO SESSION EXPIRATION
+  // ==============================
+
+  static Future<void> logout() async {
+    try {
+      await AuthServices().signOut();
+      await saveAccessToken('');
+      await saveEmail('');
+      await saveCompanyid(0);
+      await clearSession();
+    } catch (e) {
+      debugPrint('Logout error: $e');
+    }
+
+    Get.offAllNamed('/LoginScreen');
+  }
 
   // ==============================
   // ACCESS TOKEN
@@ -44,10 +63,10 @@ class SessionManager {
   // ACCOUNT CREATED DATE
   // ==============================
 
-  static Future<void> saveAccCreatedDate(String _accCreatedDateKey) async {
+  static Future<void> saveAccCreatedDate(String accCreatedDate) async {
     await _storage.write(
       _accCreatedDateKey,
-      _accCreatedDateKey,
+      accCreatedDate,
     );
   }
 
@@ -120,8 +139,8 @@ class SessionManager {
   // ==============================
 
   static Future<void> saveUserData(
-      Map<String, dynamic> data,
-      ) async {
+    Map<String, dynamic> data,
+  ) async {
     await _storage.write(
       _userDataKey,
       data,
@@ -199,7 +218,7 @@ class SessionManager {
   }
 
   // ==============================
-  // ACCESS CORRENCY CODE
+  // ACCESS CURRENCY CODE
   // ==============================
 
   static Future<void> saveCorrencycode(String correncycode) async {
@@ -213,14 +232,12 @@ class SessionManager {
     return _storage.read<String>(_correncycodeKey);
   }
 
-
   // ==============================
   // CHECK LOGIN
   // ==============================
 
   static bool get isLoggedIn {
-    return accessToken != null &&
-        accessToken!.isNotEmpty;
+    return accessToken != null && accessToken!.isNotEmpty;
   }
 
   // ==============================
@@ -234,10 +251,11 @@ class SessionManager {
     await _storage.remove(_usernameKey);
     await _storage.remove(_roleKey);
     await _storage.remove(_userDataKey);
+    await _storage.remove(_companyidKey);
+    await _storage.remove(_companynameKey);
   }
 
-
-  // Shared prefrences
+  // Shared preferences
   static Future<void> saveRememberMe({
     required bool remember,
     String? email,
@@ -265,5 +283,4 @@ class SessionManager {
       'password': prefs.getString(_rememberPasswordKey) ?? '',
     };
   }
-
 }

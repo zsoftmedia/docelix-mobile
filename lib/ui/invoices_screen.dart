@@ -75,8 +75,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             "Invoices",
             style: TextStyle(
               color: colorsList.textColor,
-              fontSize: width * 0.055,
-              fontWeight: FontWeight.w700,
+              fontSize: 20,
+              fontWeight: FontWeight.normal,
             ),
           );
         }),
@@ -132,8 +132,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     "All Invoices",
                     style: TextStyle(
                       color: colorsList.textColor,
-                      fontSize: width * 0.045,
-                    //  fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
 
@@ -153,7 +153,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                           "${invoicesController.invoices.length} Invoices",
                           style: TextStyle(
                             color: colorsList.textColor,
-                            fontSize: width * 0.032,
+                            fontSize: 14,
                           //  fontWeight: FontWeight.w600,
                           ),
                         );})
@@ -383,8 +383,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colorsList.textColor,
-                    fontSize: 14,
-                   // fontWeight: FontWeight.w700, // Bold
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal, // Bold
                   ),
                 ),
 

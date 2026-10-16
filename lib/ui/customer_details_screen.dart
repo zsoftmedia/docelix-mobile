@@ -46,7 +46,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: 20,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.normal,
           ),
         ),
 
@@ -234,7 +234,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             style: const TextStyle(
               color: colorsList.textColor,
               fontSize: 21,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.normal,
               height: 1.2,
             ),
           ),
@@ -268,7 +268,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               style: const TextStyle(
                 color: colorsList.secondaryTextColor,
                 fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -286,8 +286,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       title,
       style: const TextStyle(
         color: colorsList.primaryColor,
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
+        fontSize: 18,
+        fontWeight: FontWeight.normal,
       ),
     );
   }
@@ -361,8 +361,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                   label,
                   style: const TextStyle(
                     color: colorsList.mutedTextColor,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
 
@@ -376,7 +376,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                     color: hasValue ? colorsList.textColor : colorsList.mutedTextColor,
                     fontSize: 14,
                     fontWeight:
-                    hasValue ? FontWeight.w500 : FontWeight.normal,
+                    hasValue ? FontWeight.normal : FontWeight.normal,
                     height: 1.3,
                   ),
                 ),
@@ -487,7 +487,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: colorsList.textColor,
-                  fontSize: 11.5,
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal
                 ),
               ),
 
@@ -500,7 +501,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 style: const TextStyle(
                   color: colorsList.textColor,
                   fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ],

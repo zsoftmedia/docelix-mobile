@@ -547,7 +547,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width * 0.062,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.normal,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -970,7 +970,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.024,
+                    fontSize: width * 0.035,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -986,8 +986,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.034,
-              fontWeight: FontWeight.w700,
+              fontSize: width * 0.044,
+              fontWeight: FontWeight.normal,
             ),
           ),
 
@@ -1004,7 +1004,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: percentage.startsWith("-")
                         ? colorsList.red
                         : iconColor,
-                    fontSize: width * 0.020,
+                    fontSize: width * 0.027,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -1018,7 +1018,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: colorsList.secondaryText,
-                      fontSize: width * 0.019,
+                      fontSize: width * 0.027,
                     ),
                   ),
                 ),
@@ -1067,8 +1067,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   "Quick actions",
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.037,
-                    fontWeight: FontWeight.w600,
+                    fontSize: width * 0.039,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -1284,8 +1284,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     "Outstanding Amount",
                     style: TextStyle(
                       color: colorsList.primaryText,
-                      fontSize: width * 0.037,
-                      fontWeight: FontWeight.w600,
+                      fontSize: width * 0.039,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                 ),
@@ -1528,8 +1528,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           title,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width * 0.026,
-                            fontWeight: FontWeight.w600,
+                            fontSize: width * 0.037,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
 
@@ -1539,7 +1539,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           subtitle,
                           style: TextStyle(
                             color: colorsList.secondaryText,
-                            fontSize: width * 0.022,
+                            fontSize: width * 0.027,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ],

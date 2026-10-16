@@ -98,8 +98,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       title: const Text(
         'Create Invoice',
         style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          fontWeight: FontWeight.normal,
           color: colorsList.textColor,
         ),
       ),
@@ -746,8 +746,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     return Text(
       title,
       style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
+        fontSize: 18,
+        fontWeight: FontWeight.normal,
         color: colorsList.textColor,
       ),
     );

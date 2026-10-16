@@ -48,7 +48,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                 'Purchase Details',
                 style: TextStyle(
                   color: colorsList.textColor,
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.normal,
                 ),
               ),
