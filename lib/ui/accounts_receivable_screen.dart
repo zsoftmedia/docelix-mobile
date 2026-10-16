@@ -81,8 +81,8 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
             'Accounts Receivable',
             style: TextStyle(
               color: colorsList.textColor,
-              fontSize: width * 0.055,
-              fontWeight: FontWeight.w700,
+              fontSize: 20,
+              fontWeight: FontWeight.normal,
             ),
           );
         }),
@@ -140,8 +140,8 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
                     'Receivable Invoices',
                     style: TextStyle(
                       color: colorsList.textColor,
-                      fontSize: width * 0.045,
-                     // fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
 
@@ -167,8 +167,8 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
                         '${invoicesController.totalReceivableInvoices.value} Invoices',
                         style: TextStyle(
                           color: colorsList.textColor,
-                          fontSize: width * 0.032,
-                         // fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     );
@@ -494,7 +494,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
                           fontSize:
                           width * 0.039,
                           fontWeight:
-                          FontWeight.w600,
+                          FontWeight.normal,
                         ),
                       ),
 
@@ -550,7 +550,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
                       fontSize:
                       width * 0.029,
                       fontWeight:
-                      FontWeight.w500,
+                      FontWeight.normal,
                     ),
                   ),
                 ),
@@ -743,7 +743,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
               colorsList.textColor,
               fontSize: width * 0.036,
               fontWeight:
-              FontWeight.w600,
+              FontWeight.normal,
             ),
           ),
         ],

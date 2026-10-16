@@ -45,7 +45,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: 20,
-           // fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.normal,
           ),
         ),
 
@@ -344,8 +344,8 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
       style: const TextStyle(
         color: colorsList.textColor,
-        fontSize: 17,
-       // fontWeight: FontWeight.w600,
+        fontSize: 18,
+        fontWeight: FontWeight.normal,
       ),
     );
   }
@@ -461,15 +461,13 @@ class ReceivablesDashboardScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-
                   maxLines: 1,
-
                   overflow:
                   TextOverflow.ellipsis,
-
                   style: const TextStyle(
                     color: colorsList.textHintColor,
                     fontSize: 12,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -496,7 +494,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
             style: const TextStyle(
               color: colorsList.textColor,
               fontSize: 18,
-             // fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.normal,
             ),
           ),
 
@@ -696,7 +694,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
                     const TextStyle(
                       color: colorsList.textColor,
                       fontSize: 14,
-                     // fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                 ],
