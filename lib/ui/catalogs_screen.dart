@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/catalog_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -11,111 +12,123 @@ class CatalogsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final rs = context.rs;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.white,
-
         leading: IconButton(
           onPressed: Get.back,
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             color: colorsList.colorBackArrow,
-            size: 20,
+            size: rs.s(20),
           ),
         ),
-
-        title: const Text(
+        title: Text(
           'Items',
           style: TextStyle(
             color: colorsList.textColor,
-            fontSize: 20,
+            fontSize: rs.sp(20),
             fontWeight: FontWeight.normal,
           ),
         ),
-
         centerTitle: false,
       ),
-
       body: Obx(() {
-        // Loading
-        if (controller.isLoading.value &&
-            controller.catalogList.isEmpty) {
+        if (controller.isLoading.value && controller.catalogList.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
 
-        // Error
         if (controller.errorMessage.value.isNotEmpty &&
             controller.catalogList.isEmpty) {
           return Center(
             child: Text(
               controller.errorMessage.value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: colorsList.red,
+                fontSize: rs.sp(14),
               ),
             ),
           );
         }
 
-        // Empty
         if (controller.catalogList.isEmpty) {
           return Center(
             child: Text(
               'No items found.',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: rs.sp(16),
                 color: colorsList.colorGray_350,
               ),
             ),
           );
         }
 
-        return RefreshIndicator(
-          onRefresh: controller.refreshCatalog,
-          child: ListView.builder(
-            itemCount: controller.catalogList.length,
-            itemBuilder: (context, index) {
-              final item = controller.catalogList[index];
+        final cols = rs.listColumns;
+        final items = controller.catalogList;
 
-              final double stock = item.stockQty ?? 0;
-              final double minStock = item.minStock ?? 0;
-
-              final bool lowStock = stock <= minStock;
-
-              return _catalogItem(
-                context: context,
-                item: item,
-                width: width,
-                height: height,
-                lowStock: lowStock,
-              );
-            },
+        return ResponsivePage(
+          padding: EdgeInsets.zero,
+          child: RefreshIndicator(
+            onRefresh: controller.refreshCatalog,
+            child: cols <= 1
+                ? ListView.builder(
+                    padding: EdgeInsets.only(
+                      left: rs.pagePaddingH,
+                      right: rs.pagePaddingH,
+                      bottom: rs.s(96),
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final double stock = item.stockQty ?? 0;
+                      final double minStock = item.minStock ?? 0;
+                      return _catalogItem(
+                        context: context,
+                        item: item,
+                        lowStock: stock <= minStock,
+                        asGridTile: false,
+                      );
+                    },
+                  )
+                : GridView.builder(
+                    padding: EdgeInsets.only(
+                      left: rs.pagePaddingH,
+                      right: rs.pagePaddingH,
+                      top: rs.s(8),
+                      bottom: rs.s(96),
+                    ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: cols,
+                      crossAxisSpacing: rs.s(12),
+                      mainAxisSpacing: rs.s(12),
+                      childAspectRatio: rs.isLandscape ? 2.8 : 2.3,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final double stock = item.stockQty ?? 0;
+                      final double minStock = item.minStock ?? 0;
+                      return _catalogItem(
+                        context: context,
+                        item: item,
+                        lowStock: stock <= minStock,
+                        asGridTile: true,
+                      );
+                    },
+                  ),
           ),
         );
       }),
-
-      // ============================================================
-      // ADD ITEM BUTTON
-      // ============================================================
-
-      floatingActionButtonLocation:
-      FloatingActionButtonLocation.endFloat,
-
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-
-          // ----------------------------------------------------------
-          // OPEN ADD ITEM PAGE
-          // ----------------------------------------------------------
-
           final result = await Get.toNamed(
             '/AddItemScreen',
             arguments: 'Add Item Screen',
@@ -125,126 +138,121 @@ class CatalogsScreen extends StatelessWidget {
             controller.refreshCatalog();
           }
         },
-
         backgroundColor: colorsList.colorButton,
         foregroundColor: colorsList.colorWhite,
-
         elevation: 4,
-
         icon: const Icon(
           Icons.add_rounded,
         ),
-
         label: Text(
-          "Add Item",
+          'Add Item',
           style: TextStyle(
-              fontSize: 14,
-             // fontWeight: FontWeight.w700,
-              color: colorsList.colorWhite
+            fontSize: rs.sp(15),
+            fontWeight: FontWeight.w700,
+            color: colorsList.colorWhite,
           ),
         ),
       ),
-
     );
   }
 
   Widget _catalogItem({
     required BuildContext context,
     required CatalogModel item,
-    required double width,
-    required double height,
     required bool lowStock,
-  })
-  {
-    return Container(
-      color: colorsList.colorWhite,
-      child: Column(
+    required bool asGridTile,
+  }) {
+    final rs = context.rs;
+
+    final content = Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: asGridTile ? rs.s(12) : rs.s(4),
+        vertical: rs.s(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: width * 0.045,
-              vertical: height * 0.014,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+          Icon(
+            Icons.inventory_2_outlined,
+            color: lowStock ? colorsList.orange : colorsList.iconColor,
+            size: rs.s(24),
+          ),
+          SizedBox(width: rs.s(12)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Item icon
-                Icon(
-                  Icons.inventory_2_outlined,
-                  color: colorsList.iconColor,
-                  size: width * 0.06,
-                ),
-
-                SizedBox(width: width * 0.035),
-
-                // Item information
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.articleName ?? 'Unnamed Item',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: colorsList.textColor,
-                          fontSize: 14,
-                        //  fontWeight: FontWeight.w600,
-                        ),
-                      ),
-
-                      SizedBox(height: height * 0.004),
-
-                      Text(
-                        item.articleNumber ?? 'N/A',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: colorsList.textColor,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                Text(
+                  item.articleName ?? 'Unnamed Item',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colorsList.textColor,
+                    fontSize: rs.sp(16),
                   ),
                 ),
-
-                SizedBox(width: width * 0.025),
-
-                // Price
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      item.unitPriceNet?.toStringAsFixed(2) ?? '0.00',
-                      style: TextStyle(
-                        color: colorsList.textColor,
-                        fontSize: 14,
-                      //  fontWeight: FontWeight.w600,
-                      ),
-                    ),
-
-                    SizedBox(height: height * 0.003),
-
-                    Text(
-                      item.unitCode ?? '',
-                      style: TextStyle(
-                        color: colorsList.textColor,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
+                SizedBox(height: rs.s(4)),
+                Text(
+                  item.articleNumber ?? 'N/A',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colorsList.textColor,
+                    fontSize: rs.sp(12),
+                  ),
                 ),
               ],
             ),
           ),
+          SizedBox(width: rs.s(10)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                item.unitPriceNet?.toStringAsFixed(2) ?? '0.00',
+                style: TextStyle(
+                  color: colorsList.textColor,
+                  fontSize: rs.sp(14),
+                ),
+              ),
+              SizedBox(height: rs.s(3)),
+              Text(
+                item.unitCode ?? '',
+                style: TextStyle(
+                  color: colorsList.textColor,
+                  fontSize: rs.sp(11),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
 
-          // List separator
+    if (asGridTile) {
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorsList.colorWhite,
+          borderRadius: BorderRadius.circular(rs.s(12)),
+          border: Border.all(color: colorsList.borderColor),
+        ),
+        child: content,
+      );
+    }
+
+    return Container(
+      color: colorsList.colorWhite,
+      child: Column(
+        children: [
+          content,
           Divider(
             height: 1,
             thickness: 1,
             color: colorsList.dividerColor,
-            indent: 20,
-            endIndent: 20,
+            indent: rs.s(20),
+            endIndent: rs.s(20),
           ),
         ],
       ),

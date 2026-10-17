@@ -1,5 +1,6 @@
 import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/create_invoice_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -19,86 +20,93 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
+
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(rs),
       body: Obx(() {
         final currentStep = controllerCreateInvoice.currentStep.value;
 
-        return Stepper(
-          type: StepperType.horizontal,
-          currentStep: currentStep,
-          onStepTapped: controllerCreateInvoice.goToStep,
-          onStepContinue: controllerCreateInvoice.nextStep,
-          onStepCancel: controllerCreateInvoice.previousStep,
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          controlsBuilder: _buildControls,
-          steps: [
-            Step(
-              title: const Text(
-                'Sender',
-                style: TextStyle(fontSize: 11),
+        return ResponsivePage(
+          padding: EdgeInsets.symmetric(
+            horizontal: rs.isPhone ? 0 : rs.pagePaddingH,
+          ),
+          child: Stepper(
+            type: StepperType.horizontal,
+            currentStep: currentStep,
+            onStepTapped: controllerCreateInvoice.goToStep,
+            onStepContinue: controllerCreateInvoice.nextStep,
+            onStepCancel: controllerCreateInvoice.previousStep,
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            controlsBuilder: _buildControls,
+            steps: [
+              Step(
+                title: Text(
+                  'Sender',
+                  style: TextStyle(fontSize: rs.sp(11)),
+                ),
+                isActive: currentStep >= 0,
+                state: currentStep > 0
+                    ? StepState.complete
+                    : StepState.indexed,
+                content: _senderStep(),
               ),
-              isActive: currentStep >= 0,
-              state: currentStep > 0
-                  ? StepState.complete
-                  : StepState.indexed,
-              content: _senderStep(),
-            ),
-            Step(
-              title: const Text(
-                'Client',
-                style: TextStyle(fontSize: 11),
+              Step(
+                title: Text(
+                  'Client',
+                  style: TextStyle(fontSize: rs.sp(11)),
+                ),
+                isActive: currentStep >= 1,
+                state: currentStep > 1
+                    ? StepState.complete
+                    : StepState.indexed,
+                content: _clientStep(),
               ),
-              isActive: currentStep >= 1,
-              state: currentStep > 1
-                  ? StepState.complete
-                  : StepState.indexed,
-              content: _clientStep(),
-            ),
-            Step(
-              title: const Text(
-                'Invoice',
-                style: TextStyle(fontSize: 11),
+              Step(
+                title: Text(
+                  'Invoice',
+                  style: TextStyle(fontSize: rs.sp(11)),
+                ),
+                isActive: currentStep >= 2,
+                state: currentStep > 2
+                    ? StepState.complete
+                    : StepState.indexed,
+                content: _invoiceStep(),
               ),
-              isActive: currentStep >= 2,
-              state: currentStep > 2
-                  ? StepState.complete
-                  : StepState.indexed,
-              content: _invoiceStep(),
-            ),
-            Step(
-              title: const Text(
-                'Items',
-                style: TextStyle(fontSize: 11),
+              Step(
+                title: Text(
+                  'Items',
+                  style: TextStyle(fontSize: rs.sp(11)),
+                ),
+                isActive: currentStep >= 3,
+                state: StepState.indexed,
+                content: _itemsStep(),
               ),
-              isActive: currentStep >= 3,
-              state: StepState.indexed,
-              content: _itemsStep(),
-            ),
-          ],
+            ],
+          ),
         );
       }),
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(ResponsiveMetrics rs) {
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.white,
       leading: IconButton(
         onPressed: Get.back,
-        icon: const Icon(
+        icon: Icon(
           Icons.arrow_back_ios_new_rounded,
-          size: 19,
+          size: rs.s(19),
         ),
       ),
-      title: const Text(
+      title: Text(
         'Create Invoice',
         style: TextStyle(
-          fontSize: 20,
+          fontSize: rs.sp(20),
           fontWeight: FontWeight.normal,
           color: colorsList.textColor,
         ),
@@ -831,8 +839,11 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     controllerCreateInvoice.updateUnitSearchQuery('');
 
     Get.bottomSheet(
-      Container(
-        height: MediaQuery.of(context).size.height * 0.75,
+      backgroundColor: Colors.transparent,
+      ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+        height: context.rs.height * 0.75,
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -947,6 +958,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
             ),
           ],
         ),
+        ),
       ),
       isScrollControlled: true,
     );
@@ -957,8 +969,11 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     controllerCreateInvoice.updateClientSearchQuery('');
 
     Get.bottomSheet(
-      Container(
-        height: MediaQuery.of(context).size.height * 0.75,
+      backgroundColor: Colors.transparent,
+      ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+        height: context.rs.height * 0.75,
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -1107,6 +1122,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
             ),
           ],
         ),
+        ),
       ),
       isScrollControlled: true,
     );
@@ -1146,8 +1162,11 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     }
 
     Get.bottomSheet(
-      Container(
-        height: Get.height * 0.75,
+      backgroundColor: Colors.transparent,
+      ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+        height: Get.context!.rs.height * 0.75,
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -1316,6 +1335,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
       isScrollControlled: true,

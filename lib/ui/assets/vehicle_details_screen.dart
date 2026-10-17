@@ -1,10 +1,16 @@
 import 'package:docelix_mobileapp/controllers/vehicle_details_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/vehicle_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+
+double _designWidth(BuildContext context) {
+  final rs = context.rs;
+  return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
+}
 
 class VehicleDetailsScreen extends StatefulWidget {
   const VehicleDetailsScreen({super.key});
@@ -61,7 +67,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -88,7 +94,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen>
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.042,
+                  fontSize: width.fontSizeW(0.042),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -98,7 +104,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen>
                     : 'No plate',
                 style: TextStyle(
                   color: colorsList.secondaryText,
-                  fontSize: width * 0.026,
+                  fontSize: width.fontSizeW(0.026),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -134,51 +140,60 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen>
           Container(
             width: double.infinity,
             color: colorsList.colorWhite,
-            padding: EdgeInsets.fromLTRB(
-              width * 0.04,
-              0,
-              width * 0.04,
-              width * 0.03,
+            child: ResponsivePage(
+              padding: EdgeInsets.fromLTRB(
+                context.rs.isPhone ? width * 0.04 : context.rs.pagePaddingH,
+                0,
+                context.rs.isPhone ? width * 0.04 : context.rs.pagePaddingH,
+                width * 0.03,
+              ),
+              child: _SummaryCard(controller: controller),
             ),
-            child: _SummaryCard(controller: controller),
           ),
           Container(
+            width: double.infinity,
             color: colorsList.colorWhite,
-            child: TabBar(
-              controller: tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              padding: EdgeInsets.symmetric(horizontal: width * 0.02),
-              labelPadding: EdgeInsets.symmetric(horizontal: width * 0.035),
-              labelColor: colorsList.colorButton,
-              unselectedLabelColor: colorsList.mutedTextColor,
-              indicatorColor: colorsList.colorButton,
-              indicatorWeight: 2.5,
-              indicatorSize: TabBarIndicatorSize.label,
-              dividerColor: colorsList.borderColor,
-              labelStyle: TextStyle(
-                fontSize: width * 0.032,
-                fontWeight: FontWeight.w700,
+            child: ResponsivePage(
+              padding: EdgeInsets.zero,
+              child: TabBar(
+                controller: tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                padding: EdgeInsets.symmetric(horizontal: width * 0.02),
+                labelPadding: EdgeInsets.symmetric(horizontal: width * 0.035),
+                labelColor: colorsList.colorButton,
+                unselectedLabelColor: colorsList.mutedTextColor,
+                indicatorColor: colorsList.colorButton,
+                indicatorWeight: 2.5,
+                indicatorSize: TabBarIndicatorSize.label,
+                dividerColor: colorsList.borderColor,
+                labelStyle: TextStyle(
+                  fontSize: width.fontSizeW(0.032),
+                  fontWeight: FontWeight.w700,
+                ),
+                unselectedLabelStyle: TextStyle(
+                  fontSize: width.fontSizeW(0.032),
+                  fontWeight: FontWeight.w500,
+                ),
+                tabs: _tabs.map((t) => Tab(height: 40, text: t)).toList(),
               ),
-              unselectedLabelStyle: TextStyle(
-                fontSize: width * 0.032,
-                fontWeight: FontWeight.w500,
-              ),
-              tabs: _tabs.map((t) => Tab(height: 40, text: t)).toList(),
             ),
           ),
           Expanded(
-            child: TabBarView(
-              controller: tabController,
-              children: [
-                _OverviewTab(controller: controller),
-                _DriversTab(controller: controller),
-                _TripsTab(controller: controller),
-                _FuelTab(controller: controller),
-                _ServicesTab(controller: controller),
-                _InsuranceTab(controller: controller),
-                _DocumentsTab(controller: controller),
-              ],
+            child: ResponsivePage(
+              padding: EdgeInsets.zero,
+              child: TabBarView(
+                controller: tabController,
+                children: [
+                  _OverviewTab(controller: controller),
+                  _DriversTab(controller: controller),
+                  _TripsTab(controller: controller),
+                  _FuelTab(controller: controller),
+                  _ServicesTab(controller: controller),
+                  _InsuranceTab(controller: controller),
+                  _DocumentsTab(controller: controller),
+                ],
+              ),
             ),
           ),
         ],
@@ -194,7 +209,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       final vehicle = controller.vehicle.value;
@@ -236,7 +251,7 @@ class _SummaryCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: colorsList.primaryText,
-                      fontSize: width * 0.034,
+                      fontSize: width.fontSizeW(0.034),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -251,7 +266,7 @@ class _SummaryCard extends StatelessWidget {
                         vehicle.typeLabel,
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.026,
+                          fontSize: width.fontSizeW(0.026),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -263,7 +278,7 @@ class _SummaryCard extends StatelessWidget {
                         vehicle.kmLabel,
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.026,
+                          fontSize: width.fontSizeW(0.026),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -287,7 +302,7 @@ class _MiniChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -302,7 +317,7 @@ class _MiniChip extends StatelessWidget {
         label,
         style: TextStyle(
           color: color,
-          fontSize: width * 0.024,
+          fontSize: width.fontSizeW(0.024),
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -317,7 +332,7 @@ class _OverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       final vehicle = controller.vehicle.value;
@@ -405,11 +420,17 @@ class _DriversTab extends StatelessWidget {
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: colorsList.colorWhite,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      backgroundColor: Colors.transparent,
+      builder: (_) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorsList.colorWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          ),
+          child: _AssignDriverSheet(controller: controller),
+        ),
       ),
-      builder: (_) => _AssignDriverSheet(controller: controller),
     );
   }
 
@@ -422,20 +443,22 @@ class _DriversTab extends StatelessWidget {
         : 'this driver';
 
     final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Remove assignment'),
-        content: Text('Remove $name from this vehicle?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            style: TextButton.styleFrom(foregroundColor: colorsList.red),
-            child: const Text('Remove'),
-          ),
-        ],
+      ResponsiveDialogBody(
+        child: AlertDialog(
+          title: const Text('Remove assignment'),
+          content: Text('Remove $name from this vehicle?'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Get.back(result: true),
+              style: TextButton.styleFrom(foregroundColor: colorsList.red),
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -446,7 +469,7 @@ class _DriversTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       final assignments = controller.vehicle.value.vehicleDriverAssignments;
@@ -479,7 +502,7 @@ class _DriversTab extends StatelessWidget {
                         'Assigned Drivers',
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.036,
+                          fontSize: width.fontSizeW(0.036),
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -488,7 +511,7 @@ class _DriversTab extends StatelessWidget {
                         countLabel,
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ],
@@ -506,7 +529,7 @@ class _DriversTab extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.colorButton,
                       fontWeight: FontWeight.w700,
-                      fontSize: width * 0.03,
+                      fontSize: width.fontSizeW(0.03),
                     ),
                   ),
                 ),
@@ -563,7 +586,7 @@ class _DriverAssignmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.all(width * 0.035),
@@ -596,7 +619,7 @@ class _DriverAssignmentCard extends StatelessWidget {
                   name,
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.034,
+                    fontSize: width.fontSizeW(0.034),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -615,7 +638,7 @@ class _DriverAssignmentCard extends StatelessWidget {
                       'Assigned $assignedAt',
                       style: TextStyle(
                         color: colorsList.secondaryText,
-                        fontSize: width * 0.026,
+                        fontSize: width.fontSizeW(0.026),
                       ),
                     ),
                   ],
@@ -703,7 +726,7 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
@@ -729,7 +752,7 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
                       'Assign Driver',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.042,
+                        fontSize: width.fontSizeW(0.042),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -787,7 +810,7 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
                               text: 'Driver Name',
                               style: TextStyle(
                                 color: colorsList.secondaryText,
-                                fontSize: width * 0.03,
+                                fontSize: width.fontSizeW(0.03),
                                 fontWeight: FontWeight.w600,
                               ),
                               children: const [
@@ -854,7 +877,7 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
                             'No drivers in the company yet. Create a new one.',
                             style: TextStyle(
                               color: colorsList.secondaryText,
-                              fontSize: width * 0.032,
+                              fontSize: width.fontSizeW(0.032),
                             ),
                           );
                         }
@@ -906,7 +929,7 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
                   'Primary driver',
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.033,
+                    fontSize: width.fontSizeW(0.033),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -982,7 +1005,7 @@ class _ModeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Material(
       color: selected ? colorsList.colorButton : Colors.transparent,
@@ -997,7 +1020,7 @@ class _ModeChip extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: selected ? Colors.white : colorsList.colorButton,
-              fontSize: width * 0.03,
+              fontSize: width.fontSizeW(0.03),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1016,30 +1039,38 @@ class _TripsTab extends StatelessWidget {
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: colorsList.colorWhite,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      backgroundColor: Colors.transparent,
+      builder: (_) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorsList.colorWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          ),
+          child: _AddTripSheet(controller: controller),
+        ),
       ),
-      builder: (_) => _AddTripSheet(controller: controller),
     );
   }
 
   Future<void> _confirmDelete(BuildContext context, VehicleTrip trip) async {
     final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Delete trip'),
-        content: Text('Delete trip ${trip.routeLabel}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            style: TextButton.styleFrom(foregroundColor: colorsList.red),
-            child: const Text('Delete'),
-          ),
-        ],
+      ResponsiveDialogBody(
+        child: AlertDialog(
+          title: const Text('Delete trip'),
+          content: Text('Delete trip ${trip.routeLabel}?'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Get.back(result: true),
+              style: TextButton.styleFrom(foregroundColor: colorsList.red),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -1050,7 +1081,7 @@ class _TripsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       if (controller.isLoadingTrips.value && controller.trips.isEmpty) {
@@ -1093,7 +1124,7 @@ class _TripsTab extends StatelessWidget {
                         'Trip History',
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.036,
+                          fontSize: width.fontSizeW(0.036),
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -1102,7 +1133,7 @@ class _TripsTab extends StatelessWidget {
                         '${trips.length} trip${trips.length == 1 ? '' : 's'}',
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ],
@@ -1120,7 +1151,7 @@ class _TripsTab extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.colorButton,
                       fontWeight: FontWeight.w700,
-                      fontSize: width * 0.03,
+                      fontSize: width.fontSizeW(0.03),
                     ),
                   ),
                 ),
@@ -1165,7 +1196,7 @@ class _TripsTab extends StatelessWidget {
                         'Total (all trips)',
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.03,
+                          fontSize: width.fontSizeW(0.03),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -1174,7 +1205,7 @@ class _TripsTab extends StatelessWidget {
                       '${controller.formatKm(totalDistance)} · $totalDuration min',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.03,
+                        fontSize: width.fontSizeW(0.03),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -1206,7 +1237,7 @@ class _TripCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.all(width * 0.035),
@@ -1226,7 +1257,7 @@ class _TripCard extends StatelessWidget {
                   trip.routeLabel,
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.034,
+                    fontSize: width.fontSizeW(0.034),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -1241,7 +1272,7 @@ class _TripCard extends StatelessWidget {
                   ].join(' · '),
                   style: TextStyle(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.027,
+                    fontSize: width.fontSizeW(0.027),
                   ),
                 ),
                 if (trip.purpose?.trim().isNotEmpty == true) ...[
@@ -1250,7 +1281,7 @@ class _TripCard extends StatelessWidget {
                     trip.purpose!,
                     style: TextStyle(
                       color: colorsList.mutedTextColor,
-                      fontSize: width * 0.026,
+                      fontSize: width.fontSizeW(0.026),
                     ),
                   ),
                 ],
@@ -1264,7 +1295,7 @@ class _TripCard extends StatelessWidget {
                 distanceLabel,
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.032,
+                  fontSize: width.fontSizeW(0.032),
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -1370,7 +1401,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
@@ -1398,7 +1429,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                       'Add Trip',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.042,
+                        fontSize: width.fontSizeW(0.042),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -1438,7 +1469,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                 dateLabel,
                                 style: TextStyle(
                                   color: colorsList.primaryText,
-                                  fontSize: width * 0.033,
+                                  fontSize: width.fontSizeW(0.033),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -1545,7 +1576,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                     'TOTAL DISTANCE',
                                     style: TextStyle(
                                       color: colorsList.mutedTextColor,
-                                      fontSize: width * 0.024,
+                                      fontSize: width.fontSizeW(0.024),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -1554,7 +1585,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                     _distance!.distanceText,
                                     style: TextStyle(
                                       color: colorsList.primaryText,
-                                      fontSize: width * 0.034,
+                                      fontSize: width.fontSizeW(0.034),
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -1569,7 +1600,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                     'EST. DURATION',
                                     style: TextStyle(
                                       color: colorsList.mutedTextColor,
-                                      fontSize: width * 0.024,
+                                      fontSize: width.fontSizeW(0.024),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -1578,7 +1609,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                     _distance!.durationText,
                                     style: TextStyle(
                                       color: colorsList.primaryText,
-                                      fontSize: width * 0.034,
+                                      fontSize: width.fontSizeW(0.034),
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -1669,14 +1700,14 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Text.rich(
       TextSpan(
         text: text,
         style: TextStyle(
           color: colorsList.secondaryText,
-          fontSize: width * 0.03,
+          fontSize: width.fontSizeW(0.03),
           fontWeight: FontWeight.w600,
         ),
         children: [
@@ -1700,17 +1731,23 @@ class _FuelTab extends StatelessWidget {
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: colorsList.colorWhite,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      backgroundColor: Colors.transparent,
+      builder: (_) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorsList.colorWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          ),
+          child: _LogFuelSheet(controller: controller),
+        ),
       ),
-      builder: (_) => _LogFuelSheet(controller: controller),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       if (controller.isLoadingFuel.value && controller.fuelLogs.isEmpty) {
@@ -1740,7 +1777,7 @@ class _FuelTab extends StatelessWidget {
                         'Fuel History',
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.036,
+                          fontSize: width.fontSizeW(0.036),
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -1749,7 +1786,7 @@ class _FuelTab extends StatelessWidget {
                         '${logs.length} fuel log${logs.length == 1 ? '' : 's'}',
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ],
@@ -1767,7 +1804,7 @@ class _FuelTab extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.colorButton,
                       fontWeight: FontWeight.w700,
-                      fontSize: width * 0.03,
+                      fontSize: width.fontSizeW(0.03),
                     ),
                   ),
                 ),
@@ -1799,7 +1836,7 @@ class _FuelTab extends StatelessWidget {
                       controller.formatMoney(log.cost),
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.032,
+                        fontSize: width.fontSizeW(0.032),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -1868,35 +1905,43 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
   Future<void> _pickReceiptSource() async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      backgroundColor: colorsList.colorWhite,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        final width = MediaQuery.of(context).size.width;
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(width * 0.04),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: Icon(
-                    Icons.photo_camera_outlined,
-                    color: colorsList.colorButton,
-                  ),
-                  title: const Text('Take Photo'),
-                  onTap: () => Navigator.pop(context, ImageSource.camera),
+        final width = _designWidth(context);
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorsList.colorWhite,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.all(width * 0.04),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: Icon(
+                        Icons.photo_camera_outlined,
+                        color: colorsList.colorButton,
+                      ),
+                      title: const Text('Take Photo'),
+                      onTap: () => Navigator.pop(context, ImageSource.camera),
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        Icons.photo_library_outlined,
+                        color: colorsList.colorButton,
+                      ),
+                      title: const Text('Upload from Gallery'),
+                      onTap: () => Navigator.pop(context, ImageSource.gallery),
+                    ),
+                  ],
                 ),
-                ListTile(
-                  leading: Icon(
-                    Icons.photo_library_outlined,
-                    color: colorsList.colorButton,
-                  ),
-                  title: const Text('Upload from Gallery'),
-                  onTap: () => Navigator.pop(context, ImageSource.gallery),
-                ),
-              ],
+              ),
             ),
           ),
         );
@@ -1952,7 +1997,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
@@ -1981,7 +2026,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                       'Log Fuel',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.042,
+                        fontSize: width.fontSizeW(0.042),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -2019,7 +2064,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                       'Smart Receipt Upload',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.036,
+                        fontSize: width.fontSizeW(0.036),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -2029,7 +2074,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: colorsList.secondaryText,
-                        fontSize: width * 0.028,
+                        fontSize: width.fontSizeW(0.028),
                         height: 1.35,
                       ),
                     ),
@@ -2076,7 +2121,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                 'OR ENTER MANUALLY:',
                 style: TextStyle(
                   color: colorsList.mutedTextColor,
-                  fontSize: width * 0.028,
+                  fontSize: width.fontSizeW(0.028),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.4,
                 ),
@@ -2107,7 +2152,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                                 dateLabel,
                                 style: TextStyle(
                                   color: colorsList.primaryText,
-                                  fontSize: width * 0.033,
+                                  fontSize: width.fontSizeW(0.033),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -2267,17 +2312,23 @@ class _ServicesTab extends StatelessWidget {
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: colorsList.colorWhite,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      backgroundColor: Colors.transparent,
+      builder: (_) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorsList.colorWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          ),
+          child: _LogServiceSheet(controller: controller),
+        ),
       ),
-      builder: (_) => _LogServiceSheet(controller: controller),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       if (controller.isLoadingServices.value && controller.services.isEmpty) {
@@ -2307,7 +2358,7 @@ class _ServicesTab extends StatelessWidget {
                         'Service & Maintenance',
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.036,
+                          fontSize: width.fontSizeW(0.036),
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -2316,7 +2367,7 @@ class _ServicesTab extends StatelessWidget {
                         '${items.length} service${items.length == 1 ? '' : 's'}',
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ],
@@ -2334,7 +2385,7 @@ class _ServicesTab extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.colorButton,
                       fontWeight: FontWeight.w700,
-                      fontSize: width * 0.03,
+                      fontSize: width.fontSizeW(0.03),
                     ),
                   ),
                 ),
@@ -2363,7 +2414,7 @@ class _ServicesTab extends StatelessWidget {
                       controller.formatMoney(service.cost),
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.032,
+                        fontSize: width.fontSizeW(0.032),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -2459,7 +2510,7 @@ class _LogServiceSheetState extends State<_LogServiceSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
@@ -2488,7 +2539,7 @@ class _LogServiceSheetState extends State<_LogServiceSheet> {
                       'Log Service / Maintenance',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.042,
+                        fontSize: width.fontSizeW(0.042),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -2528,7 +2579,7 @@ class _LogServiceSheetState extends State<_LogServiceSheet> {
                                 dateLabel,
                                 style: TextStyle(
                                   color: colorsList.primaryText,
-                                  fontSize: width * 0.033,
+                                  fontSize: width.fontSizeW(0.033),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -2676,17 +2727,23 @@ class _InsuranceTab extends StatelessWidget {
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: colorsList.colorWhite,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      backgroundColor: Colors.transparent,
+      builder: (_) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorsList.colorWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          ),
+          child: _LogInsuranceSheet(controller: controller),
+        ),
       ),
-      builder: (_) => _LogInsuranceSheet(controller: controller),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       if (controller.isLoadingInsurance.value &&
@@ -2717,7 +2774,7 @@ class _InsuranceTab extends StatelessWidget {
                         'Insurance Policies',
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.036,
+                          fontSize: width.fontSizeW(0.036),
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -2726,7 +2783,7 @@ class _InsuranceTab extends StatelessWidget {
                         '${policies.length} polic${policies.length == 1 ? 'y' : 'ies'}',
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ],
@@ -2744,7 +2801,7 @@ class _InsuranceTab extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.colorButton,
                       fontWeight: FontWeight.w700,
-                      fontSize: width * 0.03,
+                      fontSize: width.fontSizeW(0.03),
                     ),
                   ),
                 ),
@@ -2774,7 +2831,7 @@ class _InsuranceTab extends StatelessWidget {
                       controller.formatMoney(policy.premium),
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.032,
+                        fontSize: width.fontSizeW(0.032),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -2875,7 +2932,7 @@ class _LogInsuranceSheetState extends State<_LogInsuranceSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
@@ -2902,7 +2959,7 @@ class _LogInsuranceSheetState extends State<_LogInsuranceSheet> {
                       'Log Insurance Policy',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.042,
+                        fontSize: width.fontSizeW(0.042),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -3008,11 +3065,17 @@ class _DocumentsTab extends StatelessWidget {
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: colorsList.colorWhite,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      backgroundColor: Colors.transparent,
+      builder: (_) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorsList.colorWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          ),
+          child: _UploadDocumentSheet(controller: controller),
+        ),
       ),
-      builder: (_) => _UploadDocumentSheet(controller: controller),
     );
   }
 
@@ -3073,7 +3136,7 @@ class _DocumentsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       if (controller.isLoadingDocuments.value && controller.documents.isEmpty) {
@@ -3103,7 +3166,7 @@ class _DocumentsTab extends StatelessWidget {
                         'Vehicle Documents',
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.036,
+                          fontSize: width.fontSizeW(0.036),
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -3112,7 +3175,7 @@ class _DocumentsTab extends StatelessWidget {
                         '${docs.length} document${docs.length == 1 ? '' : 's'}',
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ],
@@ -3130,7 +3193,7 @@ class _DocumentsTab extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.colorButton,
                       fontWeight: FontWeight.w700,
-                      fontSize: width * 0.03,
+                      fontSize: width.fontSizeW(0.03),
                     ),
                   ),
                 ),
@@ -3160,7 +3223,7 @@ class _DocumentsTab extends StatelessWidget {
                       'View File',
                       style: TextStyle(
                         color: colorsList.colorButton,
-                        fontSize: width * 0.028,
+                        fontSize: width.fontSizeW(0.028),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -3223,7 +3286,7 @@ class _UploadDocumentSheetState extends State<_UploadDocumentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
@@ -3249,7 +3312,7 @@ class _UploadDocumentSheetState extends State<_UploadDocumentSheet> {
                       'Upload Document',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.042,
+                        fontSize: width.fontSizeW(0.042),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -3326,7 +3389,7 @@ class _UploadDocumentSheetState extends State<_UploadDocumentSheet> {
                       'Provide a valid URL to the document (Temporary implementation)',
                       style: TextStyle(
                         color: colorsList.mutedTextColor,
-                        fontSize: width * 0.026,
+                        fontSize: width.fontSizeW(0.026),
                       ),
                     ),
                   ],
@@ -3376,7 +3439,7 @@ class _DateField extends StatelessWidget {
                   color: muted
                       ? colorsList.mutedTextColor
                       : colorsList.primaryText,
-                  fontSize: width * 0.033,
+                  fontSize: width.fontSizeW(0.033),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -3408,7 +3471,7 @@ class _SheetActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Row(
       children: [
@@ -3501,7 +3564,7 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       width: double.infinity,
@@ -3518,7 +3581,7 @@ class _SectionCard extends StatelessWidget {
             title,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.034,
+              fontSize: width.fontSizeW(0.034),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -3538,7 +3601,7 @@ class _MetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: width * 0.014),
@@ -3551,7 +3614,7 @@ class _MetaRow extends StatelessWidget {
               label,
               style: TextStyle(
                 color: colorsList.mutedTextColor,
-                fontSize: width * 0.03,
+                fontSize: width.fontSizeW(0.03),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -3562,7 +3625,7 @@ class _MetaRow extends StatelessWidget {
               textAlign: TextAlign.right,
               style: TextStyle(
                 color: colorsList.primaryText,
-                fontSize: width * 0.032,
+                fontSize: width.fontSizeW(0.032),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -3588,7 +3651,7 @@ class _ListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Material(
       color: Colors.transparent,
@@ -3613,7 +3676,7 @@ class _ListCard extends StatelessWidget {
                       title,
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.034,
+                        fontSize: width.fontSizeW(0.034),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -3623,7 +3686,7 @@ class _ListCard extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.027,
+                          fontSize: width.fontSizeW(0.027),
                         ),
                       ),
                     ],
@@ -3650,7 +3713,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Column(
       children: [
@@ -3661,7 +3724,7 @@ class _EmptyState extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: colorsList.secondaryText,
-            fontSize: width * 0.034,
+            fontSize: width.fontSizeW(0.034),
             fontWeight: FontWeight.w600,
           ),
         ),

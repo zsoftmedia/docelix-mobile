@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/client_details_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final rs = context.rs;
     final client = controller.client;
 
     final String clientName = client.name.trim().isNotEmpty
@@ -34,18 +35,18 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
         leading: IconButton(
           onPressed: Get.back,
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             color: colorsList.colorBackArrow,
-            size: 20,
+            size: rs.s(20),
           ),
         ),
 
-        title: const Text(
+        title: Text(
           'Customer Details',
           style: TextStyle(
             color: colorsList.textColor,
-            fontSize: 20,
+            fontSize: rs.sp(20),
             fontWeight: FontWeight.normal,
           ),
         ),
@@ -54,14 +55,15 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       ),
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+        child: ResponsivePage(
           padding: EdgeInsets.fromLTRB(
-            width * 0.05,
-            20,
-            width * 0.05,
-            30,
+            rs.pagePaddingH,
+            rs.s(20),
+            rs.pagePaddingH,
+            rs.s(30),
           ),
+          child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -176,6 +178,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 ],
               ),
             ],
+          ),
           ),
         ),
       ),

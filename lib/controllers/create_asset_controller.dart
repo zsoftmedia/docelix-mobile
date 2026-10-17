@@ -85,6 +85,18 @@ class CreateAssetController extends GetxController {
     }
   }
 
+  LedgerAccount? get selectedAccount {
+    final id = selectedAccountId.value;
+    if (id == null) return null;
+    for (final account in accounts) {
+      if (account.id == id) return account;
+    }
+    return null;
+  }
+
+  String get selectedAccountLabel =>
+      selectedAccount?.displayLabel ?? 'Select ledger account';
+
   double get fullYearWriteOff {
     if (annualRate.value > 0) {
       return purchasePrice.value * (annualRate.value / 100);
@@ -390,6 +402,7 @@ class CreateAssetController extends GetxController {
         'notes': notesController.text.trim(),
     };
 
+    var succeeded = false;
     try {
       isSubmitting.value = true;
       final response = await _dioClient.createAsset(
@@ -399,10 +412,10 @@ class CreateAssetController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        AppSnackbar.success(
-          title: 'Success',
-          message: 'Asset created successfully.',
-        );
+        // Success snackbar is shown by the previous screen after Get.back,
+        // so we don't open an overlay on a route that is about to dispose.
+        // Keep isSubmitting true to avoid an Obx rebuild right before pop.
+        succeeded = true;
         return true;
       }
 
@@ -426,23 +439,34 @@ class CreateAssetController extends GetxController {
       AppSnackbar.error(title: 'Error', message: e.toString());
       return false;
     } finally {
-      isSubmitting.value = false;
+      if (!succeeded) {
+        isSubmitting.value = false;
+      }
     }
   }
 
   @override
   void onClose() {
     _searchDebounce?.cancel();
-    nameController.dispose();
-    assetNumberController.dispose();
-    purchasePriceController.dispose();
-    bookValueController.dispose();
-    usefulLifeController.dispose();
-    annualRateController.dispose();
-    supplierController.dispose();
-    serialController.dispose();
-    locationController.dispose();
-    notesController.dispose();
+    // Defer dispose one frame so any last route-exit rebuilds don't hit
+    // "TextEditingController was used after being disposed".
+    final controllers = <TextEditingController>[
+      nameController,
+      assetNumberController,
+      purchasePriceController,
+      bookValueController,
+      usefulLifeController,
+      annualRateController,
+      supplierController,
+      serialController,
+      locationController,
+      notesController,
+    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final c in controllers) {
+        c.dispose();
+      }
+    });
     super.onClose();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/clients_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -12,33 +13,19 @@ class CustomersScreen extends StatefulWidget {
 }
 
 class _CustomersScreenState extends State<CustomersScreen> {
-
   final ClientsController controller = Get.put(ClientsController());
 
   @override
   Widget build(BuildContext context) {
-
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final rs = context.rs;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-
-      // ============================================================
-      // APP BAR
-      // ============================================================
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-
-        // ============================================================
-        // BACK / CLOSE SEARCH
-        // ============================================================
-
         leading: Obx(() {
-          final bool searching =
-              controller.isSearching.value;
+          final bool searching = controller.isSearching.value;
 
           return IconButton(
             onPressed: () {
@@ -53,30 +40,20 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   ? Icons.close_rounded
                   : Icons.arrow_back_ios_new_rounded,
               color: colorsList.iconColor,
-              size: width * 0.05,
+              size: rs.s(20),
             ),
           );
         }),
-
-        // ============================================================
-        // TITLE / SEARCH FIELD
-        // ============================================================
-
         title: Obx(() {
           if (controller.isSearching.value) {
             return TextField(
               autofocus: true,
-
               onChanged: controller.searchClients,
-
-              textInputAction:
-              TextInputAction.search,
-
+              textInputAction: TextInputAction.search,
               style: TextStyle(
                 color: colorsList.textColor,
-                fontSize: width * 0.04,
+                fontSize: rs.sp(16),
               ),
-
               decoration: const InputDecoration(
                 hintText: 'Search customers...',
                 hintStyle: TextStyle(
@@ -89,21 +66,15 @@ class _CustomersScreenState extends State<CustomersScreen> {
           }
 
           return Text(
-            "Customers",
+            'Customers',
             style: TextStyle(
               color: colorsList.textColor,
-              fontSize: 20,
+              fontSize: rs.sp(20),
               fontWeight: FontWeight.normal,
             ),
           );
         }),
-
         centerTitle: false,
-
-        // ============================================================
-        // SEARCH BUTTON
-        // ============================================================
-
         actions: [
           Obx(() {
             if (controller.isSearching.value) {
@@ -115,165 +86,132 @@ class _CustomersScreenState extends State<CustomersScreen> {
               icon: Icon(
                 Icons.search_rounded,
                 color: colorsList.iconColor,
-                size: width * 0.065,
+                size: rs.s(24),
               ),
             );
           }),
-
-          SizedBox(
-            width: width * 0.02,
-          ),
+          SizedBox(width: rs.s(8)),
         ],
       ),
-
-      // ============================================================
-      // BODY
-      // ============================================================
-
       body: SafeArea(
-        child: Column(
-          children: [
-
-            // --------------------------------------------------------
-            // HEADER
-            // --------------------------------------------------------
-
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: width * 0.05,
-                vertical: height * 0.02,
-              ),
-
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                children: [
-
-                  Text(
-                    "All Customers",
-                    style: TextStyle(
-                      color: colorsList.textColor,
-                      fontSize: width * 0.045,
-                     // fontWeight: FontWeight.w700,
+        child: ResponsivePage(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: rs.pagePaddingH,
+                  vertical: rs.s(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'All Customers',
+                      style: TextStyle(
+                        color: colorsList.textColor,
+                        fontSize: rs.sp(17),
+                      ),
                     ),
-                  ),
-
-                  Obx(() => Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: width * 0.035,
-                        vertical: height * 0.008,
-                      ),
-
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEAF3FB),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-
-                      child: Text(
-                        "${controller.clients.length} Customers",
-                        style: TextStyle(
-                          color: colorsList.textColor,
-                          fontSize: width * 0.032,
-                         // fontWeight: FontWeight.w600,
+                    Obx(
+                      () => Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: rs.s(14),
+                          vertical: rs.s(6),
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEAF3FB),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${controller.clients.length} Customers',
+                          style: TextStyle(
+                            color: colorsList.textColor,
+                            fontSize: rs.sp(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-
-            // --------------------------------------------------------
-            // CLIENT LIST
-            // --------------------------------------------------------
-
-            Expanded(
-              child: Obx(() {
-                // ==========================================================
-                // LOADING
-                // ==========================================================
-
-                if (controller.isLoading.value &&
-                    controller.filteredClients.isEmpty) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colorsList.textColor,
-                    ),
-                  );
-                }
-
-                // ==========================================================
-                // EMPTY / NO SEARCH RESULT
-                // ==========================================================
-
-                if (controller.filteredClients.isEmpty) {
-                  final bool searching =
-                      controller.searchQuery.value
-                          .trim()
-                          .isNotEmpty;
-
-                  return Center(
-                    child: Text(
-                      searching
-                          ? 'No customers found.'
-                          : 'No customers found.',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: colorsList.textHintColor,
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value &&
+                      controller.filteredClients.isEmpty) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorsList.textColor,
                       ),
-                    ),
-                  );
-                }
-
-                // ==========================================================
-                // CLIENT LIST
-                // ==========================================================
-
-                return ListView.builder(
-                  padding: EdgeInsets.only(
-                    left: width * 0.04,
-                    right: width * 0.04,
-                    bottom: height * 0.12,
-                  ),
-
-                  physics: const BouncingScrollPhysics(),
-
-                  itemCount:
-                  controller.filteredClients.length,
-
-                  itemBuilder: (context, index) {
-                    final client =
-                    controller.filteredClients[index];
-
-                    return _clientCard(
-                      context: context,
-                      client: client,
-                      width: width,
-                      height: height,
                     );
-                  },
-                );
-              }),
-            ),
-          ],
+                  }
+
+                  if (controller.filteredClients.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No customers found.',
+                        style: TextStyle(
+                          fontSize: rs.sp(14),
+                          color: colorsList.textHintColor,
+                        ),
+                      ),
+                    );
+                  }
+
+                  final cols = rs.listColumns;
+                  final clients = controller.filteredClients;
+
+                  if (cols <= 1) {
+                    return ListView.builder(
+                      padding: EdgeInsets.only(
+                        left: rs.pagePaddingH,
+                        right: rs.pagePaddingH,
+                        bottom: rs.s(96),
+                      ),
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: clients.length,
+                      itemBuilder: (context, index) {
+                        return _clientCard(
+                          context: context,
+                          client: clients[index],
+                          asGridTile: false,
+                        );
+                      },
+                    );
+                  }
+
+                  return GridView.builder(
+                    padding: EdgeInsets.only(
+                      left: rs.pagePaddingH,
+                      right: rs.pagePaddingH,
+                      bottom: rs.s(96),
+                    ),
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: cols,
+                      crossAxisSpacing: rs.s(12),
+                      mainAxisSpacing: rs.s(12),
+                      childAspectRatio: rs.isLandscape ? 2.4 : 2.1,
+                    ),
+                    itemCount: clients.length,
+                    itemBuilder: (context, index) {
+                      return _clientCard(
+                        context: context,
+                        client: clients[index],
+                        asGridTile: true,
+                      );
+                    },
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ),
-
-      // ============================================================
-      // ADD CLIENT BUTTON
-      // ============================================================
-
-      floatingActionButtonLocation:
-      FloatingActionButtonLocation.endFloat,
-
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-
-          // ----------------------------------------------------------
-          // OPEN ADD CLIENT PAGE
-          // ----------------------------------------------------------
-
           final result = await Get.toNamed(
             '/AddCustomersScreen',
             arguments: 'Add Customers Screen',
@@ -282,42 +220,34 @@ class _CustomersScreenState extends State<CustomersScreen> {
           if (result == true) {
             controller.refreshClients();
           }
-
         },
-
         backgroundColor: colorsList.colorButton,
         foregroundColor: Colors.white,
-
         elevation: 4,
-
         icon: const Icon(
           Icons.person_add_alt_1_rounded,
         ),
-
         label: Text(
-          "Add Customer",
+          'Add Customer',
           style: TextStyle(
-            fontSize: 14,
-          //  fontWeight: FontWeight.w700,
+            fontSize: rs.sp(15),
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
     );
   }
 
-  // ================================================================
-  // CLIENT CARD
-  // ================================================================
-
   Widget _clientCard({
     required BuildContext context,
     required ClientScreenModel client,
-    required double width,
-    required double height,
+    required bool asGridTile,
   }) {
+    final rs = context.rs;
+
     final String name = client.name.trim().isNotEmpty
         ? client.name.trim()
-        : "Unnamed Customer";
+        : 'Unnamed Customer';
 
     final String? email = client.email?.trim().isNotEmpty == true
         ? client.email!.trim()
@@ -327,180 +257,174 @@ class _CustomersScreenState extends State<CustomersScreen> {
         ? client.phone!.trim()
         : null;
 
-    final String city = client.city?.trim() ?? "";
-    final String country = client.country?.trim() ?? "";
+    final String city = client.city?.trim() ?? '';
+    final String country = client.country?.trim() ?? '';
 
     final String location = [
       if (city.isNotEmpty) city,
       if (country.isNotEmpty) country,
-    ].join(", ");
+    ].join(', ');
 
-    return Material(
-      color: colorsList.colorWhite,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          Get.toNamed(
-            '/CustomerDetailsScreen',
-            arguments: client,
-          );
-        },
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 13,
-                horizontal: 4,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // ------------------------------------------------
-                  // AVATAR
-                  // ------------------------------------------------
-
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: colorsList.colorBoxDecoration,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person_outline_rounded,
-                      color: colorsList.iconColor,
-                      size: 21,
-                    ),
+    final content = Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: rs.s(13),
+        horizontal: asGridTile ? rs.s(12) : rs.s(4),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: rs.s(40),
+            height: rs.s(40),
+            decoration: const BoxDecoration(
+              color: colorsList.colorBoxDecoration,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.person_outline_rounded,
+              color: colorsList.iconColor,
+              size: rs.s(21),
+            ),
+          ),
+          SizedBox(width: rs.s(12)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colorsList.textColor,
+                    fontSize: rs.sp(asGridTile ? 16 : 18),
+                    height: 1.2,
                   ),
-
-                  const SizedBox(width: 12),
-
-                  // ------------------------------------------------
-                  // CLIENT INFORMATION
-                  // ------------------------------------------------
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: colorsList.textColor,
-                            fontSize: 14,
-                          //  fontWeight: FontWeight.w600,
-                            height: 1.2,
-                          ),
-                        ),
-
-                        if (email != null || phone != null) ...[
-                          const SizedBox(height: 5),
-
-                          Row(
+                ),
+                if (email != null || phone != null) ...[
+                  SizedBox(height: rs.s(5)),
+                  Row(
+                    children: [
+                      if (email != null)
+                        Expanded(
+                          child: Row(
                             children: [
-                              if (email != null)
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.email_outlined,
-                                        size: 12,
-                                        color: colorsList.iconColor,
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Expanded(
-                                        child: Text(
-                                          email,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: colorsList.textColor,
-                                            fontSize: 12.5,
-                                            height: 1.2,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                              if (email != null && phone != null)
-                                const SizedBox(width: 12),
-
-                              if (phone != null)
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.phone_outlined,
-                                        size: 14,
-                                        color: colorsList.iconColor,
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Expanded(
-                                        child: Text(
-                                          phone,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: colorsList.textColor,
-                                            fontSize: 12.5,
-                                            height: 1.2,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-
-                        if (location.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_outlined,
-                                size: 13,
+                              Icon(
+                                Icons.email_outlined,
+                                size: rs.s(14),
                                 color: colorsList.iconColor,
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: rs.s(5)),
                               Expanded(
                                 child: Text(
-                                  location,
+                                  email,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: colorsList.textColor,
-                                    fontSize: 12,
+                                    fontSize: rs.sp(12.5),
                                     height: 1.2,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ],
-                    ),
+                        ),
+                      if (email != null && phone != null)
+                        SizedBox(width: rs.s(12)),
+                      if (phone != null)
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.phone_outlined,
+                                size: rs.s(14),
+                                color: colorsList.iconColor,
+                              ),
+                              SizedBox(width: rs.s(5)),
+                              Expanded(
+                                child: Text(
+                                  phone,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: colorsList.textColor,
+                                    fontSize: rs.sp(12.5),
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+                if (location.isNotEmpty) ...[
+                  SizedBox(height: rs.s(4)),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: rs.s(13),
+                        color: colorsList.iconColor,
+                      ),
+                      SizedBox(width: rs.s(4)),
+                      Expanded(
+                        child: Text(
+                          location,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colorsList.textColor,
+                            fontSize: rs.sp(12),
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Material(
+      color: colorsList.colorWhite,
+      borderRadius: asGridTile ? BorderRadius.circular(rs.s(12)) : null,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(rs.s(12)),
+        onTap: () {
+          Get.toNamed(
+            '/CustomerDetailsScreen',
+            arguments: client,
+          );
+        },
+        child: asGridTile
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(rs.s(12)),
+                  border: Border.all(color: colorsList.borderColor),
+                ),
+                child: content,
+              )
+            : Column(
+                children: [
+                  content,
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    indent: rs.s(52),
+                    endIndent: rs.s(4),
+                    color: colorsList.dividerColor,
                   ),
                 ],
               ),
-            ),
-
-            const Divider(
-              height: 1,
-              thickness: 1,
-              indent: 52,
-              endIndent: 4,
-              color: colorsList.dividerColor,
-            ),
-          ],
-        ),
       ),
     );
   }
-
 }

@@ -1,6 +1,7 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/create_purchase_invoice_controller.dart';
 import 'package:docelix_mobileapp/controllers/dashboard_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
@@ -46,10 +47,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    final width = size.width;
-    final height = size.height;
+    final rs = context.rs;
+    // Keep legacy width*/height* tokens phone-sized on tablet/iPad.
+    final width = rs.isPhone
+        ? rs.width
+        : ResponsiveBreakpoints.designWidth * rs.scale;
+    final height = rs.isPhone
+        ? rs.height
+        : ResponsiveBreakpoints.designHeight * rs.scale;
 
     return Container(
       color: colorsList.backgroundColor,
@@ -61,77 +66,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
           }
 
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
+          return ResponsivePage(
             padding: EdgeInsets.symmetric(
-              horizontal: width * 0.055,
-              vertical: height * 0.012,
+              horizontal: rs.isPhone ? width * 0.055 : rs.pagePaddingH,
+              vertical: rs.isPhone ? height * 0.012 : rs.s(12),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ======================================================
-                // HEADER
-                // ======================================================
-
-                _buildHeader(
-                  width: width,
-                  height: height,
-                ),
-
-                SizedBox(height: height * 0.018),
-
-                // ======================================================
-                // NET PROFIT
-                // ======================================================
-
-                _buildNetProfitMainCard(
-                  width: width,
-                  height: height,
-                ),
-
-                SizedBox(height: height * 0.018),
-
-                // ======================================================
-                // TABS
-                // ======================================================
-
-                _buildTabs(
-                  width: width,
-                  height: height,
-                ),
-
-                SizedBox(height: height * 0.018),
-
-                // ======================================================
-                // SELECTED TAB
-                // ======================================================
-
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  switchInCurve: Curves.easeOut,
-                  switchOutCurve: Curves.easeIn,
-                  transitionBuilder: (
-                      Widget child,
-                      Animation<double> animation,
-                      ) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0.03, 0),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _buildSelectedTab(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(
                     width: width,
                     height: height,
                   ),
-                ),
-              ],
+                  SizedBox(height: height * 0.018),
+                  _buildNetProfitMainCard(
+                    width: width,
+                    height: height,
+                  ),
+                  SizedBox(height: height * 0.018),
+                  _buildTabs(
+                    width: width,
+                    height: height,
+                  ),
+                  SizedBox(height: height * 0.018),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    transitionBuilder: (
+                      Widget child,
+                      Animation<double> animation,
+                    ) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0.03, 0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _buildSelectedTab(
+                      width: width,
+                      height: height,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }),
@@ -148,6 +133,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required double width,
     required double height,
   }) {
+    final text = context.appText;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -160,57 +147,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Expanded(
               child: Text(
                 "Docelix",
-                style: TextStyle(
-                  color: colorsList.textColor,
-                  fontSize: width * 0.065,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.8,
-                ),
+                style: text
+                    .headline(
+                      color: colorsList.textColor,
+                      fontWeight: FontWeight.w700,
+                    )
+                    .copyWith(letterSpacing: -0.8),
               ),
             ),
 
-            /*IconButton(
+            IconButton(
               onPressed: () {
-                // Notification click functionality
-                Get.toNamed('/NotificationScreen',
-                  arguments: 'Notification Screen',);
+                Get.toNamed('/SearchScreen');
               },
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              icon: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(
-                    Icons.notifications_none_rounded,
-                    color: colorsList.primaryText,
-                    size: width * 0.065,
-                  ),
-
-                  Positioned(
-                    right: -2,
-                    top: -4,
-                    child: Container(
-                      width: width * 0.042,
-                      height: width * 0.042,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: colorsList.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        "0",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: width * 0.020,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              icon: Icon(
+                Icons.search_rounded,
+                color: colorsList.primaryText,
+                size: width * 0.065,
               ),
-            ),*/
-
+            ),
           ],
         ),
 
@@ -333,9 +290,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 text,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: context.appText.label(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.027,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -397,7 +353,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   "Select company",
                   style: TextStyle(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.027,
+                    fontSize: width.fontSizeW(0.027),
                   ),
                 ),
               ],
@@ -423,7 +379,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width * 0.027,
+                            fontSize: width.fontSizeW(0.027),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -444,7 +400,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: colorsList.primaryText,
-                      fontSize: width * 0.027,
+                      fontSize: width.fontSizeW(0.027),
                     ),
                   ),
                 );
@@ -475,6 +431,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required double height,
   })
   {
+    final text = context.appText;
     final netProfit =
         dashboardController.dashboardData.value?.kpis?.netResult?.value ?? 0;
 
@@ -507,21 +464,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           Text(
             "FINANCIAL OVERVIEW",
-            style: TextStyle(
-              color: colorsList.secondaryText,
-              fontSize: width * 0.023,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 1.1,
-            ),
+            style: text.overline(color: colorsList.secondaryText),
           ),
 
           SizedBox(height: height * 0.010),
 
           Text(
             "Net profit",
-            style: TextStyle(
+            style: text.titleSm(
               color: colorsList.primaryText,
-              fontSize: width * 0.032,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -544,12 +495,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       '${_formatCurrency(revenue)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width * 0.062,
-                        fontWeight: FontWeight.normal,
-                        letterSpacing: -0.5,
-                      ),
+                      style: text.amountLg(color: colorsList.primaryText),
                     ),
 
                     SizedBox(height: height * 0.009),
@@ -567,9 +513,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           child: Text(
                             "↑ ${dashboardController.dashboardData.value?.kpis?.revenue?.changePercent ?? 0}%",
-                            style: TextStyle(
+                            style: text.caption(
                               color: colorsList.green,
-                              fontSize: width * 0.023,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -582,10 +527,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             "${dashboardController.dashboardData.value?.kpis?.revenue?.changePercent ?? 0}% profit margin",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: colorsList.secondaryText,
-                              fontSize: width * 0.022,
-                            ),
+                            style: text.caption(color: colorsList.secondaryText),
                           ),
                         ),
                       ],
@@ -663,7 +605,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       text,
       style: TextStyle(
         color: colorsList.secondaryText,
-        fontSize: width * 0.017,
+        fontSize: width.fontSizeW(0.017),
       ),
     );
   }
@@ -716,7 +658,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       color: isSelected
                           ? Colors.white
                           : colorsList.secondaryText,
-                      fontSize: width * 0.027,
+                      fontSize: width.fontSizeW(0.027),
                       fontWeight: isSelected
                           ? FontWeight.w600
                           : FontWeight.w500,
@@ -798,13 +740,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ==========================================================
-        // FINANCIAL CARDS
+        // FINANCIAL CARDS (adaptive columns on tablet / iPad)
         // ==========================================================
 
-        Row(
-          children: [
-            Expanded(
-              child: _financialCard(
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final cols = context.rs.kpiColumns;
+            final gap = width * 0.025;
+            final itemW =
+                (constraints.maxWidth - gap * (cols - 1)) / cols;
+
+            final cards = <Widget>[
+              _financialCard(
                 width: width,
                 height: height,
                 title: "Revenue",
@@ -814,12 +761,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.bar_chart_rounded,
                 iconColor: colorsList.green,
               ),
-            ),
-
-            SizedBox(width: width * 0.025),
-
-            Expanded(
-              child: _financialCard(
+              _financialCard(
                 width: width,
                 height: height,
                 title: "Expenses",
@@ -829,16 +771,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.wallet_outlined,
                 iconColor: colorsList.red,
               ),
-            ),
-          ],
-        ),
-
-        SizedBox(height: height * 0.014),
-
-        Row(
-          children: [
-            Expanded(
-              child: _financialCard(
+              _financialCard(
                 width: width,
                 height: height,
                 title: "Cash balance",
@@ -848,12 +781,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.account_balance_outlined,
                 iconColor: colorsList.orange,
               ),
-            ),
-
-            SizedBox(width: width * 0.025),
-
-            Expanded(
-              child: _financialCard(
+              _financialCard(
                 width: width,
                 height: height,
                 title: "Outstanding",
@@ -863,8 +791,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.receipt_long_outlined,
                 iconColor: colorsList.purple,
               ),
-            ),
-          ],
+            ];
+
+            return Wrap(
+              spacing: gap,
+              runSpacing: height * 0.014,
+              children: cards
+                  .map((card) => SizedBox(width: itemW, child: card))
+                  .toList(),
+            );
+          },
         ),
 
         SizedBox(height: height * 0.018),
@@ -968,9 +904,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: context.appText.caption(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.035,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -984,11 +919,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: colorsList.primaryText,
-              fontSize: width * 0.044,
-              fontWeight: FontWeight.normal,
-            ),
+            style: context.appText.amount(color: colorsList.primaryText),
           ),
 
           SizedBox(height: height * 0.003),
@@ -1000,11 +931,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   percentage.startsWith("-")
                       ? "↓ $percentage"
                       : "↑ $percentage",
-                  style: TextStyle(
+                  style: context.appText.caption(
                     color: percentage.startsWith("-")
                         ? colorsList.red
                         : iconColor,
-                    fontSize: width * 0.027,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -1016,9 +946,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: context.appText.caption(
                       color: colorsList.secondaryText,
-                      fontSize: width * 0.027,
                     ),
                   ),
                 ),
@@ -1029,10 +958,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               subtitle,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: colorsList.secondaryText,
-                fontSize: width * 0.019,
-              ),
+              style: context.appText.caption(color: colorsList.secondaryText),
             ),
         ],
       ),
@@ -1067,8 +993,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   "Quick actions",
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.039,
-                    fontWeight: FontWeight.normal,
+                    fontSize: width.fontSizeW(0.039),
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -1083,7 +1009,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       "See all",
                       style: TextStyle(
                         color: colorsList.green,
-                        fontSize: width * 0.023,
+                        fontSize: width.fontSizeW(0.023),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1209,7 +1135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.020,
+                  fontSize: width.fontSizeW(0.020),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -1284,8 +1210,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     "Outstanding Amount",
                     style: TextStyle(
                       color: colorsList.primaryText,
-                      fontSize: width * 0.039,
-                      fontWeight: FontWeight.normal,
+                      fontSize: width.fontSizeW(0.039),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -1298,7 +1224,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       "See all",
                       style: TextStyle(
                         color: colorsList.green,
-                        fontSize: width * 0.023,
+                        fontSize: width.fontSizeW(0.023),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1418,7 +1344,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       "Recent transactions",
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.037,
+                        fontSize: width.fontSizeW(0.037),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1430,7 +1356,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         "See all",
                         style: TextStyle(
                           color: colorsList.green,
-                          fontSize: width * 0.023,
+                          fontSize: width.fontSizeW(0.023),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1455,7 +1381,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   "No recent transactions",
                   style: TextStyle(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.024,
+                    fontSize: width.fontSizeW(0.024),
                   ),
                 ),
               )
@@ -1528,8 +1454,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           title,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width * 0.037,
-                            fontWeight: FontWeight.normal,
+                            fontSize: width.fontSizeW(0.037),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
 
@@ -1539,8 +1465,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           subtitle,
                           style: TextStyle(
                             color: colorsList.secondaryText,
-                            fontSize: width * 0.027,
-                            fontWeight: FontWeight.normal,
+                            fontSize: width.fontSizeW(0.027),
                           ),
                         ),
                       ],
@@ -1634,7 +1559,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.026,
+                        fontSize: width.fontSizeW(0.026),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1647,7 +1572,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: colorsList.secondaryText,
-                        fontSize: width * 0.022,
+                        fontSize: width.fontSizeW(0.022),
                       ),
                     ),
                   ],
@@ -1661,7 +1586,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 "${isIncome ? '+' : '-'} ${dashboardController.currencySymbol} ${amount.abs().toStringAsFixed(2)}",
                 style: TextStyle(
                   color: iconColor,
-                  fontSize: width * 0.024,
+                  fontSize: width.fontSizeW(0.024),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1741,7 +1666,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               "RECENT TRANSACTIONS",
               style: TextStyle(
                 color: colorsList.secondaryText,
-                fontSize: width * 0.027,
+                fontSize: width.fontSizeW(0.027),
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1.1,
               ),
@@ -1760,7 +1685,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     "See all",
                     style: TextStyle(
                       color: colorsList.green,
-                      fontSize: width * 0.023,
+                      fontSize: width.fontSizeW(0.023),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1887,7 +1812,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             "No transactions found",
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.035,
+              fontSize: width.fontSizeW(0.035),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1901,7 +1826,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: colorsList.secondaryText,
-              fontSize: width * 0.026,
+              fontSize: width.fontSizeW(0.026),
             ),
           ),
         ],
@@ -1978,7 +1903,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.032,
+                    fontSize: width.fontSizeW(0.032),
                    // fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1999,7 +1924,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       style: TextStyle(
                         color: transactionColor,
-                        fontSize: width * 0.024,
+                        fontSize: width.fontSizeW(0.024),
                        // fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -2013,7 +1938,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           color:
                           colorsList.secondaryText,
-                          fontSize: width * 0.022,
+                          fontSize: width.fontSizeW(0.022),
                         ),
                       ),
                     ),
@@ -2028,7 +1953,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           color:
                           colorsList.secondaryText,
-                          fontSize: width * 0.024,
+                          fontSize: width.fontSizeW(0.024),
                         ),
                       ),
                     ),
@@ -2053,7 +1978,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 "${isIncome ? '+' : '-'}${_formatAmount(transaction.amount)}",
                 style: TextStyle(
                   color: transactionColor,
-                  fontSize: width * 0.031,
+                  fontSize: width.fontSizeW(0.031),
                 //  fontWeight: FontWeight.w700,
                 ),
               ),
@@ -2066,7 +1991,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 "ID: ${transaction.id ?? '-'}",
                 style: TextStyle(
                   color: colorsList.secondaryText,
-                  fontSize: width * 0.021,
+                  fontSize: width.fontSizeW(0.021),
                 ),
               ),*/
             ],
