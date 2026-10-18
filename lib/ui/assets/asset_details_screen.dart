@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/controllers/asset_details_controller.dart';
 import 'package:docelix_mobileapp/controllers/general_ledger_controller.dart';
 import 'package:docelix_mobileapp/models/asset_model.dart';
@@ -5,6 +6,13 @@ import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+
+/// Phone: real screen width. Tablet+: design width scaled (keeps proportions
+/// consistent instead of stretching with the viewport).
+double _designWidth(BuildContext context) {
+  final rs = context.rs;
+  return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
+}
 
 class AssetDetailsScreen extends StatefulWidget {
   const AssetDetailsScreen({super.key});
@@ -60,7 +68,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -87,7 +95,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.042,
+                  fontSize: width.fontSizeW(0.042),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -96,7 +104,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
                   controller.asset.value.assetNumber!,
                   style: TextStyle(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.026,
+                    fontSize: width.fontSizeW(0.026),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -122,7 +130,9 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
           ),
         ],
       ),
-      body: Column(
+      body: ResponsivePage(
+        padding: EdgeInsets.zero,
+        child: Column(
         children: [
           Container(
             width: double.infinity,
@@ -150,11 +160,11 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
               indicatorSize: TabBarIndicatorSize.label,
               dividerColor: colorsList.borderColor,
               labelStyle: TextStyle(
-                fontSize: width * 0.032,
+                fontSize: width.fontSizeW(0.032),
                 fontWeight: FontWeight.w700,
               ),
               unselectedLabelStyle: TextStyle(
-                fontSize: width * 0.032,
+                fontSize: width.fontSizeW(0.032),
                 fontWeight: FontWeight.w500,
               ),
               tabs: _tabs.map((t) => Tab(height: 40, text: t)).toList(),
@@ -175,6 +185,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
           ),
         ],
       ),
+      ),
     );
   }
 }
@@ -186,7 +197,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       final asset = controller.asset.value;
@@ -226,7 +237,7 @@ class _SummaryCard extends StatelessWidget {
                         asset.categoryName,
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -244,7 +255,7 @@ class _SummaryCard extends StatelessWidget {
                           asset.status,
                           style: TextStyle(
                             color: statusColor,
-                            fontSize: width * 0.024,
+                            fontSize: width.fontSizeW(0.024),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -315,7 +326,7 @@ class _MetricCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: width * 0.015),
@@ -328,7 +339,7 @@ class _MetricCell extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: colorsList.mutedTextColor,
-              fontSize: width * 0.02,
+              fontSize: width.fontSizeW(0.02),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -340,7 +351,7 @@ class _MetricCell extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.028,
+              fontSize: width.fontSizeW(0.028),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -357,7 +368,7 @@ class _OverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       final asset = controller.asset.value;
@@ -409,7 +420,7 @@ class _AccountingTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       final asset = controller.asset.value;
@@ -481,7 +492,7 @@ class _DepreciationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       final rows = controller.asset.value.depreciationSchedule;
@@ -536,7 +547,7 @@ class _DepreciationTab extends StatelessWidget {
                       'No depreciation schedule available.',
                       style: TextStyle(
                         color: colorsList.secondaryText,
-                        fontSize: width * 0.032,
+                        fontSize: width.fontSizeW(0.032),
                       ),
                     ),
                   )
@@ -557,7 +568,7 @@ class _DepreciationTab extends StatelessWidget {
                                   '${row.year}',
                                   style: TextStyle(
                                     color: colorsList.primaryText,
-                                    fontSize: width * 0.032,
+                                    fontSize: width.fontSizeW(0.032),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -576,7 +587,7 @@ class _DepreciationTab extends StatelessWidget {
                                       'Current',
                                       style: TextStyle(
                                         color: colorsList.colorButton,
-                                        fontSize: width * 0.022,
+                                        fontSize: width.fontSizeW(0.022),
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
@@ -592,7 +603,7 @@ class _DepreciationTab extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: colorsList.primaryText,
-                                fontSize: width * 0.03,
+                                fontSize: width.fontSizeW(0.03),
                               ),
                             ),
                           ),
@@ -603,7 +614,7 @@ class _DepreciationTab extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: colorsList.primaryText,
-                                fontSize: width * 0.03,
+                                fontSize: width.fontSizeW(0.03),
                               ),
                             ),
                           ),
@@ -626,7 +637,7 @@ class _DepreciationTab extends StatelessWidget {
                             'Total',
                             style: TextStyle(
                               color: colorsList.primaryText,
-                              fontSize: width * 0.032,
+                              fontSize: width.fontSizeW(0.032),
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -638,7 +649,7 @@ class _DepreciationTab extends StatelessWidget {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: colorsList.primaryText,
-                              fontSize: width * 0.032,
+                              fontSize: width.fontSizeW(0.032),
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -659,7 +670,7 @@ class _DepreciationTab extends StatelessWidget {
   TextStyle _headerStyle(double width) {
     return TextStyle(
       color: colorsList.mutedTextColor,
-      fontSize: width * 0.022,
+      fontSize: width.fontSizeW(0.022),
       fontWeight: FontWeight.w700,
       letterSpacing: 0.3,
     );
@@ -673,7 +684,7 @@ class _JournalEntriesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       if (controller.isLoadingJournal.value &&
@@ -687,7 +698,7 @@ class _JournalEntriesTab extends StatelessWidget {
             'No journal entries for this asset.',
             style: TextStyle(
               color: colorsList.secondaryText,
-              fontSize: width * 0.034,
+              fontSize: width.fontSizeW(0.034),
             ),
           ),
         );
@@ -736,7 +747,7 @@ class _JournalEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.all(width * 0.035),
@@ -773,7 +784,7 @@ class _JournalEntryCard extends StatelessWidget {
                             entry.sourceTypeLabel,
                             style: TextStyle(
                               color: colorsList.secondaryText,
-                              fontSize: width * 0.022,
+                              fontSize: width.fontSizeW(0.022),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -782,7 +793,7 @@ class _JournalEntryCard extends StatelessWidget {
                           entry.status,
                           style: TextStyle(
                             color: colorsList.green,
-                            fontSize: width * 0.024,
+                            fontSize: width.fontSizeW(0.024),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -793,7 +804,7 @@ class _JournalEntryCard extends StatelessWidget {
                       entry.description,
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.034,
+                        fontSize: width.fontSizeW(0.034),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -803,7 +814,7 @@ class _JournalEntryCard extends StatelessWidget {
                         date,
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.026,
+                          fontSize: width.fontSizeW(0.026),
                         ),
                       ),
                     ],
@@ -817,7 +828,7 @@ class _JournalEntryCard extends StatelessWidget {
                     money(entry.totalAmount),
                     style: TextStyle(
                       color: colorsList.primaryText,
-                      fontSize: width * 0.036,
+                      fontSize: width.fontSizeW(0.036),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -856,7 +867,7 @@ class _JournalEntryCard extends StatelessWidget {
                         line.accountLabel,
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ),
@@ -867,7 +878,7 @@ class _JournalEntryCard extends StatelessWidget {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ),
@@ -878,7 +889,7 @@ class _JournalEntryCard extends StatelessWidget {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: colorsList.primaryText,
-                          fontSize: width * 0.028,
+                          fontSize: width.fontSizeW(0.028),
                         ),
                       ),
                     ),
@@ -900,7 +911,7 @@ class _DocumentsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       return ListView(
@@ -920,7 +931,7 @@ class _DocumentsTab extends StatelessWidget {
                   'Document type',
                   style: TextStyle(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.028,
+                    fontSize: width.fontSizeW(0.028),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -966,7 +977,7 @@ class _DocumentsTab extends StatelessWidget {
                             'Images, PDF, or any other file.',
                             style: TextStyle(
                               color: colorsList.mutedTextColor,
-                              fontSize: width * 0.024,
+                              fontSize: width.fontSizeW(0.024),
                             ),
                           ),
                         ],
@@ -994,7 +1005,7 @@ class _DocumentsTab extends StatelessWidget {
                         'Upload',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          fontSize: width * 0.03,
+                          fontSize: width.fontSizeW(0.03),
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -1052,7 +1063,7 @@ class _DocumentsTab extends StatelessWidget {
                     'No documents attached.',
                     style: TextStyle(
                       color: colorsList.secondaryText,
-                      fontSize: width * 0.034,
+                      fontSize: width.fontSizeW(0.034),
                     ),
                   ),
                 ],
@@ -1154,19 +1165,21 @@ class _DocumentsTab extends StatelessWidget {
     AssetDocument document,
   ) async {
     final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Delete document?'),
-        content: Text('Remove "${document.documentType}" from this asset?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('Delete', style: TextStyle(color: colorsList.red)),
-          ),
-        ],
+      ResponsiveDialogBody(
+        child: AlertDialog(
+          title: const Text('Delete document?'),
+          content: Text('Remove "${document.documentType}" from this asset?'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Get.back(result: true),
+              child: Text('Delete', style: TextStyle(color: colorsList.red)),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -1191,7 +1204,7 @@ class _DocumentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.all(width * 0.035),
@@ -1228,7 +1241,7 @@ class _DocumentCard extends StatelessWidget {
                   document.documentType,
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.034,
+                    fontSize: width.fontSizeW(0.034),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -1238,7 +1251,7 @@ class _DocumentCard extends StatelessWidget {
                     date,
                     style: TextStyle(
                       color: colorsList.secondaryText,
-                      fontSize: width * 0.026,
+                      fontSize: width.fontSizeW(0.026),
                     ),
                   ),
                 ],
@@ -1274,7 +1287,7 @@ class _HistoryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       if (controller.isLoadingHistory.value && controller.history.isEmpty) {
@@ -1287,7 +1300,7 @@ class _HistoryTab extends StatelessWidget {
             'No history yet.',
             style: TextStyle(
               color: colorsList.secondaryText,
-              fontSize: width * 0.034,
+              fontSize: width.fontSizeW(0.034),
             ),
           ),
         );
@@ -1326,7 +1339,7 @@ class _HistoryTab extends StatelessWidget {
                           entry.title,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width * 0.034,
+                            fontSize: width.fontSizeW(0.034),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -1335,7 +1348,7 @@ class _HistoryTab extends StatelessWidget {
                         controller.formatDateTime(entry.changedAt),
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.026,
+                          fontSize: width.fontSizeW(0.026),
                         ),
                       ),
                     ],
@@ -1371,7 +1384,7 @@ class _EmptyDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       width: double.infinity,
@@ -1386,7 +1399,7 @@ class _EmptyDetailsCard extends StatelessWidget {
         textAlign: TextAlign.center,
         style: TextStyle(
           color: colorsList.secondaryText,
-          fontSize: width * 0.033,
+          fontSize: width.fontSizeW(0.033),
         ),
       ),
     );
@@ -1400,7 +1413,7 @@ class _DetailsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       width: double.infinity,
@@ -1426,7 +1439,7 @@ class _DetailRowPair extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(vertical: width * 0.028),
@@ -1461,7 +1474,7 @@ class _DetailTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       width: fullWidth ? double.infinity : null,
@@ -1484,7 +1497,7 @@ class _DetailTile extends StatelessWidget {
             item.label.toUpperCase(),
             style: TextStyle(
               color: colorsList.mutedTextColor,
-              fontSize: width * 0.021,
+              fontSize: width.fontSizeW(0.021),
               fontWeight: FontWeight.w700,
               letterSpacing: 0.35,
             ),
@@ -1494,7 +1507,7 @@ class _DetailTile extends StatelessWidget {
             item.value,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.033,
+              fontSize: width.fontSizeW(0.033),
               fontWeight: FontWeight.w600,
               height: 1.25,
             ),

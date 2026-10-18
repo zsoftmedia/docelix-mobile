@@ -1,6 +1,7 @@
 import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/profile_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:get/get.dart';
@@ -19,30 +20,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final rs = context.rs;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-
-      /*appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        centerTitle: false,
-        title: const Text(
-          'Profile',
-          style: TextStyle(
-            color: Color(0xFF0A2342),
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),*/
-
-      // ============================================================
-      // APP BAR
-      // ============================================================
 
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -55,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             color: colorsList.iconColor,
-            size: width * 0.05,
+            size: rs.s(20),
           ),
         ),
 
@@ -63,8 +44,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           "Profile",
           style: TextStyle(
             color: colorsList.textColor,
-            fontSize: width * 0.055,
-            fontWeight: FontWeight.normal,
+            fontSize: rs.sp(22),
+            fontWeight: FontWeight.w700,
           ),
         ),
 
@@ -78,11 +59,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           }
 
-          return SingleChildScrollView(
+          return ResponsivePage(
             padding: EdgeInsets.symmetric(
-              horizontal: width * 0.045,
-              vertical: 18,
+              horizontal: rs.pagePaddingH,
+              vertical: rs.s(18),
             ),
+            child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -475,7 +457,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed:
                     profileController.saveChanges,
                     width: double.infinity,
-                    height: height * 0.062,
+                    height: rs.s(52),
                     backgroundColor:
                     colorsList.primaryBlue,
                     disabledBackgroundColor:
@@ -483,13 +465,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     foregroundColor: Colors.white,
                     loadingColor: Colors.white,
                     borderRadius: 4,
-                    fontSize: width * 0.043,
+                    fontSize: rs.sp(16),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
 
                 const SizedBox(height: 30),
               ],
+            ),
             ),
           );
         },

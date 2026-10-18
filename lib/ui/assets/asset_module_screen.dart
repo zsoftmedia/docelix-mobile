@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,7 +21,10 @@ class AssetModuleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final rs = context.rs;
+    final width = rs.isPhone
+        ? rs.width
+        : ResponsiveBreakpoints.designWidth * rs.scale;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -40,17 +44,18 @@ class AssetModuleScreen extends StatelessWidget {
           title,
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width * 0.045,
+            fontSize: width.fontSizeW(0.045),
             fontWeight: FontWeight.w700,
           ),
         ),
         centerTitle: false,
       ),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: width * 0.08),
+        child: ResponsivePage(
+          padding: EdgeInsets.symmetric(horizontal: width * 0.08),
+          child: Center(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
@@ -72,7 +77,7 @@ class AssetModuleScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.055,
+                    fontSize: width.fontSizeW(0.055),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -82,7 +87,7 @@ class AssetModuleScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.035,
+                    fontSize: width.fontSizeW(0.035),
                     height: 1.45,
                   ),
                 ),
@@ -92,7 +97,7 @@ class AssetModuleScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: colorsList.mutedTextColor,
-                    fontSize: width * 0.032,
+                    fontSize: width.fontSizeW(0.032),
                   ),
                 ),
               ],

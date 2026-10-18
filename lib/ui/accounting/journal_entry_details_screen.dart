@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/general_ledger_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -5,6 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
+/// Phone: real screen width. Tablet+: design width scaled (keeps proportions
+/// consistent instead of stretching with the viewport).
+double _designWidth(BuildContext context) {
+  final rs = context.rs;
+  return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
+}
 
 class JournalEntryDetailsScreen extends StatelessWidget {
   const JournalEntryDetailsScreen({super.key});
@@ -23,7 +31,8 @@ class JournalEntryDetailsScreen extends StatelessWidget {
       );
     }
 
-    final width = MediaQuery.of(context).size.width;
+    final rs = context.rs;
+    final width = _designWidth(context);
     final isBalanced = (entry.totalDebit - entry.totalCredit).abs() < 0.0001;
     final statusLabel = _titleCase(entry.status);
     final sourceLabel = _friendlySource(entry.sourceType);
@@ -48,7 +57,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
           'Journal #${entry.journalEntryId}',
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width * 0.045,
+            fontSize: width.fontSizeW(0.045),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -75,231 +84,237 @@ class JournalEntryDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          width * 0.045,
-          width * 0.035,
-          width * 0.045,
-          width * 0.12,
-        ),
-        children: [
-          _Card(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.description,
-                  style: TextStyle(
-                    color: colorsList.primaryText,
-                    fontSize: width * 0.042,
-                    fontWeight: FontWeight.w800,
-                    height: 1.3,
-                  ),
-                ),
-                SizedBox(height: width * 0.025),
-                Wrap(
-                  spacing: width * 0.02,
-                  runSpacing: width * 0.015,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    _StatusChip(label: statusLabel),
-                    Text(
-                      dateLabel,
-                      style: TextStyle(
-                        color: colorsList.secondaryText,
-                        fontSize: width * 0.03,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      '·',
-                      style: TextStyle(color: colorsList.mutedTextColor),
-                    ),
-                    Text(
-                      sourceLabel,
-                      style: TextStyle(
-                        color: colorsList.secondaryText,
-                        fontSize: width * 0.03,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: width * 0.03),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _AmountTile(
-                        label: 'Total Debit',
-                        value: _money(entry.totalDebit),
-                      ),
-                    ),
-                    SizedBox(width: width * 0.025),
-                    Expanded(
-                      child: _AmountTile(
-                        label: 'Total Credit',
-                        value: _money(entry.totalCredit),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+      body: ResponsivePage(
+        padding: EdgeInsets.zero,
+        child: ListView(
+          padding: EdgeInsets.fromLTRB(
+            rs.pagePaddingH,
+            width * 0.035,
+            rs.pagePaddingH,
+            width * 0.12,
           ),
-          SizedBox(height: width * 0.04),
-          _SectionTitle('Journal Information'),
-          SizedBox(height: width * 0.02),
-          _Card(
-            child: Column(
-              children: [
-                _MetaRow(label: 'Reference', value: 'JE-${entry.journalEntryId}'),
-                _Divider(),
-                _MetaRow(label: 'Date', value: dateLabel),
-                _Divider(),
-                _MetaRow(label: 'Source', value: sourceLabel),
-                _Divider(),
-                _MetaRow(
-                  label: 'Status',
-                  valueWidget: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            _Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entry.description,
+                    style: TextStyle(
+                      color: colorsList.primaryText,
+                      fontSize: width.fontSizeW(0.042),
+                      fontWeight: FontWeight.w800,
+                      height: 1.3,
+                    ),
+                  ),
+                  SizedBox(height: width * 0.025),
+                  Wrap(
+                    spacing: width * 0.02,
+                    runSpacing: width * 0.015,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF16A34A),
-                          shape: BoxShape.circle,
+                      _StatusChip(label: statusLabel),
+                      Text(
+                        dateLabel,
+                        style: TextStyle(
+                          color: colorsList.secondaryText,
+                          fontSize: width.fontSizeW(0.03),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(width: width * 0.015),
                       Text(
-                        statusLabel,
+                        '·',
+                        style: TextStyle(color: colorsList.mutedTextColor),
+                      ),
+                      Text(
+                        sourceLabel,
                         style: TextStyle(
-                          color: colorsList.primaryText,
-                          fontSize: width * 0.033,
-                          fontWeight: FontWeight.w600,
+                          color: colorsList.secondaryText,
+                          fontSize: width.fontSizeW(0.03),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
-                ),
-                _Divider(),
-                _MetaRow(
-                  label: 'Posted at',
-                  value: postedLabel.isEmpty ? '—' : postedLabel,
-                ),
-                _Divider(),
-                _MetaRow(
-                  label: 'Posted by',
-                  value: (entry.postedBy == null || entry.postedBy!.isEmpty)
-                      ? 'System'
-                      : entry.postedBy!,
-                ),
-                if (entry.sourceId != null) ...[
-                  _Divider(),
-                  _MetaRow(
-                    label: 'Source document',
-                    value: '$sourceLabel #${entry.sourceId}',
+                  SizedBox(height: width * 0.03),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _AmountTile(
+                          label: 'Total Debit',
+                          value: _money(entry.totalDebit),
+                        ),
+                      ),
+                      SizedBox(width: width * 0.025),
+                      Expanded(
+                        child: _AmountTile(
+                          label: 'Total Credit',
+                          value: _money(entry.totalCredit),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ],
+              ),
             ),
-          ),
-          SizedBox(height: width * 0.04),
-          Row(
-            children: [
-              Expanded(child: _SectionTitle('Double Entry')),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.025,
-                  vertical: width * 0.012,
-                ),
-                decoration: BoxDecoration(
-                  color: isBalanced
-                      ? const Color(0xFFDCFCE7)
-                      : const Color(0xFFFEE2E2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isBalanced
-                          ? Icons.check_circle_rounded
-                          : Icons.error_outline_rounded,
-                      size: width * 0.04,
-                      color: isBalanced
-                          ? const Color(0xFF16A34A)
-                          : colorsList.red,
+            SizedBox(height: width * 0.04),
+            _SectionTitle('Journal Information'),
+            SizedBox(height: width * 0.02),
+            _Card(
+              child: Column(
+                children: [
+                  _MetaRow(
+                    label: 'Reference',
+                    value: 'JE-${entry.journalEntryId}',
+                  ),
+                  _Divider(),
+                  _MetaRow(label: 'Date', value: dateLabel),
+                  _Divider(),
+                  _MetaRow(label: 'Source', value: sourceLabel),
+                  _Divider(),
+                  _MetaRow(
+                    label: 'Status',
+                    valueWidget: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF16A34A),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: width * 0.015),
+                        Text(
+                          statusLabel,
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontSize: width.fontSizeW(0.033),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: width * 0.01),
-                    Text(
-                      isBalanced ? 'Balanced' : 'Unbalanced',
-                      style: TextStyle(
+                  ),
+                  _Divider(),
+                  _MetaRow(
+                    label: 'Posted at',
+                    value: postedLabel.isEmpty ? '—' : postedLabel,
+                  ),
+                  _Divider(),
+                  _MetaRow(
+                    label: 'Posted by',
+                    value: (entry.postedBy == null || entry.postedBy!.isEmpty)
+                        ? 'System'
+                        : entry.postedBy!,
+                  ),
+                  if (entry.sourceId != null) ...[
+                    _Divider(),
+                    _MetaRow(
+                      label: 'Source document',
+                      value: '$sourceLabel #${entry.sourceId}',
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            SizedBox(height: width * 0.04),
+            Row(
+              children: [
+                Expanded(child: _SectionTitle('Double Entry')),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: width * 0.025,
+                    vertical: width * 0.012,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isBalanced
+                        ? const Color(0xFFDCFCE7)
+                        : const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isBalanced
+                            ? Icons.check_circle_rounded
+                            : Icons.error_outline_rounded,
+                        size: width * 0.04,
                         color: isBalanced
                             ? const Color(0xFF16A34A)
                             : colorsList.red,
-                        fontSize: width * 0.028,
-                        fontWeight: FontWeight.w700,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: width * 0.02),
-          _Card(
-            child: Column(
-              children: [
-                for (var i = 0; i < entry.lines.length; i++) ...[
-                  if (i > 0) _Divider(),
-                  _LedgerLineTile(line: entry.lines[i]),
-                ],
-                _Divider(),
-                Padding(
-                  padding: EdgeInsets.only(top: width * 0.01),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Totals',
-                          style: TextStyle(
-                            color: colorsList.primaryText,
-                            fontSize: width * 0.034,
-                            fontWeight: FontWeight.w800,
-                          ),
+                      SizedBox(width: width * 0.01),
+                      Text(
+                        isBalanced ? 'Balanced' : 'Unbalanced',
+                        style: TextStyle(
+                          color: isBalanced
+                              ? const Color(0xFF16A34A)
+                              : colorsList.red,
+                          fontSize: width.fontSizeW(0.028),
+                          fontWeight: FontWeight.w700,
                         ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Debit  ${_money(entry.totalDebit)}',
-                            style: TextStyle(
-                              color: colorsList.primaryText,
-                              fontSize: width * 0.03,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          SizedBox(height: width * 0.01),
-                          Text(
-                            'Credit  ${_money(entry.totalCredit)}',
-                            style: TextStyle(
-                              color: colorsList.primaryText,
-                              fontSize: width * 0.03,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            SizedBox(height: width * 0.02),
+            _Card(
+              child: Column(
+                children: [
+                  for (var i = 0; i < entry.lines.length; i++) ...[
+                    if (i > 0) _Divider(),
+                    _LedgerLineTile(line: entry.lines[i]),
+                  ],
+                  _Divider(),
+                  Padding(
+                    padding: EdgeInsets.only(top: width * 0.01),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Totals',
+                            style: TextStyle(
+                              color: colorsList.primaryText,
+                              fontSize: width.fontSizeW(0.034),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Debit  ${_money(entry.totalDebit)}',
+                              style: TextStyle(
+                                color: colorsList.primaryText,
+                                fontSize: width.fontSizeW(0.03),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(height: width * 0.01),
+                            Text(
+                              'Credit  ${_money(entry.totalCredit)}',
+                              style: TextStyle(
+                                color: colorsList.primaryText,
+                                fontSize: width.fontSizeW(0.03),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -365,7 +380,7 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       width: double.infinity,
@@ -387,13 +402,13 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Text(
       text,
       style: TextStyle(
         color: colorsList.primaryText,
-        fontSize: width * 0.036,
+        fontSize: width.fontSizeW(0.036),
         fontWeight: FontWeight.w800,
       ),
     );
@@ -407,7 +422,7 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -434,7 +449,7 @@ class _StatusChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: const Color(0xFF16A34A),
-              fontSize: width * 0.028,
+              fontSize: width.fontSizeW(0.028),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -452,7 +467,7 @@ class _AmountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -470,7 +485,7 @@ class _AmountTile extends StatelessWidget {
             label,
             style: TextStyle(
               color: colorsList.mutedTextColor,
-              fontSize: width * 0.024,
+              fontSize: width.fontSizeW(0.024),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -479,7 +494,7 @@ class _AmountTile extends StatelessWidget {
             value,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.034,
+              fontSize: width.fontSizeW(0.034),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -490,11 +505,7 @@ class _AmountTile extends StatelessWidget {
 }
 
 class _MetaRow extends StatelessWidget {
-  const _MetaRow({
-    required this.label,
-    this.value,
-    this.valueWidget,
-  });
+  const _MetaRow({required this.label, this.value, this.valueWidget});
 
   final String label;
   final String? value;
@@ -502,7 +513,7 @@ class _MetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: width * 0.018),
@@ -515,19 +526,20 @@ class _MetaRow extends StatelessWidget {
               label,
               style: TextStyle(
                 color: colorsList.mutedTextColor,
-                fontSize: width * 0.03,
+                fontSize: width.fontSizeW(0.03),
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
           Expanded(
-            child: valueWidget ??
+            child:
+                valueWidget ??
                 Text(
                   value ?? '—',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.033,
+                    fontSize: width.fontSizeW(0.033),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -545,7 +557,7 @@ class _LedgerLineTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final isDebit = line.debit > 0;
 
     return Padding(
@@ -557,7 +569,7 @@ class _LedgerLineTile extends StatelessWidget {
             line.account?.displayLabel ?? 'Account #${line.accountId}',
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.033,
+              fontSize: width.fontSizeW(0.033),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -567,7 +579,7 @@ class _LedgerLineTile extends StatelessWidget {
               line.lineDescription!,
               style: TextStyle(
                 color: colorsList.secondaryText,
-                fontSize: width * 0.028,
+                fontSize: width.fontSizeW(0.028),
               ),
             ),
           ],
@@ -591,7 +603,7 @@ class _LedgerLineTile extends StatelessWidget {
                     color: isDebit
                         ? colorsList.colorButton
                         : colorsList.secondaryText,
-                    fontSize: width * 0.024,
+                    fontSize: width.fontSizeW(0.024),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -603,7 +615,7 @@ class _LedgerLineTile extends StatelessWidget {
                 ),
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.036,
+                  fontSize: width.fontSizeW(0.036),
                   fontWeight: FontWeight.w800,
                 ),
               ),

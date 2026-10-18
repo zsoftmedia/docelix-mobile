@@ -1,22 +1,20 @@
 import 'package:docelix_mobileapp/controllers/receivables_dashboard_controller.dart';
 import 'package:docelix_mobileapp/models/receivables_dashboard_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ReceivablesDashboardScreen extends StatelessWidget {
   ReceivablesDashboardScreen({super.key});
 
-  final ReceivablesDashboardController
-  dashboardController =
-  Get.put(
+  final ReceivablesDashboardController dashboardController = Get.put(
     ReceivablesDashboardController(),
   );
 
   @override
   Widget build(BuildContext context) {
-    final double width =
-        MediaQuery.of(context).size.width;
+    final rs = context.rs;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -24,15 +22,14 @@ class ReceivablesDashboardScreen extends StatelessWidget {
       // ========================================================
       // APP BAR
       // ========================================================
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
 
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            size: 20,
+            size: context.s(20),
             color: colorsList.textColor,
           ),
           onPressed: () {
@@ -40,27 +37,22 @@ class ReceivablesDashboardScreen extends StatelessWidget {
           },
         ),
 
-        title: const Text(
+        title: Text(
           'Receivables',
           style: TextStyle(
             color: colorsList.textColor,
-            fontSize: 20,
+            fontSize: context.sp(20),
             fontWeight: FontWeight.normal,
           ),
         ),
 
         actions: [
           Obx(
-                () => IconButton(
-              onPressed:
-              dashboardController.isLoading.value
+            () => IconButton(
+              onPressed: dashboardController.isLoading.value
                   ? null
-                  : dashboardController
-                  .getReceivablesDashboard,
-              icon: const Icon(
-                Icons.refresh_rounded,
-                color: colorsList.iconColor,
-              ),
+                  : dashboardController.getReceivablesDashboard,
+              icon: Icon(Icons.refresh_rounded, color: colorsList.iconColor),
             ),
           ),
         ],
@@ -69,41 +61,31 @@ class ReceivablesDashboardScreen extends StatelessWidget {
       // ========================================================
       // BODY
       // ========================================================
+      body: Obx(() {
+        if (dashboardController.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: colorsList.textColor),
+          );
+        }
 
-      body: Obx(
-            () {
-          if (dashboardController
-              .isLoading
-              .value) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: colorsList.textColor,
+        final data = dashboardController.receivablesDashboard.value;
+
+        return RefreshIndicator(
+          color: colorsList.textColor,
+
+          onRefresh: dashboardController.getReceivablesDashboard,
+
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+
+            child: ResponsivePage(
+              padding: EdgeInsets.symmetric(
+                horizontal: rs.pagePaddingH,
+                vertical: context.s(16),
               ),
-            );
-          }
-
-          final data =
-              dashboardController
-                  .receivablesDashboard
-                  .value;
-
-          return RefreshIndicator(
-            color: colorsList.textColor,
-
-            onRefresh:
-            dashboardController
-                .getReceivablesDashboard,
-
-            child: SingleChildScrollView(
-              physics:
-              const AlwaysScrollableScrollPhysics(),
-
-              padding:
-              const EdgeInsets.all(16),
 
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
                   // ==================================================
@@ -114,146 +96,112 @@ class ReceivablesDashboardScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Obx(
-                              () => _headerDropdown(
-                            width: width,
-                            icon: Icons
-                                .calendar_today_outlined,
+                          () => _headerDropdown(
+                            context,
+                            icon: Icons.calendar_today_outlined,
                             text:
-                            "From: ${dashboardController.fromDateText.value}",
-                            onTap:
-                            dashboardController
-                                .selectFromDate,
+                                "From: ${dashboardController.fromDateText.value}",
+                            onTap: dashboardController.selectFromDate,
                           ),
                         ),
                       ),
 
-                      SizedBox(
-                        width: width * 0.025,
-                      ),
+                      SizedBox(width: rs.s(10)),
 
                       Expanded(
                         child: Obx(
-                              () => _headerDropdown(
-                            width: width,
-                            icon: Icons
-                                .calendar_today_outlined,
-                            text:
-                            "To: ${dashboardController.toDateText.value}",
-                            onTap:
-                            dashboardController
-                                .selectToDate,
+                          () => _headerDropdown(
+                            context,
+                            icon: Icons.calendar_today_outlined,
+                            text: "To: ${dashboardController.toDateText.value}",
+                            onTap: dashboardController.selectToDate,
                           ),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: context.s(20)),
 
                   // ==================================================
                   // NO DATA
                   // ==================================================
-
                   if (data == null)
-                    _emptyState()
+                    _emptyState(context)
                   else ...[
                     // ==============================================
                     // KPI SECTION
                     // ==============================================
 
-                    _sectionTitle(
-                      'Receivables Overview',
-                    ),
+                    _sectionTitle(context, 'Receivables Overview'),
 
-                    const SizedBox(height: 12),
+                    SizedBox(height: context.s(12)),
 
-                    _buildKpiGrid(
-                      data,
-                      width,
-                    ),
+                    _buildKpiGrid(context, data),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: context.s(24)),
 
                     // ==============================================
                     // AGING
                     // ==============================================
+                    _sectionTitle(context, 'Receivables Aging'),
 
-                    _sectionTitle(
-                      'Receivables Aging',
-                    ),
+                    SizedBox(height: context.s(12)),
 
-                    const SizedBox(height: 12),
+                    _buildAging(context, data),
 
-                    _buildAging(data),
-
-                    const SizedBox(height: 24),
+                    SizedBox(height: context.s(24)),
 
                     // ==============================================
                     // ATTENTION INVOICES
                     // ==============================================
+                    _sectionTitle(context, 'Invoices Requiring Attention'),
 
-                    _sectionTitle(
-                      'Invoices Requiring Attention',
-                    ),
+                    SizedBox(height: context.s(12)),
 
-                    const SizedBox(height: 12),
+                    _buildAttentionInvoices(context, data),
 
-                    _buildAttentionInvoices(
-                      data,
-                    ),
-
-                    const SizedBox(height: 24),
+                    SizedBox(height: context.s(24)),
 
                     // ==============================================
                     // COLLECTION PERFORMANCE
                     // ==============================================
+                    _sectionTitle(context, 'Collection Performance'),
 
-                    _sectionTitle(
-                      'Collection Performance',
-                    ),
+                    SizedBox(height: context.s(12)),
 
-                    const SizedBox(height: 12),
+                    _buildCollectionPerformance(context, data),
 
-                    _buildCollectionPerformance(
-                      data,
-                    ),
-
-                    const SizedBox(height: 24),
+                    SizedBox(height: context.s(24)),
 
                     // ==============================================
                     // COLLECTION RISK
                     // ==============================================
+                    _sectionTitle(context, 'Collection Risk'),
 
-                    _sectionTitle(
-                      'Collection Risk',
-                    ),
+                    SizedBox(height: context.s(12)),
 
-                    const SizedBox(height: 12),
+                    _buildCollectionRisk(context, data),
 
-                    _buildCollectionRisk(data),
-
-                    const SizedBox(height: 24),
+                    SizedBox(height: context.s(24)),
 
                     // ==============================================
                     // RECONCILIATION
                     // ==============================================
+                    _sectionTitle(context, 'Reconciliation'),
 
-                    _sectionTitle(
-                      'Reconciliation',
-                    ),
+                    SizedBox(height: context.s(12)),
 
-                    const SizedBox(height: 12),
+                    _buildReconciliation(context, data),
 
-                    _buildReconciliation(data),
-
-                    const SizedBox(height: 30),
+                    SizedBox(height: context.s(30)),
                   ],
                 ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      }),
     );
   }
 
@@ -261,8 +209,8 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // HEADER DATE DROPDOWN
   // ============================================================
 
-  Widget _headerDropdown({
-    required double width,
+  Widget _headerDropdown(
+    BuildContext context, {
     required IconData icon,
     required String text,
     required VoidCallback onTap,
@@ -270,37 +218,26 @@ class ReceivablesDashboardScreen extends StatelessWidget {
     return InkWell(
       onTap: onTap,
 
-      borderRadius:
-      BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(10),
 
       child: Container(
-        height: 48,
+        height: context.s(48),
 
-        padding:
-        const EdgeInsets.symmetric(
-          horizontal: 12,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: context.s(12)),
 
         decoration: BoxDecoration(
           color: Colors.white,
 
-          borderRadius:
-          BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10),
 
-          border: Border.all(
-            color: colorsList.borderColor,
-          ),
+          border: Border.all(color: colorsList.borderColor),
         ),
 
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: colorsList.iconColor,
-            ),
+            Icon(icon, size: context.s(18), color: colorsList.iconColor),
 
-            const SizedBox(width: 8),
+            SizedBox(width: context.s(8)),
 
             Expanded(
               child: Text(
@@ -308,24 +245,21 @@ class ReceivablesDashboardScreen extends StatelessWidget {
 
                 maxLines: 1,
 
-                overflow:
-                TextOverflow.ellipsis,
+                overflow: TextOverflow.ellipsis,
 
-                style: const TextStyle(
+                style: TextStyle(
                   color: colorsList.textColor,
-                  fontSize: 12,
-                  fontWeight:
-                  FontWeight.w500,
+                  fontSize: context.sp(12),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
 
-            const SizedBox(width: 4),
+            SizedBox(width: context.s(4)),
 
-            const Icon(
-              Icons
-                  .keyboard_arrow_down_rounded,
-              size: 20,
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: context.s(20),
               color: colorsList.iconColor,
             ),
           ],
@@ -338,13 +272,13 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // SECTION TITLE
   // ============================================================
 
-  Widget _sectionTitle(String title) {
+  Widget _sectionTitle(BuildContext context, String title) {
     return Text(
       title,
 
-      style: const TextStyle(
+      style: TextStyle(
         color: colorsList.textColor,
-        fontSize: 18,
+        fontSize: context.sp(18),
         fontWeight: FontWeight.normal,
       ),
     );
@@ -354,76 +288,60 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // KPI GRID
   // ============================================================
 
-  Widget _buildKpiGrid(
-      ReceivablesDashboardModel data,
-      double width,
-      ) {
+  Widget _buildKpiGrid(BuildContext context, ReceivablesDashboardModel data) {
     final kpis = data.kpis;
 
     if (kpis == null) {
       return const SizedBox();
     }
 
-    final double cardWidth =
-        (width - 44) / 2;
+    final cards = <Widget>[
+      _kpiCard(
+        context,
+        title: 'Total Receivables',
+        amount: kpis.totalReceivables.amount,
+        count: kpis.totalReceivables.count,
+        icon: Icons.account_balance_wallet_outlined,
+      ),
+      _kpiCard(
+        context,
+        title: 'Overdue',
+        amount: kpis.overdueReceivables.amount,
+        count: kpis.overdueReceivables.count,
+        icon: Icons.warning_amber_rounded,
+      ),
+      _kpiCard(
+        context,
+        title: 'Not Due',
+        amount: kpis.notDueReceivables.amount,
+        count: kpis.notDueReceivables.count,
+        icon: Icons.schedule_rounded,
+      ),
+      _kpiCard(
+        context,
+        title: 'Customers Past Due',
+        amount: kpis.customersPastDue.amount,
+        count: kpis.customersPastDue.count,
+        icon: Icons.people_outline_rounded,
+      ),
+    ];
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final rs = context.rs;
+        final int cols = rs.kpiColumns.clamp(1, cards.length);
+        final double gap = context.s(12);
+        final double cardWidth =
+            ((constraints.maxWidth - gap * (cols - 1)) / cols).floorToDouble();
 
-      children: [
-        SizedBox(
-          width: cardWidth,
-          child: _kpiCard(
-            title: 'Total Receivables',
-            amount:
-            kpis.totalReceivables.amount,
-            count:
-            kpis.totalReceivables.count,
-            icon:
-            Icons.account_balance_wallet_outlined,
-          ),
-        ),
-
-        SizedBox(
-          width: cardWidth,
-          child: _kpiCard(
-            title: 'Overdue',
-            amount:
-            kpis.overdueReceivables.amount,
-            count:
-            kpis.overdueReceivables.count,
-            icon:
-            Icons.warning_amber_rounded,
-          ),
-        ),
-
-        SizedBox(
-          width: cardWidth,
-          child: _kpiCard(
-            title: 'Not Due',
-            amount:
-            kpis.notDueReceivables.amount,
-            count:
-            kpis.notDueReceivables.count,
-            icon:
-            Icons.schedule_rounded,
-          ),
-        ),
-
-        SizedBox(
-          width: cardWidth,
-          child: _kpiCard(
-            title: 'Customers Past Due',
-            amount:
-            kpis.customersPastDue.amount,
-            count:
-            kpis.customersPastDue.count,
-            icon:
-            Icons.people_outline_rounded,
-          ),
-        ),
-      ],
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final card in cards) SizedBox(width: cardWidth, child: card),
+          ],
+        );
+      },
     );
   }
 
@@ -431,29 +349,26 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // KPI CARD
   // ============================================================
 
-  Widget _kpiCard({
+  Widget _kpiCard(
+    BuildContext context, {
     required String title,
     required double amount,
     required int count,
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: EdgeInsets.all(context.s(15)),
 
       decoration: BoxDecoration(
         color: Colors.white,
 
-        borderRadius:
-        BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
 
-        border: Border.all(
-          color: colorsList.borderColor,
-        ),
+        border: Border.all(color: colorsList.borderColor),
       ),
 
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
           Row(
@@ -462,50 +377,43 @@ class ReceivablesDashboardScreen extends StatelessWidget {
                 child: Text(
                   title,
                   maxLines: 1,
-                  overflow:
-                  TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
                     color: colorsList.textHintColor,
-                    fontSize: 12,
+                    fontSize: context.sp(12),
                     fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
 
-              Icon(
-                icon,
-                size: 21,
-                color: colorsList.iconColor,
-              ),
+              Icon(icon, size: context.s(21), color: colorsList.iconColor),
             ],
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.s(12)),
 
           Text(
-            dashboardController
-                .formatAmount(amount),
+            dashboardController.formatAmount(amount),
 
             maxLines: 1,
 
-            overflow:
-            TextOverflow.ellipsis,
+            overflow: TextOverflow.ellipsis,
 
-            style: const TextStyle(
+            style: TextStyle(
               color: colorsList.textColor,
-              fontSize: 18,
+              fontSize: context.sp(18),
               fontWeight: FontWeight.normal,
             ),
           ),
 
-          const SizedBox(height: 5),
+          SizedBox(height: context.s(5)),
 
           Text(
             '$count invoice${count == 1 ? '' : 's'}',
 
-            style: const TextStyle(
+            style: TextStyle(
               color: colorsList.textHintColor,
-              fontSize: 11,
+              fontSize: context.sp(11),
             ),
           ),
         ],
@@ -517,9 +425,7 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // AGING
   // ============================================================
 
-  Widget _buildAging(
-      ReceivablesDashboardModel data,
-      ) {
+  Widget _buildAging(BuildContext context, ReceivablesDashboardModel data) {
     final aging = data.aging;
 
     if (aging == null) {
@@ -527,54 +433,34 @@ class ReceivablesDashboardScreen extends StatelessWidget {
     }
 
     return _sectionContainer(
+      context,
       child: Column(
         children: [
-          _agingRow(
-            'Not Due',
-            aging.notDue,
-          ),
+          _agingRow(context, 'Not Due', aging.notDue),
 
-          _divider(),
+          _divider(context),
 
-          _agingRow(
-            '1 - 30 Days',
-            aging.days1to30,
-          ),
+          _agingRow(context, '1 - 30 Days', aging.days1to30),
 
-          _divider(),
+          _divider(context),
 
-          _agingRow(
-            '31 - 60 Days',
-            aging.days31to60,
-          ),
+          _agingRow(context, '31 - 60 Days', aging.days31to60),
 
-          _divider(),
+          _divider(context),
 
-          _agingRow(
-            '61 - 90 Days',
-            aging.days61to90,
-          ),
+          _agingRow(context, '61 - 90 Days', aging.days61to90),
 
-          _divider(),
+          _divider(context),
 
-          _agingRow(
-            '90+ Days',
-            aging.days90Plus,
-          ),
+          _agingRow(context, '90+ Days', aging.days90Plus),
         ],
       ),
     );
   }
 
-  Widget _agingRow(
-      String title,
-      AgingItem item,
-      ) {
+  Widget _agingRow(BuildContext context, String title, AgingItem item) {
     return Padding(
-      padding:
-      const EdgeInsets.symmetric(
-        vertical: 8,
-      ),
+      padding: EdgeInsets.symmetric(vertical: context.s(8)),
 
       child: Row(
         children: [
@@ -582,39 +468,36 @@ class ReceivablesDashboardScreen extends StatelessWidget {
             child: Text(
               title,
 
-              style: const TextStyle(
+              style: TextStyle(
                 color: colorsList.textColor,
-                fontSize: 13,
+                fontSize: context.sp(13),
               ),
             ),
           ),
 
           Text(
-            dashboardController
-                .formatAmount(
-              item.amount,
-            ),
+            dashboardController.formatAmount(item.amount),
 
-            style: const TextStyle(
+            style: TextStyle(
               color: colorsList.textColor,
-              fontSize: 13,
-             // fontWeight: FontWeight.w600,
+              fontSize: context.sp(13),
+              // fontWeight: FontWeight.w600,
             ),
           ),
 
-          const SizedBox(width: 12),
+          SizedBox(width: context.s(12)),
 
           SizedBox(
-            width: 45,
+            width: context.s(45),
 
             child: Text(
               '${item.percentage}%',
 
               textAlign: TextAlign.right,
 
-              style: const TextStyle(
+              style: TextStyle(
                 color: colorsList.textHintColor,
-                fontSize: 11,
+                fontSize: context.sp(11),
               ),
             ),
           ),
@@ -628,115 +511,93 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // ============================================================
 
   Widget _buildAttentionInvoices(
-      ReceivablesDashboardModel data,
-      ) {
+    BuildContext context,
+    ReceivablesDashboardModel data,
+  ) {
     if (data.attentionInvoices.isEmpty) {
-      return _emptyBox(
-        'No invoices require attention.',
-      );
+      return _emptyBox(context, 'No invoices require attention.');
     }
 
     return Column(
       children: data.attentionInvoices
           .map(
             (invoice) => Container(
-          width: double.infinity,
+              width: double.infinity,
 
-          margin:
-          const EdgeInsets.only(
-            bottom: 10,
-          ),
+              margin: EdgeInsets.only(bottom: context.s(10)),
 
-          padding:
-          const EdgeInsets.all(14),
+              padding: EdgeInsets.all(context.s(14)),
 
-          decoration:
-          BoxDecoration(
-            color: colorsList.colorBoxDecoration,
+              decoration: BoxDecoration(
+                color: colorsList.colorBoxDecoration,
 
-            borderRadius:
-            BorderRadius.circular(
-              12,
-            ),
+                borderRadius: BorderRadius.circular(12),
 
-            border: Border.all(
-              color: colorsList.borderColor,
-            ),
-          ),
+                border: Border.all(color: colorsList.borderColor),
+              ),
 
-          child: Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
 
-            children: [
-              Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      invoice.customer,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          invoice.customer,
 
-                      style:
-                      const TextStyle(
-                        color: colorsList.textColor,
-                        fontSize: 14,
-                       // fontWeight: FontWeight.w600,
+                          style: TextStyle(
+                            color: colorsList.textColor,
+                            fontSize: context.sp(14),
+                            // fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ),
+
+                      Text(
+                        dashboardController.formatAmount(invoice.balance),
+
+                        style: TextStyle(
+                          color: colorsList.textColor,
+                          fontSize: context.sp(14),
+                          // fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
+
+                  SizedBox(height: context.s(7)),
 
                   Text(
-                    dashboardController
-                        .formatAmount(
-                      invoice.balance,
-                    ),
-
-                    style:
-                    const TextStyle(
-                      color: colorsList.textColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 7),
-
-              Text(
-                invoice.invoiceNo,
-
-                style:
-                const TextStyle(
-                  color: colorsList.textHintColor,
-                  fontSize: 11,
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              Row(
-                children: [
-                  _statusBadge(
-                    invoice.status,
-                  ),
-
-                  const Spacer(),
-
-                  Text(
-                    '${invoice.daysOverdue} days overdue',
-
-                    style:
-                    const TextStyle(
+                    invoice.invoiceNo,
+                    style: TextStyle(
                       color: colorsList.textHintColor,
-                      fontSize: 11,
+                      fontSize: context.sp(11),
                     ),
+                  ),
+
+                  SizedBox(height: context.s(10)),
+
+                  Row(
+                    children: [
+                      _statusBadge(context, invoice.status),
+
+                      const Spacer(),
+
+                      Text(
+                        '${invoice.daysOverdue} days overdue',
+
+                        style: TextStyle(
+                          color: colorsList.textHintColor,
+                          fontSize: context.sp(11),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      )
+            ),
+          )
           .toList(),
     );
   }
@@ -746,47 +607,49 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // ============================================================
 
   Widget _buildCollectionPerformance(
-      ReceivablesDashboardModel data,
-      ) {
-    final performance =
-        data.collectionPerformance;
+    BuildContext context,
+    ReceivablesDashboardModel data,
+  ) {
+    final performance = data.collectionPerformance;
 
     if (performance == null) {
       return const SizedBox();
     }
 
     return _sectionContainer(
+      context,
       child: Column(
         children: [
           _infoRow(
+            context,
             'DSO',
             '${performance.dso.toStringAsFixed(0)} days',
           ),
 
-          _divider(),
+          _divider(context),
 
           _infoRow(
+            context,
             'Average Days Overdue',
             performance.avgDaysOverdue == null
                 ? 'N/A'
                 : '${performance.avgDaysOverdue!.toStringAsFixed(0)} days',
           ),
 
-          _divider(),
+          _divider(context),
 
           _infoRow(
+            context,
             'Overdue Share',
             '${performance.overdueShare.toStringAsFixed(1)}%',
           ),
 
-          _divider(),
+          _divider(context),
 
           _infoRow(
+            context,
             'Period Sales',
-            dashboardController
-                .formatAmount(
-              performance.periodSales,
-            ),
+            dashboardController.formatAmount(performance.periodSales),
           ),
         ],
       ),
@@ -798,84 +661,74 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // ============================================================
 
   Widget _buildCollectionRisk(
-      ReceivablesDashboardModel data,
-      ) {
-    final risk =
-        data.collectionRisk;
+    BuildContext context,
+    ReceivablesDashboardModel data,
+  ) {
+    final risk = data.collectionRisk;
 
     if (risk == null) {
       return const SizedBox();
     }
 
     return _sectionContainer(
+      context,
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.shield_outlined,
-                size: 22,
+                size: context.s(22),
                 color: colorsList.iconColor,
               ),
 
-              const SizedBox(width: 10),
+              SizedBox(width: context.s(10)),
 
-              const Text(
+              Text(
                 'Risk Level',
                 style: TextStyle(
                   color: colorsList.textHintColor,
-                  fontSize: 13,
+                  fontSize: context.sp(13),
                 ),
               ),
 
               const Spacer(),
 
-              _riskBadge(
-                risk.level,
-              ),
+              _riskBadge(context, risk.level),
             ],
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: context.s(16)),
 
           ...risk.reasons.map(
-                (reason) => Padding(
-              padding:
-              const EdgeInsets.only(
-                bottom: 10,
-              ),
+            (reason) => Padding(
+              padding: EdgeInsets.only(bottom: context.s(10)),
 
               child: Row(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
                   Icon(
-                    reason.tone ==
-                        'positive'
-                        ? Icons
-                        .check_circle_outline
-                        : Icons
-                        .info_outline,
+                    reason.tone == 'positive'
+                        ? Icons.check_circle_outline
+                        : Icons.info_outline,
 
-                    size: 18,
+                    size: context.s(18),
 
                     color: colorsList.iconColor,
                   ),
 
-                  const SizedBox(width: 8),
+                  SizedBox(width: context.s(8)),
 
                   Expanded(
                     child: Text(
                       reason.text,
 
-                      style:
-                      const TextStyle(
+                      style: TextStyle(
                         color: colorsList.textColor,
-                        fontSize: 13,
+                        fontSize: context.sp(13),
                       ),
                     ),
                   ),
@@ -893,52 +746,44 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // ============================================================
 
   Widget _buildReconciliation(
-      ReceivablesDashboardModel data,
-      ) {
-    final reconciliation =
-        data.reconciliation;
+    BuildContext context,
+    ReceivablesDashboardModel data,
+  ) {
+    final reconciliation = data.reconciliation;
 
     if (reconciliation == null) {
       return const SizedBox();
     }
 
     return _sectionContainer(
+      context,
       child: Column(
         children: [
           _infoRow(
+            context,
             'Subledger',
-            dashboardController
-                .formatAmount(
-              reconciliation.subledger,
-            ),
+            dashboardController.formatAmount(reconciliation.subledger),
           ),
 
-          _divider(),
+          _divider(context),
 
           _infoRow(
+            context,
             'GL 1100',
-            dashboardController
-                .formatAmount(
-              reconciliation.gl1100,
-            ),
+            dashboardController.formatAmount(reconciliation.gl1100),
           ),
 
-          _divider(),
+          _divider(context),
 
           _infoRow(
+            context,
             'Difference',
-            dashboardController
-                .formatAmount(
-              reconciliation.difference,
-            ),
+            dashboardController.formatAmount(reconciliation.difference),
           ),
 
-          _divider(),
+          _divider(context),
 
-          _infoRow(
-            'As Of',
-            reconciliation.asOf,
-          ),
+          _infoRow(context, 'As Of', reconciliation.asOf),
         ],
       ),
     );
@@ -948,25 +793,18 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // SECTION CONTAINER
   // ============================================================
 
-  Widget _sectionContainer({
-    required Widget child,
-  }) {
+  Widget _sectionContainer(BuildContext context, {required Widget child}) {
     return Container(
       width: double.infinity,
 
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.s(16)),
 
       decoration: BoxDecoration(
         color: colorsList.colorBoxDecoration,
 
-        borderRadius:
-        BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
 
-        border: Border.all(
-          color: const Color(
-            0xFFE8EDF3,
-          ),
-        ),
+        border: Border.all(color: const Color(0xFFE8EDF3)),
       ),
 
       child: child,
@@ -977,19 +815,16 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // INFO ROW
   // ============================================================
 
-  Widget _infoRow(
-      String title,
-      String value,
-      ) {
+  Widget _infoRow(BuildContext context, String title, String value) {
     return Row(
       children: [
         Expanded(
           child: Text(
             title,
 
-            style: const TextStyle(
+            style: TextStyle(
               color: colorsList.textHintColor,
-              fontSize: 13,
+              fontSize: context.sp(13),
             ),
           ),
         ),
@@ -997,9 +832,9 @@ class ReceivablesDashboardScreen extends StatelessWidget {
         Text(
           value,
 
-          style: const TextStyle(
+          style: TextStyle(
             color: colorsList.textColor,
-            fontSize: 13,
+            fontSize: context.sp(13),
             //fontWeight: FontWeight.w600,
           ),
         ),
@@ -1011,30 +846,26 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // STATUS BADGE
   // ============================================================
 
-  Widget _statusBadge(
-      String status,
-      ) {
+  Widget _statusBadge(BuildContext context, String status) {
     return Container(
-      padding:
-      const EdgeInsets.symmetric(
-        horizontal: 9,
-        vertical: 5,
+      padding: EdgeInsets.symmetric(
+        horizontal: context.s(9),
+        vertical: context.s(5),
       ),
 
       decoration: BoxDecoration(
         color: Color(0xFFE9EEF4),
 
-        borderRadius:
-        BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(6),
       ),
 
       child: Text(
         status,
 
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFF063C70),
-          fontSize: 10,
-         // fontWeight: FontWeight.w600,
+          fontSize: context.sp(10),
+          // fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -1044,31 +875,25 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // RISK BADGE
   // ============================================================
 
-  Widget _riskBadge(
-      String level,
-      ) {
+  Widget _riskBadge(BuildContext context, String level) {
     return Container(
-      padding:
-      const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
+      padding: EdgeInsets.symmetric(
+        horizontal: context.s(12),
+        vertical: context.s(6),
       ),
 
       decoration: BoxDecoration(
-        color: const Color(
-          0xFFE8F5E9,
-        ),
+        color: const Color(0xFFE8F5E9),
 
-        borderRadius:
-        BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20),
       ),
 
       child: Text(
         level.toUpperCase(),
 
-        style: const TextStyle(
-          fontSize: 10,
-         // fontWeight: FontWeight.bold,
+        style: TextStyle(
+          fontSize: context.sp(10),
+          // fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -1078,42 +903,33 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // DIVIDER
   // ============================================================
 
-  Widget _divider() {
-    return const Divider(
-      height: 1,
-      color: colorsList.dividerColor,
-    );
+  Widget _divider(BuildContext context) {
+    return const Divider(height: 1, color: colorsList.dividerColor);
   }
 
   // ============================================================
   // EMPTY BOX
   // ============================================================
 
-  Widget _emptyBox(
-      String message,
-      ) {
+  Widget _emptyBox(BuildContext context, String message) {
     return Container(
       width: double.infinity,
 
-      padding:
-      const EdgeInsets.all(20),
+      padding: EdgeInsets.all(context.s(20)),
 
       decoration: BoxDecoration(
-        border: Border.all(
-          color: colorsList.colorBoxDecoration,
-        ),
+        border: Border.all(color: colorsList.colorBoxDecoration),
 
-        borderRadius:
-        BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
       ),
 
       child: Center(
         child: Text(
           message,
 
-          style: const TextStyle(
+          style: TextStyle(
             color: colorsList.textHintColor,
-            fontSize: 13,
+            fontSize: context.sp(13),
           ),
         ),
       ),
@@ -1124,30 +940,27 @@ class ReceivablesDashboardScreen extends StatelessWidget {
   // EMPTY STATE
   // ============================================================
 
-  Widget _emptyState() {
+  Widget _emptyState(BuildContext context) {
     return Container(
       width: double.infinity,
 
-      margin:
-      const EdgeInsets.only(
-        top: 50,
-      ),
+      margin: EdgeInsets.only(top: context.s(50)),
 
-      child: const Column(
+      child: Column(
         children: [
           Icon(
             Icons.receipt_long_outlined,
-            size: 50,
+            size: context.s(50),
             color: Colors.grey,
           ),
 
-          SizedBox(height: 12),
+          SizedBox(height: context.s(12)),
 
           Text(
             'No receivables data available.',
             style: TextStyle(
               color: colorsList.textHintColor,
-              fontSize: 14,
+              fontSize: context.sp(14),
             ),
           ),
         ],

@@ -1,3 +1,5 @@
+import 'package:docelix_mobileapp/config/api_constants.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/introPages/Intro_screen.dart';
 import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/ui/accounts_payable_screen.dart';
@@ -31,19 +33,17 @@ import 'package:docelix_mobileapp/ui/quotation_screen.dart';
 import 'package:docelix_mobileapp/ui/receivables_dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/purchase_details_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
+import 'package:docelix_mobileapp/ui/search_screen.dart';
+import 'package:docelix_mobileapp/ui/splash_screen.dart';
 import 'package:docelix_mobileapp/ui/supplier_details_screen.dart';
 import 'package:docelix_mobileapp/ui/suppliers_screen.dart';
 import 'package:docelix_mobileapp/ui/transaction_screen.dart';
 import 'package:docelix_mobileapp/ui/ui_auth/forgot_screen.dart';
 import 'package:docelix_mobileapp/ui/ui_auth/login_screen.dart';
 import 'package:docelix_mobileapp/ui/ui_auth/signup_screen.dart';
-import 'package:docelix_mobileapp/ui/splash_screen.dart';
-import 'package:docelix_mobileapp/config/api_constants.dart';
 import 'package:docelix_mobileapp/ui/voice_recognition_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -55,6 +55,7 @@ Future<void> main() async {
   );
 
   await GetStorage.init();
+  Get.put(ResponsiveService(), permanent: true);
 
   final box = GetStorage();
 
@@ -72,6 +73,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return ResponsiveScope(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
 
       // First time → Intro
       // Already completed → Splash
@@ -118,6 +124,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/PurchaseDetailsScreen', page: () => const PurchaseDetailsScreen(),),
         GetPage(name: '/InvoiceArchiveScreen', page: () => const InvoiceArchiveScreen(),),
         GetPage(name: '/QuotationScreen', page: () => const QuotationScreen(),),
+        GetPage(name: '/SearchScreen', page: () => const SearchScreen(),),
       ],
     );
   }

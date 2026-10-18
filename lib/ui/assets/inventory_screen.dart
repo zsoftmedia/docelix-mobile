@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/inventory_controller.dart';
 import 'package:docelix_mobileapp/models/inventory_model.dart';
@@ -5,6 +6,13 @@ import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
+/// Phone: real screen width. Tablet+: design width scaled (keeps proportions
+/// consistent instead of stretching with the viewport).
+double _designWidth(BuildContext context) {
+  final rs = context.rs;
+  return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
+}
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
@@ -35,7 +43,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final rs = context.rs;
+    final width = _designWidth(context);
+    final columns = rs.listColumns;
+    final gap = width * 0.03;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -55,7 +66,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           'Inventory Management',
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width * 0.045,
+            fontSize: width.fontSizeW(0.045),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -77,65 +88,92 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              width * 0.045,
-              width * 0.03,
-              width * 0.045,
-              width * 0.02,
+      body: ResponsivePage(
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                width * 0.045,
+                width * 0.03,
+                width * 0.045,
+                width * 0.02,
+              ),
+              child: _SearchHeader(controller: controller),
             ),
-            child: _SearchHeader(controller: controller),
-          ),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value && controller.items.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value && controller.items.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              return RefreshIndicator(
-                onRefresh: controller.refreshItems,
-                child: controller.filteredItems.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(height: width * 0.25),
-                          _EmptyState(
-                            hasSearch: controller.searchQuery.value.isNotEmpty,
-                            onClear: controller.clearSearch,
-                          ),
-                        ],
-                      )
-                    : ListView.separated(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.fromLTRB(
-                          width * 0.045,
-                          0,
-                          width * 0.045,
-                          width * 0.08,
-                        ),
-                        itemCount: controller.filteredItems.length,
-                        separatorBuilder: (_, _) =>
-                            SizedBox(height: width * 0.03),
-                        itemBuilder: (context, index) {
-                          final item = controller.filteredItems[index];
-                          return _InventoryCard(
-                            item: item,
-                            onAdjust: () => _openAdjustStockSheet(
-                              context,
-                              controller,
-                              item,
+                return RefreshIndicator(
+                  onRefresh: controller.refreshItems,
+                  child: controller.filteredItems.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(height: width * 0.25),
+                            _EmptyState(
+                              hasSearch:
+                                  controller.searchQuery.value.isNotEmpty,
+                              onClear: controller.clearSearch,
                             ),
-                            onLedger: () =>
-                                _openLedgerSheet(context, controller, item),
-                          );
-                        },
-                      ),
-              );
-            }),
-          ),
-        ],
+                          ],
+                        )
+                      : ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.fromLTRB(
+                            width * 0.045,
+                            0,
+                            width * 0.045,
+                            width * 0.08,
+                          ),
+                          itemCount: (controller.filteredItems.length / columns)
+                              .ceil(),
+                          separatorBuilder: (_, _) => SizedBox(height: gap),
+                          itemBuilder: (context, rowIndex) {
+                            final start = rowIndex * columns;
+                            Widget cardAt(int index) {
+                              final item = controller.filteredItems[index];
+                              return _InventoryCard(
+                                item: item,
+                                onAdjust: () => _openAdjustStockSheet(
+                                  context,
+                                  controller,
+                                  item,
+                                ),
+                                onLedger: () =>
+                                    _openLedgerSheet(context, controller, item),
+                              );
+                            }
+
+                            if (columns == 1) return cardAt(start);
+
+                            return IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  for (var c = 0; c < columns; c++) ...[
+                                    if (c > 0) SizedBox(width: gap),
+                                    Expanded(
+                                      child:
+                                          start + c <
+                                              controller.filteredItems.length
+                                          ? cardAt(start + c)
+                                          : const SizedBox.shrink(),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -149,10 +187,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: false,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) =>
           _AdjustStockSheet(controller: controller, item: item),
     ).then((logged) async {
@@ -175,106 +210,110 @@ class _InventoryScreenState extends State<InventoryScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: false,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        final width = MediaQuery.of(context).size.width;
+        final width = _designWidth(context);
         final bottomInset = MediaQuery.of(context).padding.bottom;
         final height = MediaQuery.of(context).size.height * 0.72;
 
         controller.loadMovements(item);
 
-        return SizedBox(
-          height: height,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              width * 0.05,
-              width * 0.04,
-              width * 0.05,
-              width * 0.04 + bottomInset,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD7DDE5),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                SizedBox(height: width * 0.04),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Ledger: ${item.articleName}',
-                        style: TextStyle(
-                          color: colorsList.primaryText,
-                          fontSize: width * 0.042,
-                          fontWeight: FontWeight.w700,
-                        ),
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: SizedBox(
+            height: height,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+              ),
+              padding: EdgeInsets.fromLTRB(
+                width * 0.05,
+                width * 0.04,
+                width * 0.05,
+                width * 0.04 + bottomInset,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD7DDE5),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(
-                        Icons.close_rounded,
-                        color: colorsList.iconColor,
-                      ),
-                    ),
-                  ],
-                ),
-                Obx(
-                  () => Text(
-                    controller.isLoadingMovements.value
-                        ? 'Loading movements...'
-                        : '${controller.movements.length} movement${controller.movements.length == 1 ? '' : 's'} · Stock ${item.stockLabel}',
-                    style: TextStyle(
-                      color: item.isNegativeStock
-                          ? colorsList.red
-                          : colorsList.secondaryText,
-                      fontSize: width * 0.03,
-                      fontWeight: FontWeight.w600,
-                    ),
                   ),
-                ),
-                SizedBox(height: width * 0.03),
-                Expanded(
-                  child: Obx(() {
-                    if (controller.isLoadingMovements.value) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (controller.movements.isEmpty) {
-                      return Center(
+                  SizedBox(height: width * 0.04),
+                  Row(
+                    children: [
+                      Expanded(
                         child: Text(
-                          'No movements found for this item.',
+                          'Ledger: ${item.articleName}',
                           style: TextStyle(
-                            color: colorsList.secondaryText,
-                            fontSize: width * 0.033,
+                            color: colorsList.primaryText,
+                            fontSize: width.fontSizeW(0.042),
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      );
-                    }
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: colorsList.iconColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Obx(
+                    () => Text(
+                      controller.isLoadingMovements.value
+                          ? 'Loading movements...'
+                          : '${controller.movements.length} movement${controller.movements.length == 1 ? '' : 's'} · Stock ${item.stockLabel}',
+                      style: TextStyle(
+                        color: item.isNegativeStock
+                            ? colorsList.red
+                            : colorsList.secondaryText,
+                        fontSize: width.fontSizeW(0.03),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: width * 0.03),
+                  Expanded(
+                    child: Obx(() {
+                      if (controller.isLoadingMovements.value) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                    return ListView.separated(
-                      itemCount: controller.movements.length,
-                      separatorBuilder: (_, _) =>
-                          SizedBox(height: width * 0.025),
-                      itemBuilder: (context, index) {
-                        final movement = controller.movements[index];
-                        return _MovementTile(movement: movement);
-                      },
-                    );
-                  }),
-                ),
-              ],
+                      if (controller.movements.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No movements found for this item.',
+                            style: TextStyle(
+                              color: colorsList.secondaryText,
+                              fontSize: width.fontSizeW(0.033),
+                            ),
+                          ),
+                        );
+                      }
+
+                      return ListView.separated(
+                        itemCount: controller.movements.length,
+                        separatorBuilder: (_, _) =>
+                            SizedBox(height: width * 0.025),
+                        itemBuilder: (context, index) {
+                          final movement = controller.movements[index];
+                          return _MovementTile(movement: movement);
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -354,229 +393,239 @@ class _AdjustStockSheetState extends State<_AdjustStockSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
     final item = widget.item;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        width * 0.05,
-        width * 0.04,
-        width * 0.05,
-        width * 0.05 + bottomInset,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD7DDE5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-            SizedBox(height: width * 0.04),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Adjust Stock: ${item.articleName}',
-                    style: TextStyle(
-                      color: colorsList.primaryText,
-                      fontSize: width * 0.042,
-                      fontWeight: FontWeight.w700,
-                    ),
+    return ResponsiveSheetBody(
+      padding: EdgeInsets.zero,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          width * 0.05,
+          width * 0.04,
+          width * 0.05,
+          width * 0.05 + bottomInset,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD7DDE5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                IconButton(
-                  onPressed: _isSubmitting ? null : () => _close(),
-                  icon: Icon(Icons.close_rounded, color: colorsList.iconColor),
-                ),
-              ],
-            ),
-            SizedBox(height: width * 0.02),
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(width * 0.035),
-              decoration: BoxDecoration(
-                color: colorsList.colorBoxDecoration,
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
+              SizedBox(height: width * 0.04),
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Current Stock:',
-                        style: TextStyle(
-                          color: colorsList.secondaryText,
-                          fontSize: width * 0.03,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        item.stockLabel,
-                        style: TextStyle(
-                          color: item.isNegativeStock
-                              ? colorsList.red
-                              : colorsList.primaryText,
-                          fontSize: width * 0.033,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: width * 0.035),
-                  Align(
-                    alignment: Alignment.centerLeft,
+                  Expanded(
                     child: Text(
-                      'Movement Type *',
+                      'Adjust Stock: ${item.articleName}',
                       style: TextStyle(
-                        color: colorsList.secondaryText,
-                        fontSize: width * 0.03,
-                        fontWeight: FontWeight.w600,
+                        color: colorsList.primaryText,
+                        fontSize: width.fontSizeW(0.042),
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  SizedBox(height: width * 0.015),
-                  DropdownButtonFormField<String>(
-                    key: ValueKey(_movementType),
-                    initialValue: _movementType,
-                    isExpanded: true,
-                    decoration: _inventorySheetInputDecoration(),
-                    items: inventoryMovementTypeOptions
-                        .map(
-                          (option) => DropdownMenuItem<String>(
-                            value: option.value,
-                            child: Text(option.label),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: _isSubmitting
-                        ? null
-                        : (value) {
-                            if (value == null) return;
-                            setState(() => _movementType = value);
-                          },
-                  ),
-                  SizedBox(height: width * 0.03),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Quantity *',
-                      style: TextStyle(
-                        color: colorsList.secondaryText,
-                        fontSize: width * 0.03,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: width * 0.015),
-                  TextField(
-                    controller: _quantityController,
-                    enabled: !_isSubmitting,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                      signed: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^-?\d*\.?\d*'),
-                      ),
-                    ],
-                    decoration: _inventorySheetInputDecoration(
-                      hint: 'Enter quantity',
-                    ),
-                  ),
-                  SizedBox(height: width * 0.01),
-                  Text(
-                    'Use positive numbers for additions (e.g. Purchase) and negative numbers for deductions (e.g. Loss).',
-                    style: TextStyle(
-                      color: colorsList.mutedTextColor,
-                      fontSize: width * 0.024,
-                      height: 1.35,
-                    ),
-                  ),
-                  SizedBox(height: width * 0.03),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Notes (Optional)',
-                      style: TextStyle(
-                        color: colorsList.secondaryText,
-                        fontSize: width * 0.03,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: width * 0.015),
-                  TextField(
-                    controller: _notesController,
-                    enabled: !_isSubmitting,
-                    maxLines: 3,
-                    decoration: _inventorySheetInputDecoration(
-                      hint: 'Add a note',
+                  IconButton(
+                    onPressed: _isSubmitting ? null : () => _close(),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: colorsList.iconColor,
                     ),
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: width * 0.045),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _isSubmitting ? null : () => _close(),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 48),
-                      side: const BorderSide(color: colorsList.borderColor),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
+              SizedBox(height: width * 0.02),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(width * 0.035),
+                decoration: BoxDecoration(
+                  color: colorsList.colorBoxDecoration,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                SizedBox(width: width * 0.03),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorsList.colorButton,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(0, 48),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Current Stock:',
+                          style: TextStyle(
+                            color: colorsList.secondaryText,
+                            fontSize: width.fontSizeW(0.03),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          item.stockLabel,
+                          style: TextStyle(
+                            color: item.isNegativeStock
+                                ? colorsList.red
+                                : colorsList.primaryText,
+                            fontSize: width.fontSizeW(0.033),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: width * 0.035),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Movement Type *',
+                        style: TextStyle(
+                          color: colorsList.secondaryText,
+                          fontSize: width.fontSizeW(0.03),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                    SizedBox(height: width * 0.015),
+                    DropdownButtonFormField<String>(
+                      key: ValueKey(_movementType),
+                      initialValue: _movementType,
+                      isExpanded: true,
+                      decoration: _inventorySheetInputDecoration(),
+                      items: inventoryMovementTypeOptions
+                          .map(
+                            (option) => DropdownMenuItem<String>(
+                              value: option.value,
+                              child: Text(option.label),
                             ),
                           )
-                        : const Text(
-                            'Log Movement',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                  ),
+                          .toList(),
+                      onChanged: _isSubmitting
+                          ? null
+                          : (value) {
+                              if (value == null) return;
+                              setState(() => _movementType = value);
+                            },
+                    ),
+                    SizedBox(height: width * 0.03),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Quantity *',
+                        style: TextStyle(
+                          color: colorsList.secondaryText,
+                          fontSize: width.fontSizeW(0.03),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: width * 0.015),
+                    TextField(
+                      controller: _quantityController,
+                      enabled: !_isSubmitting,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^-?\d*\.?\d*'),
+                        ),
+                      ],
+                      decoration: _inventorySheetInputDecoration(
+                        hint: 'Enter quantity',
+                      ),
+                    ),
+                    SizedBox(height: width * 0.01),
+                    Text(
+                      'Use positive numbers for additions (e.g. Purchase) and negative numbers for deductions (e.g. Loss).',
+                      style: TextStyle(
+                        color: colorsList.mutedTextColor,
+                        fontSize: width.fontSizeW(0.024),
+                        height: 1.35,
+                      ),
+                    ),
+                    SizedBox(height: width * 0.03),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Notes (Optional)',
+                        style: TextStyle(
+                          color: colorsList.secondaryText,
+                          fontSize: width.fontSizeW(0.03),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: width * 0.015),
+                    TextField(
+                      controller: _notesController,
+                      enabled: !_isSubmitting,
+                      maxLines: 3,
+                      decoration: _inventorySheetInputDecoration(
+                        hint: 'Add a note',
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+              SizedBox(height: width * 0.045),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isSubmitting ? null : () => _close(),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 48),
+                        side: const BorderSide(color: colorsList.borderColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  SizedBox(width: width * 0.03),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorsList.colorButton,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(0, 48),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Log Movement',
+                              style: TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -615,7 +664,7 @@ class _SearchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.all(width * 0.035),
@@ -633,7 +682,7 @@ class _SearchHeader extends StatelessWidget {
                   '${controller.filteredItems.length} item${controller.filteredItems.length == 1 ? '' : 's'}',
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.033,
+                    fontSize: width.fontSizeW(0.033),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -663,7 +712,7 @@ class _SearchHeader extends StatelessWidget {
                 hintText: 'Search by name or SKU...',
                 hintStyle: TextStyle(
                   color: colorsList.secondaryText,
-                  fontSize: width * 0.032,
+                  fontSize: width.fontSizeW(0.032),
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
@@ -694,7 +743,7 @@ class _InventoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.all(width * 0.04),
@@ -724,7 +773,7 @@ class _InventoryCard extends StatelessWidget {
                       item.articleName,
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.04,
+                        fontSize: width.fontSizeW(0.04),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -733,7 +782,7 @@ class _InventoryCard extends StatelessWidget {
                       'SKU: ${item.skuLabel}',
                       style: TextStyle(
                         color: colorsList.secondaryText,
-                        fontSize: width * 0.028,
+                        fontSize: width.fontSizeW(0.028),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -761,7 +810,7 @@ class _InventoryCard extends StatelessWidget {
                         : item.isLowStock
                         ? const Color(0xFFF59E0B)
                         : const Color(0xFF12B886),
-                    fontSize: width * 0.028,
+                    fontSize: width.fontSizeW(0.028),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -834,7 +883,7 @@ class _MetaBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -843,7 +892,7 @@ class _MetaBlock extends StatelessWidget {
           label,
           style: TextStyle(
             color: colorsList.mutedTextColor,
-            fontSize: width * 0.024,
+            fontSize: width.fontSizeW(0.024),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -852,7 +901,7 @@ class _MetaBlock extends StatelessWidget {
           value,
           style: TextStyle(
             color: valueColor ?? colorsList.primaryText,
-            fontSize: width * 0.032,
+            fontSize: width.fontSizeW(0.032),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -868,7 +917,7 @@ class _MovementTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final qtyColor = movement.isOutbound || movement.quantity < 0
         ? colorsList.red
         : const Color(0xFF15803D);
@@ -891,7 +940,7 @@ class _MovementTile extends StatelessWidget {
                 movement.displayDate,
                 style: TextStyle(
                   color: colorsList.secondaryText,
-                  fontSize: width * 0.028,
+                  fontSize: width.fontSizeW(0.028),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -900,7 +949,7 @@ class _MovementTile extends StatelessWidget {
                 movement.quantityLabel,
                 style: TextStyle(
                   color: qtyColor,
-                  fontSize: width * 0.036,
+                  fontSize: width.fontSizeW(0.036),
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -922,7 +971,7 @@ class _MovementTile extends StatelessWidget {
                   movement.typeBadgeLabel,
                   style: TextStyle(
                     color: badgeColors.$2,
-                    fontSize: width * 0.024,
+                    fontSize: width.fontSizeW(0.024),
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.2,
                   ),
@@ -937,7 +986,7 @@ class _MovementTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: colorsList.secondaryText,
-                      fontSize: width * 0.027,
+                      fontSize: width.fontSizeW(0.027),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -951,7 +1000,7 @@ class _MovementTile extends StatelessWidget {
               movement.notes!,
               style: TextStyle(
                 color: colorsList.primaryText,
-                fontSize: width * 0.03,
+                fontSize: width.fontSizeW(0.03),
                 height: 1.35,
               ),
             ),
@@ -988,7 +1037,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Center(
       child: Padding(
@@ -1006,7 +1055,7 @@ class _EmptyState extends StatelessWidget {
               'No inventory items',
               style: TextStyle(
                 color: colorsList.primaryText,
-                fontSize: width * 0.042,
+                fontSize: width.fontSizeW(0.042),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -1018,7 +1067,7 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: colorsList.secondaryText,
-                fontSize: width * 0.032,
+                fontSize: width.fontSizeW(0.032),
                 height: 1.4,
               ),
             ),

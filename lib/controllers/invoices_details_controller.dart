@@ -6,6 +6,7 @@ import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/invoices_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/client_model.dart';
 import 'package:docelix_mobileapp/models/invoice_item_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
@@ -392,26 +393,28 @@ class InvoicesDetailsController extends GetxController {
 
   void showDeleteConfirmation() {
     Get.dialog(
-      AlertDialog(
-        title: const Text('Delete Invoice'),
-        content: const Text(
-          'Are you sure you want to delete this invoice?',
+      ResponsiveDialogBody(
+        child: AlertDialog(
+          title: const Text('Delete Invoice'),
+          content: const Text(
+            'Are you sure you want to delete this invoice?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Get.back();
+                deleteInvoice();
+              },
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              deleteInvoice();
-            },
-            child: const Text('Delete'),
-          ),
-        ],
       ),
     );
   }
@@ -449,7 +452,8 @@ class InvoicesDetailsController extends GetxController {
     );
 
     Get.dialog(
-      Dialog(
+      ResponsiveDialogBody(
+        child: Dialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -587,6 +591,7 @@ class InvoicesDetailsController extends GetxController {
               ),
             ],
           ),
+        ),
         ),
       ),
       barrierDismissible: false,
@@ -863,7 +868,8 @@ class InvoicesDetailsController extends GetxController {
   void _showXmlSuccessDialog(
       String filePath, String invoiceNumber, Uint8List xmlBytes) {
     Get.dialog(
-      Dialog(
+      ResponsiveDialogBody(
+        child: Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
         ),
@@ -968,6 +974,7 @@ class InvoicesDetailsController extends GetxController {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -1130,7 +1137,8 @@ class InvoicesDetailsController extends GetxController {
 
   void _showDownloadSuccessDialog(Uint8List pdfBytes, InvoicesModel inv) {
     Get.dialog(
-      Dialog(
+      ResponsiveDialogBody(
+        child: Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
         ),
@@ -1215,6 +1223,7 @@ class InvoicesDetailsController extends GetxController {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

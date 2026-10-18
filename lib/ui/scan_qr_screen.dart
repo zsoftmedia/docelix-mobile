@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -36,115 +37,92 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
+    final frameSize = (rs.shortestSide * 0.55).clamp(220.0, 340.0);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-
-          // ======================================================
-          // CAMERA
-          // ======================================================
-
           MobileScanner(
             onDetect: _onDetect,
           ),
-
-          // ======================================================
-          // TOP BAR
-          // ======================================================
-
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 10,
+              padding: EdgeInsets.symmetric(
+                horizontal: rs.s(16),
+                vertical: rs.s(10),
               ),
               child: Row(
                 children: [
-
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.45),
+                      color: Colors.black.withValues(alpha: 0.45),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.close_rounded,
                         color: Colors.white,
+                        size: rs.s(22),
                       ),
                     ),
                   ),
-
-                  const Expanded(
+                  Expanded(
                     child: Center(
                       child: Text(
-                        "Scan QR Code",
+                        'Scan QR Code',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: rs.sp(18),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-
-                  const SizedBox(
-                    width: 48,
-                  ),
+                  SizedBox(width: rs.s(48)),
                 ],
               ),
             ),
           ),
-
-          // ======================================================
-          // SCAN FRAME
-          // ======================================================
-
           Center(
             child: Container(
-              width: 270,
-              height: 270,
+              width: frameSize,
+              height: frameSize,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Colors.white,
                   width: 3,
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(rs.s(20)),
               ),
             ),
           ),
-
-          // ======================================================
-          // TEXT
-          // ======================================================
-
           Positioned(
-            left: 30,
-            right: 30,
-            bottom: 70,
+            left: rs.s(30),
+            right: rs.s(30),
+            bottom: rs.s(70),
             child: Column(
               children: [
-                const Text(
-                  "Scan QR Code",
+                Text(
+                  'Scan QR Code',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: rs.sp(20),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-
-                const SizedBox(height: 8),
-
+                SizedBox(height: rs.s(8)),
                 Text(
-                  "Position the QR code inside the frame",
+                  'Position the QR code inside the frame',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: rs.sp(14),
                   ),
                 ),
               ],

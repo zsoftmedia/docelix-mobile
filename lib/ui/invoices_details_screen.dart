@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/invoices_details_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,15 +11,17 @@ class InvoicesDetailsScreen extends StatelessWidget {
     InvoicesDetailsController(),
   );
 
- // static const Color _background = Color(0xFFFFFFFF);
-//  static const Color _surface = Color(0xFFFFFFFF);
- // static const Color _border = Color(0xFFE8EAED);
+  // static const Color _background = Color(0xFFFFFFFF);
+  static const Color _surface = Color(0xFFFFFFFF);
+  // static const Color _border = Color(0xFFE8EAED);
   static const Color _heading = Color(0xFF30343B);
- // static const Color _secondary = Color(0xFF777E87);
+  // static const Color _secondary = Color(0xFF777E87);
   static const double _radius = 10;
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
+
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
       appBar: AppBar(
@@ -28,34 +31,30 @@ class InvoicesDetailsScreen extends StatelessWidget {
         centerTitle: false,
         leading: IconButton(
           onPressed: Get.back,
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            size: 19,
-            color: _heading,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, size: rs.s(19), color: _heading),
         ),
-        title: const Text(
+        title: Text(
           'Invoice Details',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: rs.sp(18),
             fontWeight: FontWeight.normal,
             color: _heading,
           ),
         ),
       ),
       body: Obx(() {
-        if (controller.isLoading.value &&
-            controller.invoice.value == null) {
-          return const Center(
-            child: CircularProgressIndicator(strokeWidth: 2),
-          );
+        if (controller.isLoading.value && controller.invoice.value == null) {
+          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
         }
 
         if (controller.invoice.value == null) {
-          return const Center(
+          return Center(
             child: Text(
               'Invoice not found.',
-              style: TextStyle(fontSize: 14, color: colorsList.secondaryTextColor),
+              style: TextStyle(
+                fontSize: rs.sp(14),
+                color: colorsList.secondaryTextColor,
+              ),
             ),
           );
         }
@@ -64,100 +63,108 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
         return RefreshIndicator(
           onRefresh: controller.refreshInvoice,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _invoiceHeader(
-                  invoice.invoiceNumber,
-                  invoice.status,
-                  invoice.currencyCode,
-                  invoice.paidAmount,
-                ),
+          child: ResponsivePage(
+            padding: EdgeInsets.fromLTRB(
+              rs.pagePaddingH,
+              rs.s(8),
+              rs.pagePaddingH,
+              rs.s(24),
+            ),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _invoiceHeader(
+                    context,
+                    invoice.invoiceNumber,
+                    invoice.status,
+                    invoice.currencyCode,
+                    invoice.paidAmount,
+                  ),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                _sectionTitle('Invoice information'),
-                const SizedBox(height: 12),
+                  _sectionTitle('Invoice information'),
+                  const SizedBox(height: 12),
 
-                _outlinedSection(
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _infoItem(
-                              'Issue date',
-                              _formatDate(invoice.issueDate),
+                  _outlinedSection(
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _infoItem(
+                                'Issue date',
+                                _formatDate(invoice.issueDate),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _infoItem(
-                              'Due date',
-                              invoice.dueDate == null ||
-                                  invoice.dueDate!.isEmpty
-                                  ? '—'
-                                  : _formatDate(invoice.dueDate!),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _infoItem(
+                                'Due date',
+                                invoice.dueDate == null ||
+                                        invoice.dueDate!.isEmpty
+                                    ? '—'
+                                    : _formatDate(invoice.dueDate!),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _infoItem(
-                              'Total amount',
-                              controller.formatCurrency(
-                                invoice.paidAmount,
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _infoItem(
+                                'Total amount',
+                                controller.formatCurrency(
+                                  invoice.paidAmount,
+                                  invoice.currencyCode,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _infoItem(
+                                'Currency',
                                 invoice.currencyCode,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _infoItem(
-                              'Currency',
-                              invoice.currencyCode,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                _sectionTitle('Client'),
-                const SizedBox(height: 12),
-                _clientCard(),
-
-                const SizedBox(height: 24),
-
-                _sectionTitle('Items'),
-                const SizedBox(height: 12),
-                _itemsCard(),
-
-                if ((invoice.notes ?? '').trim().isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  _sectionTitle('Notes'),
-                  const SizedBox(height: 12),
-                  _outlinedSection(
-                    child: Text(
-                      invoice.notes!,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        height: 1.6,
-                        color: colorsList.secondaryTextColor,
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+
+                  const SizedBox(height: 24),
+
+                  _sectionTitle('Client'),
+                  const SizedBox(height: 12),
+                  _clientCard(),
+
+                  const SizedBox(height: 24),
+
+                  _sectionTitle('Items'),
+                  const SizedBox(height: 12),
+                  _itemsCard(),
+
+                  if ((invoice.notes ?? '').trim().isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    _sectionTitle('Notes'),
+                    const SizedBox(height: 12),
+                    _outlinedSection(
+                      child: Text(
+                        invoice.notes!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          height: 1.6,
+                          color: colorsList.secondaryTextColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         );
@@ -175,11 +182,12 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // Invoice header
 
   Widget _invoiceHeader(
-      String invoiceNumber,
-      String status,
-      String currency,
-      double amount,
-      ) {
+    BuildContext context,
+    String invoiceNumber,
+    String status,
+    String currency,
+    double amount,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -233,7 +241,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _statusBadge(status),
+              _statusBadge(context, status),
             ],
           ),
           const Padding(
@@ -242,7 +250,10 @@ class InvoicesDetailsScreen extends StatelessWidget {
           ),
           const Text(
             'Total amount',
-            style: TextStyle(fontSize: 13, color: colorsList.secondaryTextColor),
+            style: TextStyle(
+              fontSize: 13,
+              color: colorsList.secondaryTextColor,
+            ),
           ),
           const SizedBox(height: 7),
           Text(
@@ -318,8 +329,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   Widget _clientCard() {
     return Obx(() {
-      if (controller.client.value == null &&
-          controller.isLoading.value) {
+      if (controller.client.value == null && controller.isLoading.value) {
         return _outlinedSection(
           child: const Center(
             child: SizedBox(
@@ -389,17 +399,11 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   ),
                   if ((client.email ?? '').isNotEmpty) ...[
                     const SizedBox(height: 8),
-                    _clientDetail(
-                      Icons.email_outlined,
-                      client.email!,
-                    ),
+                    _clientDetail(Icons.email_outlined, client.email!),
                   ],
                   if ((client.phone ?? '').isNotEmpty) ...[
                     const SizedBox(height: 7),
-                    _clientDetail(
-                      Icons.phone_outlined,
-                      client.phone!,
-                    ),
+                    _clientDetail(Icons.phone_outlined, client.phone!),
                   ],
                   if ((client.addressLine1 ?? '').isNotEmpty) ...[
                     const SizedBox(height: 7),
@@ -414,10 +418,8 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     _clientDetail(
                       Icons.public_outlined,
                       [
-                        if ((client.city ?? '').isNotEmpty)
-                          client.city!,
-                        if ((client.country ?? '').isNotEmpty)
-                          client.country!,
+                        if ((client.city ?? '').isNotEmpty) client.city!,
+                        if ((client.country ?? '').isNotEmpty) client.country!,
                       ].join(', '),
                     ),
                   ],
@@ -454,8 +456,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   Widget _itemsCard() {
     return Obx(() {
-      if (controller.isLoading.value &&
-          controller.invoiceItems.isEmpty) {
+      if (controller.isLoading.value && controller.invoiceItems.isEmpty) {
         return _outlinedSection(
           child: const Center(
             child: Padding(
@@ -498,7 +499,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
       final double itemsTotal = items.fold(
         0.0,
-            (sum, item) => sum + item.grossAmount,
+        (sum, item) => sum + item.grossAmount,
       );
 
       return Container(
@@ -512,10 +513,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
           children: [
             // Table heading
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 13,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
               decoration: const BoxDecoration(
                 color: Color(0xFFF8F9FA),
                 borderRadius: BorderRadius.vertical(
@@ -671,26 +669,22 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   // Invoice status
 
-  Widget _statusBadge(String status) {
+  Widget _statusBadge(BuildContext context, String status) {
     final String label = status.isEmpty
         ? 'Pending'
         : status.capitalizeFirst ?? status;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.normal,
+        style: context.appText.caption(
           color: colorsList.secondaryTextColor,
+          fontWeight: FontWeight.normal,
         ),
       ),
     );
@@ -714,22 +708,17 @@ class InvoicesDetailsScreen extends StatelessWidget {
             Expanded(
               flex: 5,
               child: Obx(
-                    () => OutlinedButton.icon(
+                () => OutlinedButton.icon(
                   onPressed: controller.isLoading.value
                       ? null
                       : controller.downloadInvoicePdf,
                   icon: controller.isLoading.value
                       ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
-                  )
-                      : const Icon(
-                    Icons.download_outlined,
-                    size: 18,
-                  ),
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.download_outlined, size: 18),
                   label: const Text(
                     'Download PDF',
                     maxLines: 1,
@@ -758,10 +747,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                 icon: const Icon(Icons.send_outlined, size: 17),
                 label: const Text(
                   'Send',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.normal,
-                  ),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
                 ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: _heading,
@@ -788,10 +774,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Icon(
-                  Icons.more_horiz,
-                  size: 22,
-                ),
+                child: const Icon(Icons.more_horiz, size: 22),
               ),
             ),
           ],
@@ -804,42 +787,44 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   void _showMoreActions() {
     Get.bottomSheet(
-      Material(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(16),
-        ),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorsList.colorBoxDecoration,
-                  borderRadius: BorderRadius.circular(4),
+      backgroundColor: Colors.transparent,
+      ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Material(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colorsList.colorBoxDecoration,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _bottomSheetAction(
-                icon: Icons.code_outlined,
-                title: 'Download XML',
-                onTap: () {
-                  Get.back();
-                  controller.downloadEInvoice();
-                },
-              ),
-              _bottomSheetAction(
-                icon: Icons.delete_outline,
-                title: 'Delete invoice',
-                onTap: () {
-                  Get.back();
-                  controller.showDeleteConfirmation();
-                },
-              ),
-            ],
+                const SizedBox(height: 16),
+                _bottomSheetAction(
+                  icon: Icons.code_outlined,
+                  title: 'Download XML',
+                  onTap: () {
+                    Get.back();
+                    controller.downloadEInvoice();
+                  },
+                ),
+                _bottomSheetAction(
+                  icon: Icons.delete_outline,
+                  title: 'Delete invoice',
+                  onTap: () {
+                    Get.back();
+                    controller.showDeleteConfirmation();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -856,11 +841,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
       color: Colors.transparent,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-        leading: Icon(
-          icon,
-          size: 21,
-          color: colorsList.secondaryTextColor,
-        ),
+        leading: Icon(icon, size: 21, color: colorsList.secondaryTextColor),
         title: Text(
           title,
           style: const TextStyle(

@@ -1,8 +1,14 @@
 import 'package:docelix_mobileapp/controllers/vehicles_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/vehicle_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+double _designWidth(BuildContext context) {
+  final rs = context.rs;
+  return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
+}
 
 class FleetDashboardScreen extends StatefulWidget {
   const FleetDashboardScreen({super.key});
@@ -25,7 +31,7 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -45,7 +51,7 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
           'Fleet Dashboard',
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width * 0.045,
+            fontSize: width.fontSizeW(0.045),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -63,88 +69,114 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
           onRefresh: controller.loadDashboard,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              width * 0.045,
-              width * 0.04,
-              width * 0.045,
-              width * 0.08,
-            ),
             children: [
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: width * 0.03,
-                crossAxisSpacing: width * 0.03,
-                childAspectRatio: 1.35,
-                children: [
-                  _KpiCard(
-                    title: 'Total Vehicles',
-                    value: '${data.totalVehicles}',
-                    subtitle: '${data.activeVehicles} active',
-                    icon: Icons.local_shipping_outlined,
-                    iconColor: const Color(0xFF3B82F6),
-                  ),
-                  _KpiCard(
-                    title: 'Total Mileage',
-                    value: controller.formatKm(data.totalMileage),
-                    icon: Icons.speed_rounded,
-                    iconColor: const Color(0xFF12B886),
-                  ),
-                  _KpiCard(
-                    title: 'Fleet Value',
-                    value: controller.formatMoney(data.totalFleetValue),
-                    icon: Icons.account_balance_wallet_outlined,
-                    iconColor: const Color(0xFFF59E0B),
-                  ),
-                  _KpiCard(
-                    title: 'Total Expenses',
-                    value: controller.formatMoney(data.totalExpenses),
-                    icon: Icons.show_chart_rounded,
-                    iconColor: const Color(0xFFEF4444),
-                  ),
-                ],
-              ),
-              SizedBox(height: width * 0.04),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(width * 0.04),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: colorsList.borderColor),
+              ResponsivePage(
+                padding: EdgeInsets.fromLTRB(
+                  context.rs.pagePaddingH,
+                  width * 0.04,
+                  context.rs.pagePaddingH,
+                  width * 0.08,
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Expense Breakdown',
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width * 0.038,
-                        fontWeight: FontWeight.w700,
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final columns = context.rs.kpiColumns;
+                        final gap = width * 0.03;
+                        final itemWidth =
+                            (constraints.maxWidth - gap * (columns - 1)) /
+                            columns;
+                        // Keeps the original 1.35 aspect ratio per tile.
+                        final itemHeight = itemWidth / 1.35;
+                        final cards = <Widget>[
+                          _KpiCard(
+                            title: 'Total Vehicles',
+                            value: '${data.totalVehicles}',
+                            subtitle: '${data.activeVehicles} active',
+                            icon: Icons.local_shipping_outlined,
+                            iconColor: const Color(0xFF3B82F6),
+                          ),
+                          _KpiCard(
+                            title: 'Total Mileage',
+                            value: controller.formatKm(data.totalMileage),
+                            icon: Icons.speed_rounded,
+                            iconColor: const Color(0xFF12B886),
+                          ),
+                          _KpiCard(
+                            title: 'Fleet Value',
+                            value: controller.formatMoney(data.totalFleetValue),
+                            icon: Icons.account_balance_wallet_outlined,
+                            iconColor: const Color(0xFFF59E0B),
+                          ),
+                          _KpiCard(
+                            title: 'Total Expenses',
+                            value: controller.formatMoney(data.totalExpenses),
+                            icon: Icons.show_chart_rounded,
+                            iconColor: const Color(0xFFEF4444),
+                          ),
+                        ];
+                        return Wrap(
+                          spacing: gap,
+                          runSpacing: gap,
+                          children: [
+                            for (final card in cards)
+                              SizedBox(
+                                width: itemWidth,
+                                height: itemHeight,
+                                child: card,
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                    SizedBox(height: width * 0.04),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(width * 0.04),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: colorsList.borderColor),
                       ),
-                    ),
-                    SizedBox(height: width * 0.035),
-                    _ExpenseRow(
-                      label: 'Fuel Costs',
-                      value: controller.formatMoney(data.totalFuelCost),
-                    ),
-                    Divider(
-                      height: width * 0.06,
-                      color: colorsList.borderColor,
-                    ),
-                    _ExpenseRow(
-                      label: 'Maintenance & Services',
-                      value: controller.formatMoney(data.totalServiceCost),
-                    ),
-                    Divider(
-                      height: width * 0.06,
-                      color: colorsList.borderColor,
-                    ),
-                    _ExpenseRow(
-                      label: 'Insurance Policies',
-                      value: controller.formatMoney(data.totalInsuranceCost),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Expense Breakdown',
+                            style: TextStyle(
+                              color: colorsList.primaryText,
+                              fontSize: width.fontSizeW(0.038),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          SizedBox(height: width * 0.035),
+                          _ExpenseRow(
+                            label: 'Fuel Costs',
+                            value: controller.formatMoney(data.totalFuelCost),
+                          ),
+                          Divider(
+                            height: width * 0.06,
+                            color: colorsList.borderColor,
+                          ),
+                          _ExpenseRow(
+                            label: 'Maintenance & Services',
+                            value: controller.formatMoney(
+                              data.totalServiceCost,
+                            ),
+                          ),
+                          Divider(
+                            height: width * 0.06,
+                            color: colorsList.borderColor,
+                          ),
+                          _ExpenseRow(
+                            label: 'Insurance Policies',
+                            value: controller.formatMoney(
+                              data.totalInsuranceCost,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -174,7 +206,7 @@ class _KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.all(width * 0.035),
@@ -200,7 +232,7 @@ class _KpiCard extends StatelessWidget {
             title,
             style: TextStyle(
               color: colorsList.secondaryText,
-              fontSize: width * 0.027,
+              fontSize: width.fontSizeW(0.027),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -211,7 +243,7 @@ class _KpiCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.042,
+              fontSize: width.fontSizeW(0.042),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -221,7 +253,7 @@ class _KpiCard extends StatelessWidget {
               subtitle!,
               style: TextStyle(
                 color: colorsList.mutedTextColor,
-                fontSize: width * 0.024,
+                fontSize: width.fontSizeW(0.024),
               ),
             ),
           ],
@@ -232,17 +264,14 @@ class _KpiCard extends StatelessWidget {
 }
 
 class _ExpenseRow extends StatelessWidget {
-  const _ExpenseRow({
-    required this.label,
-    required this.value,
-  });
+  const _ExpenseRow({required this.label, required this.value});
 
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Row(
       children: [
@@ -251,7 +280,7 @@ class _ExpenseRow extends StatelessWidget {
             label,
             style: TextStyle(
               color: colorsList.secondaryText,
-              fontSize: width * 0.032,
+              fontSize: width.fontSizeW(0.032),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -260,7 +289,7 @@ class _ExpenseRow extends StatelessWidget {
           value,
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width * 0.033,
+            fontSize: width.fontSizeW(0.033),
             fontWeight: FontWeight.w800,
           ),
         ),

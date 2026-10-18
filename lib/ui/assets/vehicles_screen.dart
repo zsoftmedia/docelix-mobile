@@ -1,9 +1,15 @@
 import 'package:docelix_mobileapp/controllers/vehicles_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/vehicle_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
+double _designWidth(BuildContext context) {
+  final rs = context.rs;
+  return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
+}
 
 class VehiclesScreen extends StatefulWidget {
   const VehiclesScreen({super.key});
@@ -34,7 +40,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -54,7 +60,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
           'Vehicles & Logbook',
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width * 0.045,
+            fontSize: width.fontSizeW(0.045),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -72,7 +78,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
               style: TextStyle(
                 color: colorsList.primaryText,
                 fontWeight: FontWeight.w600,
-                fontSize: width * 0.032,
+                fontSize: width.fontSizeW(0.032),
               ),
             ),
           ),
@@ -91,11 +97,11 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
       ),
       body: Column(
         children: [
-          Padding(
+          ResponsivePage(
             padding: EdgeInsets.fromLTRB(
-              width * 0.045,
+              context.rs.pagePaddingH,
               width * 0.03,
-              width * 0.045,
+              context.rs.pagePaddingH,
               width * 0.02,
             ),
             child: _SearchHeader(controller: controller),
@@ -106,6 +112,15 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
 
+              final rs = context.rs;
+              final columns = rs.listColumns;
+              final listPadding = EdgeInsets.fromLTRB(
+                rs.pagePaddingH,
+                0,
+                rs.pagePaddingH,
+                width * 0.28,
+              );
+
               return RefreshIndicator(
                 onRefresh: controller.refreshVehicles,
                 child: controller.filteredVehicles.isEmpty
@@ -113,34 +128,61 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           SizedBox(height: width * 0.25),
-                          _EmptyState(
-                            hasSearch: controller.searchQuery.value.isNotEmpty,
-                            onClear: controller.clearSearch,
-                            onAdd: () => _openAddVehicleSheet(context),
+                          ResponsivePage(
+                            padding: EdgeInsets.zero,
+                            child: _EmptyState(
+                              hasSearch:
+                                  controller.searchQuery.value.isNotEmpty,
+                              onClear: controller.clearSearch,
+                              onAdd: () => _openAddVehicleSheet(context),
+                            ),
                           ),
                         ],
                       )
-                    : ListView.separated(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.fromLTRB(
-                          width * 0.045,
-                          0,
-                          width * 0.045,
-                          width * 0.28,
-                        ),
-                        itemCount: controller.filteredVehicles.length,
-                        separatorBuilder: (_, _) =>
-                            SizedBox(height: width * 0.03),
-                        itemBuilder: (context, index) {
-                          final vehicle = controller.filteredVehicles[index];
-                          return _VehicleCard(
-                            vehicle: vehicle,
-                            onTap: () => Get.toNamed(
-                              '/VehicleDetailsScreen',
-                              arguments: vehicle,
-                            ),
-                          );
-                        },
+                    : ResponsivePage(
+                        padding: EdgeInsets.zero,
+                        child: columns > 1
+                            ? GridView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: listPadding,
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: columns,
+                                      crossAxisSpacing: width * 0.03,
+                                      mainAxisSpacing: width * 0.03,
+                                      mainAxisExtent: width * 0.56,
+                                    ),
+                                itemCount: controller.filteredVehicles.length,
+                                itemBuilder: (context, index) {
+                                  final vehicle =
+                                      controller.filteredVehicles[index];
+                                  return _VehicleCard(
+                                    vehicle: vehicle,
+                                    onTap: () => Get.toNamed(
+                                      '/VehicleDetailsScreen',
+                                      arguments: vehicle,
+                                    ),
+                                  );
+                                },
+                              )
+                            : ListView.separated(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: listPadding,
+                                itemCount: controller.filteredVehicles.length,
+                                separatorBuilder: (_, _) =>
+                                    SizedBox(height: width * 0.03),
+                                itemBuilder: (context, index) {
+                                  final vehicle =
+                                      controller.filteredVehicles[index];
+                                  return _VehicleCard(
+                                    vehicle: vehicle,
+                                    onTap: () => Get.toNamed(
+                                      '/VehicleDetailsScreen',
+                                      arguments: vehicle,
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
               );
             }),
@@ -155,11 +197,17 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: false,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      backgroundColor: Colors.transparent,
+      builder: (_) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+          ),
+          child: _AddVehicleSheet(controller: controller),
+        ),
       ),
-      builder: (_) => _AddVehicleSheet(controller: controller),
     );
   }
 }
@@ -171,7 +219,7 @@ class _SearchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.all(width * 0.035),
@@ -189,7 +237,7 @@ class _SearchHeader extends StatelessWidget {
                   '${controller.filteredVehicles.length} vehicle${controller.filteredVehicles.length == 1 ? '' : 's'}',
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width * 0.033,
+                    fontSize: width.fontSizeW(0.033),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -225,7 +273,7 @@ class _SearchHeader extends StatelessWidget {
                 hintText: 'Search by name, plate, brand...',
                 hintStyle: TextStyle(
                   color: colorsList.secondaryText,
-                  fontSize: width * 0.032,
+                  fontSize: width.fontSizeW(0.032),
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
@@ -251,7 +299,7 @@ class _VehicleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Material(
       color: Colors.transparent,
@@ -286,7 +334,7 @@ class _VehicleCard extends StatelessWidget {
                           vehicle.name,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width * 0.04,
+                            fontSize: width.fontSizeW(0.04),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -297,7 +345,7 @@ class _VehicleCard extends StatelessWidget {
                               : 'No plate',
                           style: TextStyle(
                             color: colorsList.secondaryText,
-                            fontSize: width * 0.028,
+                            fontSize: width.fontSizeW(0.028),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -321,7 +369,7 @@ class _VehicleCard extends StatelessWidget {
                         color: vehicle.isActive
                             ? const Color(0xFF12B886)
                             : colorsList.secondaryText,
-                        fontSize: width * 0.026,
+                        fontSize: width.fontSizeW(0.026),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -382,7 +430,7 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -397,7 +445,7 @@ class _Chip extends StatelessWidget {
         label,
         style: TextStyle(
           color: color,
-          fontSize: width * 0.026,
+          fontSize: width.fontSizeW(0.026),
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -413,7 +461,7 @@ class _MetaBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,7 +470,7 @@ class _MetaBlock extends StatelessWidget {
           label,
           style: TextStyle(
             color: colorsList.mutedTextColor,
-            fontSize: width * 0.024,
+            fontSize: width.fontSizeW(0.024),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -431,7 +479,7 @@ class _MetaBlock extends StatelessWidget {
           value,
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width * 0.032,
+            fontSize: width.fontSizeW(0.032),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -453,7 +501,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Center(
       child: Padding(
@@ -470,7 +518,7 @@ class _EmptyState extends StatelessWidget {
               'No vehicles found',
               style: TextStyle(
                 color: colorsList.primaryText,
-                fontSize: width * 0.042,
+                fontSize: width.fontSizeW(0.042),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -482,7 +530,7 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: colorsList.secondaryText,
-                fontSize: width * 0.032,
+                fontSize: width.fontSizeW(0.032),
                 height: 1.4,
               ),
             ),
@@ -575,7 +623,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
@@ -612,7 +660,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                       'Add New Vehicle',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width * 0.042,
+                        fontSize: width.fontSizeW(0.042),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -631,7 +679,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                 'Vehicle Details',
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.035,
+                  fontSize: width.fontSizeW(0.035),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -736,7 +784,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                 'Status & Mileage',
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.035,
+                  fontSize: width.fontSizeW(0.035),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -760,7 +808,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontWeight: FontWeight.w600,
-                    fontSize: width * 0.033,
+                    fontSize: width.fontSizeW(0.033),
                   ),
                 ),
                 value: _isInsured,
@@ -824,7 +872,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
   }
 
   Widget _label(String text, {bool required = false}) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     return Padding(
       padding: EdgeInsets.only(bottom: width * 0.015),
       child: RichText(
@@ -832,7 +880,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
           text: text,
           style: TextStyle(
             color: colorsList.secondaryText,
-            fontSize: width * 0.03,
+            fontSize: width.fontSizeW(0.03),
             fontWeight: FontWeight.w600,
           ),
           children: [
@@ -857,7 +905,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     return TextFormField(
       controller: controller,
       enabled: !_isSubmitting,
@@ -868,7 +916,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
       style: TextStyle(
         color: colorsList.primaryText,
         fontWeight: FontWeight.w600,
-        fontSize: width * 0.033,
+        fontSize: width.fontSizeW(0.033),
       ),
     );
   }
