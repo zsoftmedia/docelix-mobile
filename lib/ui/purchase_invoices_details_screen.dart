@@ -1,5 +1,4 @@
 import 'package:docelix_mobileapp/components/app_button.dart';
-import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/purchase_invoices_details_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
@@ -22,7 +21,6 @@ class PurchaseInvoicesDetailsScreen extends StatefulWidget {
 }
 
 class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
-
   late PurchaseInvoicesDetailsController controller;
 
   @override
@@ -39,7 +37,6 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final rs = context.rs;
-    // Keep legacy width*/height* tokens phone-sized on tablet/iPad.
     final width = rs.isPhone
         ? rs.width
         : ResponsiveBreakpoints.designWidth * rs.scale;
@@ -47,29 +44,27 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
         ? rs.height
         : ResponsiveBreakpoints.designHeight * rs.scale;
 
+    final item = widget.invoice;
+
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // APP BAR
-      // ----------------------------------------------------------
+      // ==========================================================
 
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.white,
-
         leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             color: colorsList.iconColor,
             size: rs.s(20),
           ),
         ),
-
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -77,26 +72,25 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
               'Purchase Invoice Details',
               style: TextStyle(
                 color: colorsList.textColor,
-                fontSize: rs.sp(20),
+                fontSize: rs.sp(18),
                 fontWeight: FontWeight.normal,
               ),
             ),
-
             Text(
-              '#${controller.invoiceNumberController.text}',
+              '#${item.supplierInvoiceNumber ?? item.invoiceNumber ?? item.id}',
               style: TextStyle(
                 color: colorsList.textHintColor,
                 fontSize: rs.sp(12),
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ],
         ),
       ),
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // BODY
-      // ----------------------------------------------------------
+      // ==========================================================
 
       body: SafeArea(
         child: Column(
@@ -110,427 +104,52 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                   rs.s(96),
                 ),
                 child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ------------------------------------------------
-                    // STATUS CHIP
-                    // ------------------------------------------------
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ------------------------------------------------
+                      // 1. TOP HEADER & STATUS BADGE CARD
+                      // ------------------------------------------------
+                      _buildHeaderCard(item, width),
 
-                    Obx(
-                      () => Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: width * 0.035,
-                          vertical: height * 0.008,
-                        ),
-                        decoration: BoxDecoration(
-                          color: controller.statusColor.withOpacity(0.10),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                color: controller.statusColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            SizedBox(
-                              width: width * 0.015,
-                            ),
-                            Text(
-                              controller.displayStatus,
-                              style: TextStyle(
-                                color: controller.statusColor,
-                                fontSize: width.fontSizeW(0.032),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                      SizedBox(height: height * 0.018),
 
-                    SizedBox(
-                      height: height * 0.022,
-                    ),
+                      // ------------------------------------------------
+                      // 2. SUPPLIER & DOCUMENT INFO CARD
+                      // ------------------------------------------------
+                      _buildSupplierAndDocCard(item, width),
 
-                    // ------------------------------------------------
-                    // INVOICE DETAILS
-                    // ------------------------------------------------
+                      SizedBox(height: height * 0.018),
 
-                    _sectionTitle(
-                      'Invoice Details',
-                      width,
-                    ),
+                      // ------------------------------------------------
+                      // 3. TAX & TOTALS CARD
+                      // ------------------------------------------------
+                      _buildTotalsCard(item, width),
 
-                    SizedBox(
-                      height: height * 0.012,
-                    ),
+                      SizedBox(height: height * 0.018),
 
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(
-                        width * 0.045,
-                      ),
+                      // ------------------------------------------------
+                      // 4. HISTORY CARD
+                      // ------------------------------------------------
+                      _buildHistoryCard(item, width),
 
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          width * 0.04,
-                        ),
-                        border: Border.all(
-                          color: const Color(0xFFE4EAF1),
-                        ),
-                      ),
+                      SizedBox(height: height * 0.022),
 
-                      child: Column(
-                        children: [
-                          _invoiceTextField(
-                            label: 'Invoice Number',
-                            controller: controller.invoiceNumberController,
-                            icon: Icons.numbers_rounded,
-                            width: width,
-                          ),
+                      // ------------------------------------------------
+                      // 5. INVOICE DOCUMENT PREVIEW CARD
+                      // ------------------------------------------------
+                      _buildDocumentCard(item, width, height, context),
 
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Invoice Date',
-                            controller: controller.dateController,
-                            icon: Icons.calendar_today_outlined,
-                            onTap: controller.selectInvoiceDate,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Currency',
-                            controller: controller.currencyController,
-                            icon: Icons.currency_exchange_rounded,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Total Amount',
-                            controller: controller.totalController,
-                            icon: Icons.payments_outlined,
-                            width: width,
-                            keyboardType: TextInputType.number,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'VAT %',
-                            controller: controller.vatController,
-                            icon: Icons.percent_rounded,
-                            width: width,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.022,
-                    ),
-
-                    // ------------------------------------------------
-                    // SUPPLIER
-                    // ------------------------------------------------
-
-                    _sectionTitle(
-                      'Supplier',
-                      width,
-                    ),
-
-                    SizedBox(
-                      height: height * 0.012,
-                    ),
-
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(
-                        width * 0.045,
-                      ),
-
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          width * 0.04,
-                        ),
-                        border: Border.all(
-                          color: const Color(0xFFE4EAF1),
-                        ),
-                      ),
-
-                      child: Column(
-                        children: [
-                          _invoiceTextField(
-                            label: 'Supplier',
-                            controller: controller.supplierController,
-                            icon: Icons.business_outlined,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Supplier Email',
-                            controller: controller.supplierEmailController,
-                            icon: Icons.email_outlined,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Supplier Phone',
-                            controller: controller.supplierPhoneController,
-                            icon: Icons.phone_outlined,
-                            width: width,
-                          ),
-
-                          SizedBox(height: height * 0.018),
-
-                          _invoiceTextField(
-                            label: 'Supplier Address',
-                            controller: controller.supplierAddressController,
-                            icon: Icons.location_on_outlined,
-                            width: width,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.022,
-                    ),
-
-                    // ------------------------------------------------
-                    // CATEGORY
-                    // ------------------------------------------------
-
-                    _sectionTitle(
-                      'Payment & Category',
-                      width,
-                    ),
-
-                    SizedBox(
-                      height: height * 0.012,
-                    ),
-
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(
-                        width * 0.045,
-                      ),
-
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          width * 0.04,
-                        ),
-                        border: Border.all(
-                          color: const Color(0xFFE4EAF1),
-                        ),
-                      ),
-
-                      child: Obx(
-                            () => Row(
-                          children: [
-                            Expanded(
-                              child: _smallInfo(
-                                'Payment Status',
-                                controller.displayStatus,
-                                Icons.payments_outlined,
-                                width,
-                              ),
-                            ),
-
-                            Container(
-                              height: width * 0.12,
-                              width: 1,
-                              color: const Color(0xFFE5EAF0),
-                            ),
-
-                            Expanded(
-                              child: _smallInfo(
-                                'Category',
-                                controller.displayCategory,
-                                Icons.category_outlined,
-                                width,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.022,
-                    ),
-
-                    // ------------------------------------------------
-                    // DOCUMENT
-                    // ------------------------------------------------
-
-                    _sectionTitle(
-                      'Invoice Document',
-                      width,
-                    ),
-
-                    SizedBox(
-                      height: height * 0.012,
-                    ),
-
-                    GestureDetector(
-                      onTap: () {
-                        final previewUrl = controller.invoice.previewUrl;
-
-                        if (previewUrl == null || previewUrl.isEmpty) {
-                          Get.snackbar(
-                            'Document',
-                            'Document preview is not available.',
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                          return;
-                        }
-
-                        showInvoiceDocumentDialog(
-                          context: context,
-                          fileUrl: previewUrl,
-                          fileType: controller.invoice.fileType,
-                          mimeType: controller.invoice.mimeType,
-                        );
-                      },
-
-                      child: Container(
-                        width: double.infinity,
-                        height: height * 0.24,
-
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF3F7),
-                          borderRadius:
-                          BorderRadius.circular(
-                            width * 0.04,
-                          ),
-
-                          border: Border.all(
-                            color: const Color(0xFFE0E6ED),
-                          ),
-                        ),
-
-                        child: Stack(
-                          children: [
-                            Center(
-                              child: Icon(
-                                Icons.picture_as_pdf_rounded,
-                                color: const Color(0xFFD64545),
-                                size: width * 0.15,
-                              ),
-                            ),
-
-                            Positioned(
-                              bottom: width * 0.035,
-                              left: width * 0.04,
-                              right: width * 0.04,
-
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment
-                                    .spaceBetween,
-
-                                children: [
-                                  Text(
-                                    'Invoice Document',
-                                    style: TextStyle(
-                                      color: const Color(0xFF0A2342),
-                                      fontSize: width.fontSizeW(0.034),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-
-                                  Container(
-                                    padding:
-                                    EdgeInsets.symmetric(
-                                      horizontal:
-                                      width * 0.025,
-                                      vertical:
-                                      height * 0.006,
-                                    ),
-                                    decoration:
-                                    BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                        20,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'View',
-                                      style: TextStyle(
-                                        color: const Color(0xFF063C70),
-                                        fontSize: width.fontSizeW(0.03),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // --------------------------------------------------------
-                    // SAVE CHANGES BUTTON
-                    // --------------------------------------------------------
-
-                    SizedBox(
-                      height: height * 0.025,
-                    ),
-
-                    Obx(
-                      () => AppButton(
-                        text: 'Save Changes',
-                        isLoading: controller.isSaving.value,
-                        onPressed: () {
-                          controller.saveChanges();
-                        },
-                        width: double.infinity,
-                        height: height * 0.062,
-                        backgroundColor: colorsList.primaryBlue,
-                        disabledBackgroundColor: colorsList.primaryBlue,
-                        foregroundColor: Colors.white,
-                        loadingColor: Colors.white,
-                        borderRadius: 4,
-                        fontSize: width.fontSizeW(0.043),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    SizedBox(
-                      height: height * 0.025,
-                    ),
-
-                  ],
-                ),
+                      SizedBox(height: height * 0.025),
+                    ],
+                  ),
                 ),
               ),
             ),
 
             // --------------------------------------------------------
-            // BOTTOM ACTIONS
+            // BOTTOM ACTIONS BAR
             // --------------------------------------------------------
 
             Align(
@@ -606,68 +225,78 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
   }
 
   // ================================================================
-  // SECTION TITLE
+  // 1. TOP HEADER & STATUS CARD
   // ================================================================
 
-  Widget _sectionTitle(
-      String title,
-      double width,
-      )
-  {
-    return Text(
-      title,
-      style: TextStyle(
-        color: colorsList.textColor,
-        fontSize: width.fontSizeW(0.038),
-      ),
-    );
-  }
+  Widget _buildHeaderCard(PurchaseInvoicesModel item, double width) {
+    final String invNo =
+        item.supplierInvoiceNumber ?? item.invoiceNumber ?? 'PURCHASE';
+    final String suppName = item.supplierName ?? 'Supplier';
 
-  // ================================================================
-  // SMALL INFO
-  // ================================================================
-
-  Widget _smallInfo(
-      String title,
-      String value,
-      IconData icon,
-      double width,
-      )
-  {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: width * 0.025,
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(width * 0.045),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: colorsList.iconColor,
-            size: width * 0.055,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  invNo,
+                  style: TextStyle(
+                    fontSize: width * 0.050,
+                    fontWeight: FontWeight.normal,
+                    color: const Color(0xFF063C70),
+                  ),
+                ),
+              ),
+              Obx(
+                () => Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: controller.statusColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: controller.statusColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        controller.displayStatus,
+                        style: TextStyle(
+                          fontSize: width * 0.028,
+                          color: controller.statusColor,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-
-          const SizedBox(height: 6),
-
+          const SizedBox(height: 4),
           Text(
-            title,
-            textAlign: TextAlign.center,
+            suppName,
             style: TextStyle(
-              color: colorsList.textHintColor,
-              fontSize: width.fontSizeW(0.027),
-            ),
-          ),
-
-          const SizedBox(height: 3),
-
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: colorsList.textColor,
-              fontSize: width.fontSizeW(0.031),
-              fontWeight: FontWeight.w700,
+              fontSize: width * 0.032,
+              color: colorsList.secondaryText,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],
@@ -675,43 +304,368 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
     );
   }
 
-  Widget _invoiceTextField({
-    required String label,
-    required TextEditingController controller,
-    required IconData icon,
-    required double width,
-    bool readOnly = false,
-    TextInputType keyboardType = TextInputType.text,
-    VoidCallback? onTap,
-  })
-  {
+  // ================================================================
+  // 2. SUPPLIER & DOCUMENT INFORMATION CARD
+  // ================================================================
+
+  Widget _buildSupplierAndDocCard(PurchaseInvoicesModel item, double width) {
+    final suppName = item.supplierName ?? '—';
+    final invNo = item.supplierInvoiceNumber ?? item.invoiceNumber ?? '—';
+    final invDate = _formatDate(item.invoiceDate);
+    final dueDate = _formatDate(item.dueDate);
+    final docType = item.fileType.isNotEmpty
+        ? (item.fileType == 'pdf' ? 'PDF Invoice' : 'Image Invoice')
+        : 'Invoice';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(width * 0.045),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                  child: _gridItem('Supplier', suppName, width, isItalic: true)),
+              Expanded(child: _gridItem('Document', docType, width)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                  child: _gridItem('Supplier invoice number', invNo, width)),
+              Expanded(
+                  child: _gridItem('Supplier invoice date', invDate, width)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(child: _gridItem('Purchase date', invDate, width)),
+              Expanded(child: _gridItem('Due date', dueDate, width)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                  child: _gridItem(
+                      'Purchase type', controller.displayCategory, width)),
+              Expanded(child: _gridItem('Payment method', '—', width)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _gridItem('Reference', '—', width),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // 3. TAX & TOTALS CARD
+  // ================================================================
+
+  Widget _buildTotalsCard(PurchaseInvoicesModel item, double width) {
+    final currency = item.currency ?? 'EUR';
+    final amount = item.totalAmount ?? 0;
+    final formattedAmt = '$currency ${amount.toStringAsFixed(2)}';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(width * 0.045),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tax & totals',
+            style: TextStyle(
+              fontSize: width * 0.040,
+              fontWeight: FontWeight.normal,
+              color: colorsList.textColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _totalRow('Subtotal', formattedAmt, width),
+          _totalRow('Tax', '$currency 0.00', width),
+          const Divider(height: 16, color: Color(0xFFF0F4F8)),
+          _totalRow('Grand total', formattedAmt, width),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // 4. HISTORY CARD
+  // ================================================================
+
+  Widget _buildHistoryCard(PurchaseInvoicesModel item, double width) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(width * 0.045),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'History',
+            style: TextStyle(
+              fontSize: width * 0.040,
+              fontWeight: FontWeight.normal,
+              color: colorsList.textColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _historyRow('Created', _formatDate(item.uploadedAt), width),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // 5. INVOICE DOCUMENT PREVIEW CARD
+  // ================================================================
+
+  Widget _buildDocumentCard(
+    PurchaseInvoicesModel item,
+    double width,
+    double height,
+    BuildContext context,
+  ) {
+    final previewUrl = item.previewUrl;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(width * 0.045),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Invoice Document',
+            style: TextStyle(
+              fontSize: width * 0.040,
+              fontWeight: FontWeight.normal,
+              color: colorsList.textColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () {
+              if (previewUrl == null || previewUrl.isEmpty) {
+                Get.snackbar(
+                  'Document',
+                  'Document preview is not available.',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+                return;
+              }
+
+              showInvoiceDocumentDialog(
+                context: context,
+                fileUrl: previewUrl,
+                fileType: item.fileType,
+                mimeType: item.mimeType,
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              height: height * 0.22,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF3F7),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE0E6ED)),
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Icon(
+                      item.fileType == 'pdf'
+                          ? Icons.picture_as_pdf_rounded
+                          : Icons.image_outlined,
+                      color: item.fileType == 'pdf'
+                          ? const Color(0xFFD64545)
+                          : colorsList.iconColor,
+                      size: width * 0.15,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 12,
+                    left: 14,
+                    right: 14,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.fileName.isNotEmpty
+                                ? item.fileName
+                                : 'Attachment Document',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: const Color(0xFF0A2342),
+                              fontSize: width * 0.031,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'View',
+                            style: TextStyle(
+                              color: const Color(0xFF063C70),
+                              fontSize: width * 0.028,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // HELPER WIDGETS
+  // ================================================================
+
+  Widget _gridItem(String label, String value, double width,
+      {bool isItalic = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
+            fontSize: width * 0.027,
             color: colorsList.textHintColor,
-            fontSize: width.fontSizeW(0.030),
+            fontWeight: FontWeight.normal,
           ),
         ),
-
-        SizedBox(
-          height: width * 0.018,
-        ),
-
-        AppTextField(
-          controller: controller,
-          prefixIcon: icon,
-          readOnly: readOnly,
-          onTap: onTap,
-          keyboardType: keyboardType,
-          fillColor: const Color(0xFFF9FAFC),
-          borderRadius: width * 0.03,
-          fontSize: width.fontSizeW(0.034),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: width * 0.034,
+            fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+            fontWeight: FontWeight.normal,
+            color: colorsList.textColor,
+          ),
         ),
       ],
     );
+  }
+
+  Widget _totalRow(String label, String value, double width) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: width * 0.033,
+              fontWeight: FontWeight.normal,
+              color: colorsList.textHintColor,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: width * 0.033,
+              fontWeight: FontWeight.normal,
+              color: colorsList.textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _historyRow(String label, String value, double width) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: width * 0.030,
+              color: colorsList.textHintColor,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: width * 0.030,
+              color: colorsList.textColor,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty) return '—';
+    try {
+      final parsed = DateTime.parse(dateStr);
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ];
+      return '${parsed.day} ${months[parsed.month - 1]} ${parsed.year}';
+    } catch (_) {
+      return dateStr;
+    }
   }
 }
 
@@ -720,9 +674,7 @@ void showInvoiceDocumentDialog({
   required String fileUrl,
   required String fileType,
   required String mimeType,
-})
-{
-
+}) {
   final rs = context.rs;
   final double width = rs.isPhone
       ? rs.width
@@ -731,176 +683,127 @@ void showInvoiceDocumentDialog({
       ? rs.height
       : ResponsiveBreakpoints.designHeight * rs.scale;
 
-  final bool isPdf =
-      fileType.toLowerCase() == 'pdf' ||
-          mimeType.toLowerCase() == 'application/pdf';
+  final bool isPdf = fileType.toLowerCase() == 'pdf' ||
+      mimeType.toLowerCase() == 'application/pdf';
 
-  final bool isImage =
-      mimeType.toLowerCase().startsWith('image/') ||
-          [
-            'jpg',
-            'jpeg',
-            'png',
-            'webp',
-          ].contains(fileType.toLowerCase());
+  final bool isImage = mimeType.toLowerCase().startsWith('image/') ||
+      [
+        'jpg',
+        'jpeg',
+        'png',
+        'webp',
+      ].contains(fileType.toLowerCase());
 
   showDialog(
     context: context,
     barrierDismissible: true,
     barrierColor: Colors.black.withValues(alpha: 0.70),
-
     builder: (context) {
       return ResponsiveDialogBody(
         maxWidth: rs.sheetMaxWidth + 80,
         child: Dialog(
-        backgroundColor: Colors.white,
-        insetPadding: EdgeInsets.symmetric(
-          horizontal: rs.isPhone ? rs.wp(0.04) : rs.s(48),
-          vertical: rs.isPhone ? rs.hp(0.06) : rs.s(40),
-        ),
-
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-
-        child: SizedBox(
-          height: rs.height * 0.82,
-          child: Column(
-            children: [
-
-              // ------------------------------------------------
-              // HEADER
-              // ------------------------------------------------
-
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.04,
-                  vertical: height * 0.018,
-                ),
-
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: colorsList.borderColor,
+          backgroundColor: Colors.white,
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: rs.isPhone ? rs.wp(0.04) : rs.s(48),
+            vertical: rs.isPhone ? rs.hp(0.06) : rs.s(40),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: SizedBox(
+            height: rs.height * 0.82,
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: width * 0.04,
+                    vertical: height * 0.018,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: colorsList.borderColor,
+                      ),
                     ),
                   ),
-                ),
-
-                child: Row(
-                  children: [
-
-                    Container(
-                      width: width * 0.10,
-                      height: width * 0.10,
-
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFF4F9),
-                        borderRadius:
-                        BorderRadius.circular(12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: width * 0.10,
+                        height: width * 0.10,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF4F9),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          isPdf
+                              ? Icons.picture_as_pdf_rounded
+                              : Icons.image_outlined,
+                          color: isPdf
+                              ? colorsList.colorRed
+                              : colorsList.textColor,
+                          size: width * 0.055,
+                        ),
                       ),
-
-                      child: Icon(
-                        isPdf
-                            ? Icons.picture_as_pdf_rounded
-                            : Icons.image_outlined,
-                        color: isPdf
-                            ? colorsList.colorRed
-                            : colorsList.textColor,
-                        size: width * 0.055,
-                      ),
-                    ),
-
-                    SizedBox(
-                      width: width * 0.03,
-                    ),
-
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Invoice Document',
-                            style: TextStyle(
-                              color:
-                              colorsList.textColor,
-                              fontSize: width.fontSizeW(0.040),
-                              fontWeight: FontWeight.w700,
+                      SizedBox(width: width * 0.03),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Invoice Document',
+                              style: TextStyle(
+                                color: colorsList.textColor,
+                                fontSize: width.fontSizeW(0.040),
+                                fontWeight: FontWeight.normal,
+                              ),
                             ),
-                          ),
-
-                          SizedBox(
-                            height: height * 0.004,
-                          ),
-
-                          Text(
-                            isPdf
-                                ? 'PDF Document'
-                                : 'Image Document',
-                            style: TextStyle(
-                              color:
-                              colorsList.textColor,
-                              fontSize: width.fontSizeW(0.028),
+                            SizedBox(height: height * 0.004),
+                            Text(
+                              isPdf ? 'PDF Document' : 'Image Document',
+                              style: TextStyle(
+                                color: colorsList.textColor,
+                                fontSize: width.fontSizeW(0.028),
+                                fontWeight: FontWeight.normal,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-
-                    // ------------------------------------------------
-                    // CLOSE BUTTON
-                    // ------------------------------------------------
-
-                    Material(
-                      color: const Color(0xFFF3F5F8),
-                      shape: const CircleBorder(),
-
-                      child: InkWell(
-                        customBorder:
-                        const CircleBorder(),
-
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-
-                        child: Padding(
-                          padding: EdgeInsets.all(
-                            width * 0.022,
-                          ),
-
-                          child: Icon(
-                            Icons.close_rounded,
-                            color:
-                            colorsList.iconColor,
-                            size: width * 0.055,
+                      Material(
+                        color: const Color(0xFFF3F5F8),
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Padding(
+                            padding: EdgeInsets.all(width * 0.022),
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: colorsList.iconColor,
+                              size: width * 0.055,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // ------------------------------------------------
-              // DOCUMENT CONTENT
-              // ------------------------------------------------
-
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  color: colorsList.colorBoxDecoration,
-
-                  child: _buildDocumentPreview(
-                    fileUrl: fileUrl,
-                    isPdf: isPdf,
-                    isImage: isImage,
+                    ],
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    color: colorsList.colorBoxDecoration,
+                    child: _buildDocumentPreview(
+                      fileUrl: fileUrl,
+                      isPdf: isPdf,
+                      isImage: isImage,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       );
     },
@@ -911,48 +814,28 @@ Widget _buildDocumentPreview({
   required String fileUrl,
   required bool isPdf,
   required bool isImage,
-})
-{
+}) {
   if (isPdf) {
-    return SfPdfViewer.network(
-      fileUrl,
-    );
+    return SfPdfViewer.network(fileUrl);
   }
 
   if (isImage) {
     return InteractiveViewer(
       minScale: 0.5,
       maxScale: 4.0,
-
       child: Center(
         child: Image.network(
           fileUrl,
           fit: BoxFit.contain,
-
-          loadingBuilder: (
-              context,
-              child,
-              loadingProgress,
-              ) {
-            if (loadingProgress == null) {
-              return child;
-            }
-
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
             return const Center(
-              child: CircularProgressIndicator(
-                color: colorsList.textColor,
-              ),
+              child: CircularProgressIndicator(color: colorsList.textColor),
             );
           },
-
-          errorBuilder: (
-              context,
-              error,
-              stackTrace,
-              ) {
+          errorBuilder: (context, error, stackTrace) {
             return const Column(
-              mainAxisAlignment:
-              MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.broken_image_outlined,
@@ -962,9 +845,7 @@ Widget _buildDocumentPreview({
                 SizedBox(height: 12),
                 Text(
                   'Unable to load document.',
-                  style: TextStyle(
-                    color: colorsList.textHintColor,
-                  ),
+                  style: TextStyle(color: colorsList.textHintColor),
                 ),
               ],
             );
@@ -977,9 +858,7 @@ Widget _buildDocumentPreview({
   return const Center(
     child: Text(
       'Unsupported document format.',
-      style: TextStyle(
-        color: colorsList.textHintColor,
-      ),
+      style: TextStyle(color: colorsList.textHintColor),
     ),
   );
 }
