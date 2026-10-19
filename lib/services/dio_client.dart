@@ -738,6 +738,25 @@ class DioClient {
     );
   }
 
+  // ==============================
+  // CREATE OFFER / QUOTATION
+  // ==============================
+  Future<Response> createOffer({
+    required String accessToken,
+    required Map<String, dynamic> data,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/offers',
+      data: data,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
 
   // ==============================
   // POST CATALOGUE ITEM

@@ -67,7 +67,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Incoming Invoice Details',
+              'Purchase Invoice Details',
               style: TextStyle(
                 color: colorsList.textColor,
                 fontSize: 20,

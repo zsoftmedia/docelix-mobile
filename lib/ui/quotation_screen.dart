@@ -76,17 +76,49 @@ class _QuotationScreenState extends State<QuotationScreen> {
           Obx(() {
             if (controller.isSearching.value) return const SizedBox.shrink();
 
-            return IconButton(
-              onPressed: controller.openSearch,
-              icon: Icon(
-                Icons.search_rounded,
-                color: colorsList.iconColor,
-                size: width * 0.065,
-              ),
+            return Row(
+              children: [
+                IconButton(
+                  onPressed: controller.openSearch,
+                  icon: Icon(
+                    Icons.search_rounded,
+                    color: colorsList.iconColor,
+                    size: width * 0.065,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    final result = await Get.toNamed('/CreateQuotationScreen');
+                    if (result == true) {
+                      controller.refreshQuotations();
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.add_circle_outline_rounded,
+                    color: colorsList.primaryBlue,
+                    size: 24,
+                  ),
+                ),
+              ],
             );
           }),
           SizedBox(width: width * 0.02),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Get.toNamed('/CreateQuotationScreen');
+          if (result == true) {
+            controller.refreshQuotations();
+          }
+        },
+        backgroundColor: colorsList.primaryBlue,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(
+          'Create Offer',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
       ),
 
       // ==========================================================

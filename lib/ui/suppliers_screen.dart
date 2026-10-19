@@ -61,7 +61,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
           ),
         ),
         backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF263238),
+        /*foregroundColor: const Color(0xFF263238),
         elevation: 0,
         centerTitle: false,
         actions: [
@@ -79,23 +79,9 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
             ),
           ),
           const SizedBox(width: 8),
-        ],
+        ],*/
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Get.toNamed('/AddSupplierScreen');
-          if (result == true) {
-            controller.refreshSuppliers();
-          }
-        },
-        backgroundColor: colorsList.colorButton,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'Add Supplier',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-      ),
+
       body: Column(
         children: [
           Container(
@@ -193,6 +179,24 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
             }),
           ),
         ],
+      ),
+
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Get.toNamed('/AddSupplierScreen');
+          if (result == true) {
+            controller.refreshSuppliers();
+          }
+        },
+        backgroundColor: colorsList.colorButton,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(
+          'Add Supplier',
+          style: TextStyle(
+              fontWeight: FontWeight.normal
+          ),
+        ),
       ),
     );
   }
