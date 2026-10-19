@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/purchase_invoices_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -383,57 +384,61 @@ class PurchaseInvoicesDetailsController extends GetxController {
 
   void showStatusSelectionSheet() {
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 25),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(22),
+      backgroundColor: Colors.transparent,
+      ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 25),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(22),
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD0D5DD),
-                  borderRadius: BorderRadius.circular(10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD0D5DD),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 18),
-            const Text(
-              'Change Invoice Status',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0A2342),
+              const SizedBox(height: 18),
+              const Text(
+                'Change Invoice Status',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0A2342),
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
-            /*_statusOptionTile(
+              const SizedBox(height: 14),
+              /*_statusOptionTile(
               title: 'Mark Draft',
               statusKey: 'draft',
               icon: Icons.drafts_outlined,
               color: const Color(0xFF71829A),
             ),*/
-            _statusOptionTile(
-              title: 'Mark Paid',
-              statusKey: 'paid',
-              icon: Icons.check_circle_outline_rounded,
-              color: const Color(0xFF12A150),
-            ),
-            _statusOptionTile(
-              title: 'Mark Unpaid',
-              statusKey: 'unpaid',
-              icon: Icons.pending_actions_rounded,
-              color: const Color(0xFFF39C12),
-            ),
-          ],
+              _statusOptionTile(
+                title: 'Mark Paid',
+                statusKey: 'paid',
+                icon: Icons.check_circle_outline_rounded,
+                color: const Color(0xFF12A150),
+              ),
+              _statusOptionTile(
+                title: 'Mark Unpaid',
+                statusKey: 'unpaid',
+                icon: Icons.pending_actions_rounded,
+                color: const Color(0xFFF39C12),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -487,7 +492,8 @@ class PurchaseInvoicesDetailsController extends GetxController {
     final invoiceId = invoice.id;
 
     final bool? confirmed = await Get.dialog<bool>(
-      AlertDialog(
+      ResponsiveDialogBody(
+        child: AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -533,6 +539,7 @@ class PurchaseInvoicesDetailsController extends GetxController {
             child: const Text('Delete'),
           ),
         ],
+        ),
       ),
     );
 

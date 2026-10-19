@@ -1,9 +1,17 @@
 import 'package:docelix_mobileapp/controllers/general_ledger_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/asset_model.dart';
 import 'package:docelix_mobileapp/models/general_ledger_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+/// Phone: real screen width. Tablet+: design width scaled (keeps proportions
+/// consistent instead of stretching with the viewport).
+double _designWidth(BuildContext context) {
+  final rs = context.rs;
+  return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
+}
 
 class GeneralLedgerScreen extends StatelessWidget {
   const GeneralLedgerScreen({super.key});
@@ -11,7 +19,12 @@ class GeneralLedgerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(GeneralLedgerController());
-    final width = MediaQuery.of(context).size.width;
+    final rs = context.rs;
+    final width = _designWidth(context);
+    final gutter = rs.pagePaddingH;
+    final listGutter = rs.isPhone ? width * 0.04 : rs.pagePaddingH;
+    final columns = rs.listColumns;
+    final cardGap = width * 0.025;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -47,13 +60,13 @@ class GeneralLedgerScreen extends StatelessWidget {
               textInputAction: TextInputAction.search,
               style: TextStyle(
                 color: colorsList.primaryText,
-                fontSize: width * 0.04,
+                fontSize: width.fontSizeW(0.04),
               ),
               decoration: InputDecoration(
                 hintText: 'Search ledger...',
                 hintStyle: TextStyle(
                   color: colorsList.mutedTextColor,
-                  fontSize: width * 0.038,
+                  fontSize: width.fontSizeW(0.038),
                 ),
                 border: InputBorder.none,
                 isDense: true,
@@ -65,7 +78,7 @@ class GeneralLedgerScreen extends StatelessWidget {
             'General Ledger',
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.048,
+              fontSize: width.fontSizeW(0.048),
               fontWeight: FontWeight.w700,
             ),
           );
@@ -127,140 +140,170 @@ class GeneralLedgerScreen extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                width * 0.045,
-                width * 0.03,
-                width * 0.045,
-                width * 0.02,
-              ),
-              child: Obx(
-                () => Row(
-                  children: [
-                    Expanded(
-                      child: _DateField(
-                        label: controller.fromDateText,
-                        onTap: () => controller.pickFromDate(context),
+        child: ResponsivePage(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  gutter,
+                  width * 0.03,
+                  gutter,
+                  width * 0.02,
+                ),
+                child: Obx(
+                  () => Row(
+                    children: [
+                      Expanded(
+                        child: _DateField(
+                          label: controller.fromDateText,
+                          onTap: () => controller.pickFromDate(context),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: width * 0.025),
-                    Expanded(
-                      child: _DateField(
-                        label: controller.toDateText,
-                        onTap: () => controller.pickToDate(context),
+                      SizedBox(width: width * 0.025),
+                      Expanded(
+                        child: _DateField(
+                          label: controller.toDateText,
+                          onTap: () => controller.pickToDate(context),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-              child: Obx(
-                () => Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        controller.accountFilterLabel(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: colorsList.primaryText,
-                          fontSize: width * 0.038,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: width * 0.03,
-                        vertical: width * 0.015,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorsList.colorBoxDecoration,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '${controller.entries.length} entries',
-                        style: TextStyle(
-                          color: colorsList.secondaryText,
-                          fontSize: width * 0.028,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: width * 0.025),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.045),
-              child: _SummaryStrip(controller: controller),
-            ),
-            SizedBox(height: width * 0.02),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value && controller.entries.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (controller.entries.isEmpty) {
-                  return RefreshIndicator(
-                    onRefresh: controller.loadReport,
-                    child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        SizedBox(height: width * 0.25),
-                        Icon(
-                          Icons.menu_book_outlined,
-                          size: width * 0.14,
-                          color: colorsList.mutedTextColor,
-                        ),
-                        SizedBox(height: width * 0.04),
-                        Text(
-                          controller.searchQuery.value.trim().isNotEmpty
-                              ? 'No entries match your search.'
-                              : 'No ledger entries for this period.',
-                          textAlign: TextAlign.center,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: gutter),
+                child: Obx(
+                  () => Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          controller.accountFilterLabel(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: colorsList.secondaryText,
-                            fontSize: width * 0.034,
+                            color: colorsList.primaryText,
+                            fontSize: width.fontSizeW(0.038),
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: width * 0.03,
+                          vertical: width * 0.015,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorsList.colorBoxDecoration,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${controller.entries.length} entries',
+                          style: TextStyle(
+                            color: colorsList.secondaryText,
+                            fontSize: width.fontSizeW(0.028),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: width * 0.025),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: gutter),
+                child: _SummaryStrip(controller: controller),
+              ),
+              SizedBox(height: width * 0.02),
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value &&
+                      controller.entries.isEmpty) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (controller.entries.isEmpty) {
+                    return RefreshIndicator(
+                      onRefresh: controller.loadReport,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(height: width * 0.25),
+                          Icon(
+                            Icons.menu_book_outlined,
+                            size: width * 0.14,
+                            color: colorsList.mutedTextColor,
+                          ),
+                          SizedBox(height: width * 0.04),
+                          Text(
+                            controller.searchQuery.value.trim().isNotEmpty
+                                ? 'No entries match your search.'
+                                : 'No ledger entries for this period.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: colorsList.secondaryText,
+                              fontSize: width.fontSizeW(0.034),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final listPadding = EdgeInsets.fromLTRB(
+                    listGutter,
+                    width * 0.01,
+                    listGutter,
+                    width * 0.1,
+                  );
+
+                  if (columns > 1) {
+                    return RefreshIndicator(
+                      onRefresh: controller.loadReport,
+                      child: GridView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: listPadding,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          crossAxisSpacing: cardGap,
+                          mainAxisSpacing: cardGap,
+                          mainAxisExtent: rs.sp(176),
+                        ),
+                        itemCount: controller.entries.length,
+                        itemBuilder: (context, index) {
+                          final entry = controller.entries[index];
+                          return _LedgerEntryCard(
+                            controller: controller,
+                            entry: entry,
+                          );
+                        },
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: controller.loadReport,
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: listPadding,
+                      itemCount: controller.entries.length,
+                      itemBuilder: (context, index) {
+                        final entry = controller.entries[index];
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: cardGap),
+                          child: _LedgerEntryCard(
+                            controller: controller,
+                            entry: entry,
+                          ),
+                        );
+                      },
                     ),
                   );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: controller.loadReport,
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(
-                      width * 0.04,
-                      width * 0.01,
-                      width * 0.04,
-                      width * 0.1,
-                    ),
-                    itemCount: controller.entries.length,
-                    itemBuilder: (context, index) {
-                      final entry = controller.entries[index];
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: width * 0.025),
-                        child: _LedgerEntryCard(
-                          controller: controller,
-                          entry: entry,
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
-            ),
-          ],
+                }),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -283,7 +326,7 @@ class _DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return InkWell(
       onTap: onTap,
@@ -313,7 +356,7 @@ class _DateField extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width * 0.032,
+                  fontSize: width.fontSizeW(0.032),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -332,7 +375,7 @@ class _SummaryStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Obx(() {
       final opening = controller.formatMoney(controller.openingBalance);
@@ -379,7 +422,7 @@ class _SummaryStrip extends StatelessWidget {
                   sourceLabel,
                   style: TextStyle(
                     color: colorsList.colorButton,
-                    fontSize: width * 0.026,
+                    fontSize: width.fontSizeW(0.026),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -400,7 +443,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -421,7 +464,7 @@ class _SummaryCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.mutedTextColor,
-              fontSize: width * 0.022,
+              fontSize: width.fontSizeW(0.022),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -432,7 +475,7 @@ class _SummaryCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.026,
+              fontSize: width.fontSizeW(0.026),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -450,7 +493,7 @@ class _LedgerEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final dateParts = controller.parseDateParts(entry.entryDate);
 
     return Material(
@@ -486,7 +529,7 @@ class _LedgerEntryCard extends StatelessWidget {
                         Text(
                           dateParts['day']!,
                           style: TextStyle(
-                            fontSize: width * 0.05,
+                            fontSize: width.fontSizeW(0.05),
                             fontWeight: FontWeight.w800,
                             color: colorsList.primaryText,
                             height: 1,
@@ -496,7 +539,7 @@ class _LedgerEntryCard extends StatelessWidget {
                         Text(
                           dateParts['month']!,
                           style: TextStyle(
-                            fontSize: width * 0.026,
+                            fontSize: width.fontSizeW(0.026),
                             fontWeight: FontWeight.w700,
                             color: colorsList.secondaryText,
                             letterSpacing: 0.4,
@@ -505,7 +548,7 @@ class _LedgerEntryCard extends StatelessWidget {
                         Text(
                           dateParts['year']!,
                           style: TextStyle(
-                            fontSize: width * 0.024,
+                            fontSize: width.fontSizeW(0.024),
                             color: colorsList.mutedTextColor,
                           ),
                         ),
@@ -523,7 +566,7 @@ class _LedgerEntryCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width * 0.034,
+                            fontSize: width.fontSizeW(0.034),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -532,7 +575,7 @@ class _LedgerEntryCard extends StatelessWidget {
                           'Ref #${entry.sourceId ?? '—'} · Journal #${entry.journalEntryId}',
                           style: TextStyle(
                             color: colorsList.secondaryText,
-                            fontSize: width * 0.026,
+                            fontSize: width.fontSizeW(0.026),
                           ),
                         ),
                         SizedBox(height: width * 0.015),
@@ -560,7 +603,7 @@ class _LedgerEntryCard extends StatelessWidget {
                     controller.formatMoney(entry.totalAmount),
                     style: TextStyle(
                       color: colorsList.primaryText,
-                      fontSize: width * 0.034,
+                      fontSize: width.fontSizeW(0.034),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -579,7 +622,7 @@ class _LedgerEntryCard extends StatelessWidget {
                     'View',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: width * 0.03,
+                      fontSize: width.fontSizeW(0.03),
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -616,7 +659,7 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -631,7 +674,7 @@ class _Badge extends StatelessWidget {
         label,
         style: TextStyle(
           color: foreground,
-          fontSize: width * 0.022,
+          fontSize: width.fontSizeW(0.022),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -646,142 +689,150 @@ class _FiltersSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final rs = context.rs;
+    final width = _designWidth(context);
     final bottom = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      margin: EdgeInsets.only(top: width * 0.2),
-      padding: EdgeInsets.fromLTRB(
-        width * 0.045,
-        width * 0.04,
-        width * 0.045,
-        bottom + width * 0.05,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Obx(() {
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colorsList.borderColor,
-                    borderRadius: BorderRadius.circular(4),
+    return ResponsiveSheetBody(
+      padding: EdgeInsets.zero,
+      child: Container(
+        margin: EdgeInsets.only(top: width * 0.2),
+        padding: EdgeInsets.fromLTRB(
+          rs.pagePaddingH,
+          width * 0.04,
+          rs.pagePaddingH,
+          bottom + width * 0.05,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Obx(() {
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: colorsList.borderColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: width * 0.035),
-              Text(
-                'Filters',
-                style: TextStyle(
-                  color: colorsList.primaryText,
-                  fontSize: width * 0.045,
-                  fontWeight: FontWeight.w800,
+                SizedBox(height: width * 0.035),
+                Text(
+                  'Filters',
+                  style: TextStyle(
+                    color: colorsList.primaryText,
+                    fontSize: width.fontSizeW(0.045),
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              SizedBox(height: width * 0.04),
-              _FieldLabel('Account'),
-              _DropdownShell(
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<int?>(
-                    isExpanded: true,
-                    value: controller.selectedAccountId.value,
-                    hint: const Text('All Accounts'),
-                    items: [
-                      const DropdownMenuItem<int?>(
-                        value: null,
-                        child: Text('All Accounts'),
-                      ),
-                      ...controller.accounts.map(
-                        (LedgerAccount account) => DropdownMenuItem<int?>(
-                          value: account.id,
-                          child: Text(
-                            account.displayLabel,
-                            overflow: TextOverflow.ellipsis,
+                SizedBox(height: width * 0.04),
+                _FieldLabel('Account'),
+                _DropdownShell(
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int?>(
+                      isExpanded: true,
+                      value: controller.selectedAccountId.value,
+                      hint: const Text('All Accounts'),
+                      items: [
+                        const DropdownMenuItem<int?>(
+                          value: null,
+                          child: Text('All Accounts'),
+                        ),
+                        ...controller.accounts.map(
+                          (LedgerAccount account) => DropdownMenuItem<int?>(
+                            value: account.id,
+                            child: Text(
+                              account.displayLabel,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                      onChanged: controller.setAccountFilter,
+                    ),
+                  ),
+                ),
+                SizedBox(height: width * 0.03),
+                _FieldLabel('Source Type'),
+                _DropdownShell(
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String?>(
+                      isExpanded: true,
+                      value: controller.selectedSourceType.value,
+                      hint: const Text('All Sources'),
+                      items: GeneralLedgerController.sourceTypeOptions
+                          .map(
+                            (option) => DropdownMenuItem<String?>(
+                              value: option.key.isEmpty ? null : option.key,
+                              child: Text(option.value),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: controller.setSourceTypeFilter,
+                    ),
+                  ),
+                ),
+                SizedBox(height: width * 0.05),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          controller.clearFilters();
+                          Get.back();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            vertical: width * 0.035,
+                          ),
+                          side: BorderSide(color: colorsList.borderColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Reset',
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
-                    ],
-                    onChanged: controller.setAccountFilter,
-                  ),
-                ),
-              ),
-              SizedBox(height: width * 0.03),
-              _FieldLabel('Source Type'),
-              _DropdownShell(
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String?>(
-                    isExpanded: true,
-                    value: controller.selectedSourceType.value,
-                    hint: const Text('All Sources'),
-                    items: GeneralLedgerController.sourceTypeOptions
-                        .map(
-                          (option) => DropdownMenuItem<String?>(
-                            value: option.key.isEmpty ? null : option.key,
-                            child: Text(option.value),
+                    ),
+                    SizedBox(width: width * 0.03),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: Get.back,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colorsList.colorButton,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                            vertical: width * 0.035,
                           ),
-                        )
-                        .toList(),
-                    onChanged: controller.setSourceTypeFilter,
-                  ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Done',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: width * 0.05),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        controller.clearFilters();
-                        Get.back();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: width * 0.035),
-                        side: BorderSide(color: colorsList.borderColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'Reset',
-                        style: TextStyle(
-                          color: colorsList.primaryText,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: width * 0.03),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: Get.back,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorsList.colorButton,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: width * 0.035),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Done',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      }),
+              ],
+            ),
+          );
+        }),
+      ),
     );
   }
 }
@@ -793,7 +844,7 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Padding(
       padding: EdgeInsets.only(bottom: width * 0.015),
@@ -801,7 +852,7 @@ class _FieldLabel extends StatelessWidget {
         text,
         style: TextStyle(
           color: colorsList.secondaryText,
-          fontSize: width * 0.028,
+          fontSize: width.fontSizeW(0.028),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -816,7 +867,7 @@ class _DropdownShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: width * 0.03),

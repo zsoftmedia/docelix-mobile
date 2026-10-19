@@ -1,16 +1,54 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
+import 'package:docelix_mobileapp/controllers/create_asset_controller.dart';
 import 'package:docelix_mobileapp/controllers/fixed_assets_controller.dart';
 import 'package:docelix_mobileapp/models/asset_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+/// Phone: real screen width. Tablet+: design width scaled (keeps proportions
+/// consistent instead of stretching with the viewport).
+double _designWidth(BuildContext context) {
+  final rs = context.rs;
+  return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
+}
+
 class FixedAssetsScreen extends StatelessWidget {
   const FixedAssetsScreen({super.key});
+
+  Future<void> _openCreateAsset(FixedAssetsController controller) async {
+    final created = await Get.toNamed('/CreateAssetScreen');
+
+    // GetX completes this future when the route *starts* closing, while the
+    // exit transition (and Form fields) are still mounted. Wait it out before
+    // disposing TextEditingControllers — otherwise we get used-after-dispose
+    // and the red screen.
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+
+    if (Get.isRegistered<CreateAssetController>()) {
+      Get.delete<CreateAssetController>(force: true);
+    }
+
+    if (created != true) return;
+
+    await controller.refreshAssets();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppSnackbar.success(
+        title: 'Success',
+        message: 'Asset created successfully.',
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(FixedAssetsController());
-    final width = MediaQuery.of(context).size.width;
+    final rs = context.rs;
+    final width = _designWidth(context);
+    final columns = rs.listColumns;
+    final gap = width * 0.03;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -30,7 +68,7 @@ class FixedAssetsScreen extends StatelessWidget {
           'Assets',
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width * 0.048,
+            fontSize: width.fontSizeW(0.048),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -55,7 +93,7 @@ class FixedAssetsScreen extends StatelessWidget {
               style: TextStyle(
                 color: colorsList.primaryText,
                 fontWeight: FontWeight.w600,
-                fontSize: width * 0.032,
+                fontSize: width.fontSizeW(0.032),
               ),
             ),
           ),
@@ -63,9 +101,7 @@ class FixedAssetsScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await Get.toNamed('/CreateAssetScreen');
-        },
+        onPressed: () => _openCreateAsset(controller),
         backgroundColor: colorsList.colorButton,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
@@ -79,63 +115,91 @@ class FixedAssetsScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return RefreshIndicator(
-          onRefresh: controller.refreshAssets,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    width * 0.045,
-                    width * 0.03,
-                    width * 0.045,
-                    0,
-                  ),
-                  child: Column(
-                    children: [
-                      _SearchAndFilterBar(controller: controller),
-                      SizedBox(height: width * 0.03),
-                      _KpiGrid(controller: controller),
-                    ],
-                  ),
-                ),
-              ),
-              if (controller.filteredAssets.isEmpty)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: _EmptyState(
-                    hasFilters: controller.hasActiveFilters,
-                    onAdd: () async {
-                      await Get.toNamed('/CreateAssetScreen');
-                    },
-                    onClearFilters: controller.clearFilters,
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    width * 0.045,
-                    width * 0.02,
-                    width * 0.045,
-                    width * 0.28,
-                  ),
-                  sliver: SliverList.separated(
-                    itemCount: controller.filteredAssets.length,
-                    separatorBuilder: (_, _) => SizedBox(height: width * 0.03),
-                    itemBuilder: (context, index) {
-                      final asset = controller.filteredAssets[index];
-                      return _AssetCard(
-                        asset: asset,
-                        money: controller.formatMoney,
-                        onTap: () {
-                          Get.toNamed('/AssetDetailsScreen', arguments: asset);
-                        },
-                      );
-                    },
+        return ResponsivePage(
+          padding: EdgeInsets.zero,
+          child: RefreshIndicator(
+            onRefresh: controller.refreshAssets,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      width * 0.045,
+                      width * 0.03,
+                      width * 0.045,
+                      0,
+                    ),
+                    child: Column(
+                      children: [
+                        _SearchAndFilterBar(controller: controller),
+                        SizedBox(height: width * 0.03),
+                        _KpiGrid(controller: controller),
+                      ],
+                    ),
                   ),
                 ),
-            ],
+                if (controller.filteredAssets.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: _EmptyState(
+                      hasFilters: controller.hasActiveFilters,
+                      onAdd: () => _openCreateAsset(controller),
+                      onClearFilters: controller.clearFilters,
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(
+                      width * 0.045,
+                      width * 0.02,
+                      width * 0.045,
+                      width * 0.28,
+                    ),
+                    sliver: SliverList.separated(
+                      itemCount: (controller.filteredAssets.length / columns)
+                          .ceil(),
+                      separatorBuilder: (_, _) => SizedBox(height: gap),
+                      itemBuilder: (context, rowIndex) {
+                        final start = rowIndex * columns;
+                        Widget cardAt(int index) {
+                          final asset = controller.filteredAssets[index];
+                          return _AssetCard(
+                            asset: asset,
+                            money: controller.formatMoney,
+                            onTap: () {
+                              Get.toNamed(
+                                '/AssetDetailsScreen',
+                                arguments: asset,
+                              );
+                            },
+                          );
+                        }
+
+                        if (columns == 1) return cardAt(start);
+
+                        return IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (var c = 0; c < columns; c++) ...[
+                                if (c > 0) SizedBox(width: gap),
+                                Expanded(
+                                  child:
+                                      start + c <
+                                          controller.filteredAssets.length
+                                      ? cardAt(start + c)
+                                      : const SizedBox.shrink(),
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       }),
@@ -150,7 +214,7 @@ class _SearchAndFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Row(
       children: [
@@ -168,7 +232,7 @@ class _SearchAndFilterBar extends StatelessWidget {
                 hintText: 'Search by name or number',
                 hintStyle: TextStyle(
                   color: colorsList.secondaryText,
-                  fontSize: width * 0.033,
+                  fontSize: width.fontSizeW(0.033),
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
@@ -206,7 +270,7 @@ class _SearchAndFilterBar extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: width * 0.032,
+                      fontSize: width.fontSizeW(0.032),
                     ),
                   ),
                 ],
@@ -221,185 +285,191 @@ class _SearchAndFilterBar extends StatelessWidget {
   void _openFilters(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
       useSafeArea: false,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
       builder: (context) {
-        final width = MediaQuery.of(context).size.width;
+        final width = _designWidth(context);
         final bottomInset = MediaQuery.of(context).padding.bottom;
 
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            width * 0.05,
-            width * 0.04,
-            width * 0.05,
-            width * 0.05 + bottomInset,
-          ),
-          child: Obx(
-            () => SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD7DDE5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: width * 0.04),
-                  Text(
-                    'Filters',
-                    style: TextStyle(
-                      color: colorsList.primaryText,
-                      fontSize: width * 0.045,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: width * 0.04),
-                  Text(
-                    'Category',
-                    style: TextStyle(
-                      color: colorsList.secondaryText,
-                      fontSize: width * 0.032,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: width * 0.02),
-                  DropdownButtonFormField<int?>(
-                    key: ValueKey(
-                      'category_${controller.selectedCategoryId.value}',
-                    ),
-                    initialValue: controller.selectedCategoryId.value,
-                    isExpanded: true,
-                    decoration: _dropdownDecoration(),
-                    items: [
-                      const DropdownMenuItem<int?>(
-                        value: null,
-                        child: Text('All Categories'),
-                      ),
-                      ...controller.categories.map(
-                        (category) => DropdownMenuItem<int?>(
-                          value: category.id,
-                          child: Text(
-                            category.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+            ),
+            padding: EdgeInsets.fromLTRB(
+              width * 0.05,
+              width * 0.04,
+              width * 0.05,
+              width * 0.05 + bottomInset,
+            ),
+            child: Obx(
+              () => SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD7DDE5),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                    ],
-                    onChanged: controller.setCategoryFilter,
-                  ),
-                  SizedBox(height: width * 0.035),
-                  Text(
-                    'Status',
-                    style: TextStyle(
-                      color: colorsList.secondaryText,
-                      fontSize: width * 0.032,
-                      fontWeight: FontWeight.w600,
                     ),
-                  ),
-                  SizedBox(height: width * 0.02),
-                  DropdownButtonFormField<String?>(
-                    key: ValueKey('status_${controller.selectedStatus.value}'),
-                    initialValue: controller.selectedStatus.value,
-                    isExpanded: true,
-                    decoration: _dropdownDecoration(),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Filter by Status'),
+                    SizedBox(height: width * 0.04),
+                    Text(
+                      'Filters',
+                      style: TextStyle(
+                        color: colorsList.primaryText,
+                        fontSize: width.fontSizeW(0.045),
+                        fontWeight: FontWeight.w700,
                       ),
-                      ...controller.availableStatuses.map(
-                        (status) => DropdownMenuItem<String?>(
-                          value: status,
-                          child: Text(status),
+                    ),
+                    SizedBox(height: width * 0.04),
+                    Text(
+                      'Category',
+                      style: TextStyle(
+                        color: colorsList.secondaryText,
+                        fontSize: width.fontSizeW(0.032),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: width * 0.02),
+                    DropdownButtonFormField<int?>(
+                      key: ValueKey(
+                        'category_${controller.selectedCategoryId.value}',
+                      ),
+                      initialValue: controller.selectedCategoryId.value,
+                      isExpanded: true,
+                      decoration: _dropdownDecoration(),
+                      items: [
+                        const DropdownMenuItem<int?>(
+                          value: null,
+                          child: Text('All Categories'),
                         ),
-                      ),
-                    ],
-                    onChanged: controller.setStatusFilter,
-                  ),
-                  SizedBox(height: width * 0.035),
-                  Text(
-                    'Account',
-                    style: TextStyle(
-                      color: colorsList.secondaryText,
-                      fontSize: width * 0.032,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: width * 0.02),
-                  DropdownButtonFormField<int?>(
-                    key: ValueKey(
-                      'account_${controller.selectedAccountId.value}',
-                    ),
-                    initialValue: controller.selectedAccountId.value,
-                    isExpanded: true,
-                    decoration: _dropdownDecoration(),
-                    items: [
-                      const DropdownMenuItem<int?>(
-                        value: null,
-                        child: Text('All Accounts'),
-                      ),
-                      ...controller.accounts.map(
-                        (account) => DropdownMenuItem<int?>(
-                          value: account.id,
-                          child: Text(
-                            account.displayLabel,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                    ],
-                    onChanged: controller.setAccountFilter,
-                  ),
-                  SizedBox(height: width * 0.05),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            controller.clearFilters();
-                            Navigator.pop(context);
-                          },
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 48),
-                            side: const BorderSide(
-                              color: colorsList.borderColor,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                        ...controller.categories.map(
+                          (category) => DropdownMenuItem<int?>(
+                            value: category.id,
+                            child: Text(
+                              category.name,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          child: const Text('Clear'),
                         ),
+                      ],
+                      onChanged: controller.setCategoryFilter,
+                    ),
+                    SizedBox(height: width * 0.035),
+                    Text(
+                      'Status',
+                      style: TextStyle(
+                        color: colorsList.secondaryText,
+                        fontSize: width.fontSizeW(0.032),
+                        fontWeight: FontWeight.w600,
                       ),
-                      SizedBox(width: width * 0.03),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colorsList.colorButton,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(0, 48),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                    ),
+                    SizedBox(height: width * 0.02),
+                    DropdownButtonFormField<String?>(
+                      key: ValueKey(
+                        'status_${controller.selectedStatus.value}',
+                      ),
+                      initialValue: controller.selectedStatus.value,
+                      isExpanded: true,
+                      decoration: _dropdownDecoration(),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('Filter by Status'),
+                        ),
+                        ...controller.availableStatuses.map(
+                          (status) => DropdownMenuItem<String?>(
+                            value: status,
+                            child: Text(status),
+                          ),
+                        ),
+                      ],
+                      onChanged: controller.setStatusFilter,
+                    ),
+                    SizedBox(height: width * 0.035),
+                    Text(
+                      'Account',
+                      style: TextStyle(
+                        color: colorsList.secondaryText,
+                        fontSize: width.fontSizeW(0.032),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: width * 0.02),
+                    DropdownButtonFormField<int?>(
+                      key: ValueKey(
+                        'account_${controller.selectedAccountId.value}',
+                      ),
+                      initialValue: controller.selectedAccountId.value,
+                      isExpanded: true,
+                      decoration: _dropdownDecoration(),
+                      items: [
+                        const DropdownMenuItem<int?>(
+                          value: null,
+                          child: Text('All Accounts'),
+                        ),
+                        ...controller.accounts.map(
+                          (account) => DropdownMenuItem<int?>(
+                            value: account.id,
+                            child: Text(
+                              account.displayLabel,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          child: const Text('Apply'),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                      onChanged: controller.setAccountFilter,
+                    ),
+                    SizedBox(height: width * 0.05),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              controller.clearFilters();
+                              Navigator.pop(context);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(0, 48),
+                              side: const BorderSide(
+                                color: colorsList.borderColor,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Clear'),
+                          ),
+                        ),
+                        SizedBox(width: width * 0.03),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colorsList.colorButton,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(0, 48),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Apply'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -428,49 +498,66 @@ class _KpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
-    return Obx(
-      () => GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        padding: EdgeInsets.zero,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: width * 0.025,
-        crossAxisSpacing: width * 0.025,
-        childAspectRatio: 1.55,
-        children: [
-          _KpiCard(
-            title: 'Total Assets',
-            value: '${controller.totalAssetsCount}',
-            subtitle: 'All active assets',
-            icon: Icons.inventory_2_outlined,
-            iconColor: const Color(0xFF3B82F6),
-          ),
-          _KpiCard(
-            title: 'Current Book Value',
-            value: controller.formatMoney(controller.totalBookValue),
-            subtitle: 'Total depreciated value',
-            icon: Icons.payments_outlined,
-            iconColor: const Color(0xFF12B886),
-          ),
-          _KpiCard(
-            title: 'Annual Depreciation',
-            value: controller.formatMoney(controller.annualDepreciation),
-            subtitle: 'This year',
-            icon: Icons.pie_chart_outline_rounded,
-            iconColor: const Color(0xFFF59E0B),
-          ),
-          _KpiCard(
-            title: 'Near End of Life',
-            value: '${controller.nearEndOfLifeCount}',
-            subtitle: 'In next 12 months',
-            icon: Icons.warning_amber_rounded,
-            iconColor: const Color(0xFF8B5CF6),
-          ),
-        ],
-      ),
-    );
+    final columns = context.rs.kpiColumns;
+    final gap = width * 0.025;
+
+    return Obx(() {
+      // Read observables here — LayoutBuilder's builder runs outside Obx tracking.
+      controller.assets.length;
+      final totalAssets = '${controller.totalAssetsCount}';
+      final bookValue = controller.formatMoney(controller.totalBookValue);
+      final annualDep = controller.formatMoney(controller.annualDepreciation);
+      final nearEol = '${controller.nearEndOfLifeCount}';
+
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final itemWidth =
+              (constraints.maxWidth - gap * (columns - 1)) / columns;
+          final itemHeight = itemWidth / 1.55;
+          final cards = <Widget>[
+            _KpiCard(
+              title: 'Total Assets',
+              value: totalAssets,
+              subtitle: 'All active assets',
+              icon: Icons.inventory_2_outlined,
+              iconColor: const Color(0xFF3B82F6),
+            ),
+            _KpiCard(
+              title: 'Current Book Value',
+              value: bookValue,
+              subtitle: 'Total depreciated value',
+              icon: Icons.payments_outlined,
+              iconColor: const Color(0xFF12B886),
+            ),
+            _KpiCard(
+              title: 'Annual Depreciation',
+              value: annualDep,
+              subtitle: 'This year',
+              icon: Icons.pie_chart_outline_rounded,
+              iconColor: const Color(0xFFF59E0B),
+            ),
+            _KpiCard(
+              title: 'Near End of Life',
+              value: nearEol,
+              subtitle: 'In next 12 months',
+              icon: Icons.warning_amber_rounded,
+              iconColor: const Color(0xFF8B5CF6),
+            ),
+          ];
+
+          return Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (final card in cards)
+                SizedBox(width: itemWidth, height: itemHeight, child: card),
+            ],
+          );
+        },
+      );
+    });
   }
 }
 
@@ -491,7 +578,7 @@ class _KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -527,7 +614,7 @@ class _KpiCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colorsList.secondaryText,
-                    fontSize: width * 0.025,
+                    fontSize: width.fontSizeW(0.025),
                     fontWeight: FontWeight.w600,
                     height: 1.15,
                   ),
@@ -541,7 +628,7 @@ class _KpiCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width * 0.038,
+              fontSize: width.fontSizeW(0.038),
               fontWeight: FontWeight.w800,
               height: 1.1,
             ),
@@ -552,7 +639,7 @@ class _KpiCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.mutedTextColor,
-              fontSize: width * 0.022,
+              fontSize: width.fontSizeW(0.022),
               height: 1.1,
             ),
           ),
@@ -575,7 +662,7 @@ class _AssetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
     final statusColor = _statusColor(asset.status);
 
     return Material(
@@ -611,7 +698,7 @@ class _AssetCard extends StatelessWidget {
                           asset.name,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width * 0.04,
+                            fontSize: width.fontSizeW(0.04),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -620,7 +707,7 @@ class _AssetCard extends StatelessWidget {
                           asset.assetNumber ?? 'No asset number',
                           style: TextStyle(
                             color: colorsList.secondaryText,
-                            fontSize: width * 0.028,
+                            fontSize: width.fontSizeW(0.028),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -643,7 +730,7 @@ class _AssetCard extends StatelessWidget {
                           asset.status,
                           style: TextStyle(
                             color: statusColor,
-                            fontSize: width * 0.026,
+                            fontSize: width.fontSizeW(0.026),
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -655,7 +742,7 @@ class _AssetCard extends StatelessWidget {
                             : 'Life ${asset.usefulLifeYears} yrs',
                         style: TextStyle(
                           color: colorsList.secondaryText,
-                          fontSize: width * 0.026,
+                          fontSize: width.fontSizeW(0.026),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -775,7 +862,7 @@ class _MetaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -795,7 +882,7 @@ class _MetaChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: colorsList.secondaryText,
-              fontSize: width * 0.026,
+              fontSize: width.fontSizeW(0.026),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -818,7 +905,7 @@ class _ValueBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -829,7 +916,7 @@ class _ValueBlock extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: colorsList.mutedTextColor,
-            fontSize: width * 0.024,
+            fontSize: width.fontSizeW(0.024),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -862,7 +949,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = _designWidth(context);
 
     return Center(
       child: Padding(
@@ -880,7 +967,7 @@ class _EmptyState extends StatelessWidget {
               'No assets found',
               style: TextStyle(
                 color: colorsList.primaryText,
-                fontSize: width * 0.045,
+                fontSize: width.fontSizeW(0.045),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -890,7 +977,7 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: colorsList.secondaryText,
-                fontSize: width * 0.033,
+                fontSize: width.fontSizeW(0.033),
                 height: 1.4,
               ),
             ),

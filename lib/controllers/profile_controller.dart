@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/user_model.dart';
 import 'package:docelix_mobileapp/services/auth_services.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
@@ -90,83 +91,87 @@ class ProfileController extends GetxController {
 
   Future<void> changeProfilePicture() async {
     await Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 25),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(18),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 25),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(18),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD0D5DD),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              const SizedBox(height: 18),
-              const Text(
-                'Profile Picture',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF172033),
-                ),
-              ),
-              const SizedBox(height: 18),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                leading: Container(
-                  width: 42,
-                  height: 42,
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEAF4FF),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_outlined,
-                    color: Color(0xFF1769AA),
+                    color: const Color(0xFFD0D5DD),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                title: const Text('Take a photo'),
-                subtitle: const Text('Use your camera'),
-                onTap: () async {
-                  Get.back();
-                  await pickProfileImage(source: ImageSource.camera);
-                },
-              ),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                leading: Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEAF4FF),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.photo_library_outlined,
-                    color: Color(0xFF1769AA),
+                const SizedBox(height: 18),
+                const Text(
+                  'Profile Picture',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF172033),
                   ),
                 ),
-                title: const Text('Choose from gallery'),
-                subtitle: const Text('Select an existing photo'),
-                onTap: () async {
-                  Get.back();
-                  await pickProfileImage(source: ImageSource.gallery);
-                },
-              ),
-            ],
+                const SizedBox(height: 18),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                  leading: Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF4FF),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      color: Color(0xFF1769AA),
+                    ),
+                  ),
+                  title: const Text('Take a photo'),
+                  subtitle: const Text('Use your camera'),
+                  onTap: () async {
+                    Get.back();
+                    await pickProfileImage(source: ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                  leading: Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF4FF),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.photo_library_outlined,
+                      color: Color(0xFF1769AA),
+                    ),
+                  ),
+                  title: const Text('Choose from gallery'),
+                  subtitle: const Text('Select an existing photo'),
+                  onTap: () async {
+                    Get.back();
+                    await pickProfileImage(source: ImageSource.gallery);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      isScrollControlled: true,
     );
   }
 

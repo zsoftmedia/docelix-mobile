@@ -1,6 +1,7 @@
 import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/purchase_invoices_details_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -37,8 +38,14 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final rs = context.rs;
+    // Keep legacy width*/height* tokens phone-sized on tablet/iPad.
+    final width = rs.isPhone
+        ? rs.width
+        : ResponsiveBreakpoints.designWidth * rs.scale;
+    final height = rs.isPhone
+        ? rs.height
+        : ResponsiveBreakpoints.designHeight * rs.scale;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -56,10 +63,10 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             color: colorsList.iconColor,
-            size: 20,
+            size: rs.s(20),
           ),
         ),
 
@@ -70,7 +77,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
               'Purchase Invoice Details',
               style: TextStyle(
                 color: colorsList.textColor,
-                fontSize: 20,
+                fontSize: rs.sp(20),
                 fontWeight: FontWeight.normal,
               ),
             ),
@@ -79,22 +86,12 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
               '#${controller.invoiceNumberController.text}',
               style: TextStyle(
                 color: colorsList.textHintColor,
-                fontSize: width * 0.030,
-                fontWeight: FontWeight.normal,
+                fontSize: rs.sp(12),
+                fontWeight: FontWeight.w400,
               ),
             ),
           ],
         ),
-
-        /*actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.more_vert_rounded,
-              color: colorsList.iconColor,
-            ),
-          ),
-        ],*/
       ),
 
       // ----------------------------------------------------------
@@ -105,16 +102,15 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-
+              child: ResponsivePage(
                 padding: EdgeInsets.fromLTRB(
-                  width * 0.045,
-                  height * 0.02,
-                  width * 0.045,
-                  height * 0.12,
+                  rs.pagePaddingH,
+                  rs.s(16),
+                  rs.pagePaddingH,
+                  rs.s(96),
                 ),
-
+                child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -150,7 +146,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                               controller.displayStatus,
                               style: TextStyle(
                                 color: controller.statusColor,
-                                fontSize: width * 0.032,
+                                fontSize: width.fontSizeW(0.032),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -457,9 +453,9 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                                   Text(
                                     'Invoice Document',
                                     style: TextStyle(
-                                      color: const Color(0xFF0A2342,),
-                                      fontSize: width * 0.034,
-                                      fontWeight: FontWeight.normal,
+                                      color: const Color(0xFF0A2342),
+                                      fontSize: width.fontSizeW(0.034),
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
 
@@ -482,12 +478,9 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                                     child: Text(
                                       'View',
                                       style: TextStyle(
-                                        color: const Color(
-                                          0xFF063C70,
-                                        ),
-                                        fontSize:
-                                        width * 0.03,
-                                        fontWeight: FontWeight.normal,
+                                        color: const Color(0xFF063C70),
+                                        fontSize: width.fontSizeW(0.03),
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
@@ -521,7 +514,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                         foregroundColor: Colors.white,
                         loadingColor: Colors.white,
                         borderRadius: 4,
-                        fontSize: width * 0.043,
+                        fontSize: width.fontSizeW(0.043),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -532,6 +525,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
 
                   ],
                 ),
+                ),
               ),
             ),
 
@@ -539,71 +533,70 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
             // BOTTOM ACTIONS
             // --------------------------------------------------------
 
-            Container(
-              padding: EdgeInsets.fromLTRB(
-                width * 0.04,
-                height * 0.015,
-                width * 0.04,
-                height * 0.02,
-              ),
-
-              decoration: BoxDecoration(
-                color: Colors.white,
-
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 15,
-                    offset: const Offset(0, -4),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: rs.contentMaxWidth),
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(
+                    rs.s(16),
+                    rs.s(12),
+                    rs.s(16),
+                    rs.s(16),
                   ),
-                ],
-              ),
-
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Obx(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 15,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Obx(
                           () => AppButton(
-                        text: controller.isDeleting.value
-                            ? 'Deleting...'
-                            : 'Delete',
-                        icon: Icons.delete_outline_rounded,
-                        height: height * 0.055,
-                        backgroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFFD64545),
-                        borderColor: const Color(0xFFD64545),
-                        loadingColor: const Color(0xFFD64545),
-                        borderRadius: 12,
-                        isLoading: controller.isDeleting.value,
-                        onPressed: controller.deleteInvoice,
+                            text: controller.isDeleting.value
+                                ? 'Deleting...'
+                                : 'Delete',
+                            icon: Icons.delete_outline_rounded,
+                            height: rs.s(48),
+                            backgroundColor: Colors.white,
+                            disabledBackgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFFD64545),
+                            borderColor: const Color(0xFFD64545),
+                            loadingColor: const Color(0xFFD64545),
+                            borderRadius: 12,
+                            isLoading: controller.isDeleting.value,
+                            onPressed: controller.deleteInvoice,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-
-                  SizedBox(
-                    width: width * 0.03,
-                  ),
-
-                  Expanded(
-                    child: Obx(
-                      () => AppButton(
-                        text: controller.isUpdatingStatus.value
-                            ? 'Updating...'
-                            : 'Change Status',
-                        icon: Icons.swap_horiz_rounded,
-                        height: height * 0.055,
-                        backgroundColor: colorsList.colorButton,
-                        foregroundColor: Colors.white,
-                        borderRadius: 12,
-                        isLoading: controller.isUpdatingStatus.value,
-                        onPressed: () {
-                          controller.showStatusSelectionSheet();
-                        },
+                      SizedBox(width: rs.s(12)),
+                      Expanded(
+                        child: Obx(
+                          () => AppButton(
+                            text: controller.isUpdatingStatus.value
+                                ? 'Updating...'
+                                : 'Change Status',
+                            icon: Icons.swap_horiz_rounded,
+                            height: rs.s(48),
+                            backgroundColor: colorsList.colorButton,
+                            foregroundColor: Colors.white,
+                            borderRadius: 12,
+                            isLoading: controller.isUpdatingStatus.value,
+                            onPressed: () {
+                              controller.showStatusSelectionSheet();
+                            },
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -625,7 +618,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
       title,
       style: TextStyle(
         color: colorsList.textColor,
-        fontSize: width * 0.038,
+        fontSize: width.fontSizeW(0.038),
       ),
     );
   }
@@ -660,7 +653,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: colorsList.textHintColor,
-              fontSize: width * 0.027,
+              fontSize: width.fontSizeW(0.027),
             ),
           ),
 
@@ -673,8 +666,8 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.textColor,
-              fontSize: width * 0.031,
-              fontWeight: FontWeight.normal,
+              fontSize: width.fontSizeW(0.031),
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -699,7 +692,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
           label,
           style: TextStyle(
             color: colorsList.textHintColor,
-            fontSize: width * 0.030,
+            fontSize: width.fontSizeW(0.030),
           ),
         ),
 
@@ -715,7 +708,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
           keyboardType: keyboardType,
           fillColor: const Color(0xFFF9FAFC),
           borderRadius: width * 0.03,
-          fontSize: width * 0.034,
+          fontSize: width.fontSizeW(0.034),
         ),
       ],
     );
@@ -730,10 +723,13 @@ void showInvoiceDocumentDialog({
 })
 {
 
-  final Size screenSize = MediaQuery.of(context).size;
-
-  final double width = screenSize.width;
-  final double height = screenSize.height;
+  final rs = context.rs;
+  final double width = rs.isPhone
+      ? rs.width
+      : ResponsiveBreakpoints.designWidth * rs.scale;
+  final double height = rs.isPhone
+      ? rs.height
+      : ResponsiveBreakpoints.designHeight * rs.scale;
 
   final bool isPdf =
       fileType.toLowerCase() == 'pdf' ||
@@ -751,14 +747,16 @@ void showInvoiceDocumentDialog({
   showDialog(
     context: context,
     barrierDismissible: true,
-    barrierColor: Colors.black.withOpacity(0.70),
+    barrierColor: Colors.black.withValues(alpha: 0.70),
 
     builder: (context) {
-      return Dialog(
+      return ResponsiveDialogBody(
+        maxWidth: rs.sheetMaxWidth + 80,
+        child: Dialog(
         backgroundColor: Colors.white,
         insetPadding: EdgeInsets.symmetric(
-          horizontal: width * 0.04,
-          vertical: height * 0.06,
+          horizontal: rs.isPhone ? rs.wp(0.04) : rs.s(48),
+          vertical: rs.isPhone ? rs.hp(0.06) : rs.s(40),
         ),
 
         shape: RoundedRectangleBorder(
@@ -766,7 +764,7 @@ void showInvoiceDocumentDialog({
         ),
 
         child: SizedBox(
-          height: height * 0.82,
+          height: rs.height * 0.82,
           child: Column(
             children: [
 
@@ -827,8 +825,8 @@ void showInvoiceDocumentDialog({
                             style: TextStyle(
                               color:
                               colorsList.textColor,
-                              fontSize: width * 0.040,
-                              fontWeight: FontWeight.normal,
+                              fontSize: width.fontSizeW(0.040),
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
 
@@ -843,7 +841,7 @@ void showInvoiceDocumentDialog({
                             style: TextStyle(
                               color:
                               colorsList.textColor,
-                              fontSize: width * 0.028,
+                              fontSize: width.fontSizeW(0.028),
                             ),
                           ),
                         ],
@@ -902,6 +900,7 @@ void showInvoiceDocumentDialog({
               ),
             ],
           ),
+        ),
         ),
       );
     },
