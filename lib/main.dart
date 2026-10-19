@@ -34,12 +34,9 @@ import 'package:docelix_mobileapp/ui/quotation_screen.dart';
 import 'package:docelix_mobileapp/ui/receivables_dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/purchase_details_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
-<<<<<<< HEAD
 import 'package:docelix_mobileapp/ui/add_supplier_screen.dart';
-=======
 import 'package:docelix_mobileapp/ui/search_screen.dart';
 import 'package:docelix_mobileapp/ui/splash_screen.dart';
->>>>>>> 63373b90b88f860da1217f7afe2c5238a97d96e4
 import 'package:docelix_mobileapp/ui/supplier_details_screen.dart';
 import 'package:docelix_mobileapp/ui/suppliers_screen.dart';
 import 'package:docelix_mobileapp/ui/transaction_screen.dart';
