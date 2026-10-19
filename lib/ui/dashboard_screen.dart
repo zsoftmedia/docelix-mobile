@@ -292,7 +292,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: context.appText.label(
                   color: colorsList.primaryText,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ),
@@ -473,7 +473,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             "Net profit",
             style: text.titleSm(
               color: colorsList.primaryText,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.normal,
             ),
           ),
 
@@ -495,7 +495,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       '${_formatCurrency(revenue)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: text.amountLg(color: colorsList.primaryText),
+                      style: text.amountLg(color: colorsList.primaryText, fontWeight: FontWeight.normal),
                     ),
 
                     SizedBox(height: height * 0.009),
@@ -515,7 +515,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             "↑ ${dashboardController.dashboardData.value?.kpis?.revenue?.changePercent ?? 0}%",
                             style: text.caption(
                               color: colorsList.green,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
                         ),
@@ -527,7 +527,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             "${dashboardController.dashboardData.value?.kpis?.revenue?.changePercent ?? 0}% profit margin",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: text.caption(color: colorsList.secondaryText),
+                            style: text.caption(color: colorsList.secondaryText,
+                                fontWeight: FontWeight.normal),
                           ),
                         ),
                       ],
@@ -660,8 +661,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           : colorsList.secondaryText,
                       fontSize: width.fontSizeW(0.027),
                       fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w500,
+                          ? FontWeight.normal
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -906,7 +907,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: context.appText.caption(
                     color: colorsList.secondaryText,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -919,7 +920,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: context.appText.amount(color: colorsList.primaryText),
+            style: context.appText.amount(color: colorsList.primaryText,
+                fontWeight: FontWeight.normal),
           ),
 
           SizedBox(height: height * 0.003),
@@ -935,7 +937,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: percentage.startsWith("-")
                         ? colorsList.red
                         : iconColor,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
 
@@ -994,7 +996,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.039),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -1136,7 +1138,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(
                   color: colorsList.primaryText,
                   fontSize: width.fontSizeW(0.020),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ],
@@ -1211,7 +1213,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     style: TextStyle(
                       color: colorsList.primaryText,
                       fontSize: width.fontSizeW(0.039),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                 ),
@@ -1455,7 +1457,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           style: TextStyle(
                             color: colorsList.primaryText,
                             fontSize: width.fontSizeW(0.037),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
 
@@ -1560,7 +1562,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.026),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
 
@@ -1587,7 +1589,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(
                   color: iconColor,
                   fontSize: width.fontSizeW(0.024),
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ],
@@ -1667,7 +1669,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: TextStyle(
                 color: colorsList.secondaryText,
                 fontSize: width.fontSizeW(0.027),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.normal,
                 letterSpacing: 1.1,
               ),
             ),
@@ -1686,7 +1688,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     style: TextStyle(
                       color: colorsList.green,
                       fontSize: width.fontSizeW(0.023),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
 
@@ -1813,7 +1815,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: TextStyle(
               color: colorsList.primaryText,
               fontSize: width.fontSizeW(0.035),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.normal,
             ),
           ),
 

@@ -86,7 +86,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                     size: width * 0.065,
                   ),
                 ),
-                IconButton(
+                /*IconButton(
                   onPressed: () async {
                     final result = await Get.toNamed('/CreateQuotationScreen');
                     if (result == true) {
@@ -98,7 +98,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                     color: colorsList.primaryBlue,
                     size: 24,
                   ),
-                ),
+                ),*/
               ],
             );
           }),

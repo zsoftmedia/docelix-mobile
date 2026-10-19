@@ -281,6 +281,238 @@ class InvoicesDetailsController extends GetxController {
     await getInvoiceItems();
   }
 
+  // ============================================================
+  // UPDATE INVOICE STATUS
+  // ============================================================
+
+  final RxBool isUpdatingStatus = false.obs;
+
+  Future<void> updateInvoiceStatus(String newStatus) async {
+    final selectedInvoice = invoice.value;
+
+    if (selectedInvoice == null) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'No invoice selected.',
+      );
+      return;
+    }
+
+    try {
+      isUpdatingStatus.value = true;
+
+      final accessToken = SessionManager.accessToken;
+      final companyId = SessionManager.accessCompanyid;
+
+      if (accessToken == null || accessToken.isEmpty) {
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Access token is not available.',
+        );
+        return;
+      }
+
+      if (companyId == null) {
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Company ID is not available.',
+        );
+        return;
+      }
+
+      final int companyIdInt = int.parse(companyId.toString());
+      final int invoiceId = selectedInvoice.id;
+      final String targetStatus = newStatus.toLowerCase().trim();
+
+      debugPrint('Updating Invoice ID $invoiceId status to: $targetStatus');
+
+      final response = await dioClient.updateInvoiceStatus(
+        invoiceId: invoiceId,
+        companyId: companyIdInt,
+        status: targetStatus,
+        accessToken: accessToken,
+      );
+
+      debugPrint('Update Invoice Status Response: ${response.statusCode}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.data is Map && response.data['data'] is Map) {
+          final updatedData =
+              Map<String, dynamic>.from(response.data['data'] as Map);
+          invoice.value = InvoicesModel.fromJson(updatedData);
+        } else if (response.data is Map) {
+          final updatedData =
+              Map<String, dynamic>.from(response.data as Map);
+          invoice.value = InvoicesModel.fromJson(updatedData);
+        }
+
+        AppSnackbar.success(
+          title: 'Success',
+          message:
+              'Invoice status updated to ${invoice.value?.status ?? targetStatus}.',
+        );
+
+        if (Get.isRegistered<InvoicesController>()) {
+          Get.find<InvoicesController>().refreshInvoices();
+        }
+      } else {
+        AppSnackbar.error(
+          title: 'Update Failed',
+          message: 'Unable to update invoice status.',
+        );
+      }
+    } on DioException catch (e) {
+      debugPrint('Update Invoice Status Dio Error: ${e.message}');
+      debugPrint('Response: ${e.response?.data}');
+
+      String message = 'Unable to update invoice status.';
+
+      if (e.response?.data is Map) {
+        message = e.response?.data['message']?.toString() ??
+            e.response?.data['error']?.toString() ??
+            message;
+      }
+
+      AppSnackbar.error(
+        title: 'Update Failed',
+        message: message,
+      );
+    } catch (e) {
+      debugPrint('Update Invoice Status Exception: $e');
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Something went wrong while updating invoice status.',
+      );
+    } finally {
+      isUpdatingStatus.value = false;
+    }
+  }
+
+  // ============================================================
+  // SHOW STATUS SELECTION SHEET (MATCHES WEB SCREENSHOT)
+  // ============================================================
+
+  void showStatusSelectionSheet() {
+    final currentStatus =
+        (invoice.value?.status ?? 'draft').toLowerCase().trim();
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 25),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(22),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD0D5DD),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Change Invoice Status',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.normal,
+                color: Color(0xFF0A2342),
+              ),
+            ),
+            const SizedBox(height: 14),
+            _statusOptionTile(
+              title: 'Sent',
+              statusKey: 'sent',
+              icon: Icons.send_rounded,
+              color: const Color(0xFF2563EB),
+              isCurrent: currentStatus == 'sent',
+            ),
+            _statusOptionTile(
+              title: 'Paid',
+              statusKey: 'paid',
+              icon: Icons.check_circle_outline_rounded,
+              color: const Color(0xFF16A34A),
+              isCurrent: currentStatus == 'paid',
+            ),
+            _statusOptionTile(
+              title: 'Overdue',
+              statusKey: 'overdue',
+              icon: Icons.priority_high_rounded,
+              color: const Color(0xFFDC2626),
+              isCurrent: currentStatus == 'overdue',
+            ),
+            _statusOptionTile(
+              title: 'Cancelled',
+              statusKey: 'cancelled',
+              icon: Icons.cancel_outlined,
+              color: const Color(0xFF64748B),
+              isCurrent: currentStatus == 'cancelled',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _statusOptionTile({
+    required String title,
+    required String statusKey,
+    required IconData icon,
+    required Color color,
+    required bool isCurrent,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isCurrent ? color : Colors.transparent,
+          width: 1.5,
+        ),
+      ),
+      child: ListTile(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        leading: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: isCurrent ? FontWeight.normal : FontWeight.normal,
+            color: color,
+          ),
+        ),
+        trailing:
+            isCurrent ? Icon(Icons.check_rounded, color: color) : null,
+        onTap: () {
+          Get.back();
+          if (!isCurrent) {
+            updateInvoiceStatus(statusKey);
+          }
+        },
+      ),
+    );
+  }
+
   // ==============================================================
   // DELETE INVOICE
   // ==============================================================

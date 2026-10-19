@@ -471,7 +471,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
                         style: TextStyle(
                           color: colorsList.textColor,
                           fontSize: rs.sp(15),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
 
@@ -512,7 +512,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
                     style: TextStyle(
                       color: statusColor,
                       fontSize: rs.sp(11.5),
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                 ),
@@ -627,7 +627,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: rs.sp(13.5),
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.normal,
           ),
         ),
       ],
@@ -670,7 +670,7 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
             style: TextStyle(
               color: colorsList.textColor,
               fontSize: rs.sp(14),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],

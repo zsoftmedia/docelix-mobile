@@ -79,7 +79,7 @@ class _TransationScreenState extends State<TransationScreen> {
             style: TextStyle(
               color: colorsList.textColor,
               fontSize: width.fontSizeW(0.055),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           );
         }),

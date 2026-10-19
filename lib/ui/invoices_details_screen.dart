@@ -7,9 +7,7 @@ import 'package:get/get.dart';
 class InvoicesDetailsScreen extends StatelessWidget {
   InvoicesDetailsScreen({super.key});
 
-  final InvoicesDetailsController controller = Get.put(
-    InvoicesDetailsController(),
-  );
+  final InvoicesDetailsController controller = Get.put(InvoicesDetailsController(),);
 
   // static const Color _background = Color(0xFFFFFFFF);
   static const Color _surface = Color(0xFFFFFFFF);
@@ -670,21 +668,62 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // Invoice status
 
   Widget _statusBadge(BuildContext context, String status) {
-    final String label = status.isEmpty
-        ? 'Pending'
-        : status.capitalizeFirst ?? status;
+    final String cleanStatus = status.toLowerCase().trim();
+    final String label = cleanStatus.isEmpty
+        ? 'Draft'
+        : (cleanStatus[0].toUpperCase() + cleanStatus.substring(1));
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: context.appText.caption(
-          color: colorsList.secondaryTextColor,
-          fontWeight: FontWeight.normal,
+    Color bg;
+    Color fg;
+
+    switch (cleanStatus) {
+      case 'paid':
+        bg = const Color(0xFFDCFCE7);
+        fg = const Color(0xFF16A34A);
+        break;
+      case 'sent':
+        bg = const Color(0xFFEFF6FF);
+        fg = const Color(0xFF2563EB);
+        break;
+      case 'overdue':
+        bg = const Color(0xFFFEE2E2);
+        fg = const Color(0xFFDC2626);
+        break;
+      case 'cancelled':
+        bg = const Color(0xFFF1F5F9);
+        fg = const Color(0xFF64748B);
+        break;
+      default:
+        bg = const Color(0xFFF1F5F9);
+        fg = const Color(0xFF64748B);
+    }
+
+    return GestureDetector(
+      onTap: controller.showStatusSelectionSheet,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+                color: fg,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -742,20 +781,38 @@ class InvoicesDetailsScreen extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               flex: 3,
-              child: OutlinedButton.icon(
-                onPressed: controller.showSendInvoiceDialog,
-                icon: const Icon(Icons.send_outlined, size: 17),
-                label: const Text(
-                  'Send',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: _heading,
-                  side: const BorderSide(color: colorsList.borderColor),
-                  minimumSize: const Size(0, 46),
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              child: Obx(
+                () => OutlinedButton.icon(
+                  onPressed: controller.isUpdatingStatus.value
+                      ? null
+                      : controller.showStatusSelectionSheet,
+                  icon: controller.isUpdatingStatus.value
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colorsList.primaryBlue,
+                          ),
+                        )
+                      : const Icon(Icons.swap_horiz_rounded, size: 17),
+                  label: Text(
+                    controller.isUpdatingStatus.value
+                        ? 'Updating...'
+                        : 'Status',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _heading,
+                    side: const BorderSide(color: colorsList.borderColor),
+                    minimumSize: const Size(0, 46),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),

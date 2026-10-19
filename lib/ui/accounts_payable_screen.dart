@@ -81,7 +81,7 @@ class _AccountsPayableScreenState extends State<AccountsPayableScreen> {
             style: TextStyle(
               color: colorsList.textColor,
               fontSize: rs.sp(21.5),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           );
         }),
