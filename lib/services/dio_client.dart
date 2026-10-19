@@ -310,8 +310,8 @@ class DioClient {
   }
 
   // ============================================================
-// GET PAYABLE BILLS
-// ============================================================
+  // GET PAYABLE BILLS
+  // ============================================================
 
   Future<Response> getPayableBills({
     required int companyId,
@@ -325,6 +325,31 @@ class DioClient {
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // CREATE SUPPLIER
+  // ==============================
+
+  Future<Response> createSupplier({
+    required int companyId,
+    required Map<String, dynamic> data,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/purchases/suppliers',
+      data: {
+        'company_id': companyId,
+        ...data,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
           'Content-Type': 'application/json',
         },
       ),

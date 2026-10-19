@@ -31,6 +31,7 @@ import 'package:docelix_mobileapp/ui/quotation_screen.dart';
 import 'package:docelix_mobileapp/ui/receivables_dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/purchase_details_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
+import 'package:docelix_mobileapp/ui/add_supplier_screen.dart';
 import 'package:docelix_mobileapp/ui/supplier_details_screen.dart';
 import 'package:docelix_mobileapp/ui/suppliers_screen.dart';
 import 'package:docelix_mobileapp/ui/transaction_screen.dart';
@@ -114,6 +115,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/VehicleDetailsScreen', page: () => const VehicleDetailsScreen(),),
         GetPage(name: '/FleetDashboardScreen', page: () => const FleetDashboardScreen(),),
         GetPage(name: '/SuppliersScreen', page: () => const SuppliersScreen(),),
+        GetPage(name: '/AddSupplierScreen', page: () => const AddSupplierScreen(),),
         GetPage(name: '/SupplierDetailsScreen', page: () => const SupplierDetailsScreen(),),
         GetPage(name: '/PurchaseDetailsScreen', page: () => const PurchaseDetailsScreen(),),
         GetPage(name: '/InvoiceArchiveScreen', page: () => const InvoiceArchiveScreen(),),

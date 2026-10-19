@@ -422,16 +422,16 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
 
         return _buildPurchasesList(width: width, height: height);
 
-      case 2:
+      /*case 2:
         return _buildEmptyTab(
           icon: Icons.payments_outlined,
           title: 'No Payments Found',
           subtitle: 'There are no payment transactions for this supplier.',
           width: width,
           height: height,
-        );
+        );*/
 
-      case 3:
+      case 2:
         if (controller.isLoadingLedger.value) {
           return const Center(
             child: Padding(

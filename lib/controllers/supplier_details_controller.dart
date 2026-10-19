@@ -21,7 +21,7 @@ class SupplierDetailsController extends GetxController {
   final List<String> tabs = const [
     'Overview',
     'Purchases',
-    'Payments',
+    /*'Payments',*/
     'Supplier Ledger',
   ];
 

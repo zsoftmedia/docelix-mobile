@@ -212,7 +212,8 @@ class _LandScreenState extends State<LandScreen> {
                   Get.toNamed('/SuppliersScreen');
                 },
               ),
-              _MoreMenuItem(
+
+              /*_MoreMenuItem(
                 icon: Icons.inventory_2_rounded,
                 title: 'Invoice Archive',
                 subtitle: 'View and manage all incoming invoices',
@@ -220,14 +221,10 @@ class _LandScreenState extends State<LandScreen> {
                 onTap: () {
                   Navigator.pop(sheetContext);
                   Get.toNamed('/InvoiceArchiveScreen');
-                  /*AppSnackbar.info(
-                    title: 'Coming Soon',
-                    message: 'Invoice Archive feature is coming soon.',
-                  );*/
                 },
               ),
 
-              /*_MoreMenuItem(
+              _MoreMenuItem(
                 icon: Icons.request_quote_outlined,
                 title: 'Quotation',
                 subtitle: 'Create and manage sales quotes & offers',

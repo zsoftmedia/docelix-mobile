@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -46,7 +47,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF2E7D32);
+    const primaryColor = colorsList.colorButton;
     const backgroundColor = Color(0xFFF7F8FA);
 
     return Scaffold(
@@ -63,6 +64,37 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
         foregroundColor: const Color(0xFF263238),
         elevation: 0,
         centerTitle: false,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final result = await Get.toNamed('/AddSupplierScreen');
+              if (result == true) {
+                controller.refreshSuppliers();
+              }
+            },
+            icon: const Icon(
+              Icons.add_circle_outline_rounded,
+              color: colorsList.colorButton,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Get.toNamed('/AddSupplierScreen');
+          if (result == true) {
+            controller.refreshSuppliers();
+          }
+        },
+        backgroundColor: colorsList.colorButton,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(
+          'Add Supplier',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
       ),
       body: Column(
         children: [
