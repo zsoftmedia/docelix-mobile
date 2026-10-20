@@ -100,14 +100,29 @@ class PurchaseInvoicesModel {
         ? pNum
         : (suppInvNum.isNotEmpty ? suppInvNum : invNum);
 
+    final String attachPath = json['attachment_path']?.toString() ?? '';
+    final String prevUrl = json['preview_url']?.toString() ?? '';
+    final String fileUrlRaw = json['file_url']?.toString() ?? '';
+
+    final String resolvedPath = prevUrl.isNotEmpty
+        ? prevUrl
+        : (attachPath.isNotEmpty ? attachPath : fileUrlRaw);
+
+    final String attachMime = json['attachment_mime']?.toString() ?? json['mime_type']?.toString() ?? '';
+    final String docType = json['document_type']?.toString() ?? json['file_type']?.toString() ?? '';
+
+    final String resolvedFileType = docType.isNotEmpty
+        ? docType
+        : (attachMime.contains('pdf') || resolvedPath.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image');
+
     return PurchaseInvoicesModel(
       id: json['id'] ?? 0,
       companyId: json['company_id'] ?? 0,
       userId: json['created_by']?.toString() ?? json['user_id']?.toString() ?? '',
       fileName: json['attachment_name']?.toString() ?? json['file_name']?.toString() ?? '',
-      fileUrl: json['attachment_path']?.toString() ?? json['file_url']?.toString() ?? '',
-      fileType: json['document_type']?.toString() ?? json['file_type']?.toString() ?? '',
-      mimeType: json['attachment_mime']?.toString() ?? json['mime_type']?.toString() ?? '',
+      fileUrl: resolvedPath,
+      fileType: resolvedFileType,
+      mimeType: attachMime,
       sizeBytes: json['size_bytes'] is num
           ? (json['size_bytes'] as num).toInt()
           : 0,
@@ -163,7 +178,7 @@ class PurchaseInvoicesModel {
           ? (json['vat_deductibility_percent'] as num)
           : null,
 
-      previewUrl: json['file_url']?.toString() ?? json['attachment_path']?.toString(),
+      previewUrl: resolvedPath,
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:docelix_mobileapp/controllers/purchase_invoices_details_controll
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -266,7 +267,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                     'More Options',
                     style: TextStyle(
                       fontSize: 17,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.normal,
                       color: Color(0xFF1E293B),
                     ),
                   ),
@@ -367,7 +368,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                         title,
                         style: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.normal,
                           color: Color(0xFF1E293B),
                         ),
                       ),
@@ -617,7 +618,9 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
     double height,
     BuildContext context,
   ) {
-    final previewUrl = item.previewUrl;
+    final docUrl = item.previewUrl ?? '';
+
+    print('document URL Anees: $docUrl');
 
     return Container(
       width: double.infinity,
@@ -641,10 +644,10 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
           const SizedBox(height: 12),
           GestureDetector(
             onTap: () {
-              if (previewUrl == null || previewUrl.isEmpty) {
+              if (docUrl == null || docUrl.isEmpty) {
                 Get.snackbar(
                   'Document',
-                  'Document preview is not available.',
+                  'Document not available for this invoice.',
                   snackPosition: SnackPosition.BOTTOM,
                 );
                 return;
@@ -652,7 +655,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
 
               showInvoiceDocumentDialog(
                 context: context,
-                fileUrl: previewUrl,
+                fileUrl: docUrl,
                 fileType: item.fileType,
                 mimeType: item.mimeType,
               );
