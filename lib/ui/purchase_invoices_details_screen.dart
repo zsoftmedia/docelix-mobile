@@ -152,72 +152,80 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
             // BOTTOM ACTIONS BAR
             // --------------------------------------------------------
 
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: rs.contentMaxWidth),
-                child: Container(
-                  padding: EdgeInsets.fromLTRB(
-                    rs.s(16),
-                    rs.s(12),
-                    rs.s(16),
-                    rs.s(16),
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 15,
-                        offset: const Offset(0, -4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Obx(
-                          () => AppButton(
-                            text: controller.isDeleting.value
-                                ? 'Deleting...'
-                                : 'Delete',
-                            icon: Icons.delete_outline_rounded,
-                            height: rs.s(48),
-                            backgroundColor: Colors.white,
-                            disabledBackgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFFD64545),
-                            borderColor: const Color(0xFFD64545),
-                            loadingColor: const Color(0xFFD64545),
-                            borderRadius: 12,
-                            isLoading: controller.isDeleting.value,
-                            onPressed: controller.deleteInvoice,
+            Obx(() {
+              final String currentStatus =
+                  controller.status.value.toLowerCase().trim();
+              final bool isDraft = currentStatus == 'draft';
+
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: rs.contentMaxWidth),
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(
+                      rs.s(16),
+                      rs.s(12),
+                      rs.s(16),
+                      rs.s(16),
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 15,
+                          offset: const Offset(0, -4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        if (isDraft) ...[
+                          Expanded(
+                            child: Obx(
+                              () => AppButton(
+                                text: controller.isDeleting.value
+                                    ? 'Deleting...'
+                                    : 'Delete',
+                                icon: Icons.delete_outline_rounded,
+                                height: rs.s(48),
+                                backgroundColor: Colors.white,
+                                disabledBackgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFFD64545),
+                                borderColor: const Color(0xFFD64545),
+                                loadingColor: const Color(0xFFD64545),
+                                borderRadius: 12,
+                                isLoading: controller.isDeleting.value,
+                                onPressed: controller.deleteInvoice,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: rs.s(12)),
+                        ],
+                        Expanded(
+                          child: Obx(
+                            () => AppButton(
+                              text: controller.isUpdatingStatus.value
+                                  ? 'Updating...'
+                                  : 'Change Status',
+                              icon: Icons.swap_horiz_rounded,
+                              height: rs.s(48),
+                              backgroundColor: colorsList.colorButton,
+                              foregroundColor: Colors.white,
+                              borderRadius: 12,
+                              isLoading: controller.isUpdatingStatus.value,
+                              onPressed: () {
+                                controller.showStatusSelectionSheet();
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: rs.s(12)),
-                      Expanded(
-                        child: Obx(
-                          () => AppButton(
-                            text: controller.isUpdatingStatus.value
-                                ? 'Updating...'
-                                : 'Change Status',
-                            icon: Icons.swap_horiz_rounded,
-                            height: rs.s(48),
-                            backgroundColor: colorsList.colorButton,
-                            foregroundColor: Colors.white,
-                            borderRadius: 12,
-                            isLoading: controller.isUpdatingStatus.value,
-                            onPressed: () {
-                              controller.showStatusSelectionSheet();
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            }),
           ],
         ),
       ),

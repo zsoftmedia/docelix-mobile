@@ -168,6 +168,30 @@ class DioClient {
   }
 
   // ==============================
+  // DELETE PURCHASE INVOICE
+  // ==============================
+
+  Future<Response> deletePurchase({
+    required int companyId,
+    required int purchaseId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/purchases/$purchaseId',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET SUPPLIER LEDGER
   // ==============================
 

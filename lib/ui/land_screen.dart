@@ -317,7 +317,7 @@ class _LandScreenState extends State<LandScreen> {
                                 style: TextStyle(
                                   color: colorsList.primaryText,
                                   fontSize: rs.sp(19),
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.normal,
                                 ),
                               ),
                             ),
@@ -593,7 +593,7 @@ class _MoreMenuItem extends StatelessWidget {
                       style: TextStyle(
                         color: textColor ?? colorsList.primaryText,
                         fontSize: rs.sp(15),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.normal,
                         height: 1.2,
                       ),
                     ),
@@ -698,7 +698,7 @@ class _AssetsExpandableSection extends StatelessWidget {
                                   ? Colors.white
                                   : colorsList.primaryText,
                               fontSize: rs.sp(15),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.normal,
                               height: 1.2,
                             ),
                           ),
@@ -819,7 +819,8 @@ class _AssetSubItem extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, size: rs.s(19), color: colorsList.secondaryText),
+              Icon(icon, size: rs.s(19),
+                  color: colorsList.secondaryText),
               SizedBox(width: rs.s(12)),
               Expanded(
                 child: Text(
@@ -827,7 +828,7 @@ class _AssetSubItem extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: rs.sp(14),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -884,7 +885,7 @@ class _BottomNavItem extends StatelessWidget {
             style: TextStyle(
               color: isSelected ? colorsList.green : const Color(0xFF71829A),
               fontSize: rs.sp(10),
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
           if (isSelected)
@@ -961,7 +962,7 @@ class _ScanBottomButton extends StatelessWidget {
                 style: TextStyle(
                   color: const Color(0xFF71829A),
                   fontSize: rs.sp(10),
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ),

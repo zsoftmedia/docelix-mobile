@@ -555,6 +555,7 @@ class PurchaseInvoicesDetailsController extends GetxController {
       isDeleting.value = true;
 
       final accessToken = SessionManager.accessToken;
+      final companyId = SessionManager.accessCompanyid;
 
       if (accessToken == null || accessToken.isEmpty) {
         AppSnackbar.error(
@@ -564,14 +565,31 @@ class PurchaseInvoicesDetailsController extends GetxController {
         return;
       }
 
-      final response = await DioClient().deleteIncomingInvoice(
-        invoiceId: invoiceId,
+      if (companyId == null) {
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Company ID is missing.',
+        );
+        return;
+      }
+
+      final int companyIdInt = int.parse(companyId.toString());
+
+      debugPrint('Deleting Purchase Invoice ID $invoiceId for Company ID $companyIdInt');
+
+      final response = await DioClient().deletePurchase(
+        companyId: companyIdInt,
+        purchaseId: invoiceId,
         accessToken: accessToken,
       );
 
+      debugPrint('Delete Purchase Status: ${response.statusCode}');
+      debugPrint('Delete Purchase Response: ${response.data}');
+
       if (response.statusCode == 200 ||
           response.statusCode == 201 ||
-          response.statusCode == 204) {
+          response.statusCode == 204 ||
+          (response.data is Map && response.data['deleted'] == true)) {
         final data = response.data;
 
         while (Get.isDialogOpen == true || Get.isBottomSheetOpen == true) {
@@ -582,9 +600,7 @@ class PurchaseInvoicesDetailsController extends GetxController {
 
         AppSnackbar.success(
           title: 'Success',
-          message: (data is Map && data['message'] != null)
-              ? data['message']
-              : 'Invoice deleted successfully.',
+          message: 'Invoice deleted successfully.',
         );
 
         if (Get.isRegistered<PurchaseInvoicesController>()) {
@@ -597,11 +613,14 @@ class PurchaseInvoicesDetailsController extends GetxController {
         );
       }
     } on DioException catch (e) {
+      debugPrint('Delete Invoice Dio Error: ${e.message}');
+      debugPrint('Response: ${e.response?.data}');
+
       String message = 'Unable to delete invoice.';
 
       if (e.response?.data is Map) {
-        message = e.response?.data['message'] ??
-            e.response?.data['error'] ??
+        message = e.response?.data['message']?.toString() ??
+            e.response?.data['error']?.toString() ??
             message;
       }
 
@@ -610,6 +629,8 @@ class PurchaseInvoicesDetailsController extends GetxController {
         message: message,
       );
     } catch (e) {
+      debugPrint('Delete Invoice Exception: $e');
+
       AppSnackbar.error(
         title: 'Error',
         message: 'Something went wrong while deleting the invoice.',
