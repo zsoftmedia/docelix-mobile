@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/quotation_details_controller.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -541,76 +542,51 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.download_outlined, size: 16),
-                        label: const Text(
-                          'Download',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colorsList.textColor,
-                          side: const BorderSide(color: Color(0xFFD0D5DD)),
-                          minimumSize: const Size(0, 44),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.send_outlined, size: 16),
+                        onPressed: () {
+                          AppSnackbar.info(
+                            title: 'Send Quotation',
+                            message: 'Send quotation feature is being prepared.',
+                          );
+                        },
+                        icon: const Icon(Icons.send_outlined, size: 18),
                         label: const Text(
                           'Send',
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: colorsList.primaryBlue,
                           side: const BorderSide(color: colorsList.primaryBlue),
-                          minimumSize: const Size(0, 44),
+                          minimumSize: Size(0, height * 0.055),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.edit_outlined, size: 16),
-                        label: const Text(
-                          'Edit',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colorsList.textColor,
-                          side: const BorderSide(color: Color(0xFFD0D5DD)),
-                          minimumSize: const Size(0, 44),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.delete_outline_rounded, size: 16),
+                        onPressed: () {
+                          _showMoreMenuSheet(context);
+                        },
+                        icon: const Icon(Icons.more_horiz_rounded, size: 20),
                         label: const Text(
-                          'Delete',
-                          style: TextStyle(fontSize: 12),
+                          'More',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFDC2626),
+                          backgroundColor: colorsList.colorButton,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          minimumSize: const Size(0, 44),
+                          minimumSize: Size(0, height * 0.055),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
@@ -622,6 +598,176 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
           ),
         );
       }),
+    );
+  }
+
+  // ================================================================
+  // MORE MENU BOTTOM SHEET
+  // ================================================================
+
+  void _showMoreMenuSheet(BuildContext context) {
+    Get.bottomSheet(
+      backgroundColor: Colors.transparent,
+      Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'More Options',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: Color(0xFF64748B),
+                    size: 20,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _moreOptionTile(
+              title: 'Download document',
+              subtitle: 'View or print quotation document',
+              icon: Icons.file_download_outlined,
+              iconColor: const Color(0xFF0284C7),
+              onTap: () {
+                Get.back();
+                AppSnackbar.info(
+                  title: 'Document',
+                  message: 'Download document feature is being prepared.',
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            _moreOptionTile(
+              title: 'Edit quotation',
+              subtitle: 'Modify quotation details or items',
+              icon: Icons.edit_outlined,
+              iconColor: colorsList.primaryBlue,
+              onTap: () {
+                Get.back();
+                AppSnackbar.info(
+                  title: 'Edit',
+                  message: 'Edit quotation feature is coming soon.',
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            _moreOptionTile(
+              title: 'Delete quotation',
+              subtitle: 'Permanently remove this quotation',
+              icon: Icons.delete_outline_rounded,
+              iconColor: const Color(0xFFDC2626),
+              onTap: () {
+                Get.back();
+                AppSnackbar.info(
+                  title: 'Delete',
+                  message: 'Delete quotation feature is coming soon.',
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _moreOptionTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF94A3B8),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
