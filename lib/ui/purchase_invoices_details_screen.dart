@@ -203,21 +203,16 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                           SizedBox(width: rs.s(12)),
                         ],
                         Expanded(
-                          child: Obx(
-                            () => AppButton(
-                              text: controller.isUpdatingStatus.value
-                                  ? 'Updating...'
-                                  : 'Change Status',
-                              icon: Icons.swap_horiz_rounded,
-                              height: rs.s(48),
-                              backgroundColor: colorsList.colorButton,
-                              foregroundColor: Colors.white,
-                              borderRadius: 12,
-                              isLoading: controller.isUpdatingStatus.value,
-                              onPressed: () {
-                                controller.showStatusSelectionSheet();
-                              },
-                            ),
+                          child: AppButton(
+                            text: 'More',
+                            icon: Icons.more_horiz_rounded,
+                            height: rs.s(48),
+                            backgroundColor: colorsList.colorButton,
+                            foregroundColor: Colors.white,
+                            borderRadius: 12,
+                            onPressed: () {
+                              _showMoreMenuSheet(context);
+                            },
                           ),
                         ),
                       ],
@@ -227,6 +222,174 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
               );
             }),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ================================================================
+  // MORE MENU SHEET
+  // ================================================================
+
+  void _showMoreMenuSheet(BuildContext context) {
+    Get.bottomSheet(
+      backgroundColor: Colors.transparent,
+      ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'More Options',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFF64748B),
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _moreOptionTile(
+                title: 'Download document',
+                subtitle: 'View or print attachment document',
+                icon: Icons.file_download_outlined,
+                iconColor: const Color(0xFF0284C7),
+                onTap: () {
+                  Get.back();
+                  final previewUrl = widget.invoice.previewUrl;
+                  if (previewUrl == null || previewUrl.isEmpty) {
+                    Get.snackbar(
+                      'Document',
+                      'Document preview/download is not available.',
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                    return;
+                  }
+
+                  showInvoiceDocumentDialog(
+                    context: context,
+                    fileUrl: previewUrl,
+                    fileType: widget.invoice.fileType,
+                    mimeType: widget.invoice.mimeType,
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              _moreOptionTile(
+                title: 'Review',
+                subtitle: 'Review and update invoice status',
+                icon: Icons.rate_review_outlined,
+                iconColor: const Color(0xFF16A34A),
+                onTap: () {
+                  Get.back();
+                  controller.showStatusSelectionSheet();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _moreOptionTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF94A3B8),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
