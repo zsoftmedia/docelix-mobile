@@ -203,7 +203,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                           ),
                           SizedBox(width: rs.s(12)),
                         ],
-                        Expanded(
+                        /*Expanded(
                           child: AppButton(
                             text: 'More',
                             icon: Icons.more_horiz_rounded,
@@ -215,7 +215,7 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                               _showMoreMenuSheet(context);
                             },
                           ),
-                        ),
+                        ),*/
                       ],
                     ),
                   ),

@@ -312,6 +312,30 @@ class DioClient {
   }
 
   // ==============================
+  // GET OFFER / QUOTATION ITEMS
+  // ==============================
+
+  Future<Response> getOfferItems({
+    required int offerId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/offers/$offerId/items',
+      queryParameters: {
+        'companyId': companyId,
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET RECEIVALBLE INVOICES
   // ==============================
 

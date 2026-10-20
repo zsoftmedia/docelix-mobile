@@ -282,7 +282,10 @@ class _QuotationScreenState extends State<QuotationScreen> {
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           onTap: () {
-            // Future quotation details screen navigation
+            Get.toNamed(
+              '/QuotationDetailsScreen',
+              arguments: item,
+            );
           },
           borderRadius: BorderRadius.circular(14),
           child: Padding(
