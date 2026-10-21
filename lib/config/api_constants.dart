@@ -12,8 +12,7 @@ class ApiConstants {
   // Staging
   static const String baseUrl = 'https://docelix-staging.onrender.com/api';
   static const String supabaseUrl = 'https://owytoejxgqxvevjsrfjj.supabase.co';
-  static const String supabaseAnonKey =
-      'sb_publishable_Ti3w86g2K9d6QVCu6ioxjA_DP1u-VMW';
+  static const String supabaseAnonKey = 'sb_publishable_Ti3w86g2K9d6QVCu6ioxjA_DP1u-VMW';
 
   // Staging API
   // static const String baseUrl = 'https://docelix-staging.onrender.com';
