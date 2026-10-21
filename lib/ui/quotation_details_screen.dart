@@ -731,12 +731,15 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
               subtitle: 'Modify quotation details or items',
               icon: Icons.edit_outlined,
               iconColor: colorsList.primaryBlue,
-              onTap: () {
+              onTap: () async {
                 Get.back();
-                AppSnackbar.info(
-                  title: 'Edit',
-                  message: 'Edit quotation feature is coming soon.',
-                );
+                final currentOffer = controller.quotation.value;
+                if (currentOffer != null) {
+                  final result = await Get.toNamed('/EditQuotationScreen', arguments: currentOffer);
+                  if (result == true) {
+                    controller.getOfferItems();
+                  }
+                }
               },
             ),
             const SizedBox(height: 8),

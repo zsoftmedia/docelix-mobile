@@ -1,0 +1,1191 @@
+import 'package:docelix_mobileapp/components/app_textfield.dart';
+import 'package:docelix_mobileapp/controllers/edit_quotation_controller.dart';
+import 'package:docelix_mobileapp/models/catalog_model.dart';
+import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class EditQuotationScreen extends StatefulWidget {
+  const EditQuotationScreen({super.key});
+
+  @override
+  State<EditQuotationScreen> createState() => _EditQuotationScreenState();
+}
+
+class _EditQuotationScreenState extends State<EditQuotationScreen> {
+  final EditQuotationController controller = Get.put(EditQuotationController());
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: colorsList.backgroundColor,
+      appBar: _buildAppBar(),
+      body: Obx(() {
+        final currentStep = controller.currentStep.value;
+
+        return Stepper(
+          type: StepperType.horizontal,
+          currentStep: currentStep,
+          onStepTapped: controller.goToStep,
+          onStepContinue: controller.nextStep,
+          onStepCancel: controller.previousStep,
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          controlsBuilder: _buildControls,
+          steps: [
+            Step(
+              title: const Text('Sender', style: TextStyle(fontSize: 11)),
+              isActive: currentStep >= 0,
+              state: currentStep > 0 ? StepState.complete : StepState.indexed,
+              content: _senderStep(),
+            ),
+            Step(
+              title: const Text('Client', style: TextStyle(fontSize: 11)),
+              isActive: currentStep >= 1,
+              state: currentStep > 1 ? StepState.complete : StepState.indexed,
+              content: _clientStep(),
+            ),
+            Step(
+              title: const Text('Invoice', style: TextStyle(fontSize: 11)),
+              isActive: currentStep >= 2,
+              state: currentStep > 2 ? StepState.complete : StepState.indexed,
+              content: _invoiceStep(),
+            ),
+            Step(
+              title: const Text('Items', style: TextStyle(fontSize: 11)),
+              isActive: currentStep >= 3,
+              state: StepState.indexed,
+              content: _itemsStep(),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      leading: IconButton(
+        onPressed: Get.back,
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          size: 19,
+        ),
+      ),
+      title: const Text(
+        'Edit Quotation',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.normal,
+          color: colorsList.textColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControls(BuildContext context, ControlsDetails details) {
+    final isFirstStep = controller.currentStep.value == 0;
+    final isLastStep =
+        controller.currentStep.value == controller.totalSteps - 1;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 24, bottom: 8),
+      child: Row(
+        children: [
+          if (!isFirstStep) ...[
+            Expanded(
+              child: OutlinedButton(
+                onPressed: details.onStepCancel,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  side: const BorderSide(color: colorsList.borderColor),
+                ),
+                child: const Text(
+                  'Back',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Obx(() {
+              final isLoading = controller.isLoading.value;
+
+              return ElevatedButton(
+                onPressed: isLoading ? null : details.onStepContinue,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  backgroundColor: colorsList.primaryColor,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade400,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        isLastStep ? 'Update Quotation' : 'Next',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sender
+  // ---------------------------------------------------------------------------
+
+  Widget _senderStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Sender Details'),
+        const SizedBox(height: 16),
+        Obx(
+          () => AppTextField(
+            isDropdown: true,
+            hintText: 'Select sender',
+            prefixIcon: Icons.business_outlined,
+            dropdownItems: controller.companyNames,
+            selectedValue: controller.selectedCompany.value?.name,
+            onDropdownChanged: controller.selectCompanyByName,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Obx(
+          () => _infoField(
+            icon: Icons.email_outlined,
+            text: controller.sessionEmail.value.isEmpty
+                ? 'No email available'
+                : controller.sessionEmail.value,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Client
+  // ---------------------------------------------------------------------------
+
+  Widget _clientStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Client Details'),
+        const SizedBox(height: 16),
+        Obx(() {
+          final client = controller.selectedClient.value;
+          final displayText = client != null
+              ? client.name
+              : (controller.isLoading.value
+                  ? 'Loading clients...'
+                  : 'Select client');
+
+          return InkWell(
+            onTap: () => _showClientSearchBottomSheet(context),
+            borderRadius: BorderRadius.circular(7),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 15,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: const Color(0xFFD1D5DB),
+                  width: 1.2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.person_search_outlined,
+                    color: Color(0xFF4b4f57),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      displayText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: client != null
+                            ? const Color(0xFF172033)
+                            : const Color(0xFFA8A8A8),
+                        fontWeight: client != null
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Color(0xFF4b4f57),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 14),
+        AppTextField(
+          controller: controller.customerController,
+          hintText: 'Customer / Company',
+          prefixIcon: Icons.business_outlined,
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          controller: controller.addressController,
+          hintText: 'Street / Address',
+          prefixIcon: Icons.location_on_outlined,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: AppTextField(
+                controller: controller.zipController,
+                hintText: 'ZIP',
+                prefixIcon: Icons.markunread_mailbox_outlined,
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: AppTextField(
+                controller: controller.cityController,
+                hintText: 'City',
+                prefixIcon: Icons.location_city_outlined,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          controller: controller.attnController,
+          hintText: 'Attn',
+          prefixIcon: Icons.person_outline_rounded,
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          controller: controller.emailController,
+          hintText: 'Email',
+          prefixIcon: Icons.email_outlined,
+          keyboardType: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          controller: controller.phoneController,
+          hintText: 'Phone',
+          prefixIcon: Icons.phone_outlined,
+          keyboardType: TextInputType.phone,
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Invoice Details
+  // ---------------------------------------------------------------------------
+
+  Widget _invoiceStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Invoice Details'),
+        const SizedBox(height: 16),
+        Obx(
+          () => _switchRow(
+            title: 'Auto generate invoice number',
+            value: controller.autoGenerate.value,
+            onChanged: controller.toggleAutoGenerate,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Obx(
+          () => AppTextField(
+            controller: controller.invoiceNumberController,
+            hintText: controller.autoGenerate.value
+                ? 'Invoice number will be generated automatically'
+                : 'Invoice number',
+            prefixIcon: Icons.receipt_long_outlined,
+            readOnly: controller.autoGenerate.value,
+          ),
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          controller: controller.invoiceDateController,
+          hintText: 'Invoice date',
+          prefixIcon: Icons.calendar_today_outlined,
+          readOnly: true,
+          onTap: controller.selectInvoiceDate,
+        ),
+        const SizedBox(height: 12),
+        Obx(
+          () => _switchRow(
+            title: 'Enable VAT',
+            value: controller.enableVat.value,
+            onChanged: controller.toggleEnableVat,
+          ),
+        ),
+        Obx(
+          () => controller.enableVat.value
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: AppTextField(
+                    controller: controller.vatRateController,
+                    hintText: 'VAT rate (%)',
+                    prefixIcon: Icons.percent_outlined,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Items
+  // ---------------------------------------------------------------------------
+
+  Widget _itemsStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Line Items'),
+        const SizedBox(height: 16),
+
+        Obx(
+          () => InkWell(
+            onTap: () => _showCatalogSearch(),
+            borderRadius: BorderRadius.circular(8),
+            child: IgnorePointer(
+              child: AppTextField(
+                controller: controller.descriptionController,
+                hintText: controller.isLoading.value
+                    ? 'Loading catalog...'
+                    : 'Search catalog item',
+                prefixIcon: Icons.description_outlined,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: AppTextField(
+                controller: controller.quantityController,
+                hintText: 'Quantity',
+                prefixIcon: Icons.numbers_outlined,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Obx(() {
+                final selected =
+                    controller.currentSelectedUnitLabel ?? 'Select Unit';
+
+                return InkWell(
+                  onTap: () => _showUnitSearchBottomSheet(context),
+                  borderRadius: BorderRadius.circular(7),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 15,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(7),
+                      border: Border.all(
+                        color: const Color(0xFFD1D5DB),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.straighten_outlined,
+                          color: Color(0xFF4b4f57),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            selected,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Color(0xFF4b4f57),
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Color(0xFF4b4f57),
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        AppTextField(
+          controller: controller.unitPriceController,
+          hintText: 'Unit price',
+          prefixIcon: Icons.euro_outlined,
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: true,
+          ),
+        ),
+
+        const SizedBox(height: 14),
+
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: controller.addLine,
+            icon: const Icon(Icons.add, size: 19),
+            label: const Text('Add line'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(46),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              side: const BorderSide(color: Color(0xFFD1D5DB)),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        _buildItemsList(),
+
+        const SizedBox(height: 12),
+
+        _buildSubtotal(),
+
+        const SizedBox(height: 20),
+
+        _sectionTitle('Closing Text'),
+
+        const SizedBox(height: 12),
+
+        AppTextField(
+          controller: controller.closingTextController,
+          hintText: 'Enter closing text',
+          prefixIcon: Icons.notes_outlined,
+          maxLines: 4,
+        ),
+
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildItemsList() {
+    return Obx(() {
+      if (controller.lineItems.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Center(
+            child: Text(
+              'No items added yet.',
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+          ),
+        );
+      }
+
+      return Column(
+        children: List.generate(
+          controller.lineItems.length,
+          (index) => _itemRow(
+            index,
+            controller.lineItems[index],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildSubtotal() {
+    return Obx(
+      () => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.only(top: 14, bottom: 4),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: colorsList.borderColor)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Subtotal',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              '€${controller.subtotal.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _itemRow(int index, Map<String, dynamic> item) {
+    final description = item['description']?.toString() ?? '';
+    final quantity = (item['quantity'] as num?)?.toDouble() ?? 0;
+    final unit = item['unit']?.toString() ?? '';
+    final unitPrice = (item['unitPrice'] as num?)?.toDouble() ?? (item['unit_price'] as num?)?.toDouble() ?? 0;
+    final total = (item['total'] as num?)?.toDouble() ?? (item['gross_amount'] as num?)?.toDouble() ?? 0;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: colorsList.borderColor)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: colorsList.textColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$quantity $unit × €${unitPrice.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: colorsList.secondaryTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            '€${total.toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          IconButton(
+            onPressed: () => controller.removeLine(index),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              size: 20,
+            ),
+            color: colorsList.secondaryTextColor,
+            tooltip: 'Delete',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 36,
+              minHeight: 36,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Reusable Widgets
+  // ---------------------------------------------------------------------------
+
+  Widget _sectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.normal,
+        color: colorsList.textColor,
+      ),
+    );
+  }
+
+  Widget _infoField({
+    required IconData icon,
+    required String text,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 11,
+      ),
+      decoration: BoxDecoration(
+        color: colorsList.colorBoxDecoration,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: colorsList.iconColor,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                color: colorsList.textColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _switchRow({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 8,
+      ),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorsList.colorBoxDecoration),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                color: colorsList.textColor,
+              ),
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showUnitSearchBottomSheet(BuildContext context) {
+    final searchController = TextEditingController();
+    controller.updateUnitSearchQuery('');
+
+    Get.bottomSheet(
+      Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colorsList.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Select Unit',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: colorsList.textColor,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: colorsList.iconColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: searchController,
+              hintText: 'Search unit (e.g. hour, kg, pc)...',
+              prefixIcon: Icons.search_rounded,
+              onChanged: (val) {
+                controller.updateUnitSearchQuery(val);
+              },
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                final list = controller.filteredUnits;
+
+                if (list.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No matching units found.',
+                      style: TextStyle(
+                        color: colorsList.textHintColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  itemCount: list.length,
+                  separatorBuilder: (context, index) => const Divider(
+                    height: 1,
+                    thickness: 0.8,
+                    color: colorsList.borderColor,
+                  ),
+                  itemBuilder: (context, index) {
+                    final unitLabel = list[index];
+                    final isSelected =
+                        unitLabel == controller.currentSelectedUnitLabel;
+
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      title: Text(
+                        unitLabel,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? colorsList.primaryColor
+                              : colorsList.textColor,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              color: colorsList.primaryColor,
+                              size: 22,
+                            )
+                          : null,
+                      onTap: () {
+                        controller.selectUnit(unitLabel);
+                        Get.back();
+                      },
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  void _showClientSearchBottomSheet(BuildContext context) {
+    final searchController = TextEditingController();
+    controller.updateClientSearchQuery('');
+
+    Get.bottomSheet(
+      Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: colorsList.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Select Client',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: colorsList.textColor,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: colorsList.iconColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: searchController,
+              hintText: 'Search client by name, email, city...',
+              prefixIcon: Icons.search_rounded,
+              onChanged: (val) {
+                controller.updateClientSearchQuery(val);
+              },
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                final list = controller.filteredClients;
+
+                if (list.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No matching clients found.',
+                      style: TextStyle(
+                        color: colorsList.textHintColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  itemCount: list.length,
+                  separatorBuilder: (context, index) => const Divider(
+                    height: 1,
+                    thickness: 0.8,
+                    color: colorsList.borderColor,
+                  ),
+                  itemBuilder: (context, index) {
+                    final client = list[index];
+                    final isSelected =
+                        client.id == controller.selectedClient.value?.id;
+
+                    final subtitleParts = <String>[];
+                    if (client.email != null &&
+                        client.email!.trim().isNotEmpty) {
+                      subtitleParts.add(client.email!.trim());
+                    }
+                    if (client.city != null && client.city!.trim().isNotEmpty) {
+                      subtitleParts.add(client.city!.trim());
+                    }
+
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      leading: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: colorsList.colorBoxDecoration,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.person_outline_rounded,
+                          color: colorsList.iconColor,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        client.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? colorsList.primaryColor
+                              : colorsList.textColor,
+                        ),
+                      ),
+                      subtitle: subtitleParts.isNotEmpty
+                          ? Text(
+                              subtitleParts.join(' • '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: colorsList.textHintColor,
+                              ),
+                            )
+                          : null,
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              color: colorsList.primaryColor,
+                              size: 22,
+                            )
+                          : null,
+                      onTap: () {
+                        controller.selectClientByModel(client);
+                        Get.back();
+                      },
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  void _showCatalogSearch() {
+    final searchController = TextEditingController();
+    final searchText = ''.obs;
+    final filteredItems = <CatalogModel>[].obs;
+
+    filteredItems.assignAll(controller.catalogList);
+
+    void search(String value) {
+      searchText.value = value;
+      final query = value.trim().toLowerCase();
+
+      if (query.isEmpty) {
+        filteredItems.assignAll(controller.catalogList);
+        return;
+      }
+
+      filteredItems.assignAll(
+        controller.catalogList.where((item) {
+          final name = item.articleName?.toLowerCase() ?? '';
+          return name.contains(query);
+        }),
+      );
+    }
+
+    Get.bottomSheet(
+      Container(
+        height: Get.height * 0.75,
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Select Catalog Item',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(Icons.close, color: colorsList.iconColor),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: searchController,
+              onChanged: search,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search item or enter manually',
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: colorsList.iconColor,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Obx(() {
+                final query = searchText.value.trim();
+
+                return ListView(
+                  children: [
+                    if (query.isNotEmpty)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(
+                          Icons.edit_outlined,
+                          color: colorsList.iconColor,
+                        ),
+                        title: Text(
+                          'Use "$query"',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          'Add this item manually',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorsList.textColor,
+                          ),
+                        ),
+                        onTap: () {
+                          controller.descriptionController.text = query;
+                          Get.back();
+                        },
+                      ),
+                    if (query.isNotEmpty) const Divider(height: 1),
+                    if (filteredItems.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 40),
+                        child: Center(
+                          child: Text(
+                            query.isEmpty
+                                ? 'No catalog items available.'
+                                : 'No catalog item found.',
+                            style: const TextStyle(
+                              color: colorsList.textHintColor,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      ...filteredItems.map((item) {
+                        return Column(
+                          children: [
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                item.articleName ?? '',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: colorsList.textColor,
+                                ),
+                              ),
+                              subtitle: Text(_catalogSubtitle(item)),
+                              onTap: () {
+                                controller.selectCatalogItem(item.articleName);
+                                Get.back();
+                              },
+                            ),
+                            const Divider(
+                              height: 1,
+                              color: colorsList.dividerColor,
+                            ),
+                          ],
+                        );
+                      }),
+                  ],
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  String _catalogSubtitle(CatalogModel item) {
+    final unit = item.unitCode?.trim() ?? '';
+    final price = item.unitPriceNet?.toString() ?? '';
+
+    if (unit.isEmpty && price.isEmpty) return '';
+    if (unit.isEmpty) return '€$price';
+    if (price.isEmpty) return unit;
+
+    return '$unit • €$price';
+  }
+}

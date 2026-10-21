@@ -856,6 +856,26 @@ class DioClient {
     );
   }
 
+  // ==============================
+  // UPDATE OFFER / QUOTATION
+  // ==============================
+  Future<Response> updateOffer({
+    required int offerId,
+    required String accessToken,
+    required Map<String, dynamic> data,
+  }) async {
+    return await _dio.put(
+      '${ApiConstants.baseUrl}/offers/$offerId',
+      data: data,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
 
   // ==============================
   // POST CATALOGUE ITEM
