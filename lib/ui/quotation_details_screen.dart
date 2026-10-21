@@ -111,9 +111,11 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
         final String displayStatus =
             statusStr.isNotEmpty ? statusStr[0].toUpperCase() + statusStr.substring(1) : 'Draft';
 
-        return SafeArea(
-          child: Column(
-            children: [
+        return Stack(
+          children: [
+            SafeArea(
+              child: Column(
+                children: [
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -596,10 +598,68 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
               ),
             ],
           ),
-        );
-      }),
-    );
-  }
+        ),
+
+        // DELETING OVERLAY
+              Obx(() {
+                if (!controller.isDeleting.value) {
+                  return const SizedBox.shrink();
+                }
+
+                return Container(
+                  color: Colors.black.withValues(alpha: 0.45),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 28,
+                        vertical: 24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            color: colorsList.primaryBlue,
+                            strokeWidth: 3,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Deleting quotation...',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: colorsList.textColor,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Please wait a moment',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: colorsList.textHintColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          );
+        }),
+      );
+    }
 
   // ================================================================
   // MORE MENU BOTTOM SHEET
@@ -662,10 +722,7 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
               iconColor: const Color(0xFF0284C7),
               onTap: () {
                 Get.back();
-                AppSnackbar.info(
-                  title: 'Document',
-                  message: 'Download document feature is being prepared.',
-                );
+                controller.downloadQuotationDocument();
               },
             ),
             const SizedBox(height: 8),
@@ -690,10 +747,7 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
               iconColor: const Color(0xFFDC2626),
               onTap: () {
                 Get.back();
-                AppSnackbar.info(
-                  title: 'Delete',
-                  message: 'Delete quotation feature is coming soon.',
-                );
+                controller.deleteQuotation();
               },
             ),
           ],

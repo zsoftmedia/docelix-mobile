@@ -290,6 +290,33 @@ class DioClient {
   }
 
   // ==============================
+  // GET PDF TEMPLATE SETTINGS
+  // ==============================
+
+  Future<Response> getPdfTemplateSettings({
+    required int companyId,
+    required String docType,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      'https://owytoejxgqxvevjsrfjj.supabase.co/rest/v1/pdf_template_settings',
+      queryParameters: {
+        'select': 'settings',
+        'company_id': 'eq.$companyId',
+        'doc_type': 'eq.$docType',
+        'template_id': 'eq.default',
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'apikey': ApiConstants.supabaseAnonKey,
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET OFFERS / QUOTATIONS
   // ==============================
 
@@ -329,6 +356,30 @@ class DioClient {
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // DELETE OFFER / QUOTATION
+  // ==============================
+
+  Future<Response> deleteOffer({
+    required int offerId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/offers/$offerId',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
           'Content-Type': 'application/json',
         },
       ),
