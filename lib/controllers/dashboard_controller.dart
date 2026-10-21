@@ -10,7 +10,8 @@ import 'package:intl/intl.dart';
 
 class DashboardController extends GetxController {
   final dioClient = DioClient();
-  final isLoading = false.obs;
+  /// Starts true so the first frame shows a spinner, not empty/zero KPIs.
+  final isLoading = true.obs;
   final isCompaniesLoading = false.obs;
 
   final dashboardData = Rxn<DashboardModel>();
@@ -110,7 +111,10 @@ class DashboardController extends GetxController {
   // ============================================================
 
   Future<void> getCompanies() async {
+    var loadedDashboard = false;
+
     try {
+      isLoading.value = true;
       isCompaniesLoading.value = true;
 
       final accessToken = SessionManager.accessToken;
@@ -159,6 +163,7 @@ class DashboardController extends GetxController {
         }
 
         await getDashboard();
+        loadedDashboard = true;
       }
     } on DioException catch (e) {
       print("Companies API Error: ${e.message}");
@@ -178,6 +183,10 @@ class DashboardController extends GetxController {
       );
     } finally {
       isCompaniesLoading.value = false;
+      // getDashboard clears isLoading; if it never ran, clear here.
+      if (!loadedDashboard) {
+        isLoading.value = false;
+      }
     }
   }
 

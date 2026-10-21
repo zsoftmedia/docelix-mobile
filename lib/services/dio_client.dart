@@ -1,12 +1,21 @@
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/config/api_constants.dart';
+import 'package:docelix_mobileapp/services/auth_services.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/foundation.dart';
 
 class DioClient {
+  static const String _authRetriedExtraKey = 'auth_retried';
+  static const String _sessionExpiredMessage =
+      'Your session has expired. Please log in again.';
+
+  /// Shared across all DioClient instances so concurrent 401s refresh once.
+  static Future<String?>? _ongoingRefresh;
+  static bool _isHandlingSessionExpiry = false;
 
   final Dio _dio = Dio();
 
@@ -14,18 +23,94 @@ class DioClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onError: (DioException error, ErrorInterceptorHandler handler) async {
-          if (error.response?.statusCode == 401) {
-            debugPrint('========================================');
-            debugPrint('[DioClient] 401 Unauthorized: Session/Token expired.');
-            debugPrint('Triggering automatic logout...');
-            debugPrint('========================================');
-
-            await SessionManager.logout();
+          if (error.response?.statusCode != 401) {
+            return handler.next(error);
           }
-          return handler.next(error);
+
+          // Unauthenticated flows (e.g. login) should not force a logout.
+          if (!SessionManager.isLoggedIn) {
+            return handler.next(error);
+          }
+
+          final requestOptions = error.requestOptions;
+          final alreadyRetried =
+              requestOptions.extra[_authRetriedExtraKey] == true;
+
+          if (alreadyRetried) {
+            debugPrint(
+              '[DioClient] 401 after refresh retry — forcing logout.',
+            );
+            await _forceSessionExpiredLogout();
+            return handler.next(error);
+          }
+
+          debugPrint(
+            '[DioClient] 401 Unauthorized — attempting token refresh.',
+          );
+
+          final newToken = await _refreshAccessTokenOnce();
+          if (newToken == null || newToken.isEmpty) {
+            debugPrint(
+              '[DioClient] Token refresh failed — forcing logout.',
+            );
+            await _forceSessionExpiredLogout();
+            return handler.next(error);
+          }
+
+          await SessionManager.saveAccessToken(newToken);
+
+          final headers = Map<String, dynamic>.from(requestOptions.headers);
+          headers['Authorization'] = 'Bearer $newToken';
+
+          final retryOptions = requestOptions.copyWith(
+            headers: headers,
+            extra: {
+              ...requestOptions.extra,
+              _authRetriedExtraKey: true,
+            },
+          );
+
+          try {
+            final response = await _dio.fetch(retryOptions);
+            return handler.resolve(response);
+          } on DioException catch (retryError) {
+            if (retryError.response?.statusCode == 401) {
+              await _forceSessionExpiredLogout();
+            }
+            return handler.next(retryError);
+          } catch (_) {
+            return handler.next(error);
+          }
         },
       ),
     );
+  }
+
+  static Future<String?> _refreshAccessTokenOnce() {
+    final existing = _ongoingRefresh;
+    if (existing != null) return existing;
+
+    late final Future<String?> future;
+    future = AuthServices().refreshAccessToken().whenComplete(() {
+      if (identical(_ongoingRefresh, future)) {
+        _ongoingRefresh = null;
+      }
+    });
+    _ongoingRefresh = future;
+    return future;
+  }
+
+  static Future<void> _forceSessionExpiredLogout() async {
+    if (_isHandlingSessionExpiry) return;
+    _isHandlingSessionExpiry = true;
+
+    try {
+      await SessionManager.logout(message: _sessionExpiredMessage);
+    } finally {
+      Future.delayed(const Duration(seconds: 2), () {
+        _isHandlingSessionExpiry = false;
+      });
+    }
   }
 
   // ==============================

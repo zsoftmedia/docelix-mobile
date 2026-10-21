@@ -60,7 +60,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: colorsList.backgroundColor,
       child: SafeArea(
         child: Obx(() {
-          if (dashboardController.isLoading.value) {
+          if (dashboardController.isLoading.value ||
+              dashboardController.isCompaniesLoading.value) {
             return const Center(
               child: CircularProgressIndicator(),
             );

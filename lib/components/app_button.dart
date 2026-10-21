@@ -4,33 +4,33 @@ class AppButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
 
-// Loading
+  // Loading
   final bool isLoading;
   final double loadingSize;
   final double loadingStrokeWidth;
 
-// Size
+  // Size
   final double? width;
   final double? height;
 
-// Colors
+  // Colors
   final Color backgroundColor;
   final Color disabledBackgroundColor;
   final Color foregroundColor;
   final Color loadingColor;
 
-// Style
+  // Style
   final double borderRadius;
   final double elevation;
   final double fontSize;
   final FontWeight fontWeight;
 
-// Optional icon
+  // Optional icon
   final IconData? icon;
   final Widget? leading;
   final Widget? trailing;
 
-// Border
+  // Border
   final Color? borderColor;
   final double borderWidth;
 
@@ -95,58 +95,46 @@ class AppButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius),
 
             side: borderColor != null
-                ? BorderSide(
-              color: borderColor!,
-              width: borderWidth,
-            )
+                ? BorderSide(color: borderColor!, width: borderWidth)
                 : BorderSide.none,
           ),
         ),
 
         child: isLoading
             ? SizedBox(
-          width: loadingSize,
-          height: loadingSize,
+                width: loadingSize,
+                height: loadingSize,
 
-          child: CircularProgressIndicator(
-            strokeWidth: loadingStrokeWidth,
+                child: CircularProgressIndicator(
+                  strokeWidth: loadingStrokeWidth,
 
-            valueColor: AlwaysStoppedAnimation<Color>(
-              loadingColor,
-            ),
-          ),
-        )
-
+                  valueColor: AlwaysStoppedAnimation<Color>(loadingColor),
+                ),
+              )
             : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
 
-          children: [
-            if (leading != null) ...[
-              leading!,
-              const SizedBox(width: 8),
-            ],
+                children: [
+                  if (leading != null) ...[leading!, const SizedBox(width: 8)],
 
-            if (icon != null) ...[
-              Icon(icon),
-              const SizedBox(width: 8),
-            ],
+                  if (icon != null) ...[Icon(icon), const SizedBox(width: 8)],
 
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: fontSize,
-              //  fontWeight: fontWeight,
-                color: foregroundColor,
+                  Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      //  fontWeight: fontWeight,
+                      color: foregroundColor,
+                    ),
+                  ),
+
+                  if (trailing != null) ...[
+                    const SizedBox(width: 8),
+                    trailing!,
+                  ],
+                ],
               ),
-            ),
-
-            if (trailing != null) ...[
-              const SizedBox(width: 8),
-              trailing!,
-            ],
-          ],
-        ),
       ),
     );
   }

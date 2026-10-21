@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/services/auth_services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -30,18 +31,24 @@ class SessionManager {
   // CENTRALIZED LOGOUT & AUTO SESSION EXPIRATION
   // ==============================
 
-  static Future<void> logout() async {
+  static Future<void> logout({String? message}) async {
     try {
       await AuthServices().signOut();
-      await saveAccessToken('');
-      await saveEmail('');
-      await saveCompanyid(0);
       await clearSession();
     } catch (e) {
       debugPrint('Logout error: $e');
     }
 
     Get.offAllNamed('/LoginScreen');
+
+    if (message != null && message.isNotEmpty) {
+      Future.delayed(const Duration(milliseconds: 350), () {
+        AppSnackbar.info(
+          title: 'Session expired',
+          message: message,
+        );
+      });
+    }
   }
 
   // ==============================
@@ -250,9 +257,13 @@ class SessionManager {
     await _storage.remove(_emailKey);
     await _storage.remove(_usernameKey);
     await _storage.remove(_roleKey);
+    await _storage.remove(_rolenameKey);
+    await _storage.remove(_roledescriptionKey);
     await _storage.remove(_userDataKey);
     await _storage.remove(_companyidKey);
     await _storage.remove(_companynameKey);
+    await _storage.remove(_correncycodeKey);
+    await _storage.remove(_accCreatedDateKey);
   }
 
   // Shared preferences

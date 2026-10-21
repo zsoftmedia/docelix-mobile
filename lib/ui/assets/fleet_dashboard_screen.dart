@@ -82,13 +82,17 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
                   children: [
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        final columns = context.rs.kpiColumns;
+                        final columns = context.rs.kpiColumns.clamp(2, 4);
                         final gap = width * 0.03;
                         final itemWidth =
                             (constraints.maxWidth - gap * (columns - 1)) /
                             columns;
-                        // Keeps the original 1.35 aspect ratio per tile.
-                        final itemHeight = itemWidth / 1.35;
+                        // Tall enough for icon + title + value + subtitle on
+                        // small phones; still scales with tile width.
+                        final itemHeight = (itemWidth / 1.15).clamp(
+                          width * 0.36,
+                          width * 0.48,
+                        );
                         final cards = <Widget>[
                           _KpiCard(
                             title: 'Total Vehicles',
@@ -100,18 +104,21 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
                           _KpiCard(
                             title: 'Total Mileage',
                             value: controller.formatKm(data.totalMileage),
+                            subtitle: ' ',
                             icon: Icons.speed_rounded,
                             iconColor: const Color(0xFF12B886),
                           ),
                           _KpiCard(
                             title: 'Fleet Value',
                             value: controller.formatMoney(data.totalFleetValue),
+                            subtitle: ' ',
                             icon: Icons.account_balance_wallet_outlined,
                             iconColor: const Color(0xFFF59E0B),
                           ),
                           _KpiCard(
                             title: 'Total Expenses',
                             value: controller.formatMoney(data.totalExpenses),
+                            subtitle: ' ',
                             icon: Icons.show_chart_rounded,
                             iconColor: const Color(0xFFEF4444),
                           ),
@@ -207,9 +214,12 @@ class _KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = _designWidth(context);
+    final pad = width * 0.03;
+    final iconSize = width * 0.08;
+    final hasSubtitle = subtitle != null && subtitle!.trim().isNotEmpty;
 
     return Container(
-      padding: EdgeInsets.all(width * 0.035),
+      padding: EdgeInsets.fromLTRB(pad, pad, pad, pad * 0.9),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -219,44 +229,55 @@ class _KpiCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: width * 0.09,
-            height: width * 0.09,
+            width: iconSize,
+            height: iconSize,
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: width * 0.045),
+            child: Icon(icon, color: iconColor, size: iconSize * 0.5),
           ),
-          const Spacer(),
+          const Spacer(flex: 2),
           Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.secondaryText,
               fontSize: width.fontSizeW(0.027),
               fontWeight: FontWeight.w600,
+              height: 1.2,
             ),
           ),
-          SizedBox(height: width * 0.01),
+          SizedBox(height: width * 0.008),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: TextStyle(
+                color: colorsList.primaryText,
+                fontSize: width.fontSizeW(0.04),
+                fontWeight: FontWeight.w800,
+                height: 1.15,
+              ),
+            ),
+          ),
+          SizedBox(height: width * 0.005),
+          // Reserve one subtitle line on every card for equal layout.
           Text(
-            value,
+            hasSubtitle ? subtitle! : ' ',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: colorsList.primaryText,
-              fontSize: width.fontSizeW(0.042),
-              fontWeight: FontWeight.w800,
+              color: hasSubtitle
+                  ? colorsList.mutedTextColor
+                  : Colors.transparent,
+              fontSize: width.fontSizeW(0.024),
+              height: 1.2,
             ),
           ),
-          if (subtitle != null) ...[
-            SizedBox(height: width * 0.006),
-            Text(
-              subtitle!,
-              style: TextStyle(
-                color: colorsList.mutedTextColor,
-                fontSize: width.fontSizeW(0.024),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -274,6 +295,7 @@ class _ExpenseRow extends StatelessWidget {
     final width = _designWidth(context);
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Text(
@@ -282,15 +304,23 @@ class _ExpenseRow extends StatelessWidget {
               color: colorsList.secondaryText,
               fontSize: width.fontSizeW(0.032),
               fontWeight: FontWeight.w600,
+              height: 1.3,
             ),
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            color: colorsList.primaryText,
-            fontSize: width.fontSizeW(0.033),
-            fontWeight: FontWeight.w800,
+        SizedBox(width: width * 0.03),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: colorsList.primaryText,
+              fontSize: width.fontSizeW(0.033),
+              fontWeight: FontWeight.w800,
+              height: 1.3,
+            ),
           ),
         ),
       ],

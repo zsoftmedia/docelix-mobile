@@ -12,6 +12,9 @@ double _designWidth(BuildContext context) {
   return rs.isPhone ? rs.width : ResponsiveBreakpoints.designWidth * rs.scale;
 }
 
+/// Temporarily hide delete/remove actions on vehicle list cards (drivers, trips).
+const bool _kShowVehicleListDeleteActions = false;
+
 class VehicleDetailsScreen extends StatefulWidget {
   const VehicleDetailsScreen({super.key});
 
@@ -423,11 +426,10 @@ class _DriversTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => ResponsiveSheetBody(
         padding: EdgeInsets.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorsList.colorWhite,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-          ),
+        child: Material(
+          color: colorsList.colorWhite,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          clipBehavior: Clip.antiAlias,
           child: _AssignDriverSheet(controller: controller),
         ),
       ),
@@ -558,7 +560,9 @@ class _DriversTab extends StatelessWidget {
                       assignment.assignedAt ?? assignment.startDate,
                     ),
                     isPrimary: assignment.isPrimary,
-                    onDelete: controller.isDeletingAssignment.value
+                    onDelete:
+                        !_kShowVehicleListDeleteActions ||
+                            controller.isDeletingAssignment.value
                         ? null
                         : () => _confirmDelete(context, assignment),
                   ),
@@ -646,15 +650,16 @@ class _DriverAssignmentCard extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            onPressed: onDelete,
-            tooltip: 'Remove',
-            icon: Icon(
-              Icons.delete_outline_rounded,
-              color: colorsList.red,
-              size: width * 0.055,
+          if (onDelete != null)
+            IconButton(
+              onPressed: onDelete,
+              tooltip: 'Remove',
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: colorsList.red,
+                size: width * 0.055,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1042,11 +1047,10 @@ class _TripsTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => ResponsiveSheetBody(
         padding: EdgeInsets.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorsList.colorWhite,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-          ),
+        child: Material(
+          color: colorsList.colorWhite,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          clipBehavior: Clip.antiAlias,
           child: _AddTripSheet(controller: controller),
         ),
       ),
@@ -1177,7 +1181,9 @@ class _TripsTab extends StatelessWidget {
                     reimbursementLabel: trip.reimbursement == null
                         ? null
                         : controller.formatMoney(trip.reimbursement),
-                    onDelete: controller.isDeletingTrip.value
+                    onDelete:
+                        !_kShowVehicleListDeleteActions ||
+                            controller.isDeletingTrip.value
                         ? null
                         : () => _confirmDelete(context, trip),
                   ),
@@ -1299,15 +1305,16 @@ class _TripCard extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              IconButton(
-                onPressed: onDelete,
-                tooltip: 'Delete',
-                icon: Icon(
-                  Icons.delete_outline_rounded,
-                  color: colorsList.red,
-                  size: width * 0.055,
+              if (onDelete != null)
+                IconButton(
+                  onPressed: onDelete,
+                  tooltip: 'Delete',
+                  icon: Icon(
+                    Icons.delete_outline_rounded,
+                    color: colorsList.red,
+                    size: width * 0.055,
+                  ),
                 ),
-              ),
             ],
           ),
         ],
@@ -1734,11 +1741,10 @@ class _FuelTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => ResponsiveSheetBody(
         padding: EdgeInsets.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorsList.colorWhite,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-          ),
+        child: Material(
+          color: colorsList.colorWhite,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          clipBehavior: Clip.antiAlias,
           child: _LogFuelSheet(controller: controller),
         ),
       ),
@@ -1910,13 +1916,10 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
         final width = _designWidth(context);
         return ResponsiveSheetBody(
           padding: EdgeInsets.zero,
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorsList.colorWhite,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-            ),
+          child: Material(
+            color: colorsList.colorWhite,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            clipBehavior: Clip.antiAlias,
             child: SafeArea(
               child: Padding(
                 padding: EdgeInsets.all(width * 0.04),
@@ -2315,11 +2318,10 @@ class _ServicesTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => ResponsiveSheetBody(
         padding: EdgeInsets.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorsList.colorWhite,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-          ),
+        child: Material(
+          color: colorsList.colorWhite,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          clipBehavior: Clip.antiAlias,
           child: _LogServiceSheet(controller: controller),
         ),
       ),
@@ -2730,11 +2732,10 @@ class _InsuranceTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => ResponsiveSheetBody(
         padding: EdgeInsets.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorsList.colorWhite,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-          ),
+        child: Material(
+          color: colorsList.colorWhite,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          clipBehavior: Clip.antiAlias,
           child: _LogInsuranceSheet(controller: controller),
         ),
       ),
@@ -2862,6 +2863,7 @@ class _LogInsuranceSheetState extends State<_LogInsuranceSheet> {
 
   DateTime _startDate = DateTime.now();
   DateTime? _endDate;
+  String? _endDateError;
   bool _isSubmitting = false;
 
   @override
@@ -2879,32 +2881,85 @@ class _LogInsuranceSheetState extends State<_LogInsuranceSheet> {
     Navigator.of(context).pop(saved);
   }
 
+  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
   String _fmt(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
 
+  bool get _isEndBeforeStart {
+    if (_endDate == null) return false;
+    return _dateOnly(_endDate!).isBefore(_dateOnly(_startDate));
+  }
+
+  String? _validateEndDate() {
+    if (_endDate == null) return null;
+    if (_isEndBeforeStart) {
+      return 'End Date cannot be earlier than Start Date (${_fmt(_startDate)})';
+    }
+    return null;
+  }
+
+  void _revalidateEndDate() {
+    setState(() => _endDateError = _validateEndDate());
+  }
+
   Future<void> _pickStart() async {
+    final lastDate = DateTime.now().add(const Duration(days: 3650));
     final picked = await showDatePicker(
       context: context,
-      initialDate: _startDate,
+      initialDate: _dateOnly(_startDate),
       firstDate: DateTime(2000),
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
+      lastDate: lastDate,
     );
-    if (picked != null) setState(() => _startDate = picked);
+    if (picked == null || !mounted) return;
+
+    setState(() {
+      _startDate = _dateOnly(picked);
+      // If end is now before start, clear it so the user picks a valid one.
+      if (_endDate != null && _dateOnly(_endDate!).isBefore(_startDate)) {
+        _endDate = null;
+        _endDateError = 'End Date was cleared because it was earlier than the new Start Date';
+      } else {
+        _endDateError = _validateEndDate();
+      }
+    });
   }
 
   Future<void> _pickEnd() async {
+    final start = _dateOnly(_startDate);
+    final lastDate = DateTime.now().add(const Duration(days: 3650));
+    var initial = _endDate != null ? _dateOnly(_endDate!) : start;
+    if (initial.isBefore(start)) initial = start;
+    if (initial.isAfter(lastDate)) initial = lastDate;
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: _endDate ?? _startDate.add(const Duration(days: 30)),
-      firstDate: _startDate,
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
+      initialDate: initial,
+      firstDate: start, // blocks dates before Start Date
+      lastDate: lastDate,
     );
-    if (picked != null) setState(() => _endDate = picked);
+    if (picked == null || !mounted) return;
+
+    setState(() {
+      _endDate = _dateOnly(picked);
+      _endDateError = _validateEndDate();
+    });
   }
 
   Future<void> _save() async {
     FocusManager.instance.primaryFocus?.unfocus();
+    _revalidateEndDate();
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    if (_isEndBeforeStart) {
+      Get.snackbar(
+        'Invalid End Date',
+        'End Date must be the same as or later than Start Date (${_fmt(_startDate)}).',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
 
     final cost = double.tryParse(_costController.text.trim());
     if (cost == null) {
@@ -3037,7 +3092,20 @@ class _LogInsuranceSheetState extends State<_LogInsuranceSheet> {
                       onTap: _pickEnd,
                       width: width,
                       muted: _endDate == null,
+                      hasError: _endDateError != null,
                     ),
+                    if (_endDateError != null) ...[
+                      SizedBox(height: width * 0.015),
+                      Text(
+                        _endDateError!,
+                        style: TextStyle(
+                          color: const Color(0xFFE5484D),
+                          fontSize: width.fontSizeW(0.027),
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -3068,11 +3136,10 @@ class _DocumentsTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => ResponsiveSheetBody(
         padding: EdgeInsets.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorsList.colorWhite,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-          ),
+        child: Material(
+          color: colorsList.colorWhite,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          clipBehavior: Clip.antiAlias,
           child: _UploadDocumentSheet(controller: controller),
         ),
       ),
@@ -3416,20 +3483,40 @@ class _DateField extends StatelessWidget {
     required this.onTap,
     required this.width,
     this.muted = false,
+    this.hasError = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final double width;
   final bool muted;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
+    final decoration = _sheetInputDecoration(width);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: InputDecorator(
-        decoration: _sheetInputDecoration(width),
+        decoration: hasError
+            ? decoration.copyWith(
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE5484D),
+                    width: 1.2,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE5484D),
+                    width: 1.4,
+                  ),
+                ),
+              )
+            : decoration,
         child: Row(
           children: [
             Expanded(
@@ -3447,7 +3534,7 @@ class _DateField extends StatelessWidget {
             Icon(
               Icons.calendar_today_outlined,
               size: width * 0.045,
-              color: colorsList.iconColor,
+              color: hasError ? const Color(0xFFE5484D) : colorsList.iconColor,
             ),
           ],
         ),

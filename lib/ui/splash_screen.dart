@@ -1,5 +1,10 @@
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
+import 'package:docelix_mobileapp/models/user_model.dart';
+import 'package:docelix_mobileapp/services/auth_services.dart';
+import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -50,13 +55,85 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _animationController.forward();
-    _navigateToLogin();
+    _navigateAfterSplash();
   }
 
-  Future<void> _navigateToLogin() async {
-    await Future.delayed(const Duration(seconds: 3));
+  Future<void> _navigateAfterSplash() async {
+    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    Get.offNamed('/LoginScreen', arguments: 'Login Screen');
+
+    final restored = await _restorePersistedSession();
+    if (!mounted) return;
+
+    if (restored) {
+      Get.offAllNamed('/LandScreen');
+    } else {
+      Get.offNamed('/LoginScreen', arguments: 'Login Screen');
+    }
+  }
+
+  /// Restores a Supabase session (persisted by the SDK) into SessionManager.
+  Future<bool> _restorePersistedSession() async {
+    try {
+      final auth = AuthServices();
+      var session = auth.currentSession;
+
+      if (session == null) {
+        debugPrint('[Splash] No persisted Supabase session.');
+        return false;
+      }
+
+      // Refresh when possible so API calls start with a valid access token.
+      final refreshedToken = await auth.refreshAccessToken();
+      final accessToken = refreshedToken ?? session.accessToken;
+      if (accessToken.isEmpty) return false;
+
+      await SessionManager.saveAccessToken(accessToken);
+
+      final email = SessionManager.email;
+      final companyId = SessionManager.accessCompanyid;
+      final needsProfile =
+          email == null || email.isEmpty || companyId == null || companyId == 0;
+
+      if (needsProfile) {
+        await _hydrateSessionFromMe(accessToken, auth);
+      }
+
+      debugPrint('[Splash] Session restored for ${auth.currentUserEmail}.');
+      return SessionManager.isLoggedIn;
+    } catch (e) {
+      debugPrint('[Splash] Session restore failed: $e');
+      return false;
+    }
+  }
+
+  Future<void> _hydrateSessionFromMe(
+    String accessToken,
+    AuthServices auth,
+  ) async {
+    try {
+      final response = await DioClient().getMe('/me', accessToken);
+      if (response.statusCode != 200) return;
+
+      final user = UserModel.fromJson(response.data);
+      final createdDate = user.createdAt != null
+          ? DateTime.parse(user.createdAt!).toString().split(' ').first
+          : '';
+      final company =
+          user.companies?.isNotEmpty == true ? user.companies!.first : null;
+
+      await SessionManager.saveEmail(
+        user.email ?? auth.currentUserEmail ?? '',
+      );
+      await SessionManager.saveAccessToken(accessToken);
+      await SessionManager.saveCompanyid(company?.id ?? 0);
+      await SessionManager.saveCompanyname(company?.name ?? '');
+      await SessionManager.saveCorrencycode(company?.currencyCode ?? '');
+      await SessionManager.saveRole(company?.myRole ?? '');
+      await SessionManager.saveAccCreatedDate(createdDate);
+    } catch (e) {
+      debugPrint('[Splash] Failed to hydrate profile from /me: $e');
+    }
   }
 
   @override

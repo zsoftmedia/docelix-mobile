@@ -573,22 +573,26 @@ class _DepreciationTab extends StatelessWidget {
                                   ),
                                 ),
                                 if (row.isCurrent) ...[
-                                  SizedBox(width: width * 0.015),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: width * 0.018,
-                                      vertical: width * 0.006,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colorsList.lightBlue,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      'Current',
-                                      style: TextStyle(
-                                        color: colorsList.colorButton,
-                                        fontSize: width.fontSizeW(0.022),
-                                        fontWeight: FontWeight.w700,
+                                  SizedBox(width: width * 0.01),
+                                  Flexible(
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: width * 0.014,
+                                        vertical: width * 0.005,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorsList.lightBlue,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'Current',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: colorsList.colorButton,
+                                          fontSize: width.fontSizeW(0.022),
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
                                   ),

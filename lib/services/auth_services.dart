@@ -209,6 +209,31 @@ class AuthServices {
     return _supabaseClient.auth.currentSession?.refreshToken;
   }
 
+  /// Refreshes the Supabase session and returns the new access token.
+  /// Returns null when refresh is unavailable or fails.
+  Future<String?> refreshAccessToken() async {
+    try {
+      final existingRefresh = refreshToken;
+      if (existingRefresh == null || existingRefresh.isEmpty) {
+        debugPrint('[AuthServices] No refresh token available.');
+        return null;
+      }
+
+      final response = await _supabaseClient.auth.refreshSession();
+      final token = response.session?.accessToken;
+      if (token == null || token.isEmpty) {
+        debugPrint('[AuthServices] Refresh session returned no access token.');
+        return null;
+      }
+
+      debugPrint('[AuthServices] Access token refreshed successfully.');
+      return token;
+    } catch (e) {
+      debugPrint('[AuthServices] Refresh session failed: $e');
+      return null;
+    }
+  }
+
   // USER EMAIL
   String? get currentUserEmail {
     return _supabaseClient.auth.currentUser?.email;

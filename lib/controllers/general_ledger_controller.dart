@@ -120,8 +120,9 @@ class GeneralLedgerController extends GetxController {
 
   void _applyArguments(dynamic args) {
     final now = DateTime.now();
-    fromDate.value = DateTime(now.year - 1, 12, 31);
-    toDate.value = DateTime(now.year, 12, 30);
+    final today = DateTime(now.year, now.month, now.day);
+    fromDate.value = today;
+    toDate.value = today;
 
     if (args is! Map) return;
 
@@ -288,8 +289,9 @@ class GeneralLedgerController extends GetxController {
     selectedAccountId.value = null;
     selectedSourceType.value = null;
     final now = DateTime.now();
-    fromDate.value = DateTime(now.year - 1, 12, 31);
-    toDate.value = DateTime(now.year, 12, 30);
+    final today = DateTime(now.year, now.month, now.day);
+    fromDate.value = today;
+    toDate.value = today;
     loadReport();
   }
 
