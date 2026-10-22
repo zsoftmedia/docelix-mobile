@@ -979,6 +979,33 @@ class DioClient {
   }
 
   // ==============================
+  // GET STOCK REPORT
+  // ==============================
+
+  Future<Response> getStockReport({
+    required int companyId,
+    required String fromDate,
+    required String toDate,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/accounting/reports/stock',
+      queryParameters: {
+        'company_id': companyId,
+        'fromDate': fromDate,
+        'toDate': toDate,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET INVENTORY ADJUSTMENTS
   // ==============================
 
