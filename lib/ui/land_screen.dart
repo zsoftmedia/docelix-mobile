@@ -878,86 +878,70 @@ class _InventoryExpandableSection extends StatelessWidget {
 
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: rs.s(4)),
-          child: Material(
-            color: expanded
-                ? colorsList.primaryBlue.withValues(alpha: 0.08)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: onToggle,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: rs.s(10),
-                  vertical: rs.s(10),
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: expanded
-                        ? colorsList.primaryBlue.withValues(alpha: 0.3)
-                        : Colors.transparent,
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onToggle,
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: rs.s(11)),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: rs.s(44),
+                    height: rs.s(44),
+                    decoration: BoxDecoration(
+                      color: expanded
+                          ? colorsList.primaryBlue
+                          : colorsList.blue.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.grid_view_rounded,
+                      color: expanded ? Colors.white : colorsList.blue,
+                      size: rs.s(20),
+                    ),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: rs.s(42),
-                      height: rs.s(42),
-                      decoration: BoxDecoration(
-                        color: expanded
-                            ? colorsList.primaryBlue
-                            : colorsList.blue.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.grid_view_rounded,
-                        color: expanded ? Colors.white : colorsList.blue,
-                        size: rs.s(22),
-                      ),
-                    ),
-                    SizedBox(width: rs.s(14)),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Inventory',
-                            style: TextStyle(
-                              color: colorsList.primaryText,
-                              fontSize: rs.sp(15),
-                              fontWeight: FontWeight.normal,
-                              height: 1.2,
-                            ),
+                  SizedBox(width: rs.s(14)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Inventory',
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontSize: rs.sp(15),
+                            fontWeight: FontWeight.normal,
+                            height: 1.2,
                           ),
-                          SizedBox(height: rs.s(3)),
-                          Text(
-                            'Stock addition, adjustments & reports',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: colorsList.secondaryText,
-                              fontSize: rs.sp(12),
-                              height: 1.3,
-                            ),
+                        ),
+                        SizedBox(height: rs.s(3)),
+                        Text(
+                          'Stock addition, adjustments & reports',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colorsList.secondaryText,
+                            fontSize: rs.sp(12),
+                            height: 1.3,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: rs.s(8)),
-                    AnimatedRotation(
-                      turns: expanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 220),
-                      child: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: colorsList.secondaryText,
-                        size: rs.s(22),
-                      ),
+                  ),
+                  SizedBox(width: rs.s(8)),
+                  AnimatedRotation(
+                    turns: expanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 220),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: colorsList.secondaryText,
+                      size: rs.s(22),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
