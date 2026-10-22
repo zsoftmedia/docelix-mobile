@@ -78,8 +78,8 @@ class GeneralLedgerScreen extends StatelessWidget {
             'General Ledger',
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width.fontSizeW(0.048),
-              fontWeight: FontWeight.w700,
+              fontSize: width.fontSizeW(0.057),
+              fontWeight: FontWeight.normal,
             ),
           );
         }),
@@ -183,8 +183,8 @@ class GeneralLedgerScreen extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width.fontSizeW(0.038),
-                            fontWeight: FontWeight.w700,
+                            fontSize: width.fontSizeW(0.047),
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -202,7 +202,7 @@ class GeneralLedgerScreen extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.secondaryText,
                             fontSize: width.fontSizeW(0.028),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -313,6 +313,8 @@ class GeneralLedgerScreen extends StatelessWidget {
     Get.bottomSheet(
       _FiltersSheet(controller: controller),
       isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
       backgroundColor: Colors.transparent,
     );
   }
@@ -357,7 +359,7 @@ class _DateField extends StatelessWidget {
                 style: TextStyle(
                   color: colorsList.primaryText,
                   fontSize: width.fontSizeW(0.032),
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ),
@@ -391,15 +393,19 @@ class _SummaryStrip extends StatelessWidget {
               Expanded(
                 child: _SummaryCard(label: 'Opening', value: opening),
               ),
-              SizedBox(width: width * 0.02),
+              SizedBox(width: width * 0.025),
               Expanded(
                 child: _SummaryCard(label: 'Debit', value: debit),
               ),
-              SizedBox(width: width * 0.02),
+            ],
+          ),
+          SizedBox(height: width * 0.025),
+          Row(
+            children: [
               Expanded(
                 child: _SummaryCard(label: 'Credit', value: credit),
               ),
-              SizedBox(width: width * 0.02),
+              SizedBox(width: width * 0.025),
               Expanded(
                 child: _SummaryCard(label: 'Closing', value: closing),
               ),
@@ -423,7 +429,7 @@ class _SummaryStrip extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.colorButton,
                     fontSize: width.fontSizeW(0.026),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -447,8 +453,8 @@ class _SummaryCard extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: width * 0.02,
-        vertical: width * 0.022,
+        horizontal: width * 0.035,
+        vertical: width * 0.028,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -464,8 +470,8 @@ class _SummaryCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.mutedTextColor,
-              fontSize: width.fontSizeW(0.022),
-              fontWeight: FontWeight.w600,
+              fontSize: width.fontSizeW(0.028),
+              fontWeight: FontWeight.normal,
             ),
           ),
           SizedBox(height: width * 0.008),
@@ -475,8 +481,8 @@ class _SummaryCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width.fontSizeW(0.026),
-              fontWeight: FontWeight.w800,
+              fontSize: width.fontSizeW(0.038),
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],
@@ -567,7 +573,7 @@ class _LedgerEntryCard extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.primaryText,
                             fontSize: width.fontSizeW(0.034),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                         SizedBox(height: width * 0.01),
@@ -604,7 +610,7 @@ class _LedgerEntryCard extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.primaryText,
                       fontSize: width.fontSizeW(0.034),
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                 ],
@@ -621,7 +627,7 @@ class _LedgerEntryCard extends StatelessWidget {
                   label: Text(
                     'View',
                     style: TextStyle(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       fontSize: width.fontSizeW(0.03),
                     ),
                   ),
@@ -675,7 +681,7 @@ class _Badge extends StatelessWidget {
         style: TextStyle(
           color: foreground,
           fontSize: width.fontSizeW(0.022),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.normal,
         ),
       ),
     );
@@ -729,7 +735,7 @@ class _FiltersSheet extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.045),
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 SizedBox(height: width * 0.04),
@@ -739,11 +745,30 @@ class _FiltersSheet extends StatelessWidget {
                     child: DropdownButton<int?>(
                       isExpanded: true,
                       value: controller.selectedAccountId.value,
-                      hint: const Text('All Accounts'),
+                      style: TextStyle(
+                        color: colorsList.primaryText,
+                        fontSize: width.fontSizeW(0.034),
+                        fontWeight: FontWeight.normal,
+                      ),
+                      hint: Text(
+                        'All Accounts',
+                        style: TextStyle(
+                          color: colorsList.mutedTextColor,
+                          fontSize: width.fontSizeW(0.034),
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
                       items: [
-                        const DropdownMenuItem<int?>(
+                        DropdownMenuItem<int?>(
                           value: null,
-                          child: Text('All Accounts'),
+                          child: Text(
+                            'All Accounts',
+                            style: TextStyle(
+                              color: colorsList.primaryText,
+                              fontSize: width.fontSizeW(0.034),
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
                         ),
                         ...controller.accounts.map(
                           (LedgerAccount account) => DropdownMenuItem<int?>(
@@ -751,6 +776,11 @@ class _FiltersSheet extends StatelessWidget {
                             child: Text(
                               account.displayLabel,
                               overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: colorsList.primaryText,
+                                fontSize: width.fontSizeW(0.034),
+                                fontWeight: FontWeight.normal,
+                              ),
                             ),
                           ),
                         ),
@@ -766,12 +796,31 @@ class _FiltersSheet extends StatelessWidget {
                     child: DropdownButton<String?>(
                       isExpanded: true,
                       value: controller.selectedSourceType.value,
-                      hint: const Text('All Sources'),
+                      style: TextStyle(
+                        color: colorsList.primaryText,
+                        fontSize: width.fontSizeW(0.034),
+                        fontWeight: FontWeight.normal,
+                      ),
+                      hint: Text(
+                        'All Sources',
+                        style: TextStyle(
+                          color: colorsList.mutedTextColor,
+                          fontSize: width.fontSizeW(0.034),
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
                       items: GeneralLedgerController.sourceTypeOptions
                           .map(
                             (option) => DropdownMenuItem<String?>(
                               value: option.key.isEmpty ? null : option.key,
-                              child: Text(option.value),
+                              child: Text(
+                                option.value,
+                                style: TextStyle(
+                                  color: colorsList.primaryText,
+                                  fontSize: width.fontSizeW(0.034),
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
                             ),
                           )
                           .toList(),
@@ -801,7 +850,7 @@ class _FiltersSheet extends StatelessWidget {
                           'Reset',
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -822,7 +871,7 @@ class _FiltersSheet extends StatelessWidget {
                         ),
                         child: const Text(
                           'Done',
-                          style: TextStyle(fontWeight: FontWeight.w700),
+                          style: TextStyle(fontWeight: FontWeight.normal),
                         ),
                       ),
                     ),
@@ -853,7 +902,7 @@ class _FieldLabel extends StatelessWidget {
         style: TextStyle(
           color: colorsList.secondaryText,
           fontSize: width.fontSizeW(0.028),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.normal,
         ),
       ),
     );

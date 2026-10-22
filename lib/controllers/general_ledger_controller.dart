@@ -120,8 +120,9 @@ class GeneralLedgerController extends GetxController {
 
   void _applyArguments(dynamic args) {
     final now = DateTime.now();
-    fromDate.value = DateTime(now.year - 1, 12, 31);
-    toDate.value = DateTime(now.year, 12, 30);
+    final today = DateTime(now.year, now.month, now.day);
+    toDate.value = today;
+    fromDate.value = DateTime(today.year - 1, today.month, today.day);
 
     if (args is! Map) return;
 
@@ -253,27 +254,83 @@ class GeneralLedgerController extends GetxController {
   }
 
   Future<void> pickFromDate(BuildContext context) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: fromDate.value,
+      initialDate: fromDate.value.isAfter(today) ? today : fromDate.value,
       firstDate: DateTime(1990),
-      lastDate: DateTime(2100),
+      lastDate: today,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF063C70),
+              onPrimary: Colors.white,
+              onSurface: Color(0xFF0A2342),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+
     if (picked != null) {
-      fromDate.value = picked;
+      final cleanPicked = DateTime(picked.year, picked.month, picked.day);
+      fromDate.value = cleanPicked;
+
+      // AUTOMATIC VALIDATION: If toDate is earlier than newly selected fromDate,
+      // align toDate to 1 year from fromDate or today, whichever is earlier.
+      final cleanTo = DateTime(toDate.value.year, toDate.value.month, toDate.value.day);
+      if (cleanTo.isBefore(cleanPicked)) {
+        final oneYearLater = DateTime(cleanPicked.year + 1, cleanPicked.month, cleanPicked.day);
+        toDate.value = oneYearLater.isAfter(today) ? today : oneYearLater;
+      }
+
       loadReport();
     }
   }
 
   Future<void> pickToDate(BuildContext context) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: toDate.value,
+      initialDate: toDate.value.isBefore(fromDate.value)
+          ? fromDate.value
+          : (toDate.value.isAfter(today) ? today : toDate.value),
       firstDate: DateTime(1990),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF063C70),
+              onPrimary: Colors.white,
+              onSurface: Color(0xFF0A2342),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+
     if (picked != null) {
-      toDate.value = picked;
+      final cleanPicked = DateTime(picked.year, picked.month, picked.day);
+      final cleanFrom = DateTime(fromDate.value.year, fromDate.value.month, fromDate.value.day);
+
+      // VALIDATION: To Date must not be earlier than From Date
+      if (cleanPicked.isBefore(cleanFrom)) {
+        AppSnackbar.error(
+          title: 'Invalid Date Range',
+          message: 'To date (${DateFormat('dd/MM/yyyy').format(cleanPicked)}) cannot be earlier than From date (${DateFormat('dd/MM/yyyy').format(cleanFrom)}).',
+        );
+        return;
+      }
+
+      toDate.value = cleanPicked;
       loadReport();
     }
   }
@@ -288,8 +345,9 @@ class GeneralLedgerController extends GetxController {
     selectedAccountId.value = null;
     selectedSourceType.value = null;
     final now = DateTime.now();
-    fromDate.value = DateTime(now.year - 1, 12, 31);
-    toDate.value = DateTime(now.year, 12, 30);
+    final today = DateTime(now.year, now.month, now.day);
+    toDate.value = today;
+    fromDate.value = DateTime(today.year - 1, today.month, today.day);
     loadReport();
   }
 

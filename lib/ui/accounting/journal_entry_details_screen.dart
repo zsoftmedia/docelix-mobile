@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/general_ledger_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
@@ -57,8 +58,8 @@ class JournalEntryDetailsScreen extends StatelessWidget {
           'Journal #${entry.journalEntryId}',
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width.fontSizeW(0.045),
-            fontWeight: FontWeight.w700,
+            fontSize: width.fontSizeW(0.057),
+            fontWeight: FontWeight.normal,
           ),
         ),
         centerTitle: false,
@@ -69,12 +70,9 @@ class JournalEntryDetailsScreen extends StatelessWidget {
               await Clipboard.setData(
                 ClipboardData(text: 'JE-${entry.journalEntryId}'),
               );
-              Get.snackbar(
-                'Copied',
-                'Reference JE-${entry.journalEntryId} copied.',
-                snackPosition: SnackPosition.BOTTOM,
-                margin: const EdgeInsets.all(16),
-              );
+              AppSnackbar.success(
+                  title: 'Copied',
+                  message: 'Reference JE-${entry.journalEntryId} copied.');
             },
             icon: Icon(
               Icons.copy_outlined,
@@ -103,7 +101,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.primaryText,
                       fontSize: width.fontSizeW(0.042),
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.normal,
                       height: 1.3,
                     ),
                   ),
@@ -119,7 +117,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.secondaryText,
                           fontSize: width.fontSizeW(0.03),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                       Text(
@@ -131,7 +129,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.secondaryText,
                           fontSize: width.fontSizeW(0.03),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ],
@@ -191,7 +189,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.primaryText,
                             fontSize: width.fontSizeW(0.033),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ],
@@ -254,7 +252,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
                               ? const Color(0xFF16A34A)
                               : colorsList.red,
                           fontSize: width.fontSizeW(0.028),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ],
@@ -281,7 +279,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
                             style: TextStyle(
                               color: colorsList.primaryText,
                               fontSize: width.fontSizeW(0.034),
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
                         ),
@@ -293,7 +291,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
                               style: TextStyle(
                                 color: colorsList.primaryText,
                                 fontSize: width.fontSizeW(0.03),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                             SizedBox(height: width * 0.01),
@@ -302,7 +300,7 @@ class JournalEntryDetailsScreen extends StatelessWidget {
                               style: TextStyle(
                                 color: colorsList.primaryText,
                                 fontSize: width.fontSizeW(0.03),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                           ],
@@ -408,8 +406,8 @@ class _SectionTitle extends StatelessWidget {
       text,
       style: TextStyle(
         color: colorsList.primaryText,
-        fontSize: width.fontSizeW(0.036),
-        fontWeight: FontWeight.w800,
+        fontSize: width.fontSizeW(0.037),
+        fontWeight: FontWeight.normal,
       ),
     );
   }
@@ -449,8 +447,8 @@ class _StatusChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: const Color(0xFF16A34A),
-              fontSize: width.fontSizeW(0.028),
-              fontWeight: FontWeight.w700,
+              fontSize: width.fontSizeW(0.032),
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],
@@ -486,7 +484,7 @@ class _AmountTile extends StatelessWidget {
             style: TextStyle(
               color: colorsList.mutedTextColor,
               fontSize: width.fontSizeW(0.024),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.normal,
             ),
           ),
           SizedBox(height: width * 0.01),
@@ -495,7 +493,7 @@ class _AmountTile extends StatelessWidget {
             style: TextStyle(
               color: colorsList.primaryText,
               fontSize: width.fontSizeW(0.034),
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],
@@ -527,7 +525,7 @@ class _MetaRow extends StatelessWidget {
               style: TextStyle(
                 color: colorsList.mutedTextColor,
                 fontSize: width.fontSizeW(0.03),
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -540,7 +538,7 @@ class _MetaRow extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.033),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
           ),
@@ -570,7 +568,7 @@ class _LedgerLineTile extends StatelessWidget {
             style: TextStyle(
               color: colorsList.primaryText,
               fontSize: width.fontSizeW(0.033),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           ),
           if ((line.lineDescription ?? '').isNotEmpty) ...[
@@ -604,7 +602,7 @@ class _LedgerLineTile extends StatelessWidget {
                         ? colorsList.colorButton
                         : colorsList.secondaryText,
                     fontSize: width.fontSizeW(0.024),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -616,7 +614,7 @@ class _LedgerLineTile extends StatelessWidget {
                 style: TextStyle(
                   color: colorsList.primaryText,
                   fontSize: width.fontSizeW(0.036),
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ],
