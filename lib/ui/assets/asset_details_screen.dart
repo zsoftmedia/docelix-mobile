@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/controllers/asset_details_controller.dart';
 import 'package:docelix_mobileapp/controllers/general_ledger_controller.dart';
@@ -80,7 +81,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
         leading: IconButton(
           onPressed: Get.back,
           icon: Icon(
-            Icons.close_rounded,
+            Icons.arrow_back_ios_new_rounded,
             color: colorsList.iconColor,
             size: width * 0.055,
           ),
@@ -95,8 +96,8 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: colorsList.primaryText,
-                  fontSize: width.fontSizeW(0.042),
-                  fontWeight: FontWeight.w700,
+                  fontSize: width.fontSizeW(0.055),
+                  fontWeight: FontWeight.normal,
                 ),
               ),
               if ((controller.asset.value.assetNumber ?? '').isNotEmpty)
@@ -105,7 +106,7 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
                   style: TextStyle(
                     color: colorsList.secondaryText,
                     fontSize: width.fontSizeW(0.026),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
             ],
@@ -113,21 +114,18 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
         ),
         centerTitle: false,
         actions: [
-          IconButton(
+          /*IconButton(
             onPressed: () {
-              Get.snackbar(
-                'Coming soon',
-                'Edit asset will be available in a later update.',
-                snackPosition: SnackPosition.BOTTOM,
-                margin: const EdgeInsets.all(16),
-              );
+              AppSnackbar.info(
+                  title: 'Coming soon',
+                  message: 'Edit asset will be available in a later update.');
             },
             icon: Icon(
               Icons.edit_outlined,
               color: colorsList.colorButton,
               size: width * 0.055,
             ),
-          ),
+          ),*/
         ],
       ),
       body: ResponsivePage(
@@ -161,11 +159,11 @@ class _AssetDetailsScreenState extends State<AssetDetailsScreen>
               dividerColor: colorsList.borderColor,
               labelStyle: TextStyle(
                 fontSize: width.fontSizeW(0.032),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.normal,
               ),
               unselectedLabelStyle: TextStyle(
                 fontSize: width.fontSizeW(0.032),
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.normal,
               ),
               tabs: _tabs.map((t) => Tab(height: 40, text: t)).toList(),
             ),
@@ -256,7 +254,7 @@ class _SummaryCard extends StatelessWidget {
                           style: TextStyle(
                             color: statusColor,
                             fontSize: width.fontSizeW(0.024),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -339,8 +337,8 @@ class _MetricCell extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: colorsList.mutedTextColor,
-              fontSize: width.fontSizeW(0.02),
-              fontWeight: FontWeight.w600,
+              fontSize: width.fontSizeW(0.03),
+              fontWeight: FontWeight.normal,
             ),
           ),
           SizedBox(height: width * 0.01),
@@ -351,8 +349,8 @@ class _MetricCell extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width.fontSizeW(0.028),
-              fontWeight: FontWeight.w800,
+              fontSize: width.fontSizeW(0.035),
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],
@@ -517,7 +515,7 @@ class _DepreciationTab extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        flex: 3,
+                        flex: 4,
                         child: Text('YEAR', style: _headerStyle(width)),
                       ),
                       Expanded(
@@ -561,7 +559,7 @@ class _DepreciationTab extends StatelessWidget {
                       child: Row(
                         children: [
                           Expanded(
-                            flex: 3,
+                            flex: 4,
                             child: Row(
                               children: [
                                 Text(
@@ -569,26 +567,30 @@ class _DepreciationTab extends StatelessWidget {
                                   style: TextStyle(
                                     color: colorsList.primaryText,
                                     fontSize: width.fontSizeW(0.032),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.normal,
                                   ),
                                 ),
                                 if (row.isCurrent) ...[
-                                  SizedBox(width: width * 0.015),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: width * 0.018,
-                                      vertical: width * 0.006,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colorsList.lightBlue,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      'Current',
-                                      style: TextStyle(
-                                        color: colorsList.colorButton,
-                                        fontSize: width.fontSizeW(0.022),
-                                        fontWeight: FontWeight.w700,
+                                  SizedBox(width: width * 0.01),
+                                  Flexible(
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: width * 0.014,
+                                        vertical: width * 0.005,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorsList.lightBlue,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'Current',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: colorsList.colorButton,
+                                          fontSize: width.fontSizeW(0.022),
+                                          fontWeight: FontWeight.normal,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -604,6 +606,7 @@ class _DepreciationTab extends StatelessWidget {
                               style: TextStyle(
                                 color: colorsList.primaryText,
                                 fontSize: width.fontSizeW(0.03),
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                           ),
@@ -615,6 +618,7 @@ class _DepreciationTab extends StatelessWidget {
                               style: TextStyle(
                                 color: colorsList.primaryText,
                                 fontSize: width.fontSizeW(0.03),
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                           ),
@@ -632,13 +636,13 @@ class _DepreciationTab extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 3,
+                          flex: 4,
                           child: Text(
                             'Total',
                             style: TextStyle(
                               color: colorsList.primaryText,
                               fontSize: width.fontSizeW(0.032),
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
                         ),
@@ -650,7 +654,7 @@ class _DepreciationTab extends StatelessWidget {
                             style: TextStyle(
                               color: colorsList.primaryText,
                               fontSize: width.fontSizeW(0.032),
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
                         ),
@@ -671,7 +675,7 @@ class _DepreciationTab extends StatelessWidget {
     return TextStyle(
       color: colorsList.mutedTextColor,
       fontSize: width.fontSizeW(0.022),
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.normal,
       letterSpacing: 0.3,
     );
   }
@@ -784,8 +788,8 @@ class _JournalEntryCard extends StatelessWidget {
                             entry.sourceTypeLabel,
                             style: TextStyle(
                               color: colorsList.secondaryText,
-                              fontSize: width.fontSizeW(0.022),
-                              fontWeight: FontWeight.w700,
+                              fontSize: width.fontSizeW(0.035),
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
                         ),
@@ -793,8 +797,8 @@ class _JournalEntryCard extends StatelessWidget {
                           entry.status,
                           style: TextStyle(
                             color: colorsList.green,
-                            fontSize: width.fontSizeW(0.024),
-                            fontWeight: FontWeight.w600,
+                            fontSize: width.fontSizeW(0.035),
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ],
@@ -804,8 +808,8 @@ class _JournalEntryCard extends StatelessWidget {
                       entry.description,
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width.fontSizeW(0.034),
-                        fontWeight: FontWeight.w700,
+                        fontSize: width.fontSizeW(0.035),
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     if (date.isNotEmpty) ...[
@@ -829,7 +833,7 @@ class _JournalEntryCard extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.primaryText,
                       fontSize: width.fontSizeW(0.036),
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                   SizedBox(height: width * 0.015),
@@ -932,7 +936,7 @@ class _DocumentsTab extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.secondaryText,
                     fontSize: width.fontSizeW(0.028),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 SizedBox(height: width * 0.015),
@@ -955,11 +959,23 @@ class _DocumentsTab extends StatelessWidget {
                               child: DropdownButton<String>(
                                 isExpanded: true,
                                 value: controller.selectedDocumentType.value,
+                                style: TextStyle(
+                                  color: colorsList.primaryText,
+                                  fontSize: width.fontSizeW(0.032),
+                                  fontWeight: FontWeight.normal,
+                                ),
                                 items: AssetDetailsController.documentTypes
                                     .map(
                                       (type) => DropdownMenuItem(
                                         value: type,
-                                        child: Text(type),
+                                        child: Text(
+                                          type,
+                                          style: TextStyle(
+                                            color: colorsList.primaryText,
+                                            fontSize: width.fontSizeW(0.032),
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
                                       ),
                                     )
                                     .toList(),
@@ -1004,7 +1020,7 @@ class _DocumentsTab extends StatelessWidget {
                       label: Text(
                         'Upload',
                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.normal,
                           fontSize: width.fontSizeW(0.03),
                         ),
                       ),
@@ -1089,12 +1105,9 @@ class _DocumentsTab extends StatelessWidget {
   void _openPreview(BuildContext context, AssetDocument document) {
     final url = document.previewUrl;
     if (url == null || url.isEmpty) {
-      Get.snackbar(
-        'Unavailable',
-        'No preview URL for this document.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
+      AppSnackbar.error(
+          title: 'Unavailable',
+          message: 'No preview URL for this document.');
       return;
     }
 
@@ -1107,7 +1120,7 @@ class _DocumentsTab extends StatelessWidget {
             document.documentType,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ),
@@ -1176,7 +1189,9 @@ class _DocumentsTab extends StatelessWidget {
             ),
             TextButton(
               onPressed: () => Get.back(result: true),
-              child: Text('Delete', style: TextStyle(color: colorsList.red)),
+              child: Text('Delete',
+                  style: TextStyle(
+                  color: colorsList.red)),
             ),
           ],
         ),
@@ -1242,7 +1257,7 @@ class _DocumentCard extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.034),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 if (date.isNotEmpty) ...[
@@ -1340,7 +1355,7 @@ class _HistoryTab extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.primaryText,
                             fontSize: width.fontSizeW(0.034),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -1498,7 +1513,7 @@ class _DetailTile extends StatelessWidget {
             style: TextStyle(
               color: colorsList.mutedTextColor,
               fontSize: width.fontSizeW(0.021),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
               letterSpacing: 0.35,
             ),
           ),
@@ -1508,7 +1523,7 @@ class _DetailTile extends StatelessWidget {
             style: TextStyle(
               color: colorsList.primaryText,
               fontSize: width.fontSizeW(0.033),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.normal,
               height: 1.25,
             ),
           ),

@@ -68,19 +68,19 @@ class FixedAssetsScreen extends StatelessWidget {
           'Assets',
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width.fontSizeW(0.048),
-            fontWeight: FontWeight.w700,
+            fontSize: width.fontSizeW(0.055),
+            fontWeight: FontWeight.normal,
           ),
         ),
         centerTitle: false,
         actions: [
-          TextButton.icon(
+          // Export Button
+
+          /*TextButton.icon(
             onPressed: () {
-              Get.snackbar(
-                'Coming soon',
-                'Export will be available in a later update.',
-                snackPosition: SnackPosition.BOTTOM,
-                margin: const EdgeInsets.all(16),
+              AppSnackbar.info(
+                title: 'Coming soon',
+                message: 'Export will be available in a later update.',
               );
             },
             icon: Icon(
@@ -92,12 +92,12 @@ class FixedAssetsScreen extends StatelessWidget {
               'Export',
               style: TextStyle(
                 color: colorsList.primaryText,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.normal,
                 fontSize: width.fontSizeW(0.032),
               ),
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 4),*/
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -107,9 +107,11 @@ class FixedAssetsScreen extends StatelessWidget {
         icon: const Icon(Icons.add_rounded),
         label: const Text(
           'Create Asset',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          style: TextStyle(
+              fontWeight: FontWeight.normal),
         ),
       ),
+
       body: Obx(() {
         if (controller.isLoading.value && controller.assets.isEmpty) {
           return const Center(child: CircularProgressIndicator());
@@ -269,7 +271,7 @@ class _SearchAndFilterBar extends StatelessWidget {
                     'Filters',
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       fontSize: width.fontSizeW(0.032),
                     ),
                   ),
@@ -327,7 +329,7 @@ class _SearchAndFilterBar extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.045),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     SizedBox(height: width * 0.04),
@@ -336,7 +338,7 @@ class _SearchAndFilterBar extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.secondaryText,
                         fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     SizedBox(height: width * 0.02),
@@ -370,7 +372,7 @@ class _SearchAndFilterBar extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.secondaryText,
                         fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     SizedBox(height: width * 0.02),
@@ -401,7 +403,7 @@ class _SearchAndFilterBar extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.secondaryText,
                         fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     SizedBox(height: width * 0.02),
@@ -615,7 +617,7 @@ class _KpiCard extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.secondaryText,
                     fontSize: width.fontSizeW(0.025),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.normal,
                     height: 1.15,
                   ),
                 ),
@@ -629,7 +631,7 @@ class _KpiCard extends StatelessWidget {
             style: TextStyle(
               color: colorsList.primaryText,
               fontSize: width.fontSizeW(0.038),
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.normal,
               height: 1.1,
             ),
           ),
@@ -699,7 +701,7 @@ class _AssetCard extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.primaryText,
                             fontSize: width.fontSizeW(0.04),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                         SizedBox(height: width * 0.008),
@@ -708,7 +710,7 @@ class _AssetCard extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.secondaryText,
                             fontSize: width.fontSizeW(0.028),
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ],
@@ -731,7 +733,7 @@ class _AssetCard extends StatelessWidget {
                           style: TextStyle(
                             color: statusColor,
                             fontSize: width.fontSizeW(0.026),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -743,7 +745,7 @@ class _AssetCard extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.secondaryText,
                           fontSize: width.fontSizeW(0.026),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ],
@@ -883,7 +885,7 @@ class _MetaChip extends StatelessWidget {
             style: TextStyle(
               color: colorsList.secondaryText,
               fontSize: width.fontSizeW(0.026),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ],
@@ -917,7 +919,7 @@ class _ValueBlock extends StatelessWidget {
           style: TextStyle(
             color: colorsList.mutedTextColor,
             fontSize: width.fontSizeW(0.024),
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.normal,
           ),
         ),
         SizedBox(height: width * 0.006),
@@ -928,7 +930,7 @@ class _ValueBlock extends StatelessWidget {
           style: TextStyle(
             color: colorsList.primaryText,
             fontSize: emphasize ? width * 0.034 : width * 0.031,
-            fontWeight: emphasize ? FontWeight.w800 : FontWeight.w700,
+            fontWeight: emphasize ? FontWeight.normal : FontWeight.normal,
           ),
         ),
       ],
@@ -968,7 +970,7 @@ class _EmptyState extends StatelessWidget {
               style: TextStyle(
                 color: colorsList.primaryText,
                 fontSize: width.fontSizeW(0.045),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.normal,
               ),
             ),
             SizedBox(height: width * 0.02),
