@@ -652,8 +652,6 @@ class _AssetsExpandableSection extends StatelessWidget {
   final VoidCallback onInventory;
   final VoidCallback onVehicles;
 
-  static const Color _accent = Color(0xFFC47A52);
-
   @override
   Widget build(BuildContext context) {
     final rs = context.rs;
@@ -667,15 +665,8 @@ class _AssetsExpandableSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOut,
+              //curve: Curves.easeOut,
               padding: EdgeInsets.symmetric(vertical: rs.s(11)),
-              decoration: BoxDecoration(
-                color: expanded ? const Color(0xFF1B2A41) : Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-                border: expanded
-                    ? const Border(left: BorderSide(color: _accent, width: 3.5))
-                    : null,
-              ),
               child: Padding(
                 padding: EdgeInsets.only(
                   left: expanded ? rs.s(8) : 0,
@@ -688,13 +679,13 @@ class _AssetsExpandableSection extends StatelessWidget {
                       height: rs.s(44),
                       decoration: BoxDecoration(
                         color: expanded
-                            ? _accent.withValues(alpha: 0.18)
-                            : _accent.withValues(alpha: 0.12),
+                            ? colorsList.primaryBlue
+                            : colorsList.blue.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.inventory_outlined,
-                        color: _accent,
+                        color: expanded ? Colors.white : colorsList.blue,
                         size: rs.s(20),
                       ),
                     ),
@@ -706,9 +697,7 @@ class _AssetsExpandableSection extends StatelessWidget {
                           Text(
                             'Assets',
                             style: TextStyle(
-                              color: expanded
-                                  ? Colors.white
-                                  : colorsList.primaryText,
+                              color: colorsList.primaryText,
                               fontSize: rs.sp(15),
                               fontWeight: FontWeight.normal,
                               height: 1.2,
@@ -720,9 +709,7 @@ class _AssetsExpandableSection extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: expanded
-                                  ? Colors.white70
-                                  : colorsList.secondaryText,
+                              color: colorsList.secondaryText,
                               fontSize: rs.sp(12),
                               height: 1.3,
                             ),
@@ -736,9 +723,7 @@ class _AssetsExpandableSection extends StatelessWidget {
                       duration: const Duration(milliseconds: 220),
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: expanded
-                            ? Colors.white70
-                            : colorsList.secondaryText,
+                        color: colorsList.secondaryText,
                         size: rs.s(22),
                       ),
                     ),
