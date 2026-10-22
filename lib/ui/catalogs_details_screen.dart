@@ -44,7 +44,7 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Item Details',
+                'Stock Addition Details',
                 style: TextStyle(
                   color: colorsList.textColor,
                   fontSize: 18,
@@ -74,7 +74,7 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
         if (item == null) {
           return const Center(
             child: Text(
-              'Item information not available.',
+              'Stock information not available.',
               style: TextStyle(
                 color: colorsList.textHintColor,
                 fontSize: 15,
@@ -185,7 +185,7 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
                       // ====================================================
                       // 2. ITEM DETAILS CARD
                       // ====================================================
-                      _sectionTitle('Item Details', width),
+                      _sectionTitle('Stock Details', width),
                       const SizedBox(height: 8),
 
                       Container(
@@ -285,7 +285,7 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           final result = await Get.toNamed(
-                            '/AddItemScreen',
+                            '/EditCatalogsScreen',
                             arguments: item,
                           );
 
@@ -324,7 +324,7 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
                           label: Text(
                             controller.isDeleting.value
                                 ? 'Deleting...'
-                                : 'Delete Item',
+                                : 'Delete Stock',
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.normal,

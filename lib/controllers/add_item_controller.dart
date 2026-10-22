@@ -65,6 +65,7 @@ class AddItemController extends GetxController {
   final List<String> itemTypes = const [
     'Physical material',
     'Service',
+    'Software',
     'Digital product',
   ];
 

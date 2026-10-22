@@ -949,6 +949,36 @@ class DioClient {
   }
 
   // ==============================
+  // UPDATE CATALOG ITEM
+  // ==============================
+
+  Future<Response> updateCatalogItem({
+    required int itemId,
+    required int companyId,
+    required Map<String, dynamic> data,
+    required String accessToken,
+  }) async {
+    return await _dio.patch(
+      '${ApiConstants.baseUrl}/catalog/$itemId',
+      data: {
+        'company_id': companyId,
+        ...data,
+      },
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // UPDATE INVOICE STATUS
   // ==============================
 
