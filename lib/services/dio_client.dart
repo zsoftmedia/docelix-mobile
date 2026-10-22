@@ -979,6 +979,33 @@ class DioClient {
   }
 
   // ==============================
+  // GET INVENTORY ADJUSTMENTS
+  // ==============================
+
+  Future<Response> getInventoryAdjustments({
+    required int companyId,
+    int page = 1,
+    int limit = 25,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/inventory/adjustments',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'limit': limit,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // UPDATE INVOICE STATUS
   // ==============================
 

@@ -346,10 +346,8 @@ class _LandScreenState extends State<LandScreen> {
                             Get.toNamed('/CatalogsScreen');
                           },
                           onStockAdjustment: () {
-                            AppSnackbar.info(
-                              title: 'Stock Adjustment',
-                              message: 'Stock Adjustment coming soon.',
-                            );
+                            Navigator.pop(context);
+                            Get.toNamed('/StockAdjustmentScreen');
                           },
                           onStockReports: () {
                             AppSnackbar.info(

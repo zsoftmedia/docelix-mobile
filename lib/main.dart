@@ -18,6 +18,7 @@ import 'package:docelix_mobileapp/ui/assets/vehicles_screen.dart';
 import 'package:docelix_mobileapp/ui/catalogs_details_screen.dart';
 import 'package:docelix_mobileapp/ui/edit_catalogs_screen.dart';
 import 'package:docelix_mobileapp/ui/catalogs_screen.dart';
+import 'package:docelix_mobileapp/ui/stock_adjustment_screen.dart';
 import 'package:docelix_mobileapp/ui/customer_details_screen.dart';
 import 'package:docelix_mobileapp/ui/customers_screen.dart';
 import 'package:docelix_mobileapp/ui/create_purchase_invoices_screen.dart';
@@ -136,6 +137,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/QuotationDetailsScreen', page: () => const QuotationDetailsScreen(),),
         GetPage(name: '/CatalogsDetailsScreen', page: () => const CatalogsDetailsScreen(),),
         GetPage(name: '/EditCatalogsScreen', page: () => const EditCatalogsScreen(),),
+        GetPage(name: '/StockAdjustmentScreen', page: () => const StockAdjustmentScreen(),),
         GetPage(name: '/CreateQuotationScreen', page: () => const CreateQuotationScreen(),),
         GetPage(name: '/EditQuotationScreen', page: () => const EditQuotationScreen(),),
         GetPage(name: '/SearchScreen', page: () => const SearchScreen(),),
