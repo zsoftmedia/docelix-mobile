@@ -24,15 +24,15 @@ class CatalogsScreen extends StatelessWidget {
           onPressed: Get.back,
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: colorsList.colorBackArrow,
+            color: colorsList.iconColor,
             size: rs.s(20),
           ),
         ),
         title: Text(
-          'Items',
+          'Stock Addition',
           style: TextStyle(
             color: colorsList.textColor,
-            fontSize: rs.sp(20),
+            fontSize: rs.sp(18),
             fontWeight: FontWeight.normal,
           ),
         ),
@@ -61,68 +61,49 @@ class CatalogsScreen extends StatelessWidget {
         if (controller.catalogList.isEmpty) {
           return Center(
             child: Text(
-              'No items found.',
+              'No catalog items found.',
               style: TextStyle(
-                fontSize: rs.sp(16),
-                color: colorsList.colorGray_350,
+                fontSize: rs.sp(15),
+                color: colorsList.textHintColor,
               ),
             ),
           );
         }
 
-        final cols = rs.listColumns;
         final items = controller.catalogList;
 
         return ResponsivePage(
           padding: EdgeInsets.zero,
           child: RefreshIndicator(
             onRefresh: controller.refreshCatalog,
-            child: cols <= 1
-                ? ListView.builder(
-                    padding: EdgeInsets.only(
-                      left: rs.pagePaddingH,
-                      right: rs.pagePaddingH,
-                      bottom: rs.s(96),
-                    ),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final double stock = item.stockQty ?? 0;
-                      final double minStock = item.minStock ?? 0;
-                      return _catalogItem(
-                        context: context,
-                        item: item,
-                        lowStock: stock <= minStock,
-                        asGridTile: false,
-                      );
-                    },
-                  )
-                : GridView.builder(
-                    padding: EdgeInsets.only(
-                      left: rs.pagePaddingH,
-                      right: rs.pagePaddingH,
-                      top: rs.s(8),
-                      bottom: rs.s(96),
-                    ),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: cols,
-                      crossAxisSpacing: rs.s(12),
-                      mainAxisSpacing: rs.s(12),
-                      childAspectRatio: rs.isLandscape ? 2.8 : 2.3,
-                    ),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final double stock = item.stockQty ?? 0;
-                      final double minStock = item.minStock ?? 0;
-                      return _catalogItem(
-                        context: context,
-                        item: item,
-                        lowStock: stock <= minStock,
-                        asGridTile: true,
-                      );
-                    },
+            child: ListView.builder(
+              padding: EdgeInsets.only(
+                left: rs.pagePaddingH,
+                right: rs.pagePaddingH,
+                top: rs.s(12),
+                bottom: rs.s(96),
+              ),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return InkWell(
+                  onTap: () async {
+                    final result = await Get.toNamed(
+                      '/CatalogsDetailsScreen',
+                      arguments: item,
+                    );
+                    if (result == true) {
+                      controller.refreshCatalog();
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(14),
+                  child: _buildCatalogCard(
+                    context: context,
+                    item: item,
                   ),
+                );
+              },
+            ),
           ),
         );
       }),
@@ -147,8 +128,8 @@ class CatalogsScreen extends StatelessWidget {
         label: Text(
           'Add Item',
           style: TextStyle(
-            fontSize: rs.sp(15),
-            fontWeight: FontWeight.w700,
+            fontSize: rs.sp(14),
+            fontWeight: FontWeight.w600,
             color: colorsList.colorWhite,
           ),
         ),
@@ -156,106 +137,245 @@ class CatalogsScreen extends StatelessWidget {
     );
   }
 
-  Widget _catalogItem({
+  // ================================================================
+  // CATALOG CARD ITEM (MATCHES WEB TABLE COLUMNS)
+  // ================================================================
+
+  Widget _buildCatalogCard({
     required BuildContext context,
     required CatalogModel item,
-    required bool lowStock,
-    required bool asGridTile,
   }) {
-    final rs = context.rs;
+    final width = context.rs.width;
 
-    final content = Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: asGridTile ? rs.s(12) : rs.s(4),
-        vertical: rs.s(14),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.inventory_2_outlined,
-            color: lowStock ? colorsList.orange : colorsList.iconColor,
-            size: rs.s(24),
+    final String itemName = item.articleName?.isNotEmpty == true
+        ? item.articleName!
+        : 'Unnamed Item';
+
+    final String articleNo = item.articleNumber?.isNotEmpty == true
+        ? item.articleNumber!
+        : '—';
+
+    final String itemTypeStr =
+        item.itemType?.toLowerCase().trim() ?? 'service';
+    final bool isService = itemTypeStr == 'service';
+    final Color typeColor =
+        isService ? const Color(0xFF16A34A) : const Color(0xFF2563EB);
+    final String typeLabel = isService ? 'Service' : 'Physical';
+
+    final num stockQtyNum = item.stockQty ?? 0;
+    final bool isOutOfStock = stockQtyNum <= 0 && !isService;
+
+    final String priceStr = controller.formatCurrency(item.unitPriceNet);
+    final String vatStr =
+        item.vatRate != null ? '${_formatNum(item.vatRate!)}%' : '0%';
+    final String unitStr =
+        item.unitCode?.isNotEmpty == true ? item.unitCode! : '—';
+    final String qtyStr =
+        item.defaultQty != null ? _formatNum(item.defaultQty!) : '1';
+    final String dateStr = _formatDate(item.createdAt);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          SizedBox(width: rs.s(12)),
-          Expanded(
-            child: Column(
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(width * 0.04),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // TOP ROW: ITEM NAME + ARTICLE NO + TYPE BADGE + OUT OF STOCK
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  item.articleName ?? 'Unnamed Item',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorsList.textColor,
-                    fontSize: rs.sp(16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        itemName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: width * 0.038,
+                          fontWeight: FontWeight.normal,
+                          color: colorsList.textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        articleNo,
+                        style: TextStyle(
+                          fontSize: width * 0.029,
+                          color: colorsList.textHintColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: rs.s(4)),
-                Text(
-                  item.articleNumber ?? 'N/A',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorsList.textColor,
-                    fontSize: rs.sp(12),
-                  ),
+                Row(
+                  children: [
+                    // TYPE BADGE
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: typeColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: typeColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            typeLabel,
+                            style: TextStyle(
+                              fontSize: width * 0.026,
+                              fontWeight: FontWeight.normal,
+                              color: typeColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // OUT OF STOCK BADGE IF PHYSICAL & STOCK <= 0
+                    if (isOutOfStock) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 5,
+                              height: 5,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFDC2626),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Out of stock',
+                              style: TextStyle(
+                                fontSize: width * 0.026,
+                                fontWeight: FontWeight.normal,
+                                color: const Color(0xFFDC2626),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
-          ),
-          SizedBox(width: rs.s(10)),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                item.unitPriceNet?.toStringAsFixed(2) ?? '0.00',
-                style: TextStyle(
-                  color: colorsList.textColor,
-                  fontSize: rs.sp(14),
-                ),
-              ),
-              SizedBox(height: rs.s(3)),
-              Text(
-                item.unitCode ?? '',
-                style: TextStyle(
-                  color: colorsList.textColor,
-                  fontSize: rs.sp(11),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
 
-    if (asGridTile) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorsList.colorWhite,
-          borderRadius: BorderRadius.circular(rs.s(12)),
-          border: Border.all(color: colorsList.borderColor),
+            SizedBox(height: width * 0.025),
+            const Divider(height: 1, color: Color(0xFFF0F4F8)),
+            SizedBox(height: width * 0.025),
+
+            // DETAILS GRID ROW: UNIT | DEFAULT QTY | STOCK | VAT | CREATED | PRICE
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _miniStat('Unit', unitStr, width),
+                _miniStat('Default Qty', qtyStr, width),
+                if (!isService)
+                  _miniStat(
+                      'Stock', '${_formatNum(stockQtyNum.toDouble())}', width),
+                _miniStat('VAT %', vatStr, width),
+                _miniStat('Created', dateStr, width),
+                _miniStat('Price (net)', priceStr, width, isPrimary: true),
+              ],
+            ),
+          ],
         ),
-        child: content,
-      );
-    }
-
-    return Container(
-      color: colorsList.colorWhite,
-      child: Column(
-        children: [
-          content,
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: colorsList.dividerColor,
-            indent: rs.s(20),
-            endIndent: rs.s(20),
-          ),
-        ],
       ),
     );
+  }
+
+  Widget _miniStat(String label, String value, double width,
+      {bool isPrimary = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: width * 0.025,
+            color: colorsList.textHintColor,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: width * 0.029,
+            fontWeight: FontWeight.normal,
+            color: isPrimary ? const Color(0xFF063C70) : colorsList.textColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty) return '—';
+    try {
+      final parsed = DateTime.parse(dateStr);
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ];
+      return '${parsed.day} ${months[parsed.month - 1]} ${parsed.year}';
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
+  String _formatNum(double num) {
+    if (num == num.roundToDouble()) {
+      return num.toInt().toString();
+    }
+    return num.toStringAsFixed(2);
   }
 }

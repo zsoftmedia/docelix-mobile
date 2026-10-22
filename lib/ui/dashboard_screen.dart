@@ -145,14 +145,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(
           children: [
             Expanded(
-              child: Text(
-                "Docelix",
-                style: text
-                    .headline(
-                      color: colorsList.textColor,
-                      fontWeight: FontWeight.w700,
-                    )
-                    .copyWith(letterSpacing: -0.8),
+              child: Image.asset(
+                'assets/main_logo.png',
+                height: width * 0.07,
+                alignment: Alignment.centerLeft,
+                fit: BoxFit.contain,
               ),
             ),
 

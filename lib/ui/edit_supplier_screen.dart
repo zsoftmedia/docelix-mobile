@@ -35,7 +35,7 @@ class _EditSupplierScreenState extends State<EditSupplierScreen> {
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: width * 0.050,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
         actions: [

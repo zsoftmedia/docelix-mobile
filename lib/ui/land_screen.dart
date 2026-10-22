@@ -22,6 +22,7 @@ class _LandScreenState extends State<LandScreen> {
 
   int _selectedIndex = 0;
   bool _assetsExpanded = false;
+  bool _inventoryExpanded = false;
 
   final List<Widget> _pages = const [
     DashboardScreen(),
@@ -264,6 +265,7 @@ class _LandScreenState extends State<LandScreen> {
 
   void _showMoreMenu() {
     _assetsExpanded = false;
+    _inventoryExpanded = false;
 
     showModalBottomSheet<void>(
       context: context,
@@ -281,7 +283,7 @@ class _LandScreenState extends State<LandScreen> {
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: rs.sheetMaxWidth,
-                  maxHeight: rs.height * 0.82,
+                  maxHeight: rs.height * 0.85,
                 ),
                 child: Container(
                   width: double.infinity,
@@ -332,14 +334,28 @@ class _LandScreenState extends State<LandScreen> {
                           ],
                         ),
                         SizedBox(height: rs.s(4)),
-                        _MoreMenuItem(
-                          icon: Icons.grid_view_rounded,
-                          title: 'Items',
-                          subtitle: 'Manage your products and services',
-                          iconColor: colorsList.blue,
-                          onTap: () {
+                        _InventoryExpandableSection(
+                          expanded: _inventoryExpanded,
+                          onToggle: () {
+                            setSheetState(() {
+                              _inventoryExpanded = !_inventoryExpanded;
+                            });
+                          },
+                          onStockAddition: () {
                             Navigator.pop(context);
                             Get.toNamed('/CatalogsScreen');
+                          },
+                          onStockAdjustment: () {
+                            AppSnackbar.info(
+                              title: 'Stock Adjustment',
+                              message: 'Stock Adjustment coming soon.',
+                            );
+                          },
+                          onStockReports: () {
+                            AppSnackbar.info(
+                              title: 'Stock Reports',
+                              message: 'Stock Reports coming soon.',
+                            );
                           },
                         ),
                         _MoreMenuItem(
@@ -845,6 +861,167 @@ class _AssetSubItem extends StatelessWidget {
   }
 }
 
+class _InventoryExpandableSection extends StatelessWidget {
+  const _InventoryExpandableSection({
+    required this.expanded,
+    required this.onToggle,
+    required this.onStockAddition,
+    required this.onStockAdjustment,
+    required this.onStockReports,
+  });
+
+  final bool expanded;
+  final VoidCallback onToggle;
+  final VoidCallback onStockAddition;
+  final VoidCallback onStockAdjustment;
+  final VoidCallback onStockReports;
+
+  @override
+  Widget build(BuildContext context) {
+    final rs = context.rs;
+
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: rs.s(4)),
+          child: Material(
+            color: expanded
+                ? colorsList.primaryBlue.withValues(alpha: 0.08)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: onToggle,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: rs.s(10),
+                  vertical: rs.s(10),
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: expanded
+                        ? colorsList.primaryBlue.withValues(alpha: 0.3)
+                        : Colors.transparent,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: rs.s(42),
+                      height: rs.s(42),
+                      decoration: BoxDecoration(
+                        color: expanded
+                            ? colorsList.primaryBlue
+                            : colorsList.blue.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.grid_view_rounded,
+                        color: expanded ? Colors.white : colorsList.blue,
+                        size: rs.s(22),
+                      ),
+                    ),
+                    SizedBox(width: rs.s(14)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Inventory',
+                            style: TextStyle(
+                              color: colorsList.primaryText,
+                              fontSize: rs.sp(15),
+                              fontWeight: FontWeight.normal,
+                              height: 1.2,
+                            ),
+                          ),
+                          SizedBox(height: rs.s(3)),
+                          Text(
+                            'Stock addition, adjustments & reports',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: colorsList.secondaryText,
+                              fontSize: rs.sp(12),
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: rs.s(8)),
+                    AnimatedRotation(
+                      turns: expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 220),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: colorsList.secondaryText,
+                        size: rs.s(22),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox(width: double.infinity),
+          secondChild: Padding(
+            padding: EdgeInsets.only(
+              left: rs.s(22),
+              top: rs.s(4),
+              bottom: rs.s(4),
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: 2,
+                    margin: EdgeInsets.symmetric(vertical: rs.s(4)),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD7DEE8),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  SizedBox(width: rs.s(14)),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _AssetSubItem(
+                          icon: Icons.add_box_outlined,
+                          title: 'Stock Addition',
+                          onTap: onStockAddition,
+                        ),
+                        _AssetSubItem(
+                          icon: Icons.tune_rounded,
+                          title: 'Stock Adjustment',
+                          onTap: onStockAdjustment,
+                        ),
+                        _AssetSubItem(
+                          icon: Icons.assessment_outlined,
+                          title: 'Stock Reports',
+                          onTap: onStockReports,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          crossFadeState: expanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 220),
+        ),
+      ],
+    );
+  }
+}
+
 class _BottomNavItem extends StatelessWidget {
   const _BottomNavItem({
     required this.index,
@@ -874,7 +1051,7 @@ class _BottomNavItem extends StatelessWidget {
         children: [
           Icon(
             isSelected ? activeIcon : icon,
-            color: isSelected ? colorsList.green : const Color(0xFF71829A),
+            color: isSelected ? colorsList.colorButton : const Color(0xFF71829A),
             size: rs.s(22),
           ),
           SizedBox(height: rs.s(3)),
@@ -883,7 +1060,7 @@ class _BottomNavItem extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: isSelected ? colorsList.green : const Color(0xFF71829A),
+              color: isSelected ? colorsList.colorButton : const Color(0xFF71829A),
               fontSize: rs.sp(10),
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
@@ -894,7 +1071,7 @@ class _BottomNavItem extends StatelessWidget {
               width: rs.s(26),
               height: 2,
               decoration: BoxDecoration(
-                color: colorsList.green,
+                color: colorsList.colorButton,
                 borderRadius: BorderRadius.circular(10),
               ),
             )
@@ -927,11 +1104,11 @@ class _ScanBottomButton extends StatelessWidget {
                 width: rs.s(48),
                 height: rs.s(48),
                 decoration: BoxDecoration(
-                  color: isLoading ? Colors.grey : colorsList.green,
+                  color: isLoading ? Colors.grey : colorsList.colorButton,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: (isLoading ? Colors.grey : colorsList.green)
+                      color: (isLoading ? Colors.grey : colorsList.colorButton)
                           .withValues(alpha: 0.30),
                       blurRadius: 12,
                       offset: const Offset(0, 5),

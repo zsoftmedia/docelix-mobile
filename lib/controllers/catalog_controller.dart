@@ -25,8 +25,7 @@ class CatalogController extends GetxController {
   final RxInt totalItems = 0.obs;
 
   final Rxn<CatalogPaginationModel> pagination =
-  Rxn<CatalogPaginationModel>();
-
+      Rxn<CatalogPaginationModel>();
 
   final RxString errorMessage = ''.obs;
 
@@ -44,8 +43,7 @@ class CatalogController extends GetxController {
   Future<void> getCatalog({
     int page = 1,
     int pageSize = 20,
-  }) async
-  {
+  }) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
@@ -86,27 +84,22 @@ class CatalogController extends GetxController {
       print('Catalog Response: ${response.data}');
 
       if (response.statusCode == 200) {
-        // The API response is a JSON object.
         final Map<String, dynamic> responseData =
-        Map<String, dynamic>.from(response.data as Map);
+            Map<String, dynamic>.from(response.data as Map);
 
-        // Extract the catalog records.
         final List<dynamic> data =
             responseData['data'] as List<dynamic>? ?? [];
 
-        final List<CatalogModel> fetchedCatalog =
-        data.map((json) {
+        final List<CatalogModel> fetchedCatalog = data.map((json) {
           return CatalogModel.fromJson(
             Map<String, dynamic>.from(json as Map),
           );
         }).toList();
 
-        // Extract pagination.
         final paginationData = responseData['pagination'];
 
         if (paginationData is Map) {
-          final parsedPagination =
-          CatalogPaginationModel.fromJson(
+          final parsedPagination = CatalogPaginationModel.fromJson(
             Map<String, dynamic>.from(paginationData),
           );
 
@@ -159,5 +152,50 @@ class CatalogController extends GetxController {
       page: 1,
       pageSize: pageSize.value,
     );
+  }
+
+  String getCurrencySymbol(String? code) {
+    final String rawCode = (code != null && code.trim().isNotEmpty)
+        ? code.trim().toUpperCase()
+        : (SessionManager.accessCorrencycode?.trim().toUpperCase() ?? 'EUR');
+
+    switch (rawCode) {
+      case 'EUR':
+        return '€';
+      case 'USD':
+        return '\$';
+      case 'GBP':
+        return '£';
+      case 'INR':
+        return '₹';
+      case 'CAD':
+        return 'CA\$';
+      case 'AUD':
+        return 'A\$';
+      case 'CHF':
+        return 'CHF';
+      case 'JPY':
+        return '¥';
+      case 'PKR':
+        return 'Rs.';
+      default:
+        return rawCode;
+    }
+  }
+
+  String formatCurrency(num? amount, [String? currencyCode]) {
+    final double value = (amount ?? 0).toDouble();
+    final String symbol = getCurrencySymbol(currencyCode);
+
+    final parts = value.toStringAsFixed(2).split('.');
+    final String integerPart = parts[0];
+    final String decimalPart = parts[1];
+
+    final String formattedInteger = integerPart.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+
+    return '$symbol $formattedInteger.$decimalPart';
   }
 }

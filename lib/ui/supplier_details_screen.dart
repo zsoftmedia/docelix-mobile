@@ -86,53 +86,126 @@ class _SupplierDetailsScreenState extends State<SupplierDetailsScreen> {
         }
 
         return SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              width * 0.045,
-              height * 0.018,
-              width * 0.045,
-              height * 0.04,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ====================================================
-                // 1. HEADER SUPPLIER CARD
-                // ====================================================
-                _buildHeaderCard(supplier, width, height),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                    width * 0.045,
+                    height * 0.018,
+                    width * 0.045,
+                    height * 0.02,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ====================================================
+                      // 1. HEADER SUPPLIER CARD
+                      // ====================================================
+                      _buildHeaderCard(supplier, width, height),
 
-                SizedBox(height: height * 0.018),
+                      SizedBox(height: height * 0.018),
 
-                // ====================================================
-                // 2. FINANCIAL SUMMARY CARD
-                // ====================================================
-                _sectionTitle('Financial Summary', width),
-                SizedBox(height: height * 0.008),
-                _buildFinancialSummaryCard(supplier, width),
+                      // ====================================================
+                      // 2. FINANCIAL SUMMARY CARD
+                      // ====================================================
+                      _sectionTitle('Financial Summary', width),
+                      SizedBox(height: height * 0.008),
+                      _buildFinancialSummaryCard(supplier, width),
 
-                SizedBox(height: height * 0.022),
+                      SizedBox(height: height * 0.022),
 
-                // ====================================================
-                // 3. TAB BAR (Positioned below Financial Summary)
-                // ====================================================
-                _buildTabBar(width, height),
+                      // ====================================================
+                      // 3. TAB BAR (Positioned below Financial Summary)
+                      // ====================================================
+                      _buildTabBar(width, height),
 
-                SizedBox(height: height * 0.018),
+                      SizedBox(height: height * 0.018),
 
-                // ====================================================
-                // 4. TAB CONTENT
-                // ====================================================
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
-                  child: _buildTabContent(
-                    supplier: supplier,
-                    width: width,
-                    height: height,
+                      // ====================================================
+                      // 4. TAB CONTENT
+                      // ====================================================
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        child: _buildTabContent(
+                          supplier: supplier,
+                          width: width,
+                          height: height,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              // ======================================================
+              // BOTTOM ACTIONS BAR (EDIT & EXPORT STATEMENT)
+              // ======================================================
+
+              Container(
+                padding: EdgeInsets.fromLTRB(
+                  width * 0.045,
+                  height * 0.012,
+                  width * 0.045,
+                  height * 0.018,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(color: Color(0xFFE5EAF0)),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: controller.openEditSupplier,
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: const Text(
+                          'Edit Supplier',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: colorsList.textColor,
+                          side: const BorderSide(color: Color(0xFFD0D5DD)),
+                          minimumSize: Size(0, height * 0.055),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: width * 0.03),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: controller.exportStatement,
+                        icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                        label: const Text(
+                          'Export Statement',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colorsList.primaryBlue,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          minimumSize: Size(0, height * 0.055),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       }),

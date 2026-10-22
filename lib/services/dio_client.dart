@@ -456,6 +456,32 @@ class DioClient {
   }
 
   // ==============================
+  // UPDATE SUPPLIER
+  // ==============================
+
+  Future<Response> updateSupplier({
+    required int companyId,
+    required int supplierId,
+    required Map<String, dynamic> data,
+    required String accessToken,
+  }) async {
+    return await _dio.patch(
+      '${ApiConstants.baseUrl}/purchases/suppliers/$supplierId',
+      data: {
+        'company_id': companyId,
+        ...data,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET INVOICE ITEMS
   // ==============================
 
@@ -893,6 +919,30 @@ class DioClient {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // DELETE CATALOG ITEM
+  // ==============================
+
+  Future<Response> deleteCatalogItem({
+    required int itemId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/catalog/$itemId',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
         },
       ),
     );
