@@ -66,8 +66,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
           'Inventory Management',
           style: TextStyle(
             color: colorsList.primaryText,
-            fontSize: width.fontSizeW(0.045),
-            fontWeight: FontWeight.w700,
+            fontSize: width.fontSizeW(0.047),
+            fontWeight: FontWeight.normal,
           ),
         ),
         centerTitle: false,
@@ -255,7 +255,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                           style: TextStyle(
                             color: colorsList.primaryText,
                             fontSize: width.fontSizeW(0.042),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -278,7 +278,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             ? colorsList.red
                             : colorsList.secondaryText,
                         fontSize: width.fontSizeW(0.03),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -466,7 +466,7 @@ class _AdjustStockSheetState extends State<_AdjustStockSheet> {
                           style: TextStyle(
                             color: colorsList.secondaryText,
                             fontSize: width.fontSizeW(0.03),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                         const Spacer(),
@@ -477,7 +477,7 @@ class _AdjustStockSheetState extends State<_AdjustStockSheet> {
                                 ? colorsList.red
                                 : colorsList.primaryText,
                             fontSize: width.fontSizeW(0.033),
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ],
@@ -490,7 +490,7 @@ class _AdjustStockSheetState extends State<_AdjustStockSheet> {
                         style: TextStyle(
                           color: colorsList.secondaryText,
                           fontSize: width.fontSizeW(0.03),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ),
@@ -523,7 +523,7 @@ class _AdjustStockSheetState extends State<_AdjustStockSheet> {
                         style: TextStyle(
                           color: colorsList.secondaryText,
                           fontSize: width.fontSizeW(0.03),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ),
@@ -561,7 +561,7 @@ class _AdjustStockSheetState extends State<_AdjustStockSheet> {
                         style: TextStyle(
                           color: colorsList.secondaryText,
                           fontSize: width.fontSizeW(0.03),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ),
@@ -618,7 +618,7 @@ class _AdjustStockSheetState extends State<_AdjustStockSheet> {
                             )
                           : const Text(
                               'Log Movement',
-                              style: TextStyle(fontWeight: FontWeight.w700),
+                              style: TextStyle(fontWeight: FontWeight.normal),
                             ),
                     ),
                   ),
@@ -637,7 +637,7 @@ InputDecoration _inventorySheetInputDecoration({String? hint}) {
     hintText: hint,
     hintStyle: const TextStyle(
       color: colorsList.mutedTextColor,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.normal,
     ),
     filled: true,
     fillColor: Colors.white,
@@ -683,7 +683,7 @@ class _SearchHeader extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.033),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 const Spacer(),
@@ -774,7 +774,7 @@ class _InventoryCard extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.04),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     SizedBox(height: width * 0.008),
@@ -783,7 +783,7 @@ class _InventoryCard extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.secondaryText,
                         fontSize: width.fontSizeW(0.028),
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ],
@@ -811,7 +811,7 @@ class _InventoryCard extends StatelessWidget {
                         ? const Color(0xFFF59E0B)
                         : const Color(0xFF12B886),
                     fontSize: width.fontSizeW(0.028),
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
@@ -893,7 +893,7 @@ class _MetaBlock extends StatelessWidget {
           style: TextStyle(
             color: colorsList.mutedTextColor,
             fontSize: width.fontSizeW(0.024),
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.normal,
           ),
         ),
         SizedBox(height: width * 0.006),
@@ -902,7 +902,7 @@ class _MetaBlock extends StatelessWidget {
           style: TextStyle(
             color: valueColor ?? colorsList.primaryText,
             fontSize: width.fontSizeW(0.032),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
       ],
@@ -941,7 +941,7 @@ class _MovementTile extends StatelessWidget {
                 style: TextStyle(
                   color: colorsList.secondaryText,
                   fontSize: width.fontSizeW(0.028),
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
               const Spacer(),
@@ -950,7 +950,7 @@ class _MovementTile extends StatelessWidget {
                 style: TextStyle(
                   color: qtyColor,
                   fontSize: width.fontSizeW(0.036),
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ],
@@ -972,7 +972,7 @@ class _MovementTile extends StatelessWidget {
                   style: TextStyle(
                     color: badgeColors.$2,
                     fontSize: width.fontSizeW(0.024),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -987,7 +987,7 @@ class _MovementTile extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.secondaryText,
                       fontSize: width.fontSizeW(0.027),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                 ),
@@ -1056,7 +1056,7 @@ class _EmptyState extends StatelessWidget {
               style: TextStyle(
                 color: colorsList.primaryText,
                 fontSize: width.fontSizeW(0.042),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.normal,
               ),
             ),
             SizedBox(height: width * 0.02),

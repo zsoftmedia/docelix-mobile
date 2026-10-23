@@ -1,3 +1,4 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/vehicle_details_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/vehicle_model.dart';
@@ -95,7 +96,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen>
                 style: TextStyle(
                   color: colorsList.primaryText,
                   fontSize: width.fontSizeW(0.042),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
               Text(
@@ -105,7 +106,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen>
                 style: TextStyle(
                   color: colorsList.secondaryText,
                   fontSize: width.fontSizeW(0.026),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ],
@@ -169,11 +170,11 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen>
                 dividerColor: colorsList.borderColor,
                 labelStyle: TextStyle(
                   fontSize: width.fontSizeW(0.032),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.normal,
                 ),
                 unselectedLabelStyle: TextStyle(
                   fontSize: width.fontSizeW(0.032),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.normal,
                 ),
                 tabs: _tabs.map((t) => Tab(height: 40, text: t)).toList(),
               ),
@@ -252,7 +253,7 @@ class _SummaryCard extends StatelessWidget {
                     style: TextStyle(
                       color: colorsList.primaryText,
                       fontSize: width.fontSizeW(0.034),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                   SizedBox(height: width * 0.01),
@@ -267,7 +268,7 @@ class _SummaryCard extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.secondaryText,
                           fontSize: width.fontSizeW(0.026),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                       Text(
@@ -279,7 +280,7 @@ class _SummaryCard extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.secondaryText,
                           fontSize: width.fontSizeW(0.026),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ],
@@ -318,7 +319,7 @@ class _MiniChip extends StatelessWidget {
         style: TextStyle(
           color: color,
           fontSize: width.fontSizeW(0.024),
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.normal,
         ),
       ),
     );
@@ -503,7 +504,7 @@ class _DriversTab extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.primaryText,
                           fontSize: width.fontSizeW(0.036),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                       SizedBox(height: width * 0.008),
@@ -528,7 +529,7 @@ class _DriversTab extends StatelessWidget {
                     'Assign Driver',
                     style: TextStyle(
                       color: colorsList.colorButton,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       fontSize: width.fontSizeW(0.03),
                     ),
                   ),
@@ -620,7 +621,7 @@ class _DriverAssignmentCard extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.034),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 SizedBox(height: width * 0.01),
@@ -704,12 +705,9 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
     if (_createNew) {
       if (!(_formKey.currentState?.validate() ?? false)) return;
     } else if (_selectedDriverId == null) {
-      Get.snackbar(
-        'Select a driver',
-        'Choose an existing driver to assign.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
+      AppSnackbar.error(
+          title: 'Select a driver',
+          message: 'Choose an existing driver to assign.');
       return;
     }
 
@@ -753,7 +751,7 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.042),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -811,7 +809,7 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
                               style: TextStyle(
                                 color: colorsList.secondaryText,
                                 fontSize: width.fontSizeW(0.03),
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.normal,
                               ),
                               children: const [
                                 TextSpan(
@@ -930,7 +928,7 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.033),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 value: _isPrimary,
@@ -978,7 +976,8 @@ class _AssignDriverSheetState extends State<_AssignDriverSheet> {
                             )
                           : const Text(
                               'Assign Driver',
-                              style: TextStyle(fontWeight: FontWeight.w700),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.normal),
                             ),
                     ),
                   ),
@@ -1021,7 +1020,7 @@ class _ModeChip extends StatelessWidget {
             style: TextStyle(
               color: selected ? Colors.white : colorsList.colorButton,
               fontSize: width.fontSizeW(0.03),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ),
@@ -1125,7 +1124,7 @@ class _TripsTab extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.primaryText,
                           fontSize: width.fontSizeW(0.036),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                       SizedBox(height: width * 0.008),
@@ -1150,7 +1149,7 @@ class _TripsTab extends StatelessWidget {
                     'Add Trip',
                     style: TextStyle(
                       color: colorsList.colorButton,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       fontSize: width.fontSizeW(0.03),
                     ),
                   ),
@@ -1197,7 +1196,7 @@ class _TripsTab extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.primaryText,
                           fontSize: width.fontSizeW(0.03),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ),
@@ -1206,7 +1205,7 @@ class _TripsTab extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.03),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ],
@@ -1258,7 +1257,7 @@ class _TripCard extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.034),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 SizedBox(height: width * 0.012),
@@ -1296,7 +1295,7 @@ class _TripCard extends StatelessWidget {
                 style: TextStyle(
                   color: colorsList.primaryText,
                   fontSize: width.fontSizeW(0.032),
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
               IconButton(
@@ -1377,11 +1376,9 @@ class _AddTripSheetState extends State<_AddTripSheet> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_distance == null) {
-      Get.snackbar(
-        'Calculate distance',
-        'Calculate distance before saving the trip.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
+      AppSnackbar.error(
+        title: 'Calculate distance',
+        message: 'Calculate distance before saving the trip.',
       );
       return;
     }
@@ -1430,7 +1427,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.042),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -1470,7 +1467,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                 style: TextStyle(
                                   color: colorsList.primaryText,
                                   fontSize: width.fontSizeW(0.033),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.normal,
                                 ),
                               ),
                             ),
@@ -1545,7 +1542,8 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                               )
                             : const Text(
                                 'Calculate Distance',
-                                style: TextStyle(fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.normal),
                               ),
                       );
                     }),
@@ -1577,7 +1575,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                     style: TextStyle(
                                       color: colorsList.mutedTextColor,
                                       fontSize: width.fontSizeW(0.024),
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.normal,
                                     ),
                                   ),
                                   SizedBox(height: width * 0.01),
@@ -1586,7 +1584,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                     style: TextStyle(
                                       color: colorsList.primaryText,
                                       fontSize: width.fontSizeW(0.034),
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.normal,
                                     ),
                                   ),
                                 ],
@@ -1601,7 +1599,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                     style: TextStyle(
                                       color: colorsList.mutedTextColor,
                                       fontSize: width.fontSizeW(0.024),
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.normal,
                                     ),
                                   ),
                                   SizedBox(height: width * 0.01),
@@ -1610,7 +1608,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                                     style: TextStyle(
                                       color: colorsList.primaryText,
                                       fontSize: width.fontSizeW(0.034),
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.normal,
                                     ),
                                   ),
                                 ],
@@ -1664,7 +1662,8 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                             )
                           : const Text(
                               'Save Trip',
-                              style: TextStyle(fontWeight: FontWeight.w700),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.normal),
                             ),
                     ),
                   ),
@@ -1708,7 +1707,7 @@ class _FieldLabel extends StatelessWidget {
         style: TextStyle(
           color: colorsList.secondaryText,
           fontSize: width.fontSizeW(0.03),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.normal,
         ),
         children: [
           if (required)
@@ -1778,7 +1777,7 @@ class _FuelTab extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.primaryText,
                           fontSize: width.fontSizeW(0.036),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                       SizedBox(height: width * 0.008),
@@ -1803,7 +1802,7 @@ class _FuelTab extends StatelessWidget {
                     'Log Fuel',
                     style: TextStyle(
                       color: colorsList.colorButton,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       fontSize: width.fontSizeW(0.03),
                     ),
                   ),
@@ -1837,7 +1836,7 @@ class _FuelTab extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -1974,11 +1973,9 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
     final odometer = double.tryParse(_odometerController.text.trim());
 
     if (liters == null || cost == null || odometer == null) {
-      Get.snackbar(
-        'Invalid values',
-        'Enter valid numbers for liters, cost, and odometer.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
+      AppSnackbar.error(
+        title: 'Invalid values',
+        message: 'Enter valid numbers for liters, cost, and odometer.',
       );
       return;
     }
@@ -2027,7 +2024,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.042),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -2065,7 +2062,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.036),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     SizedBox(height: width * 0.015),
@@ -2100,7 +2097,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                           uploading
                               ? 'Uploading…'
                               : 'Take Photo / Upload Receipt',
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          style: const TextStyle(fontWeight: FontWeight.normal),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorsList.colorButton,
@@ -2122,7 +2119,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                 style: TextStyle(
                   color: colorsList.mutedTextColor,
                   fontSize: width.fontSizeW(0.028),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.normal,
                   letterSpacing: 0.4,
                 ),
               ),
@@ -2153,7 +2150,7 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                                 style: TextStyle(
                                   color: colorsList.primaryText,
                                   fontSize: width.fontSizeW(0.033),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.normal,
                                 ),
                               ),
                             ),
@@ -2275,7 +2272,8 @@ class _LogFuelSheetState extends State<_LogFuelSheet> {
                             )
                           : const Text(
                               'Save Manually',
-                              style: TextStyle(fontWeight: FontWeight.w700),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.normal),
                             ),
                     ),
                   ),
@@ -2359,7 +2357,7 @@ class _ServicesTab extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.primaryText,
                           fontSize: width.fontSizeW(0.036),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                       SizedBox(height: width * 0.008),
@@ -2384,7 +2382,7 @@ class _ServicesTab extends StatelessWidget {
                     'Log Service',
                     style: TextStyle(
                       color: colorsList.colorButton,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       fontSize: width.fontSizeW(0.03),
                     ),
                   ),
@@ -2415,7 +2413,7 @@ class _ServicesTab extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -2487,11 +2485,9 @@ class _LogServiceSheetState extends State<_LogServiceSheet> {
     final cost = double.tryParse(_costController.text.trim());
     final odometer = double.tryParse(_odometerController.text.trim());
     if (cost == null || odometer == null) {
-      Get.snackbar(
-        'Invalid values',
-        'Enter valid numbers for cost and odometer.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
+      AppSnackbar.error(
+        title: 'Invalid values',
+        message: 'Enter valid numbers for cost and odometer.',
       );
       return;
     }
@@ -2540,7 +2536,7 @@ class _LogServiceSheetState extends State<_LogServiceSheet> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.042),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -2580,7 +2576,7 @@ class _LogServiceSheetState extends State<_LogServiceSheet> {
                                 style: TextStyle(
                                   color: colorsList.primaryText,
                                   fontSize: width.fontSizeW(0.033),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.normal,
                                 ),
                               ),
                             ),
@@ -2690,7 +2686,8 @@ class _LogServiceSheetState extends State<_LogServiceSheet> {
                             )
                           : const Text(
                               'Save',
-                              style: TextStyle(fontWeight: FontWeight.w700),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.normal),
                             ),
                     ),
                   ),
@@ -2775,7 +2772,7 @@ class _InsuranceTab extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.primaryText,
                           fontSize: width.fontSizeW(0.036),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                       SizedBox(height: width * 0.008),
@@ -2800,7 +2797,7 @@ class _InsuranceTab extends StatelessWidget {
                     'Add Policy',
                     style: TextStyle(
                       color: colorsList.colorButton,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       fontSize: width.fontSizeW(0.03),
                     ),
                   ),
@@ -2832,7 +2829,7 @@ class _InsuranceTab extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -2908,11 +2905,9 @@ class _LogInsuranceSheetState extends State<_LogInsuranceSheet> {
 
     final cost = double.tryParse(_costController.text.trim());
     if (cost == null) {
-      Get.snackbar(
-        'Invalid cost',
-        'Enter a valid premium cost.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
+      AppSnackbar.error(
+        title: 'Invalid cost',
+        message: 'Enter a valid premium cost.',
       );
       return;
     }
@@ -2960,7 +2955,7 @@ class _LogInsuranceSheetState extends State<_LogInsuranceSheet> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.042),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -3082,11 +3077,9 @@ class _DocumentsTab extends StatelessWidget {
   void _openDocumentPreview(VehicleDocument document) {
     final url = document.url?.trim();
     if (url == null || url.isEmpty) {
-      Get.snackbar(
-        'Unavailable',
-        'No preview URL for this document.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
+      AppSnackbar.error(
+        title: 'Unavailable',
+        message: 'No preview URL for this document.',
       );
       return;
     }
@@ -3113,7 +3106,7 @@ class _DocumentsTab extends StatelessWidget {
             document.titleLabel,
             style: TextStyle(
               color: colorsList.primaryText,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ),
@@ -3167,7 +3160,7 @@ class _DocumentsTab extends StatelessWidget {
                         style: TextStyle(
                           color: colorsList.primaryText,
                           fontSize: width.fontSizeW(0.036),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                       SizedBox(height: width * 0.008),
@@ -3192,7 +3185,7 @@ class _DocumentsTab extends StatelessWidget {
                     'Upload Document',
                     style: TextStyle(
                       color: colorsList.colorButton,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.normal,
                       fontSize: width.fontSizeW(0.03),
                     ),
                   ),
@@ -3224,7 +3217,7 @@ class _DocumentsTab extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.colorButton,
                         fontSize: width.fontSizeW(0.028),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     onTap: () => _openDocumentPreview(doc),
@@ -3313,7 +3306,7 @@ class _UploadDocumentSheetState extends State<_UploadDocumentSheet> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.042),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -3440,7 +3433,7 @@ class _DateField extends StatelessWidget {
                       ? colorsList.mutedTextColor
                       : colorsList.primaryText,
                   fontSize: width.fontSizeW(0.033),
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ),
@@ -3513,7 +3506,7 @@ class _SheetActions extends StatelessWidget {
                   )
                 : Text(
                     saveLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+                    style: const TextStyle(fontWeight: FontWeight.normal),
                   ),
           ),
         ),
@@ -3582,7 +3575,7 @@ class _SectionCard extends StatelessWidget {
             style: TextStyle(
               color: colorsList.primaryText,
               fontSize: width.fontSizeW(0.034),
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.normal,
             ),
           ),
           SizedBox(height: width * 0.015),
@@ -3615,7 +3608,7 @@ class _MetaRow extends StatelessWidget {
               style: TextStyle(
                 color: colorsList.mutedTextColor,
                 fontSize: width.fontSizeW(0.03),
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -3626,7 +3619,7 @@ class _MetaRow extends StatelessWidget {
               style: TextStyle(
                 color: colorsList.primaryText,
                 fontSize: width.fontSizeW(0.032),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -3677,7 +3670,7 @@ class _ListCard extends StatelessWidget {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.034),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                     if (subtitle.trim().isNotEmpty) ...[
@@ -3725,7 +3718,7 @@ class _EmptyState extends StatelessWidget {
           style: TextStyle(
             color: colorsList.secondaryText,
             fontSize: width.fontSizeW(0.034),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.normal,
           ),
         ),
       ],
