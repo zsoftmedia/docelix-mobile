@@ -44,7 +44,7 @@ class CreateAssetScreen extends StatelessWidget {
           style: TextStyle(
             color: colorsList.primaryText,
             fontSize: width.fontSizeW(0.045),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
         centerTitle: false,
@@ -177,7 +177,7 @@ class CreateAssetScreen extends StatelessWidget {
                                           ),
                                           style: TextStyle(
                                             color: colorsList.primaryText,
-                                            fontWeight: FontWeight.w600,
+                                            fontWeight: FontWeight.normal,
                                             fontSize: width.fontSizeW(0.033),
                                           ),
                                         ),
@@ -541,7 +541,7 @@ class _NameField extends StatelessWidget {
           ),
           style: TextStyle(
             color: colorsList.primaryText,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.normal,
             fontSize: width.fontSizeW(0.033),
           ),
         ),
@@ -582,7 +582,7 @@ class _NameField extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.colorButton,
                             fontSize: width.fontSizeW(0.03),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ],
@@ -631,7 +631,7 @@ class _SuggestionTile extends StatelessWidget {
               style: TextStyle(
                 color: colorsList.primaryText,
                 fontSize: width.fontSizeW(0.032),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.normal,
               ),
             ),
             SizedBox(height: width * 0.012),
@@ -707,7 +707,7 @@ class _LiveTaxCard extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.033),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ],
@@ -775,7 +775,7 @@ class _TaxStat extends StatelessWidget {
           style: TextStyle(
             color: colorsList.secondaryText,
             fontSize: width.fontSizeW(0.025),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.normal,
           ),
         ),
         SizedBox(height: width * 0.01),
@@ -784,7 +784,7 @@ class _TaxStat extends StatelessWidget {
           style: TextStyle(
             color: valueColor ?? colorsList.primaryText,
             fontSize: width.fontSizeW(0.038),
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.normal,
           ),
         ),
         if (subtitle != null) ...[
@@ -828,7 +828,7 @@ class _SectionCard extends StatelessWidget {
             style: TextStyle(
               color: colorsList.primaryText,
               fontSize: width.fontSizeW(0.038),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.normal,
             ),
           ),
           SizedBox(height: width * 0.02),
@@ -859,7 +859,7 @@ class _FieldLabel extends StatelessWidget {
           style: TextStyle(
             color: colorsList.secondaryText,
             fontSize: width.fontSizeW(0.03),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.normal,
           ),
           children: [
             if (required)
@@ -867,7 +867,7 @@ class _FieldLabel extends StatelessWidget {
                 text: ' *',
                 style: TextStyle(
                   color: Color(0xFFE5484D),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
           ],
@@ -907,7 +907,7 @@ class _InputField extends StatelessWidget {
       decoration: _inputDecoration(hint: hint),
       style: TextStyle(
         color: colorsList.primaryText,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.normal,
         fontSize: width.fontSizeW(0.033),
       ),
     );
@@ -943,7 +943,7 @@ class _DropdownField<T> extends StatelessWidget {
       decoration: _inputDecoration(hint: hint),
       style: TextStyle(
         color: colorsList.primaryText,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.normal,
         fontSize: width.fontSizeW(0.033),
       ),
     );
@@ -1046,7 +1046,7 @@ class _LedgerAccountField extends StatelessWidget {
                                   style: TextStyle(
                                     color: colorsList.colorButton,
                                     fontSize: width.fontSizeW(0.026),
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.normal,
                                     letterSpacing: 0.2,
                                   ),
                                 ),
@@ -1060,7 +1060,7 @@ class _LedgerAccountField extends StatelessWidget {
                                   style: TextStyle(
                                     color: colorsList.primaryText,
                                     fontSize: width.fontSizeW(0.033),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.normal,
                                   ),
                                 ),
                               ] else
@@ -1069,7 +1069,7 @@ class _LedgerAccountField extends StatelessWidget {
                                   style: TextStyle(
                                     color: colorsList.mutedTextColor,
                                     fontSize: width.fontSizeW(0.033),
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.normal,
                                   ),
                                 ),
                             ],
@@ -1183,7 +1183,7 @@ class _LedgerAccountSheetState extends State<_LedgerAccountSheet> {
                             style: TextStyle(
                               color: colorsList.primaryText,
                               fontSize: width.fontSizeW(0.042),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
                           SizedBox(height: width * 0.008),
@@ -1346,7 +1346,7 @@ class _LedgerAccountSheetState extends State<_LedgerAccountSheet> {
                                               ? Colors.white
                                               : colorsList.colorButton,
                                           fontSize: width.fontSizeW(0.026),
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.normal,
                                         ),
                                       ),
                                     ),
@@ -1361,7 +1361,7 @@ class _LedgerAccountSheetState extends State<_LedgerAccountSheet> {
                                         style: TextStyle(
                                           color: colorsList.primaryText,
                                           fontSize: width.fontSizeW(0.033),
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.normal,
                                         ),
                                       ),
                                     ),
@@ -1392,7 +1392,7 @@ InputDecoration _inputDecoration({String? hint}) {
     hintText: hint,
     hintStyle: const TextStyle(
       color: colorsList.mutedTextColor,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.normal,
     ),
     filled: true,
     fillColor: colorsList.colorBoxDecoration,

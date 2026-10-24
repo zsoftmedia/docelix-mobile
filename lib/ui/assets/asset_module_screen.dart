@@ -45,7 +45,7 @@ class AssetModuleScreen extends StatelessWidget {
           style: TextStyle(
             color: colorsList.primaryText,
             fontSize: width.fontSizeW(0.045),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
         centerTitle: false,
@@ -78,7 +78,7 @@ class AssetModuleScreen extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.055),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 SizedBox(height: width * 0.025),
