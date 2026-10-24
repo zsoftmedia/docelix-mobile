@@ -52,7 +52,7 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
           style: TextStyle(
             color: colorsList.primaryText,
             fontSize: width.fontSizeW(0.045),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
         centerTitle: false,
@@ -87,8 +87,7 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
                         final itemWidth =
                             (constraints.maxWidth - gap * (columns - 1)) /
                             columns;
-                        // Keeps the original 1.35 aspect ratio per tile.
-                        final itemHeight = itemWidth / 1.35;
+                        final itemHeight = itemWidth / 1.22;
                         final cards = <Widget>[
                           _KpiCard(
                             title: 'Total Vehicles',
@@ -147,7 +146,7 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
                             style: TextStyle(
                               color: colorsList.primaryText,
                               fontSize: width.fontSizeW(0.038),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.normal,
                             ),
                           ),
                           SizedBox(height: width * 0.035),
@@ -209,7 +208,7 @@ class _KpiCard extends StatelessWidget {
     final width = _designWidth(context);
 
     return Container(
-      padding: EdgeInsets.all(width * 0.035),
+      padding: EdgeInsets.all(width * 0.03),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -217,6 +216,7 @@ class _KpiCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             width: width * 0.09,
@@ -227,36 +227,46 @@ class _KpiCard extends StatelessWidget {
             ),
             child: Icon(icon, color: iconColor, size: width * 0.045),
           ),
-          const Spacer(),
-          Text(
-            title,
-            style: TextStyle(
-              color: colorsList.secondaryText,
-              fontSize: width.fontSizeW(0.027),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: width * 0.01),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: colorsList.primaryText,
-              fontSize: width.fontSizeW(0.042),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          if (subtitle != null) ...[
-            SizedBox(height: width * 0.006),
-            Text(
-              subtitle!,
-              style: TextStyle(
-                color: colorsList.mutedTextColor,
-                fontSize: width.fontSizeW(0.024),
+          const SizedBox(height: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: colorsList.secondaryText,
+                  fontSize: width.fontSizeW(0.027),
+                  fontWeight: FontWeight.normal,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: colorsList.primaryText,
+                  fontSize: width.fontSizeW(0.040),
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colorsList.mutedTextColor,
+                    fontSize: width.fontSizeW(0.024),
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -281,7 +291,7 @@ class _ExpenseRow extends StatelessWidget {
             style: TextStyle(
               color: colorsList.secondaryText,
               fontSize: width.fontSizeW(0.032),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ),
@@ -290,7 +300,7 @@ class _ExpenseRow extends StatelessWidget {
           style: TextStyle(
             color: colorsList.primaryText,
             fontSize: width.fontSizeW(0.033),
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.normal,
           ),
         ),
       ],

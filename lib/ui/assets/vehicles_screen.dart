@@ -61,7 +61,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
           style: TextStyle(
             color: colorsList.primaryText,
             fontSize: width.fontSizeW(0.045),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
         centerTitle: false,
@@ -77,7 +77,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
               'Dashboard',
               style: TextStyle(
                 color: colorsList.primaryText,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.normal,
                 fontSize: width.fontSizeW(0.032),
               ),
             ),
@@ -92,7 +92,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
         icon: const Icon(Icons.add_rounded),
         label: const Text(
           'Add Vehicle',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          style: TextStyle(
+              fontWeight: FontWeight.normal),
         ),
       ),
       body: Column(
@@ -238,7 +239,7 @@ class _SearchHeader extends StatelessWidget {
                   style: TextStyle(
                     color: colorsList.primaryText,
                     fontSize: width.fontSizeW(0.033),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 const Spacer(),
@@ -281,7 +282,8 @@ class _SearchHeader extends StatelessWidget {
                   size: width * 0.05,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: width * 0.035),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: width * 0.035),
               ),
             ),
           ),
@@ -335,7 +337,7 @@ class _VehicleCard extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.primaryText,
                             fontSize: width.fontSizeW(0.04),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                         SizedBox(height: width * 0.008),
@@ -346,7 +348,7 @@ class _VehicleCard extends StatelessWidget {
                           style: TextStyle(
                             color: colorsList.secondaryText,
                             fontSize: width.fontSizeW(0.028),
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ],
@@ -370,7 +372,7 @@ class _VehicleCard extends StatelessWidget {
                             ? const Color(0xFF12B886)
                             : colorsList.secondaryText,
                         fontSize: width.fontSizeW(0.026),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -446,7 +448,7 @@ class _Chip extends StatelessWidget {
         style: TextStyle(
           color: color,
           fontSize: width.fontSizeW(0.026),
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.normal,
         ),
       ),
     );
@@ -471,7 +473,7 @@ class _MetaBlock extends StatelessWidget {
           style: TextStyle(
             color: colorsList.mutedTextColor,
             fontSize: width.fontSizeW(0.024),
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.normal,
           ),
         ),
         SizedBox(height: width * 0.006),
@@ -480,7 +482,7 @@ class _MetaBlock extends StatelessWidget {
           style: TextStyle(
             color: colorsList.primaryText,
             fontSize: width.fontSizeW(0.032),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.normal,
           ),
         ),
       ],
@@ -519,7 +521,7 @@ class _EmptyState extends StatelessWidget {
               style: TextStyle(
                 color: colorsList.primaryText,
                 fontSize: width.fontSizeW(0.042),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.normal,
               ),
             ),
             SizedBox(height: width * 0.02),
@@ -661,7 +663,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                       style: TextStyle(
                         color: colorsList.primaryText,
                         fontSize: width.fontSizeW(0.042),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
@@ -680,7 +682,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                 style: TextStyle(
                   color: colorsList.primaryText,
                   fontSize: width.fontSizeW(0.035),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
               SizedBox(height: width * 0.03),
@@ -785,7 +787,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                 style: TextStyle(
                   color: colorsList.primaryText,
                   fontSize: width.fontSizeW(0.035),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
               SizedBox(height: width * 0.03),
@@ -807,7 +809,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                   'Insured',
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.normal,
                     fontSize: width.fontSizeW(0.033),
                   ),
                 ),
@@ -858,7 +860,8 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                             )
                           : const Text(
                               'Save',
-                              style: TextStyle(fontWeight: FontWeight.w700),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.normal),
                             ),
                     ),
                   ),
@@ -881,7 +884,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
           style: TextStyle(
             color: colorsList.secondaryText,
             fontSize: width.fontSizeW(0.03),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.normal,
           ),
           children: [
             if (required)
@@ -889,7 +892,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
                 text: ' *',
                 style: TextStyle(
                   color: Color(0xFFE5484D),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
           ],
@@ -915,7 +918,7 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
       decoration: _decoration(hint: hint),
       style: TextStyle(
         color: colorsList.primaryText,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.normal,
         fontSize: width.fontSizeW(0.033),
       ),
     );
@@ -926,18 +929,21 @@ class _AddVehicleSheetState extends State<_AddVehicleSheet> {
       hintText: hint,
       hintStyle: const TextStyle(
         color: colorsList.mutedTextColor,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.normal,
       ),
       filled: true,
       fillColor: colorsList.colorBoxDecoration,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: colorsList.colorButton, width: 1.4),
+        borderSide: const BorderSide(
+            color: colorsList.colorButton,
+            width: 1.4),
       ),
     );
   }

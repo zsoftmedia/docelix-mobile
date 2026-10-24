@@ -89,7 +89,8 @@ class GeneralLedgerScreen extends StatelessWidget {
             if (controller.isSearching.value) {
               return IconButton(
                 onPressed: () =>
-                    controller.applySearch(controller.searchController.text),
+                    controller.applySearch(
+                        controller.searchController.text),
                 icon: Icon(
                   Icons.search_rounded,
                   color: colorsList.colorButton,
@@ -492,7 +493,9 @@ class _SummaryCard extends StatelessWidget {
 }
 
 class _LedgerEntryCard extends StatelessWidget {
-  const _LedgerEntryCard({required this.controller, required this.entry});
+  const _LedgerEntryCard({
+    required this.controller,
+    required this.entry});
 
   final GeneralLedgerController controller;
   final GeneralLedgerEntryGroup entry;
@@ -536,7 +539,7 @@ class _LedgerEntryCard extends StatelessWidget {
                           dateParts['day']!,
                           style: TextStyle(
                             fontSize: width.fontSizeW(0.05),
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.normal,
                             color: colorsList.primaryText,
                             height: 1,
                           ),
@@ -546,7 +549,7 @@ class _LedgerEntryCard extends StatelessWidget {
                           dateParts['month']!,
                           style: TextStyle(
                             fontSize: width.fontSizeW(0.026),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.normal,
                             color: colorsList.secondaryText,
                             letterSpacing: 0.4,
                           ),
