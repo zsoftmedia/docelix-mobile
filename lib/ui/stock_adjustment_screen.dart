@@ -345,7 +345,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
             SizedBox(height: width * 0.022),
 
             // ADJUST STOCK BUTTON
-            Align(
+            /*Align(
               alignment: Alignment.centerRight,
               child: OutlinedButton.icon(
                 onPressed: () {
@@ -373,7 +373,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                   ),
                 ),
               ),
-            ),
+            ),*/
           ],
         ),
       ),

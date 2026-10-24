@@ -1683,7 +1683,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Text(
                     "See all",
                     style: TextStyle(
-                      color: colorsList.green,
+                      color: colorsList.secondaryTextColor,
                       fontSize: width.fontSizeW(0.023),
                       fontWeight: FontWeight.normal,
                     ),
@@ -1691,7 +1691,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   Icon(
                     Icons.chevron_right_rounded,
-                    color: colorsList.green,
+                    color: colorsList.secondaryTextColor,
                     size: width * 0.045,
                   ),
                 ],

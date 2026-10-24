@@ -957,7 +957,7 @@ class _InventoryExpandableSection extends StatelessWidget {
                       children: [
                         _AssetSubItem(
                           icon: Icons.add_box_outlined,
-                          title: 'Stock Addition',
+                          title: 'Products',
                           onTap: onStockAddition,
                         ),
                         _AssetSubItem(

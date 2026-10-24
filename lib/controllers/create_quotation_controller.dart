@@ -685,10 +685,13 @@ class CreateQuotationController extends GetxController {
       'total': grossAmount,
     });
 
-    // Reset selected catalog item
+    // Reset selected catalog item & clear all line item form fields
     selectedCatalogItem.value = null;
+    selectedUnit.value = null;
 
     descriptionController.clear();
+    quantityController.clear();
+    unitPriceController.clear();
     unitController.clear();
   }
 

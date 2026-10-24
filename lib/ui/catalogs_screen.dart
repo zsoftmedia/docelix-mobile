@@ -29,7 +29,7 @@ class CatalogsScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Stock Addition',
+          'Products',
           style: TextStyle(
             color: colorsList.textColor,
             fontSize: rs.sp(18),
