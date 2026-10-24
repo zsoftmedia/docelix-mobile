@@ -647,7 +647,7 @@ class _DriverAssignmentCard extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
+          /*IconButton(
             onPressed: onDelete,
             tooltip: 'Remove',
             icon: Icon(
@@ -655,7 +655,7 @@ class _DriverAssignmentCard extends StatelessWidget {
               color: colorsList.red,
               size: width * 0.055,
             ),
-          ),
+          ),*/
         ],
       ),
     );
@@ -1298,7 +1298,7 @@ class _TripCard extends StatelessWidget {
                   fontWeight: FontWeight.normal,
                 ),
               ),
-              IconButton(
+              /*IconButton(
                 onPressed: onDelete,
                 tooltip: 'Delete',
                 icon: Icon(
@@ -1306,7 +1306,7 @@ class _TripCard extends StatelessWidget {
                   color: colorsList.red,
                   size: width * 0.055,
                 ),
-              ),
+              ),*/
             ],
           ),
         ],
