@@ -1,4 +1,3 @@
-import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/create_purchase_invoice_controller.dart';
 import 'package:docelix_mobileapp/controllers/dashboard_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
@@ -176,72 +175,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         Row(
           children: [
-            /*Expanded(
-              child: _headerDropdown(
-                width: width,
-                icon: Icons.business_outlined,
-                text: "Berrinex FlexKapG",
-              ),
-            ),*/
-
             Expanded(
               child: _companyDropdown(
                 width: width,
               ),
             ),
-
-            /*SizedBox(width: width * 0.025),
-
-            Expanded(
-              child: _headerDropdown(
-                width: width,
-                icon: Icons.calendar_today_outlined,
-                text: "September 2026",
-              ),
-            ),
-
-            Expanded(
-              child: Obx(
-                    () => _headerDropdown(
-                  width: width,
-                  icon: Icons.calendar_today_outlined,
-                  text: dashboardController.selectedMonthText,
-                  onTap: dashboardController.selectMonth,
-                ),
-              ),
-            ),*/
-          ],
-        ),
-
-        SizedBox(height: height * 0.007),
-
-        Row(
-          children: [
-            Expanded(
-              child: Obx(
-                () => _headerDropdown(
-                  width: width,
-                  icon: Icons.calendar_today_outlined,
-                  text: "From: ${dashboardController.fromDateText}",
-                  onTap: dashboardController.selectFromDate,
-                ),
-              ),
-            ),
-
             SizedBox(width: width * 0.025),
-
             Expanded(
-              child: Obx(
-                () => _headerDropdown(
-                  width: width,
-                  icon: Icons.calendar_today_outlined,
-                  text: "To: ${dashboardController.toDateText}",
-                  onTap: dashboardController.selectToDate,
-                ),
+              child: _periodDropdown(
+                width: width,
               ),
             ),
           ],
         ),
+
+        Obx(() {
+          if (dashboardController.selectedPeriod.value != 'custom') {
+            return const SizedBox.shrink();
+          }
+
+          return Column(
+            children: [
+              SizedBox(height: height * 0.007),
+              Row(
+                children: [
+                  Expanded(
+                    child: _headerDropdown(
+                      width: width,
+                      icon: Icons.calendar_today_outlined,
+                      text: "From: ${dashboardController.fromDateText}",
+                      onTap: dashboardController.selectFromDate,
+                    ),
+                  ),
+                  SizedBox(width: width * 0.025),
+                  Expanded(
+                    child: _headerDropdown(
+                      width: width,
+                      icon: Icons.calendar_today_outlined,
+                      text: "To: ${dashboardController.toDateText}",
+                      onTap: dashboardController.selectToDate,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }),
       ],
     );
   }
@@ -303,6 +282,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  Widget _periodDropdown({
+    required double width,
+  }) {
+    return Obx(() {
+      final controller = dashboardController;
+
+      return Container(
+        height: width * 0.105,
+        padding: EdgeInsets.symmetric(
+          horizontal: width * 0.030,
+        ),
+        decoration: BoxDecoration(
+          color: colorsList.cardColor,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(
+            color: colorsList.borderColor,
+          ),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: controller.selectedPeriod.value,
+            isExpanded: true,
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: width * 0.045,
+              color: colorsList.secondaryText,
+            ),
+            dropdownColor: colorsList.cardColor,
+            selectedItemBuilder: (context) {
+              return DashboardController.periodOptions.map(
+                (entry) {
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month_outlined,
+                        size: width * 0.045,
+                        color: colorsList.primaryText,
+                      ),
+                      SizedBox(width: width * 0.025),
+                      Expanded(
+                        child: Text(
+                          entry.value,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontSize: width.fontSizeW(0.027),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ).toList();
+            },
+            items: DashboardController.periodOptions.map(
+              (entry) {
+                return DropdownMenuItem<String>(
+                  value: entry.key,
+                  child: Text(
+                    entry.value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colorsList.primaryText,
+                      fontSize: width.fontSizeW(0.027),
+                    ),
+                  ),
+                );
+              },
+            ).toList(),
+            onChanged: (String? val) {
+              if (val != null) {
+                controller.selectPeriod(val);
+              }
+            },
+          ),
+        ),
+      );
+    });
   }
 
   Widget _companyDropdown({

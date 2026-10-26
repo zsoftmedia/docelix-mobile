@@ -18,8 +18,20 @@ class DashboardController extends GetxController {
   final selectedCompany = Rxn<CompanyModel>();
 
   // ============================================================
-  // DATE RANGE SELECTION
+  // PERIOD & DATE RANGE SELECTION
   // ============================================================
+
+  final selectedPeriod = 'this_month'.obs;
+
+  static const periodOptions = <MapEntry<String, String>>[
+    MapEntry('this_month', 'This Month'),
+    MapEntry('previous_month', 'Previous Month'),
+    MapEntry('this_quarter', 'This Quarter'),
+    MapEntry('previous_quarter', 'Previous Quarter'),
+    MapEntry('this_year', 'This Year'),
+    MapEntry('previous_year', 'Previous Year'),
+    MapEntry('custom', 'Custom Date'),
+  ];
 
   late Rx<DateTime> fromDate;
   late Rx<DateTime> toDate;
@@ -70,9 +82,70 @@ class DashboardController extends GetxController {
 
     final now = DateTime.now();
     toDate = now.obs;
-    fromDate = DateTime(now.year, now.month - 1, now.day).obs;
+    fromDate = DateTime(now.year, now.month, 1).obs;
 
     getCompanies();
+  }
+
+  // ============================================================
+  // SELECT PERIOD DROPDOWN
+  // ============================================================
+
+  void selectPeriod(String periodKey) {
+    selectedPeriod.value = periodKey;
+    final now = DateTime.now();
+
+    switch (periodKey) {
+      case 'this_month':
+        fromDate.value = DateTime(now.year, now.month, 1);
+        toDate.value = now;
+        break;
+
+      case 'previous_month':
+        final prevMonth = DateTime(now.year, now.month - 1, 1);
+        final lastDayPrevMonth = DateTime(now.year, now.month, 0);
+        fromDate.value = prevMonth;
+        toDate.value = lastDayPrevMonth;
+        break;
+
+      case 'this_quarter':
+        final startMonth = ((now.month - 1) ~/ 3) * 3 + 1;
+        fromDate.value = DateTime(now.year, startMonth, 1);
+        toDate.value = now;
+        break;
+
+      case 'previous_quarter':
+        final currentQuarterStartMonth = ((now.month - 1) ~/ 3) * 3 + 1;
+        final prevQuarterStartMonth = currentQuarterStartMonth - 3;
+        fromDate.value = DateTime(now.year, prevQuarterStartMonth, 1);
+        toDate.value = DateTime(now.year, currentQuarterStartMonth, 0);
+        break;
+
+      case 'this_year':
+        fromDate.value = DateTime(now.year, 1, 1);
+        toDate.value = now;
+        break;
+
+      case 'previous_year':
+        fromDate.value = DateTime(now.year - 1, 1, 1);
+        toDate.value = DateTime(now.year - 1, 12, 31);
+        break;
+
+      case 'custom':
+        fromDate.value = DateTime(now.year - 1, now.month, now.day);
+        toDate.value = now;
+        getDashboard();
+        break;
+
+      default:
+        fromDate.value = DateTime(now.year, now.month, 1);
+        toDate.value = now;
+        break;
+    }
+
+    if (periodKey != 'custom') {
+      getDashboard();
+    }
   }
 
   // Select From Date
@@ -86,6 +159,7 @@ class DashboardController extends GetxController {
 
     if (picked == null) return;
 
+    selectedPeriod.value = 'custom';
     fromDate.value = picked;
     await getDashboard();
   }
@@ -101,6 +175,7 @@ class DashboardController extends GetxController {
 
     if (picked == null) return;
 
+    selectedPeriod.value = 'custom';
     toDate.value = picked;
     await getDashboard();
   }
