@@ -79,6 +79,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
                     invoice.status,
                     invoice.currencyCode,
                     invoice.paidAmount,
+                    invoice.grossAmount,
                   ),
 
                   const SizedBox(height: 24),
@@ -114,18 +115,22 @@ class InvoicesDetailsScreen extends StatelessWidget {
                           children: [
                             Expanded(
                               child: _infoItem(
-                                'Total amount',
+                                'Paid amount',
                                 controller.formatCurrency(
                                   invoice.paidAmount,
                                   invoice.currencyCode,
                                 ),
+                                valueColor: const Color(0xFF16A34A),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: _infoItem(
-                                'Currency',
-                                invoice.currencyCode,
+                                'Gross amount',
+                                controller.formatCurrency(
+                                  invoice.grossAmount,
+                                  invoice.currencyCode,
+                                ),
                               ),
                             ),
                           ],
@@ -184,7 +189,8 @@ class InvoicesDetailsScreen extends StatelessWidget {
     String invoiceNumber,
     String status,
     String currency,
-    double amount,
+    double paidAmount,
+    double grossAmount,
   ) {
     return Container(
       width: double.infinity,
@@ -246,21 +252,52 @@ class InvoicesDetailsScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 18),
             child: Divider(height: 1, color: colorsList.dividerColor),
           ),
-          const Text(
-            'Total amount',
-            style: TextStyle(
-              fontSize: 13,
-              color: colorsList.secondaryTextColor,
-            ),
-          ),
-          const SizedBox(height: 7),
-          Text(
-            _amount(currency, amount),
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.normal,
-              color: _heading,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Paid amount',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorsList.secondaryTextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    _amount(currency, paidAmount),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.normal,
+                      color: Color(0xFF16A34A),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'Gross amount',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorsList.secondaryTextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    _amount(currency, grossAmount),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.normal,
+                      color: _heading,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -297,7 +334,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
   // Invoice information item
 
-  Widget _infoItem(String label, String value) {
+  Widget _infoItem(String label, String value, {Color? valueColor}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -313,9 +350,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
           value,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
-            color: _heading,
+            color: valueColor ?? _heading,
             fontWeight: FontWeight.normal,
           ),
         ),

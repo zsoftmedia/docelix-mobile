@@ -16,6 +16,7 @@ class InvoicesModel {
   final int? bankTransactionId;
   final String currencyCode;
   final double paidAmount;
+  final double grossAmount;
   final double? remainingAmount;
   final String? paidAt;
   final String? lastReminderAt;
@@ -41,6 +42,7 @@ class InvoicesModel {
     this.bankTransactionId,
     required this.currencyCode,
     required this.paidAmount,
+    required this.grossAmount,
     this.remainingAmount,
     this.paidAt,
     this.lastReminderAt,
@@ -50,33 +52,38 @@ class InvoicesModel {
   });
 
   factory InvoicesModel.fromJson(Map<String, dynamic> json) {
+    final double paidAmt = (json['paid_amount'] as num?)?.toDouble() ?? 0.0;
+    final double grossAmt = (json['total_amount'] as num?)?.toDouble() ??
+        (json['net_amount'] as num?)?.toDouble() ??
+        (json['gross_amount'] as num?)?.toDouble() ??
+        0.0;
+
     return InvoicesModel(
       id: json['id'] ?? 0,
       companyId: json['company_id'] ?? 0,
       clientId: json['client_id'] ?? 0,
-      userId: json['user_id'] ?? '',
-      invoiceNumber: json['invoice_number'] ?? '',
-      issueDate: json['issue_date'] ?? '',
-      dueDate: json['due_date'],
-      notes: json['notes'],
-      createdAt: json['created_at'] ?? '',
+      userId: json['user_id']?.toString() ?? '',
+      invoiceNumber: json['invoice_number']?.toString() ?? '',
+      issueDate: json['issue_date']?.toString() ?? '',
+      dueDate: json['due_date']?.toString(),
+      notes: json['notes']?.toString(),
+      createdAt: json['created_at']?.toString() ?? '',
       sourceOfferId: json['source_offer_id'],
-      notesPre: json['notes_pre'] ?? '',
-      notesPost: json['notes_post'] ?? '',
-      status: json['status'] ?? '',
-      layoutOrder: List<String>.from(
-        json['layout_order'] ?? [],
-      ),
+      notesPre: json['notes_pre']?.toString() ?? '',
+      notesPost: json['notes_post']?.toString() ?? '',
+      status: json['status']?.toString() ?? json['payment_status']?.toString() ?? '',
+      layoutOrder: List<String>.from(json['layout_order'] ?? []),
       bankTransactionId: json['bank_transaction_id'],
-      currencyCode: json['currency_code'] ?? '',
-      paidAmount: (json['paid_amount'] ?? 0).toDouble(),
+      currencyCode: json['currency_code']?.toString() ?? 'EUR',
+      paidAmount: paidAmt,
+      grossAmount: grossAmt,
       remainingAmount: json['remaining_amount'] != null
-          ? (json['remaining_amount']).toDouble()
+          ? (json['remaining_amount'] as num).toDouble()
           : null,
-      paidAt: json['paid_at'],
-      lastReminderAt: json['last_reminder_at'],
+      paidAt: json['paid_at']?.toString(),
+      lastReminderAt: json['last_reminder_at']?.toString(),
       reminderCount: json['reminder_count'] ?? 0,
-      vatReviewStatus: json['vat_review_status'] ?? '',
+      vatReviewStatus: json['vat_review_status']?.toString() ?? '',
       recurringInvoices: json['recurring_invoices'] ?? [],
     );
   }
@@ -100,6 +107,7 @@ class InvoicesModel {
       'bank_transaction_id': bankTransactionId,
       'currency_code': currencyCode,
       'paid_amount': paidAmount,
+      'gross_amount': grossAmount,
       'remaining_amount': remainingAmount,
       'paid_at': paidAt,
       'last_reminder_at': lastReminderAt,

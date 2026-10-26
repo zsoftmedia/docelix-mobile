@@ -372,7 +372,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   style: TextStyle(
                     color: colorsList.textHintColor,
                     fontSize: rs.sp(12),
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ],
@@ -400,15 +400,28 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: rs.s(5)),
+              SizedBox(height: rs.s(4)),
+              Text(
+                'Paid: ${invoicesController.formatCurrency(
+                  invoice.paidAmount,
+                  invoice.currencyCode,
+                )}',
+                style: TextStyle(
+                  color: const Color(0xFF16A34A),
+                  fontSize: rs.sp(11),
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              SizedBox(height: rs.s(2)),
               Text(
                 invoicesController.formatCurrency(
-                  invoice.paidAmount,
+                  invoice.grossAmount,
                   invoice.currencyCode,
                 ),
                 style: TextStyle(
                   color: colorsList.textColor,
                   fontSize: rs.sp(12),
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ],
