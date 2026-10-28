@@ -390,19 +390,27 @@ class _AccountsPayableScreenState extends State<AccountsPayableScreen> {
     // CARD
     // ============================================================
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorsList.colorWhite,
-        borderRadius: asGridTile ? BorderRadius.circular(rs.s(14)) : null,
-        border: asGridTile ? Border.all(color: const Color(0xFFE9EDF3)) : null,
-      ),
-
-      padding: EdgeInsets.symmetric(horizontal: rs.s(17.5), vertical: rs.s(15)),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
+    return InkWell(
+      onTap: () async {
+        final result = await Get.toNamed(
+          '/AccountsPayableDetailsScreen',
+          arguments: bill,
+        );
+        if (result == true) {
+          billsController.refreshPayableBills();
+        }
+      },
+      borderRadius: asGridTile ? BorderRadius.circular(rs.s(14)) : null,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorsList.colorWhite,
+          borderRadius: asGridTile ? BorderRadius.circular(rs.s(14)) : null,
+          border: asGridTile ? Border.all(color: const Color(0xFFE9EDF3)) : null,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: rs.s(17.5), vertical: rs.s(15)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // ======================================================
           // TOP ROW
           // ======================================================
@@ -585,8 +593,9 @@ class _AccountsPayableScreenState extends State<AccountsPayableScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ==============================================================
   // INFO COLUMN
