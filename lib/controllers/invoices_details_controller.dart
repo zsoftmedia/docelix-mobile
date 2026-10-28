@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -14,10 +15,9 @@ import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 class InvoicesDetailsController extends GetxController {
@@ -62,7 +62,7 @@ class InvoicesDetailsController extends GetxController {
   String getCurrencySymbol(String? code) {
     final String rawCode = (code != null && code.trim().isNotEmpty)
         ? code.trim().toUpperCase()
-        : (invoice.value?.currencyCode?.trim().toUpperCase() ??
+        : (invoice.value?.currencyCode.trim().toUpperCase() ??
             SessionManager.accessCorrencycode?.trim().toUpperCase() ??
             'EUR');
 
@@ -103,7 +103,7 @@ class InvoicesDetailsController extends GetxController {
       (match) => ',',
     );
 
-    return '$symbol $formattedInteger.$decimalPart';
+    return '$symbol$formattedInteger.$decimalPart';
   }
 
   // ============================================================
@@ -151,15 +151,10 @@ class InvoicesDetailsController extends GetxController {
       final int clientId = invoice.value!.clientId;
       final int companyIdInt = int.parse(companyId.toString());
 
-      print('Loading client ID: $clientId');
-      print('Company ID: $companyIdInt');
-
       final response = await dioClient.getClients(
         companyId: companyIdInt,
         accessToken: accessToken,
       );
-
-      print('Clients Response: ${response.data}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
@@ -178,29 +173,12 @@ class InvoicesDetailsController extends GetxController {
         );
 
         client.value = selectedClient;
-
-        if (selectedClient != null) {
-          print('Client found: ${selectedClient.name}');
-        } else {
-          print('Client not found for ID: $clientId');
-        }
       } else {
         client.value = null;
-
-        AppSnackbar.error(
-          title: 'Error',
-          message: 'Unable to load client information.',
-        );
       }
     } catch (e) {
       client.value = null;
-
-      print('Get Client Error: $e');
-
-      AppSnackbar.error(
-        title: 'Error',
-        message: 'Unable to load client information.',
-      );
+      debugPrint('Get Client Error: $e');
     } finally {
       isLoading.value = false;
     }
@@ -230,14 +208,10 @@ class InvoicesDetailsController extends GetxController {
 
       final int invoiceId = invoice.value!.id;
 
-      print('Loading items for Invoice ID: $invoiceId');
-
       final response = await dioClient.getInvoiceItems(
         invoiceId: invoiceId,
         accessToken: accessToken,
       );
-
-      print('Invoice Items Response: ${response.data}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
@@ -249,25 +223,12 @@ class InvoicesDetailsController extends GetxController {
             ),
           ),
         );
-
-        print('Invoice Items Loaded: ${invoiceItems.length}');
       } else {
         invoiceItems.clear();
-
-        AppSnackbar.error(
-          title: 'Error',
-          message: 'Unable to load invoice items.',
-        );
       }
     } catch (e) {
       invoiceItems.clear();
-
-      print('Get Invoice Items Error: $e');
-
-      AppSnackbar.error(
-        title: 'Error',
-        message: 'Unable to load invoice items.',
-      );
+      debugPrint('Get Invoice Items Error: $e');
     } finally {
       isLoading.value = false;
     }
@@ -324,16 +285,12 @@ class InvoicesDetailsController extends GetxController {
       final int invoiceId = selectedInvoice.id;
       final String targetStatus = newStatus.toLowerCase().trim();
 
-      debugPrint('Updating Invoice ID $invoiceId status to: $targetStatus');
-
       final response = await dioClient.updateInvoiceStatus(
         invoiceId: invoiceId,
         companyId: companyIdInt,
         status: targetStatus,
         accessToken: accessToken,
       );
-
-      debugPrint('Update Invoice Status Response: ${response.statusCode}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map && response.data['data'] is Map) {
@@ -362,9 +319,6 @@ class InvoicesDetailsController extends GetxController {
         );
       }
     } on DioException catch (e) {
-      debugPrint('Update Invoice Status Dio Error: ${e.message}');
-      debugPrint('Response: ${e.response?.data}');
-
       String message = 'Unable to update invoice status.';
 
       if (e.response?.data is Map) {
@@ -378,8 +332,6 @@ class InvoicesDetailsController extends GetxController {
         message: message,
       );
     } catch (e) {
-      debugPrint('Update Invoice Status Exception: $e');
-
       AppSnackbar.error(
         title: 'Error',
         message: 'Something went wrong while updating invoice status.',
@@ -390,7 +342,7 @@ class InvoicesDetailsController extends GetxController {
   }
 
   // ============================================================
-  // SHOW STATUS SELECTION SHEET (MATCHES WEB SCREENSHOT)
+  // SHOW STATUS SELECTION SHEET
   // ============================================================
 
   void showStatusSelectionSheet() {
@@ -497,7 +449,7 @@ class InvoicesDetailsController extends GetxController {
           title,
           style: TextStyle(
             fontSize: 14,
-            fontWeight: isCurrent ? FontWeight.normal : FontWeight.normal,
+            fontWeight: FontWeight.normal,
             color: color,
           ),
         ),
@@ -545,17 +497,13 @@ class InvoicesDetailsController extends GetxController {
       final int companyIdInt = int.parse(companyId.toString());
       final int invoiceId = invoice.value!.id;
 
-      print('Deleting Invoice ID: $invoiceId');
-      print('Company ID: $companyIdInt');
-
       try {
-        final ledgerResponse = await dioClient.deleteInvoiceJournalEntries(
+        await dioClient.deleteInvoiceJournalEntries(
           companyId: companyIdInt,
           sourceId: invoiceId,
           sourceType: 'invoice_issue',
           accessToken: accessToken,
         );
-        print('Ledger Delete Response: ${ledgerResponse.data}');
       } catch (e) {
         debugPrint('Ledger journal entries delete warning: $e');
       }
@@ -564,8 +512,6 @@ class InvoicesDetailsController extends GetxController {
         invoiceId: invoiceId,
         accessToken: accessToken,
       );
-
-      print('Invoice Delete Response: ${invoiceResponse.data}');
 
       if (invoiceResponse.statusCode == 200 ||
           invoiceResponse.statusCode == 201 ||
@@ -592,9 +538,6 @@ class InvoicesDetailsController extends GetxController {
         );
       }
     } on DioException catch (e) {
-      print('Delete Invoice Dio Error: ${e.message}');
-      print('Response: ${e.response?.data}');
-
       String message = 'Unable to delete invoice.';
 
       if (e.response?.data is Map) {
@@ -608,8 +551,6 @@ class InvoicesDetailsController extends GetxController {
         message: message,
       );
     } catch (e) {
-      print('Delete Invoice Error: $e');
-
       AppSnackbar.error(
         title: 'Error',
         message: 'Something went wrong while deleting the invoice.',
@@ -880,8 +821,6 @@ class InvoicesDetailsController extends GetxController {
 
       final int companyIdInt = int.parse(companyId.toString());
 
-      print('Sending invoice email to: $to');
-
       final response = await dioClient.sendInvoice(
         invoiceId: invoiceId,
         companyId: companyIdInt,
@@ -890,8 +829,6 @@ class InvoicesDetailsController extends GetxController {
         text: body,
         accessToken: accessToken,
       );
-
-      print('Send Invoice Response Status: ${response.statusCode}');
 
       if (response.statusCode == 200 ||
           response.statusCode == 201 ||
@@ -910,9 +847,6 @@ class InvoicesDetailsController extends GetxController {
         );
       }
     } on DioException catch (e) {
-      print('Send Invoice Dio Error: ${e.message}');
-      print('Response: ${e.response?.data}');
-
       String message = 'Unable to send invoice email.';
 
       if (e.response?.data is Map) {
@@ -926,8 +860,6 @@ class InvoicesDetailsController extends GetxController {
         message: message,
       );
     } catch (e) {
-      // print('Send Invoice Exception: $e');
-
       AppSnackbar.error(
         title: 'Error',
         message: 'Something went wrong while sending invoice email.',
@@ -967,7 +899,7 @@ class InvoicesDetailsController extends GetxController {
 
       final invoiceId = selectedInvoice.id;
 
-      print('Downloading PDF for invoice ID: $invoiceId');
+      debugPrint('Downloading PDF & checking fiscal receipts for invoice ID: $invoiceId');
 
       Uint8List? pdfBytes;
 
@@ -977,28 +909,49 @@ class InvoicesDetailsController extends GetxController {
           accessToken: accessToken,
         );
 
-        if (response.statusCode == 200 &&
-            response.data != null &&
-            response.data!.isNotEmpty) {
-          pdfBytes = Uint8List.fromList(response.data!);
+        debugPrint('PDF Response Status: ${response.statusCode}');
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          Map<String, dynamic>? jsonMap;
+
+          if (response.data is Map) {
+            jsonMap = Map<String, dynamic>.from(response.data as Map);
+          } else if (response.data is List) {
+            final List<int> bytesList = List<int>.from(response.data as List);
+            final String decodedStr = utf8.decode(bytesList);
+
+            if (decodedStr.trim().startsWith('{')) {
+              jsonMap = Map<String, dynamic>.from(json.decode(decodedStr) as Map);
+            } else if (decodedStr.startsWith('%PDF')) {
+              pdfBytes = Uint8List.fromList(bytesList);
+            }
+          }
+
+          if (jsonMap != null && jsonMap['pdf_url'] != null) {
+
+            final String pdfUrl = jsonMap['pdf_url'].toString();
+            debugPrint('Downloading PDF bytes from pdf_url: $pdfUrl');
+
+            final pdfFileResponse = await dioClient.downloadFileBytes(pdfUrl);
+            if (pdfFileResponse.statusCode == 200 && pdfFileResponse.data != null) {
+              pdfBytes = Uint8List.fromList(pdfFileResponse.data!);
+            }
+          }
         }
       } catch (e) {
-        debugPrint(
-            'Server endpoint /invoices/$invoiceId/pdf unavailable ($e). Generating PDF locally...');
+        debugPrint('Server /invoices/$invoiceId/pdf error: $e');
       }
 
-      pdfBytes ??= await _generateInvoicePdfLocally(selectedInvoice);
-
-      if (pdfBytes.isNotEmpty) {
+      if (pdfBytes != null && pdfBytes.isNotEmpty) {
         _showDownloadSuccessDialog(pdfBytes, selectedInvoice);
       } else {
         AppSnackbar.error(
           title: 'Download Failed',
-          message: 'Unable to generate or download invoice PDF.',
+          message: 'Unable to download invoice PDF from server.',
         );
       }
     } catch (e) {
-      print('Unexpected PDF Download Error: $e');
+      debugPrint('Unexpected PDF Download Error: $e');
 
       AppSnackbar.error(
         title: 'Error',
@@ -1039,16 +992,10 @@ class InvoicesDetailsController extends GetxController {
 
       final invoiceId = selectedInvoice.id;
 
-      debugPrint(
-        'Downloading e-Invoice XML for invoice ID: $invoiceId',
-      );
-
       final response = await dioClient.downloadEInvoice(
         invoiceId: invoiceId,
         accessToken: accessToken,
       );
-
-      debugPrint('e-Invoice status: ${response.statusCode}');
 
       if (response.data != null && response.data!.isNotEmpty) {
         final xmlBytes = Uint8List.fromList(response.data!);
@@ -1056,14 +1003,12 @@ class InvoicesDetailsController extends GetxController {
         final directory = await getApplicationDocumentsDirectory();
 
         final invoiceNumber =
-            selectedInvoice.invoiceNumber?.toString() ?? invoiceId.toString();
+            selectedInvoice.invoiceNumber.isNotEmpty ? selectedInvoice.invoiceNumber : invoiceId.toString();
 
         final filePath = '${directory.path}/INV-$invoiceNumber.xml';
         final file = File(filePath);
 
         await file.writeAsBytes(xmlBytes);
-
-        debugPrint('e-Invoice saved at: $filePath');
 
         _showXmlSuccessDialog(filePath, invoiceNumber, xmlBytes);
       } else {
@@ -1074,8 +1019,6 @@ class InvoicesDetailsController extends GetxController {
       }
     } on DioException catch (e) {
       debugPrint('e-Invoice API Error: ${e.response?.statusCode}');
-      debugPrint('e-Invoice API URL: ${e.requestOptions.uri}');
-      debugPrint('e-Invoice API Response: ${e.response?.data}');
 
       AppSnackbar.error(
         title: 'Download Failed',
@@ -1210,157 +1153,6 @@ class InvoicesDetailsController extends GetxController {
         ),
       ),
     );
-  }
-
-  // ============================================================
-  // LOCAL PDF GENERATION FALLBACK
-  // ============================================================
-
-  Future<Uint8List> _generateInvoicePdfLocally(InvoicesModel inv) async {
-    final pdf = pw.Document();
-
-    final clientName = client.value?.name ?? 'Client';
-    final itemsList = invoiceItems;
-
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        'INVOICE',
-                        style: pw.TextStyle(
-                          fontSize: 24,
-                          fontWeight: pw.FontWeight.bold,
-                          color: PdfColors.blue900,
-                        ),
-                      ),
-                      pw.SizedBox(height: 4),
-                      pw.Text(
-                        '#${inv.invoiceNumber}',
-                        style: const pw.TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.end,
-                    children: [
-                      pw.Text('Date: ${inv.issueDate}'),
-                      pw.Text('Status: ${inv.status.toUpperCase()}'),
-                    ],
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 24),
-              pw.Divider(),
-              pw.SizedBox(height: 12),
-
-              pw.Text(
-                'Billed To:',
-                style: pw.TextStyle(
-                  fontSize: 12,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.grey700,
-                ),
-              ),
-              pw.SizedBox(height: 4),
-              pw.Text(
-                clientName,
-                style: pw.TextStyle(
-                  fontSize: 14,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              if (client.value?.email != null) pw.Text(client.value!.email!),
-              if (client.value?.phone != null) pw.Text(client.value!.phone!),
-
-              pw.SizedBox(height: 24),
-
-              pw.TableHelper.fromTextArray(
-                headers: ['Description', 'Qty', 'Unit Price', 'Total'],
-                data: itemsList.isNotEmpty
-                    ? itemsList.map((item) {
-                        return [
-                          item.itemDesc,
-                          '${item.quantity}',
-                          '€${item.unitPrice.toStringAsFixed(2)}',
-                          '€${item.grossAmount.toStringAsFixed(2)}',
-                        ];
-                      }).toList()
-                    : [
-                        [
-                          'Invoice Total',
-                          '1',
-                          '€${inv.paidAmount.toStringAsFixed(2)}',
-                          '€${inv.paidAmount.toStringAsFixed(2)}'
-                        ]
-                      ],
-                headerStyle: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.white,
-                ),
-                headerDecoration: const pw.BoxDecoration(
-                  color: PdfColors.blue900,
-                ),
-                rowDecoration: const pw.BoxDecoration(
-                  border: pw.Border(
-                    bottom: pw.BorderSide(color: PdfColors.grey300),
-                  ),
-                ),
-                cellAlignment: pw.Alignment.centerLeft,
-                cellAlignments: {
-                  1: pw.Alignment.centerRight,
-                  2: pw.Alignment.centerRight,
-                  3: pw.Alignment.centerRight,
-                },
-              ),
-
-              pw.SizedBox(height: 20),
-
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.end,
-                children: [
-                  pw.Container(
-                    width: 200,
-                    child: pw.Column(
-                      children: [
-                        pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                          children: [
-                            pw.Text('Total Amount:',
-                                style: pw.TextStyle(
-                                    fontWeight: pw.FontWeight.bold)),
-                            pw.Text(
-                              formatCurrency(inv.paidAmount, inv.currencyCode),
-                              style: pw.TextStyle(
-                                fontSize: 14,
-                                fontWeight: pw.FontWeight.bold,
-                                color: PdfColors.blue900,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
-    return pdf.save();
   }
 
   // ============================================================

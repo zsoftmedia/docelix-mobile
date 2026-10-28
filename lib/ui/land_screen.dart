@@ -762,11 +762,11 @@ class _AssetsExpandableSection extends StatelessWidget {
                           title: 'Fixed Assets',
                           onTap: onFixedAssets,
                         ),
-                        _AssetSubItem(
+                        /*_AssetSubItem(
                           icon: Icons.inventory_2_outlined,
                           title: 'Inventory',
                           onTap: onInventory,
-                        ),
+                        ),*/
                         _AssetSubItem(
                           icon: Icons.directions_car_outlined,
                           title: 'Vehicles & Logbook',

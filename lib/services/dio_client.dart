@@ -1092,26 +1092,56 @@ class DioClient {
   }
 
 // ==============================
-// GET PDF
+// POST PDF
 // ==============================
 
-
-  Future<Response<List<int>>> downloadInvoicePdf({
+  Future<Response> downloadInvoicePdf({
     required int invoiceId,
     required String accessToken,
   }) async {
-    return await _dio.get<List<int>>(
+    return await _dio.post(
       '${ApiConstants.baseUrl}/invoices/$invoiceId/pdf',
       options: Options(
-        responseType: ResponseType.bytes,
         headers: {
           'Authorization': 'Bearer $accessToken',
-          'Accept': 'application/pdf',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       ),
     );
   }
 
+  // ==============================
+  // DOWNLOAD FILE BYTES FROM URL
+  // ==============================
+
+  Future<Response<List<int>>> downloadFileBytes(String url) async {
+    return await _dio.get<List<int>>(
+      url,
+      options: Options(
+        responseType: ResponseType.bytes,
+      ),
+    );
+  }
+
+  // ==============================
+  // GET FISCAL RECEIPTS
+  // ==============================
+
+  Future<Response> getFiscalReceipts({
+    required int invoiceId,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/cash-register/invoices/$invoiceId/fiscal-receipts',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+  }
   // ==============================
   // GET e Invoice PDF
   // ==============================
