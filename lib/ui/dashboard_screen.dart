@@ -1234,7 +1234,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         recievableInvoices?.count ?? 0;
 
     final recievableAmount =
-        recievableInvoices?.count ?? 0;
+        recievableInvoices?.amount ?? 0;
 
     final payableInvoices =
         dashboard?.outstanding?.payables;
@@ -1243,8 +1243,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         payableInvoices?.count ?? 0;
 
     final payableAmount =
-        payableInvoices?.count ?? 0;
-
+        payableInvoices?.amount ?? 0;
 
     return Container(
       width: double.infinity,
@@ -1276,41 +1275,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                 ),
-
-                // See All
-
-                /*Row(
-                  children: [
-                    Text(
-                      "See all",
-                      style: TextStyle(
-                        color: colorsList.green,
-                        fontSize: width.fontSizeW(0.023),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: colorsList.green,
-                      size: width * 0.045,
-                    ),
-                  ],
-                ),*/
               ],
             ),
           ),
 
-          // ==============================
           // RECEIVABLES INVOICES
-          // ==============================
-
           _attentionItem(
             width: width,
             icon: Icons.arrow_downward,
             iconColor: colorsList.green,
             title: "$recievableCount receivables invoices",
-            subtitle:
-                "Total receivables amount ${dashboardController.currencySymbol} ${recievableAmount.toStringAsFixed(2)}",
+            subtitle: "Total receivables amount",
+            amount: _formatCurrency(recievableAmount),
             showDivider: true,
             onTap: () {
               Get.toNamed(
@@ -1320,39 +1296,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
           ),
 
-          // ==============================
-          // PAYABLES
-          // ==============================
-
+          // PAYABLES INVOICES
           _attentionItem(
             width: width,
             icon: Icons.arrow_upward_rounded,
             iconColor: colorsList.red,
             title: "$payableCount payables invoices",
-            subtitle:
-                "Total payables amount ${dashboardController.currencySymbol} ${payableAmount.toStringAsFixed(2)}",
+            subtitle: "Total payables amount",
+            amount: _formatCurrency(payableAmount),
             showDivider: true,
             onTap: () {
-
               Get.toNamed(
                 '/AccountsPayableScreen',
                 arguments: 'Receivable Screen',
               );
-
             },
           ),
 
-          // ==============================
           // OVERDUE INVOICES
-          // ==============================
-
           _attentionItem(
             width: width,
             icon: Icons.priority_high_rounded,
             iconColor: colorsList.orange,
             title: "$overdueCount overdue invoices",
-            subtitle:
-                "Total amount ${dashboardController.currencySymbol} ${overdueAmount.toStringAsFixed(2)}",
+            subtitle: "Total amount",
+            amount: _formatCurrency(overdueAmount),
             showDivider: false,
             onTap: () {
               Get.toNamed(
@@ -1475,6 +1443,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required Color iconColor,
     required String title,
     required String subtitle,
+    required String amount,
     required bool showDivider,
     VoidCallback? onTap,
   }) {
@@ -1495,7 +1464,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     width: width * 0.085,
                     height: width * 0.085,
                     decoration: BoxDecoration(
-                      color: iconColor.withOpacity(0.10),
+                      color: iconColor.withValues(alpha: 0.10),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -1533,10 +1502,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
 
+                  SizedBox(width: width * 0.02),
+
+                  Text(
+                    amount,
+                    style: TextStyle(
+                      color: colorsList.primaryText,
+                      fontSize: width.fontSizeW(0.034),
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+
+                  SizedBox(width: width * 0.01),
+
                   Icon(
                     Icons.chevron_right_rounded,
                     color: colorsList.secondaryText,
-                    size: width * 0.050,
+                    size: width * 0.045,
                   ),
                 ],
               ),
