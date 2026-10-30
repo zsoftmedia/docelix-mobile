@@ -65,6 +65,8 @@ class VehicleDetailsController extends GetxController {
   }
 
   Future<void> loadAll() async {
+    if (vehicle.value.id <= 0) return;
+
     final session = _sessionOrNull(showError: true);
     if (session == null) return;
 
@@ -103,6 +105,7 @@ class VehicleDetailsController extends GetxController {
   }
 
   Future<void> loadVehicle() async {
+    if (vehicle.value.id <= 0) return;
     final session = _sessionOrNull();
     if (session == null) return;
 
@@ -141,6 +144,7 @@ class VehicleDetailsController extends GetxController {
   }
 
   Future<void> loadTrips() async {
+    if (vehicle.value.id <= 0) return;
     final session = _sessionOrNull();
     if (session == null) return;
 
@@ -1118,10 +1122,20 @@ class VehicleDetailsController extends GetxController {
     if (data is Map) {
       final message = data['message'] ?? data['error'];
       if (message != null && message.toString().trim().isNotEmpty) {
-        return message.toString();
+        final str = message.toString();
+        if (str.toLowerCase().contains('missing vehical id') ||
+            str.toLowerCase().contains('missing vehicle id')) {
+          return 'Vehicle details unavailable.';
+        }
+        return str;
       }
     } else if (data is String && data.trim().isNotEmpty) {
-      return data.trim();
+      final str = data.trim();
+      if (str.toLowerCase().contains('missing vehical id') ||
+          str.toLowerCase().contains('missing vehicle id')) {
+        return 'Vehicle details unavailable.';
+      }
+      return str;
     }
     return fallback;
   }

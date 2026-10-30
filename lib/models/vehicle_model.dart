@@ -137,7 +137,7 @@ class VehicleModel {
     }
 
     return VehicleModel(
-      id: _asInt(json['id']) ?? 0,
+      id: _asInt(json['id']) ?? _asInt(json['vehicle_id']) ?? 0,
       companyId: _asInt(json['company_id']) ?? 0,
       name: json['name']?.toString() ?? '',
       plateNumber: json['plate_number']?.toString(),
