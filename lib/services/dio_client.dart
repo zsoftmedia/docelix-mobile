@@ -745,6 +745,35 @@ class DioClient {
   }
 
   // ==============================
+  // PAY BILL / INCOMING INVOICE
+  // ==============================
+
+  Future<Response> payBill({
+    required int invoiceId,
+    required int companyId,
+    required String paymentMethod,
+    required String accessToken,
+  }) async {
+    return await _dio.patch(
+      '${ApiConstants.baseUrl}/incoming-invoices/$invoiceId',
+      data: {
+        'company_id': companyId,
+        'status': 'paid',
+        'payment_method': paymentMethod,
+        'paid_at': DateTime.now().toIso8601String(),
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // DELETE INVOICE
   // ==============================
   Future<Response> deleteInvoice({

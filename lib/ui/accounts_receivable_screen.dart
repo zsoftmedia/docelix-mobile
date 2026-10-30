@@ -2,6 +2,7 @@ import 'package:docelix_mobileapp/controllers/AccountsReceivableController.dart'
 import 'package:docelix_mobileapp/models/accounts_receivable_model.dart';
 import 'package:docelix_mobileapp/models/invoices_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -392,18 +393,36 @@ class _AccountsReceivableScreenState extends State<AccountsReceivableScreen> {
 
     return InkWell(
       onTap: () async {
-        // If you have an Accounts Receivable details screen,
-        // you can navigate here.
-        //
-        // final result = await Get.toNamed(
-        //   '/AccountsReceivableDetailsScreen',
-        //   arguments: invoice,
-        // );
-        //
-        // if (result == true) {
-        //   await invoicesController
-        //       .refreshReceivableInvoices();
-        // }
+        final invoicesModel = InvoicesModel(
+          id: invoice.id ?? 0,
+          companyId: int.tryParse(SessionManager.accessCompanyid?.toString() ?? '0') ?? 0,
+          clientId: 0,
+          userId: '',
+          invoiceNumber: invoice.invoiceNumber ?? '',
+          issueDate: invoice.issueDate ?? '',
+          dueDate: invoice.dueDate,
+          createdAt: invoice.issueDate ?? '',
+          notesPre: '',
+          notesPost: '',
+          status: invoice.status ?? '',
+          layoutOrder: const [],
+          currencyCode: invoice.currencyCode ?? 'EUR',
+          paidAmount: invoice.paidAmount ?? 0.0,
+          grossAmount: invoice.totalAmount ?? 0.0,
+          remainingAmount: invoice.remainingAmount,
+          reminderCount: 0,
+          vatReviewStatus: '',
+          recurringInvoices: const [],
+        );
+
+        final result = await Get.toNamed(
+          '/InvoicesDetailsScreen',
+          arguments: invoicesModel,
+        );
+
+        if (result == true) {
+          await invoicesController.refreshReceivableInvoices();
+        }
       },
 
       child: Container(
