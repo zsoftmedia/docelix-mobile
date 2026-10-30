@@ -844,7 +844,9 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: _heading,
-                    side: const BorderSide(color: colorsList.borderColor),
+                    side: const BorderSide(
+                        color: colorsList.borderColor
+                    ),
                     minimumSize: const Size(0, 46),
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     shape: RoundedRectangleBorder(

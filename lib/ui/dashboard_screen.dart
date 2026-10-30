@@ -59,7 +59,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: colorsList.backgroundColor,
       child: SafeArea(
         child: Obx(() {
-          if (dashboardController.isLoading.value) {
+          if (dashboardController.isLoading.value &&
+              dashboardController.dashboardData.value == null) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -70,11 +71,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               horizontal: rs.isPhone ? width * 0.055 : rs.pagePaddingH,
               vertical: rs.isPhone ? height * 0.012 : rs.s(12),
             ),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            child: RefreshIndicator(
+              onRefresh: dashboardController.getDashboard,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   _buildHeader(
                     width: width,
                     height: height,
@@ -117,8 +120,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-          );
-        }),
+          ),
+        );
+      }),
       ),
     );
   }
