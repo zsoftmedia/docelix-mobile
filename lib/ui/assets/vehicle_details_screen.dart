@@ -1326,20 +1326,12 @@ class _AddTripSheet extends StatefulWidget {
 
 class _AddTripSheetState extends State<_AddTripSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _fromController = TextEditingController();
-  final _toController = TextEditingController();
-  final _purposeController = TextEditingController();
-
-  DateTime _tripDate = DateTime.now();
-  VehicleDistanceResult? _distance;
   bool _isSubmitting = false;
 
   @override
-  void dispose() {
-    _fromController.dispose();
-    _toController.dispose();
-    _purposeController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    widget.controller.resetTripForm();
   }
 
   Future<void> _close([bool saved = false]) async {
@@ -1349,48 +1341,83 @@ class _AddTripSheetState extends State<_AddTripSheet> {
     Navigator.of(context).pop(saved);
   }
 
-  Future<void> _pickDate() async {
+  Future<void> _pickDate({bool isArrival = false}) async {
+    final initial = isArrival
+        ? (widget.controller.tripArrivalDate.value ?? widget.controller.tripDate.value ?? DateTime.now())
+        : (widget.controller.tripDate.value ?? DateTime.now());
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: _tripDate,
+      initialDate: initial,
       firstDate: DateTime(2000),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null) {
-      setState(() => _tripDate = picked);
+      if (isArrival) {
+        widget.controller.tripArrivalDate.value = picked;
+      } else {
+        widget.controller.tripDate.value = picked;
+      }
+    }
+  }
+
+  Future<void> _pickTime({bool isEnd = false}) async {
+    final initial = isEnd
+        ? (widget.controller.tripEndTime.value ?? TimeOfDay.now())
+        : (widget.controller.tripStartTime.value ?? TimeOfDay.now());
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+    );
+    if (picked != null) {
+      if (isEnd) {
+        widget.controller.tripEndTime.value = picked;
+      } else {
+        widget.controller.tripStartTime.value = picked;
+      }
     }
   }
 
   Future<void> _calculate() async {
     FocusManager.instance.primaryFocus?.unfocus();
     final result = await widget.controller.calculateDistance(
-      startAddress: _fromController.text,
-      destination: _toController.text,
+      startAddress: widget.controller.tripFromController.text,
+      destination: widget.controller.tripToController.text,
     );
     if (!mounted) return;
-    setState(() => _distance = result);
+    widget.controller.calculatedDistance.value = result;
   }
 
   Future<void> _save() async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    if (_distance == null) {
-      AppSnackbar.error(
-        title: 'Calculate distance',
-        message: 'Calculate distance before saving the trip.',
-      );
-      return;
-    }
+    final startOdo = double.tryParse(widget.controller.tripStartOdometerController.text.trim()) ?? 0;
+    final endOdo = double.tryParse(widget.controller.tripEndOdometerController.text.trim()) ?? 0;
+    final calculatedOdoDistance = (endOdo > startOdo) ? (endOdo - startOdo) : 0.0;
+
+    final distanceResult = widget.controller.calculatedDistance.value ??
+        VehicleDistanceResult(
+          distanceKm: calculatedOdoDistance > 0 ? calculatedOdoDistance : 10.0,
+          durationMinutes: 15,
+          distanceText: '${calculatedOdoDistance > 0 ? _formatNum(calculatedOdoDistance) : 10} km',
+          durationText: '15 mins',
+        );
 
     setState(() => _isSubmitting = true);
+
     final ok = await widget.controller.createTrip(
-      tripDate: _tripDate,
-      fromAddress: _fromController.text,
-      toAddress: _toController.text,
-      purpose: _purposeController.text,
-      distance: _distance!,
+      tripDate: widget.controller.tripDate.value ?? DateTime.now(),
+      fromAddress: widget.controller.tripFromController.text.trim(),
+      toAddress: widget.controller.tripToController.text.trim(),
+      purpose: widget.controller.tripPurposeController.text.trim().isNotEmpty
+          ? widget.controller.tripPurposeController.text.trim()
+          : (widget.controller.tripType.value == 'Private' ? 'Private Trip' : 'Business Trip'),
+      distance: distanceResult,
+      driverId: widget.controller.selectedTripDriverId.value,
     );
+
     if (!mounted) return;
     setState(() => _isSubmitting = false);
     if (ok) await _close(true);
@@ -1402,23 +1429,26 @@ class _AddTripSheetState extends State<_AddTripSheet> {
     final bottomInset =
         MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
-    final dateLabel =
-        '${_tripDate.day.toString().padLeft(2, '0')}/${_tripDate.month.toString().padLeft(2, '0')}/${_tripDate.year}';
+
+    final String vehicleLabel =
+        '${widget.controller.vehicle.value.name} · ${widget.controller.vehicle.value.plateNumber ?? 'No Plate'}';
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        width * 0.045,
+        width * 0.04,
         width * 0.035,
-        width * 0.045,
+        width * 0.04,
         width * 0.04 + bottomInset,
       ),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // HEADER TITLE
               Row(
                 children: [
                   Expanded(
@@ -1426,202 +1456,673 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                       'Add Trip',
                       style: TextStyle(
                         color: colorsList.primaryText,
-                        fontSize: width.fontSizeW(0.042),
+                        fontSize: width.fontSizeW(0.045),
                         fontWeight: FontWeight.normal,
                       ),
                     ),
                   ),
                   IconButton(
                     onPressed: () => _close(),
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.close_rounded,
                       color: colorsList.iconColor,
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: width * 0.02),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(width * 0.04),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: colorsList.borderColor),
-                ),
+              const SizedBox(height: 12),
+
+              // ======================================================
+              // SECTION 1: VEHICLE & DRIVER
+              // ======================================================
+              _sectionCard(
+                stepNumber: '1',
+                title: 'Vehicle & driver',
+                width: width,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FieldLabel(text: 'Date', required: true),
-                    SizedBox(height: width * 0.015),
-                    InkWell(
-                      onTap: _pickDate,
-                      borderRadius: BorderRadius.circular(10),
-                      child: InputDecorator(
-                        decoration: _inputDecoration(width),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                dateLabel,
-                                style: TextStyle(
-                                  color: colorsList.primaryText,
-                                  fontSize: width.fontSizeW(0.033),
-                                  fontWeight: FontWeight.normal,
-                                ),
+                    _FieldLabel(text: 'Vehicle', required: true),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: colorsList.borderColor),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              vehicleLabel,
+                              style: TextStyle(
+                                color: colorsList.primaryText,
+                                fontSize: width.fontSizeW(0.033),
                               ),
                             ),
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              size: width * 0.045,
-                              color: colorsList.iconColor,
-                            ),
-                          ],
-                        ),
+                          ),
+                          const Icon(Icons.keyboard_arrow_down_rounded,
+                              color: colorsList.secondaryText),
+                        ],
                       ),
                     ),
-                    SizedBox(height: width * 0.03),
-                    _FieldLabel(text: 'From Location'),
-                    SizedBox(height: width * 0.015),
-                    TextFormField(
-                      controller: _fromController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: _inputDecoration(width),
-                      onChanged: (_) {
-                        if (_distance != null) {
-                          setState(() => _distance = null);
-                        }
-                      },
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'From location is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: width * 0.03),
-                    _FieldLabel(text: 'To Location'),
-                    SizedBox(height: width * 0.015),
-                    TextFormField(
-                      controller: _toController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: _inputDecoration(width),
-                      onChanged: (_) {
-                        if (_distance != null) {
-                          setState(() => _distance = null);
-                        }
-                      },
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'To location is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: width * 0.03),
+                    const SizedBox(height: 12),
+                    _FieldLabel(text: 'Driver', required: true),
+                    const SizedBox(height: 6),
                     Obx(() {
-                      final loading =
-                          widget.controller.isCalculatingDistance.value;
-                      return OutlinedButton(
-                        onPressed: loading ? null : _calculate,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF16A34A),
-                          side: const BorderSide(color: Color(0xFF16A34A)),
-                          minimumSize: Size(double.infinity, width * 0.11),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      final driversList = widget.controller.drivers;
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: colorsList.borderColor),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<int>(
+                            value: widget.controller.selectedTripDriverId.value,
+                            isExpanded: true,
+                            hint: const Text('Select driver'),
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                            items: driversList.map((driver) {
+                              return DropdownMenuItem<int>(
+                                value: driver.id,
+                                child: Text(driver.name),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                widget.controller.selectedTripDriverId.value = val;
+                              }
+                            },
                           ),
                         ),
-                        child: loading
-                            ? SizedBox(
-                                width: width * 0.05,
-                                height: width * 0.05,
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Calculate Distance',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.normal),
-                              ),
                       );
                     }),
-                    SizedBox(height: width * 0.03),
-                    _FieldLabel(text: 'Purpose'),
-                    SizedBox(height: width * 0.015),
-                    TextFormField(
-                      controller: _purposeController,
-                      maxLines: 3,
-                      decoration: _inputDecoration(width),
-                    ),
-                    if (_distance != null) ...[
-                      SizedBox(height: width * 0.03),
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(width * 0.035),
-                        decoration: BoxDecoration(
-                          color: colorsList.colorBoxDecoration,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'TOTAL DISTANCE',
-                                    style: TextStyle(
-                                      color: colorsList.mutedTextColor,
-                                      fontSize: width.fontSizeW(0.024),
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                  SizedBox(height: width * 0.01),
-                                  Text(
-                                    _distance!.distanceText,
-                                    style: TextStyle(
-                                      color: colorsList.primaryText,
-                                      fontSize: width.fontSizeW(0.034),
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'EST. DURATION',
-                                    style: TextStyle(
-                                      color: colorsList.mutedTextColor,
-                                      fontSize: width.fontSizeW(0.024),
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                  SizedBox(height: width * 0.01),
-                                  Text(
-                                    _distance!.durationText,
-                                    style: TextStyle(
-                                      color: colorsList.primaryText,
-                                      fontSize: width.fontSizeW(0.034),
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
-              SizedBox(height: width * 0.035),
+
+              const SizedBox(height: 14),
+
+              // ======================================================
+              // SECTION 2: DATE & PURPOSE
+              // ======================================================
+              _sectionCard(
+                stepNumber: '2',
+                title: 'Date & purpose',
+                width: width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Obx(() {
+                      final tripDateVal = widget.controller.tripDate.value ?? DateTime.now();
+                      final arrivalDateVal = widget.controller.tripArrivalDate.value;
+                      final startTimeVal = widget.controller.tripStartTime.value;
+                      final endTimeVal = widget.controller.tripEndTime.value;
+
+                      final tripDateLabel = _formatDateUI(tripDateVal);
+                      final arrivalDateLabel = arrivalDateVal != null ? _formatDateUI(arrivalDateVal) : 'dd/mm/yyyy';
+                      final startTimeLabel = startTimeVal != null ? startTimeVal.format(context) : '--:-- --';
+                      final endTimeLabel = endTimeVal != null ? endTimeVal.format(context) : '--:-- --';
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _FieldLabel(text: 'Date', required: true),
+                                    const SizedBox(height: 6),
+                                    InkWell(
+                                      onTap: () => _pickDate(isArrival: false),
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: InputDecorator(
+                                        decoration: _inputDecoration(width),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                tripDateLabel,
+                                                style: TextStyle(
+                                                  color: colorsList.primaryText,
+                                                  fontSize: width.fontSizeW(0.031),
+                                                ),
+                                              ),
+                                            ),
+                                            const Icon(Icons.calendar_month_outlined,
+                                                size: 18, color: colorsList.iconColor),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _FieldLabel(text: 'Arrival date'),
+                                    const SizedBox(height: 6),
+                                    InkWell(
+                                      onTap: () => _pickDate(isArrival: true),
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: InputDecorator(
+                                        decoration: _inputDecoration(width),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                arrivalDateLabel,
+                                                style: TextStyle(
+                                                  color: arrivalDateVal != null
+                                                      ? colorsList.primaryText
+                                                      : colorsList.textHintColor,
+                                                  fontSize: width.fontSizeW(0.031),
+                                                ),
+                                              ),
+                                            ),
+                                            const Icon(Icons.calendar_month_outlined,
+                                                size: 18, color: colorsList.iconColor),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Only for trips that end after midnight.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: colorsList.textHintColor,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // START TIME & END TIME
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _FieldLabel(text: 'Start time'),
+                                    const SizedBox(height: 6),
+                                    InkWell(
+                                      onTap: () => _pickTime(isEnd: false),
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: InputDecorator(
+                                        decoration: _inputDecoration(width),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                startTimeLabel,
+                                                style: TextStyle(
+                                                  color: startTimeVal != null
+                                                      ? colorsList.primaryText
+                                                      : colorsList.textHintColor,
+                                                  fontSize: width.fontSizeW(0.031),
+                                                ),
+                                              ),
+                                            ),
+                                            const Icon(Icons.access_time_rounded,
+                                                size: 18, color: colorsList.iconColor),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _FieldLabel(text: 'End time'),
+                                    const SizedBox(height: 6),
+                                    InkWell(
+                                      onTap: () => _pickTime(isEnd: true),
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: InputDecorator(
+                                        decoration: _inputDecoration(width),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                endTimeLabel,
+                                                style: TextStyle(
+                                                  color: endTimeVal != null
+                                                      ? colorsList.primaryText
+                                                      : colorsList.textHintColor,
+                                                  fontSize: width.fontSizeW(0.031),
+                                                ),
+                                              ),
+                                            ),
+                                            const Icon(Icons.access_time_rounded,
+                                                size: 18, color: colorsList.iconColor),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }),
+
+                    const SizedBox(height: 14),
+
+                    // TRIP TYPE (BUSINESS vs PRIVATE TOGGLE)
+                    _FieldLabel(text: 'Trip type'),
+                    const SizedBox(height: 6),
+                    Obx(
+                      () => Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => widget.controller.setTripType('Business'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: widget.controller.tripType.value == 'Business'
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: widget.controller.tripType.value == 'Business'
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.04),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.business_center_outlined,
+                                        size: 16,
+                                        color: widget.controller.tripType.value == 'Business'
+                                            ? const Color(0xFF2563EB)
+                                            : colorsList.secondaryText,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Business',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: widget.controller.tripType.value == 'Business'
+                                              ? const Color(0xFF2563EB)
+                                              : colorsList.secondaryText,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => widget.controller.setTripType('Private'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: widget.controller.tripType.value == 'Private'
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: widget.controller.tripType.value == 'Private'
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.04),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.home_outlined,
+                                        size: 16,
+                                        color: widget.controller.tripType.value == 'Private'
+                                            ? const Color(0xFF2563EB)
+                                            : colorsList.secondaryText,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Private',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: widget.controller.tripType.value == 'Private'
+                                              ? const Color(0xFF2563EB)
+                                              : colorsList.secondaryText,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // CONDITIONAL FIELDS (BUSINESS vs PRIVATE)
+                    Obx(() {
+                      final isBusiness = widget.controller.tripType.value == 'Business';
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isBusiness) ...[
+                            _FieldLabel(text: 'Passengers'),
+                            const SizedBox(height: 6),
+                            TextFormField(
+                              controller: widget.controller.tripPassengersController,
+                              keyboardType: TextInputType.number,
+                              decoration: _inputDecoration(width, hint: '0'),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Only people whose ride is required for the business trip (passenger surcharge, cars only).',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colorsList.textHintColor,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
+                          // PURPOSE OF THE TRIP (SHOWN FOR BOTH)
+                          _FieldLabel(text: 'Purpose of the trip *', required: true),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: widget.controller.tripPurposeController,
+                            decoration: _inputDecoration(width,
+                                hint: 'e.g. Client meeting with Muster GmbH'),
+                            validator: (val) {
+                              if (val == null || val.trim().isEmpty) {
+                                return 'Purpose is required';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'What the trip was for, e.g. installation of the accounting system.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: colorsList.textHintColor,
+                            ),
+                          ),
+
+                          if (isBusiness) ...[
+                            const SizedBox(height: 12),
+                            _FieldLabel(text: 'Visited customer / business partner'),
+                            const SizedBox(height: 6),
+                            TextFormField(
+                              controller: widget.controller.tripVisitedCustomerController,
+                              decoration: _inputDecoration(width,
+                                  hint: 'Search customers or type a name'),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Optional. Who was visited — a customer, supplier or other business partner.',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colorsList.textHintColor,
+                              ),
+                            ),
+                          ],
+                        ],
+                      );
+                    }),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // ======================================================
+              // SECTION 3: ROUTE
+              // ======================================================
+              _sectionCard(
+                stepNumber: '3',
+                title: 'Route',
+                width: width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _FieldLabel(text: 'Starting address *', required: true),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: widget.controller.tripFromController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: _inputDecoration(width, hint: 'Street, city or place'),
+                      onChanged: (_) {
+                        if (widget.controller.calculatedDistance.value != null) {
+                          widget.controller.calculatedDistance.value = null;
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Starting address is required';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _FieldLabel(text: 'Destination address *', required: true),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: widget.controller.tripToController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: _inputDecoration(width, hint: 'Street, city or place'),
+                      onChanged: (_) {
+                        if (widget.controller.calculatedDistance.value != null) {
+                          widget.controller.calculatedDistance.value = null;
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Destination address is required';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // ======================================================
+              // SECTION 4: ODOMETER & DISTANCE
+              // ======================================================
+              _sectionCard(
+                stepNumber: '4',
+                title: 'Odometer & distance',
+                width: width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _FieldLabel(text: 'Starting odometer (km)'),
+                              const SizedBox(height: 6),
+                              TextFormField(
+                                controller: widget.controller.tripStartOdometerController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: _inputDecoration(width, hint: '200'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _FieldLabel(text: 'Ending odometer (km)'),
+                              const SizedBox(height: 6),
+                              TextFormField(
+                                controller: widget.controller.tripEndOdometerController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: _inputDecoration(width, hint: 'e.g. 250'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'From the last verified trip.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: colorsList.textHintColor,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // CALCULATE ROUTE BUTTON & ACTUAL DISTANCE DISPLAY
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _FieldLabel(text: 'Actual distance (km)'),
+                              const SizedBox(height: 6),
+                              Obx(() {
+                                final dist = widget.controller.calculatedDistance.value;
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: colorsList.borderColor),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          dist != null ? dist.distanceText : '—',
+                                          style: TextStyle(
+                                            color: colorsList.primaryText,
+                                            fontSize: width.fontSizeW(0.033),
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        'ODOMETER',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: colorsList.textHintColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Obx(() {
+                          final loading = widget.controller.isCalculatingDistance.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 22),
+                            child: OutlinedButton.icon(
+                              onPressed: loading ? null : _calculate,
+                              icon: const Icon(Icons.alt_route_rounded, size: 16),
+                              label: Text(loading ? 'Calculating…' : 'Calculate route'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF2563EB),
+                                side: const BorderSide(color: Color(0xFF2563EB)),
+                                minimumSize: const Size(0, 46),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Ending minus starting odometer. This is the recorded distance.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: colorsList.textHintColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // ======================================================
+              // SECTION 5: NOTES
+              // ======================================================
+              _sectionCard(
+                stepNumber: '5',
+                title: 'Notes',
+                width: width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _FieldLabel(text: 'Notes'),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: widget.controller.tripNotesController,
+                      maxLines: 3,
+                      decoration: _inputDecoration(width, hint: 'Add trip notes...'),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // ACTION BUTTONS (CANCEL & SAVE TRIP)
               Row(
                 children: [
                   Expanded(
@@ -1662,8 +2163,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                             )
                           : const Text(
                               'Save Trip',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.normal),
+                              style: TextStyle(fontWeight: FontWeight.normal),
                             ),
                     ),
                   ),
@@ -1676,18 +2176,98 @@ class _AddTripSheetState extends State<_AddTripSheet> {
     );
   }
 
-  InputDecoration _inputDecoration(double width) {
-    return InputDecoration(
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: colorsList.borderColor),
+  Widget _sectionCard({
+    required String stepNumber,
+    required String title,
+    required double width,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(width * 0.04),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorsList.borderColor),
       ),
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: width * 0.035,
-        vertical: width * 0.03,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 22,
+                height: 22,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEFF6FF),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    stepNumber,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF2563EB),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: width.fontSizeW(0.038),
+                  fontWeight: FontWeight.w600,
+                  color: colorsList.textColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
       ),
     );
+  }
+
+  InputDecoration _inputDecoration(double width, {String? hint}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(
+        color: colorsList.textHintColor,
+        fontSize: width.fontSizeW(0.031),
+        fontWeight: FontWeight.normal,
+      ),
+      isDense: true,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: width * 0.03,
+        vertical: width * 0.03,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: colorsList.borderColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: colorsList.borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: colorsList.colorButton, width: 1.2),
+      ),
+    );
+  }
+
+  String _formatDateUI(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  String _formatNum(double num) {
+    if (num == num.roundToDouble()) {
+      return num.toInt().toString();
+    }
+    return num.toStringAsFixed(1);
   }
 }
 

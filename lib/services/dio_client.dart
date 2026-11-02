@@ -1628,6 +1628,7 @@ class DioClient {
       '${ApiConstants.baseUrl}/vehicles/$vehicleId',
       queryParameters: {
         'company_id': companyId,
+        'vehicle_id': vehicleId,
       },
       options: Options(
         headers: {
@@ -1687,7 +1688,10 @@ class DioClient {
   }) async {
     return await _dio.get(
       '${ApiConstants.baseUrl}/vehicles/$vehicleId/trips',
-      queryParameters: {'company_id': companyId},
+      queryParameters: {
+        'company_id': companyId,
+        'vehicle_id': vehicleId,
+      },
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -1813,7 +1817,10 @@ class DioClient {
   }) async {
     return await _dio.get(
       '${ApiConstants.baseUrl}/vehicles/$vehicleId/fuel',
-      queryParameters: {'company_id': companyId},
+      queryParameters: {
+        'company_id': companyId,
+        'vehicle_id': vehicleId,
+      },
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -1883,7 +1890,10 @@ class DioClient {
   }) async {
     return await _dio.get(
       '${ApiConstants.baseUrl}/vehicles/$vehicleId/services',
-      queryParameters: {'company_id': companyId},
+      queryParameters: {
+        'company_id': companyId,
+        'vehicle_id': vehicleId,
+      },
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -1925,7 +1935,10 @@ class DioClient {
   }) async {
     return await _dio.get(
       '${ApiConstants.baseUrl}/vehicles/$vehicleId/insurance',
-      queryParameters: {'company_id': companyId},
+      queryParameters: {
+        'company_id': companyId,
+        'vehicle_id': vehicleId,
+      },
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -1967,7 +1980,10 @@ class DioClient {
   }) async {
     return await _dio.get(
       '${ApiConstants.baseUrl}/vehicles/$vehicleId/documents',
-      queryParameters: {'company_id': companyId},
+      queryParameters: {
+        'company_id': companyId,
+        'vehicle_id': vehicleId,
+      },
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',

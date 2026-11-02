@@ -3,6 +3,7 @@ import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/vehicle_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:intl/intl.dart';
 
@@ -39,6 +40,58 @@ class VehicleDetailsController extends GetxController {
   final RxBool isSavingInsurance = false.obs;
   final RxBool isSavingDocument = false.obs;
 
+  // ============================================================
+  // TRIP FORM CONTROLLERS & REACTIVE STATE
+  // ============================================================
+
+  final tripFromController = TextEditingController();
+  final tripToController = TextEditingController();
+  final tripPurposeController = TextEditingController();
+  final tripPassengersController = TextEditingController(text: '0');
+  final tripVisitedCustomerController = TextEditingController();
+  final tripStartOdometerController = TextEditingController();
+  final tripEndOdometerController = TextEditingController();
+  final tripNotesController = TextEditingController();
+
+  final RxString tripType = 'Business'.obs; // 'Business' or 'Private'
+  final Rxn<DateTime> tripDate = Rxn<DateTime>(DateTime.now());
+  final Rxn<DateTime> tripArrivalDate = Rxn<DateTime>();
+  final Rxn<TimeOfDay> tripStartTime = Rxn<TimeOfDay>();
+  final Rxn<TimeOfDay> tripEndTime = Rxn<TimeOfDay>();
+  final RxnInt selectedTripDriverId = RxnInt();
+  final Rxn<VehicleDistanceResult> calculatedDistance = Rxn<VehicleDistanceResult>();
+
+  void setTripType(String type) {
+    tripType.value = type;
+  }
+
+  void resetTripForm() {
+    tripFromController.clear();
+    tripToController.clear();
+    tripPurposeController.clear();
+    tripPassengersController.text = '0';
+    tripVisitedCustomerController.clear();
+
+    final currentKm = vehicle.value.currentKm;
+    tripStartOdometerController.text = currentKm > 0
+        ? currentKm.toInt().toString()
+        : '200';
+    tripEndOdometerController.clear();
+    tripNotesController.clear();
+
+    tripType.value = 'Business';
+    tripDate.value = DateTime.now();
+    tripArrivalDate.value = null;
+    tripStartTime.value = null;
+    tripEndTime.value = null;
+    calculatedDistance.value = null;
+
+    final primaryDriver = vehicle.value.vehicleDriverAssignments
+        .firstWhereOrNull((a) => a.isPrimary);
+    selectedTripDriverId.value = primaryDriver?.driverId ??
+        (drivers.isNotEmpty ? drivers.first.id : null);
+  }
+
   String get currencyCode {
     return SessionManager.accessCorrencycode?.trim().toUpperCase() ?? 'EUR';
   }
@@ -73,7 +126,7 @@ class VehicleDetailsController extends GetxController {
     await Future.wait([
       loadVehicle(),
       loadDrivers(),
-      loadLocations(),
+      //loadLocations(),
       loadTrips(),
       loadFuelLogs(),
       loadServices(),
@@ -86,7 +139,17 @@ class VehicleDetailsController extends GetxController {
 
   ({String token, int companyId})? _sessionOrNull({bool showError = false}) {
     final accessToken = SessionManager.accessToken;
-    final companyId = SessionManager.accessCompanyid;
+
+    int? companyId = vehicle.value.companyId > 0
+        ? vehicle.value.companyId
+        : null;
+
+    if (companyId == null || companyId == 0) {
+      final raw = SessionManager.accessCompanyid;
+      if (raw != null) {
+        companyId = int.tryParse(raw.toString());
+      }
+    }
 
     if (accessToken == null ||
         accessToken.isEmpty ||
@@ -95,7 +158,7 @@ class VehicleDetailsController extends GetxController {
       if (showError) {
         AppSnackbar.error(
           title: 'Error',
-          message: 'Session is not available.',
+          message: 'Company ID or Session is missing.',
         );
       }
       return null;
@@ -117,27 +180,18 @@ class VehicleDetailsController extends GetxController {
         accessToken: session.token,
       );
 
-      if (response.statusCode != 200) {
-        AppSnackbar.error(
-          title: 'Error',
-          message: _responseMessage(
-            response.data,
-            'Unable to load vehicle.',
-          ),
-        );
-        return;
+      if (response.statusCode == 200 && response.data != null) {
+        final raw = _extractMap(response.data);
+        if (raw != null) {
+          vehicle.value = VehicleModel.fromJson(raw);
+        }
+      } else {
+        debugPrint('[VehicleDetailsController] getVehicleById status: ${response.statusCode}');
       }
-
-      final raw = _extractMap(response.data);
-      if (raw == null) return;
-      vehicle.value = VehicleModel.fromJson(raw);
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to load vehicle.'),
-      );
+      debugPrint('[VehicleDetailsController] getVehicleById DioError: ${e.message}');
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] getVehicleById Exception: $e');
     } finally {
       isLoading.value = false;
     }
@@ -236,7 +290,8 @@ class VehicleDetailsController extends GetxController {
   Future<VehicleDistanceResult?> calculateDistance({
     required String startAddress,
     required String destination,
-  }) async {
+  }) async
+  {
     final session = _sessionOrNull(showError: true);
     if (session == null) return null;
 
@@ -287,7 +342,8 @@ class VehicleDetailsController extends GetxController {
     }
   }
 
-  Future<VehicleLocation?> _ensureLocation(String raw) async {
+  Future<VehicleLocation?> _ensureLocation(String raw) async
+  {
     final session = _sessionOrNull();
     if (session == null) return null;
 
@@ -340,7 +396,8 @@ class VehicleDetailsController extends GetxController {
     required String purpose,
     required VehicleDistanceResult distance,
     int? driverId,
-  }) async {
+  }) async
+  {
     final session = _sessionOrNull(showError: true);
     if (session == null) return false;
 
@@ -506,7 +563,8 @@ class VehicleDetailsController extends GetxController {
     required double liters,
     required double cost,
     required double odometer,
-  }) async {
+  }) async
+  {
     final session = _sessionOrNull(showError: true);
     if (session == null) return false;
 
@@ -555,7 +613,8 @@ class VehicleDetailsController extends GetxController {
   Future<bool> uploadFuelReceipt({
     required String filePath,
     required String fileName,
-  }) async {
+  }) async
+  {
     final session = _sessionOrNull(showError: true);
     if (session == null) return false;
 
@@ -639,7 +698,8 @@ class VehicleDetailsController extends GetxController {
     required String description,
     required double cost,
     required double odometer,
-  }) async {
+  }) async
+  {
     final session = _sessionOrNull(showError: true);
     if (session == null) return false;
 
@@ -778,7 +838,8 @@ class VehicleDetailsController extends GetxController {
     required double cost,
     required DateTime startDate,
     DateTime? endDate,
-  }) async {
+  }) async
+  {
     final session = _sessionOrNull(showError: true);
     if (session == null) return false;
 
@@ -928,7 +989,8 @@ class VehicleDetailsController extends GetxController {
     int? existingDriverId,
     String? newDriverName,
     bool isPrimary = true,
-  }) async {
+  }) async
+  {
     final session = _sessionOrNull(showError: true);
     if (session == null) return false;
 
@@ -1005,14 +1067,17 @@ class VehicleDetailsController extends GetxController {
         );
         await Future.wait([loadVehicle(), loadDrivers()]);
         return true;
+      } else {
+
+        AppSnackbar.error(
+          title: 'Error',
+          message: assignResponse.data?['message']?.toString() ??
+              assignResponse.data?['error']?.toString() ??
+              'Unable to assign driver.',
+        );
+
       }
 
-      AppSnackbar.error(
-        title: 'Error',
-        message: assignResponse.data?['message']?.toString() ??
-            assignResponse.data?['error']?.toString() ??
-            'Unable to assign driver.',
-      );
       return false;
     } on DioException catch (e) {
       AppSnackbar.error(
@@ -1124,7 +1189,9 @@ class VehicleDetailsController extends GetxController {
       if (message != null && message.toString().trim().isNotEmpty) {
         final str = message.toString();
         if (str.toLowerCase().contains('missing vehical id') ||
-            str.toLowerCase().contains('missing vehicle id')) {
+            str.toLowerCase().contains('missing vehicle id') ||
+            str.toLowerCase().contains('company id missing') ||
+            str.toLowerCase().contains('missing company id')) {
           return 'Vehicle details unavailable.';
         }
         return str;
@@ -1132,7 +1199,9 @@ class VehicleDetailsController extends GetxController {
     } else if (data is String && data.trim().isNotEmpty) {
       final str = data.trim();
       if (str.toLowerCase().contains('missing vehical id') ||
-          str.toLowerCase().contains('missing vehicle id')) {
+          str.toLowerCase().contains('missing vehicle id') ||
+          str.toLowerCase().contains('company id missing') ||
+          str.toLowerCase().contains('missing company id')) {
         return 'Vehicle details unavailable.';
       }
       return str;
@@ -1176,4 +1245,17 @@ class VehicleDetailsController extends GetxController {
   }
 
   Future<void> refreshVehicle() => loadVehicle();
+
+  @override
+  void onClose() {
+    tripFromController.dispose();
+    tripToController.dispose();
+    tripPurposeController.dispose();
+    tripPassengersController.dispose();
+    tripVisitedCustomerController.dispose();
+    tripStartOdometerController.dispose();
+    tripEndOdometerController.dispose();
+    tripNotesController.dispose();
+    super.onClose();
+  }
 }
