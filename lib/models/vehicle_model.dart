@@ -1,3 +1,76 @@
+class PlaceMatch {
+  final int start;
+  final int end;
+
+  const PlaceMatch({required this.start, required this.end});
+
+  factory PlaceMatch.fromJson(Map<String, dynamic> json) {
+    return PlaceMatch(
+      start: json['start'] as int? ?? 0,
+      end: json['end'] as int? ?? 0,
+    );
+  }
+}
+
+class PlaceSuggestion {
+  final String placeId;
+  final String mainText;
+  final String secondaryText;
+  final List<PlaceMatch> matches;
+
+  const PlaceSuggestion({
+    required this.placeId,
+    required this.mainText,
+    required this.secondaryText,
+    this.matches = const [],
+  });
+
+  factory PlaceSuggestion.fromJson(Map<String, dynamic> json) {
+    final rawMatches = json['matches'] as List?;
+    final parsedMatches = rawMatches != null
+        ? rawMatches
+            .whereType<Map>()
+            .map((m) => PlaceMatch.fromJson(Map<String, dynamic>.from(m)))
+            .toList()
+        : <PlaceMatch>[];
+
+    return PlaceSuggestion(
+      placeId: json['placeId']?.toString() ?? '',
+      mainText: json['mainText']?.toString() ?? '',
+      secondaryText: json['secondaryText']?.toString() ?? '',
+      matches: parsedMatches,
+    );
+  }
+
+  String get fullAddress {
+    if (secondaryText.trim().isEmpty) return mainText;
+    return '$mainText, $secondaryText';
+  }
+}
+
+class PlaceDetails {
+  final String placeId;
+  final String formattedAddress;
+  final double? latitude;
+  final double? longitude;
+
+  const PlaceDetails({
+    required this.placeId,
+    required this.formattedAddress,
+    this.latitude,
+    this.longitude,
+  });
+
+  factory PlaceDetails.fromJson(Map<String, dynamic> json) {
+    return PlaceDetails(
+      placeId: json['placeId']?.toString() ?? '',
+      formattedAddress: json['formattedAddress']?.toString() ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+    );
+  }
+}
+
 class VehicleDriver {
   final int id;
   final int companyId;

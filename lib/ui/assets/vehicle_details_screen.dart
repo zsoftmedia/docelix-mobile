@@ -1334,6 +1334,36 @@ class _AddTripSheetState extends State<_AddTripSheet> {
     widget.controller.resetTripForm();
   }
 
+  Widget _buildHighlightedText(PlaceSuggestion suggestion) {
+    final text = suggestion.mainText;
+    if (suggestion.matches.isEmpty) {
+      return Text(text, style: const TextStyle(fontSize: 13, color: colorsList.primaryText));
+    }
+
+    final match = suggestion.matches.first;
+    final start = match.start.clamp(0, text.length);
+    final end = match.end.clamp(start, text.length);
+
+    final before = text.substring(0, start);
+    final matched = text.substring(start, end);
+    final after = text.substring(end);
+
+    return Text.rich(
+      TextSpan(
+        style: const TextStyle(fontSize: 13, color: colorsList.primaryText),
+        children: [
+          if (before.isNotEmpty) TextSpan(text: before),
+          if (matched.isNotEmpty)
+            TextSpan(
+              text: matched,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+            ),
+          if (after.isNotEmpty) TextSpan(text: after),
+        ],
+      ),
+    );
+  }
+
   Future<void> _close([bool saved = false]) async {
     FocusManager.instance.primaryFocus?.unfocus();
     await Future<void>.delayed(const Duration(milliseconds: 40));
@@ -1914,7 +1944,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
               const SizedBox(height: 14),
 
               // ======================================================
-              // SECTION 3: ROUTE
+              // SECTION 3: ROUTE (WITH REAL-TIME AUTOCOMPLETE)
               // ======================================================
               _sectionCard(
                 stepNumber: '3',
@@ -1929,10 +1959,11 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                       controller: widget.controller.tripFromController,
                       textCapitalization: TextCapitalization.words,
                       decoration: _inputDecoration(width, hint: 'Street, city or place'),
-                      onChanged: (_) {
+                      onChanged: (val) {
                         if (widget.controller.calculatedDistance.value != null) {
                           widget.controller.calculatedDistance.value = null;
                         }
+                        widget.controller.searchPlaceAutocomplete(input: val, isStart: true);
                       },
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -1941,17 +1972,80 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                         return null;
                       },
                     ),
+                    Obx(() {
+                      final isSearching = widget.controller.isSearchingStartPlaces.value;
+                      final suggestions = widget.controller.startingAddressSuggestions;
+
+                      if (isSearching) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              SizedBox(width: 8),
+                              Text('Searching places...', style: TextStyle(fontSize: 12, color: colorsList.secondaryText)),
+                            ],
+                          ),
+                        );
+                      }
+
+                      if (suggestions.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: colorsList.borderColor),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: suggestions.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          itemBuilder: (context, index) {
+                            final item = suggestions[index];
+                            return ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity.compact,
+                              leading: const Icon(Icons.location_on_outlined, color: Color(0xFF2563EB), size: 18),
+                              title: _buildHighlightedText(item),
+                              subtitle: item.secondaryText.isNotEmpty
+                                  ? Text(item.secondaryText, style: const TextStyle(fontSize: 11, color: colorsList.secondaryText))
+                                  : null,
+                              onTap: () => widget.controller.selectStartingSuggestion(item),
+                            );
+                          },
+                        ),
+                      );
+                    }),
+
                     const SizedBox(height: 12),
+
                     _FieldLabel(text: 'Destination address *', required: true),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: widget.controller.tripToController,
                       textCapitalization: TextCapitalization.words,
                       decoration: _inputDecoration(width, hint: 'Street, city or place'),
-                      onChanged: (_) {
+                      onChanged: (val) {
                         if (widget.controller.calculatedDistance.value != null) {
                           widget.controller.calculatedDistance.value = null;
                         }
+                        widget.controller.searchPlaceAutocomplete(input: val, isStart: false);
                       },
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -1960,6 +2054,66 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                         return null;
                       },
                     ),
+                    Obx(() {
+                      final isSearching = widget.controller.isSearchingDestPlaces.value;
+                      final suggestions = widget.controller.destinationAddressSuggestions;
+
+                      if (isSearching) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              SizedBox(width: 8),
+                              Text('Searching places...', style: TextStyle(fontSize: 12, color: colorsList.secondaryText)),
+                            ],
+                          ),
+                        );
+                      }
+
+                      if (suggestions.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: colorsList.borderColor),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: suggestions.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          itemBuilder: (context, index) {
+                            final item = suggestions[index];
+                            return ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity.compact,
+                              leading: const Icon(Icons.location_on_outlined, color: Color(0xFF2563EB), size: 18),
+                              title: _buildHighlightedText(item),
+                              subtitle: item.secondaryText.isNotEmpty
+                                  ? Text(item.secondaryText, style: const TextStyle(fontSize: 11, color: colorsList.secondaryText))
+                                  : null,
+                              onTap: () => widget.controller.selectDestinationSuggestion(item),
+                            );
+                          },
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),

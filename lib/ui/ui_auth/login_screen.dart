@@ -162,6 +162,7 @@ class _LoginPageState extends State<LoginScreen> {
         GestureDetector(
           onTap: () {
             // Forgot password
+            Get.offAllNamed('/ForgotPasswordScreen');
           },
           child: Text(
             'Forgot your password?',
@@ -295,6 +296,33 @@ class _LoginPageState extends State<LoginScreen> {
           ),
         ),
         SizedBox(height: rs.s(36)),
+        GestureDetector(
+          onTap: () {
+            // Navigate to Register Screen
+            Get.offAllNamed('/RegisterScreen');
+          },
+          child: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: context.sp(14),
+                color: const Color(0xFF64748B),
+                fontWeight: FontWeight.w400,
+              ),
+              children: [
+                const TextSpan(
+                  text: "Don't have an account? ",
+                ),
+                TextSpan(
+                  text: "Sign Up",
+                  style: const TextStyle(
+                    color: Color(0xFF198754),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

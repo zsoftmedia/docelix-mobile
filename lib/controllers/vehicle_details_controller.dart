@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/vehicle_model.dart';
@@ -85,11 +87,159 @@ class VehicleDetailsController extends GetxController {
     tripStartTime.value = null;
     tripEndTime.value = null;
     calculatedDistance.value = null;
+    startingAddressSuggestions.clear();
+    destinationAddressSuggestions.clear();
+    _placeSessionToken = '';
 
     final primaryDriver = vehicle.value.vehicleDriverAssignments
         .firstWhereOrNull((a) => a.isPrimary);
     selectedTripDriverId.value = primaryDriver?.driverId ??
         (drivers.isNotEmpty ? drivers.first.id : null);
+  }
+
+  // ============================================================
+  // MAPS PLACE AUTOCOMPLETE
+  // ============================================================
+
+  final RxList<PlaceSuggestion> startingAddressSuggestions = <PlaceSuggestion>[].obs;
+  final RxList<PlaceSuggestion> destinationAddressSuggestions = <PlaceSuggestion>[].obs;
+  final RxBool isSearchingStartPlaces = false.obs;
+  final RxBool isSearchingDestPlaces = false.obs;
+
+  String _placeSessionToken = '';
+
+  String get placeSessionToken {
+    if (_placeSessionToken.isEmpty) {
+      _placeSessionToken = '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(999999)}';
+    }
+    return _placeSessionToken;
+  }
+
+  Future<void> searchPlaceAutocomplete({
+    required String input,
+    required bool isStart,
+  }) async {
+    final query = input.trim();
+    if (query.length < 3) {
+      if (isStart) {
+        startingAddressSuggestions.clear();
+      } else {
+        destinationAddressSuggestions.clear();
+      }
+      return;
+    }
+
+    try {
+      if (isStart) {
+        isSearchingStartPlaces.value = true;
+      } else {
+        isSearchingDestPlaces.value = true;
+      }
+
+      final session = _sessionOrNull();
+      if (session == null) return;
+
+      final response = await _dioClient.getPlaceAutocomplete(
+        input: query,
+        sessionToken: placeSessionToken,
+        companyId: session.companyId,
+        accessToken: session.token,
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final Map<String, dynamic> data = Map<String, dynamic>.from(response.data as Map);
+        final List<dynamic> suggestionsRaw = data['suggestions'] as List<dynamic>? ?? [];
+
+        final List<PlaceSuggestion> items = suggestionsRaw
+            .whereType<Map>()
+            .map((e) => PlaceSuggestion.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+
+        if (isStart) {
+          startingAddressSuggestions.assignAll(items);
+        } else {
+          destinationAddressSuggestions.assignAll(items);
+        }
+      } else {
+        if (isStart) {
+          startingAddressSuggestions.clear();
+        } else {
+          destinationAddressSuggestions.clear();
+        }
+      }
+    } catch (e) {
+      debugPrint('[VehicleDetailsController] searchPlaceAutocomplete Error: $e');
+    } finally {
+      if (isStart) {
+        isSearchingStartPlaces.value = false;
+      } else {
+        isSearchingDestPlaces.value = false;
+      }
+    }
+  }
+
+  Future<void> selectStartingSuggestion(PlaceSuggestion suggestion) async {
+    startingAddressSuggestions.clear();
+    calculatedDistance.value = null;
+
+    final session = _sessionOrNull();
+    if (session != null) {
+      try {
+        final response = await _dioClient.getPlaceDetails(
+          placeId: suggestion.placeId,
+          sessionToken: placeSessionToken,
+          companyId: session.companyId,
+          accessToken: session.token,
+        );
+
+        // Refresh session token for next search session
+        _placeSessionToken = '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(999999)}';
+
+        if (response.statusCode == 200 && response.data != null) {
+          final details = PlaceDetails.fromJson(Map<String, dynamic>.from(response.data as Map));
+          if (details.formattedAddress.isNotEmpty) {
+            tripFromController.text = details.formattedAddress;
+            return;
+          }
+        }
+      } catch (e) {
+        debugPrint('[VehicleDetailsController] getPlaceDetails Error: $e');
+      }
+    }
+
+    tripFromController.text = suggestion.fullAddress;
+  }
+
+  Future<void> selectDestinationSuggestion(PlaceSuggestion suggestion) async {
+    destinationAddressSuggestions.clear();
+    calculatedDistance.value = null;
+
+    final session = _sessionOrNull();
+    if (session != null) {
+      try {
+        final response = await _dioClient.getPlaceDetails(
+          placeId: suggestion.placeId,
+          sessionToken: placeSessionToken,
+          companyId: session.companyId,
+          accessToken: session.token,
+        );
+
+        // Refresh session token for next search session
+        _placeSessionToken = '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(999999)}';
+
+        if (response.statusCode == 200 && response.data != null) {
+          final details = PlaceDetails.fromJson(Map<String, dynamic>.from(response.data as Map));
+          if (details.formattedAddress.isNotEmpty) {
+            tripToController.text = details.formattedAddress;
+            return;
+          }
+        }
+      } catch (e) {
+        debugPrint('[VehicleDetailsController] getPlaceDetails Error: $e');
+      }
+    }
+
+    tripToController.text = suggestion.fullAddress;
   }
 
   String get currencyCode {

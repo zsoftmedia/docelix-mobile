@@ -1702,6 +1702,57 @@ class DioClient {
     );
   }
 
+  // ==============================
+  // MAPS PLACE AUTOCOMPLETE & DETAILS
+  // ==============================
+
+  Future<Response> getPlaceAutocomplete({
+    required String input,
+    required String sessionToken,
+    required int companyId,
+    required String accessToken,
+    String language = 'en',
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/maps/places/autocomplete',
+      queryParameters: {
+        'input': input,
+        'sessionToken': sessionToken,
+        'language': language,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
+  Future<Response> getPlaceDetails({
+    required String placeId,
+    required String sessionToken,
+    required int companyId,
+    required String accessToken,
+    String language = 'en',
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/vehicles/maps/places/${Uri.encodeComponent(placeId)}',
+      queryParameters: {
+        'sessionToken': sessionToken,
+        'language': language,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
   Future<Response> calculateVehicleDistance({
     required String startAddress,
     required String destination,
