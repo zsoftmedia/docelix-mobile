@@ -1518,7 +1518,21 @@ class _AddTripSheetState extends State<_AddTripSheet> {
 
   Future<void> _save() async {
     FocusManager.instance.primaryFocus?.unfocus();
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    if (widget.controller.tripPurposeController.text.trim().isEmpty) {
+      widget.controller.tripPurposeController.text =
+          widget.controller.tripType.value == 'Private'
+              ? 'Private Trip'
+              : 'Business Trip';
+    }
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Please enter starting and destination addresses.',
+      );
+      return;
+    }
 
     final startOdo = double.tryParse(widget.controller.tripStartOdometerController.text.trim()) ?? 0;
     final endOdo = double.tryParse(widget.controller.tripEndOdometerController.text.trim()) ?? 0;
@@ -1538,9 +1552,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
       tripDate: widget.controller.tripDate.value ?? DateTime.now(),
       fromAddress: widget.controller.tripFromController.text.trim(),
       toAddress: widget.controller.tripToController.text.trim(),
-      purpose: widget.controller.tripPurposeController.text.trim().isNotEmpty
-          ? widget.controller.tripPurposeController.text.trim()
-          : (widget.controller.tripType.value == 'Private' ? 'Private Trip' : 'Business Trip'),
+      purpose: widget.controller.tripPurposeController.text.trim(),
       distance: distanceResult,
       driverId: widget.controller.selectedTripDriverId.value,
     );

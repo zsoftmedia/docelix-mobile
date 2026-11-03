@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -582,12 +583,12 @@ class VehicleDetailsController extends GetxController {
     required String purpose,
     required VehicleDistanceResult distance,
     int? driverId,
-  }) async
-  {
+  }) async {
     final session = _sessionOrNull(showError: true);
     if (session == null) return false;
 
     final resolvedDriverId = driverId ??
+        selectedTripDriverId.value ??
         vehicle.value.vehicleDriverAssignments
             .where((a) => a.isPrimary)
             .map((a) => a.driverId)
@@ -607,27 +608,56 @@ class VehicleDetailsController extends GetxController {
     try {
       isSavingTrip.value = true;
 
-      final fromLocation = await _ensureLocation(fromAddress);
-      final toLocation = await _ensureLocation(toAddress);
-      if (fromLocation == null || toLocation == null) {
-        AppSnackbar.error(
-          title: 'Error',
-          message: 'Unable to resolve trip locations.',
-        );
-        return false;
-      }
+      final startOdo = double.tryParse(tripStartOdometerController.text.trim()) ?? 0.0;
+      final endOdo = double.tryParse(tripEndOdometerController.text.trim()) ?? 0.0;
+      final bool hasOdometer = endOdo > startOdo;
+
+      final String? startTimeStr = tripStartTime.value != null
+          ? '${tripStartTime.value!.hour.toString().padLeft(2, '0')}:${tripStartTime.value!.minute.toString().padLeft(2, '0')}'
+          : null;
+
+      final String? endTimeStr = tripEndTime.value != null
+          ? '${tripEndTime.value!.hour.toString().padLeft(2, '0')}:${tripEndTime.value!.minute.toString().padLeft(2, '0')}'
+          : null;
+
+      final String? endDateStr = tripArrivalDate.value != null
+          ? DateFormat('yyyy-MM-dd').format(tripArrivalDate.value!)
+          : null;
 
       final body = <String, dynamic>{
         'vehicle_id': vehicle.value.id,
         'driver_id': resolvedDriverId,
         'trip_date': DateFormat('yyyy-MM-dd').format(tripDate),
+        'end_date': endDateStr,
+        'start_time': startTimeStr,
+        'end_time': endTimeStr,
+        'trip_type': tripType.value.toLowerCase(),
         'purpose': purpose.trim(),
-        'from_location_id': fromLocation.id,
-        'to_location_id': toLocation.id,
+        'passenger_count': int.tryParse(tripPassengersController.text.trim()) ?? 0,
+        'partner_name': tripVisitedCustomerController.text.trim().isNotEmpty
+            ? tripVisitedCustomerController.text.trim()
+            : null,
+        'start_address': fromAddress.trim(),
+        'start_place_id': startingPlaceDetails.value?.placeId,
+        'start_latitude': startingPlaceDetails.value?.latitude,
+        'start_longitude': startingPlaceDetails.value?.longitude,
+        'destination_address': toAddress.trim(),
+        'destination_place_id': destinationPlaceDetails.value?.placeId,
+        'destination_latitude': destinationPlaceDetails.value?.latitude,
+        'destination_longitude': destinationPlaceDetails.value?.longitude,
+        'odometer_start_km': startOdo,
+        'odometer_end_km': endOdo,
         'distance_km': distance.distanceKm,
-        'duration_minutes': distance.durationMinutes,
+        'distance_source': hasOdometer ? 'odometer' : 'route',
+        'route_distance_km': calculatedDistance.value?.distanceKm ?? distance.distanceKm,
+        'notes': tripNotesController.text.trim().isNotEmpty
+            ? tripNotesController.text.trim()
+            : null,
+        'client_request_id': '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(999999)}',
+        'change_reason': null,
       };
 
+      debugPrint('Anees_CreateTrip_Body: ${const JsonEncoder.withIndent('  ').convert(body)}');
       final response = await _dioClient.createVehicleTrip(
         body: body,
         companyId: session.companyId,
@@ -639,16 +669,16 @@ class VehicleDetailsController extends GetxController {
           title: 'Success',
           message: 'Trip saved successfully.',
         );
-        await Future.wait([loadVehicle(), loadLocations(), loadTrips()]);
+        await Future.wait([loadVehicle(), loadTrips()]);
         return true;
       }
 
       AppSnackbar.error(
         title: 'Error',
         message: _responseMessage(
-            response.data,
-            'Unable to save trip.',
-          ),
+          response.data,
+          'Unable to save trip.',
+        ),
       );
       return false;
     } on DioException catch (e) {
