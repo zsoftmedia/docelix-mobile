@@ -1753,6 +1753,36 @@ class DioClient {
     );
   }
 
+  // ==============================
+  // MAPS CALCULATE ROUTE
+  // ==============================
+
+  Future<Response> calculateVehicleRoute({
+    required Map<String, dynamic> origin,
+    required Map<String, dynamic> destination,
+    required int companyId,
+    required String accessToken,
+    String language = 'en',
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/maps/routes',
+      data: {
+        'company_id': companyId,
+        'origin': origin,
+        'destination': destination,
+        'language': language,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
   Future<Response> calculateVehicleDistance({
     required String startAddress,
     required String destination,

@@ -64,12 +64,29 @@ class PlaceDetails {
   factory PlaceDetails.fromJson(Map<String, dynamic> json) {
     return PlaceDetails(
       placeId: json['placeId']?.toString() ?? '',
-      formattedAddress: json['formattedAddress']?.toString() ?? '',
+      formattedAddress: json['formattedAddress']?.toString() ?? json['formatted_address']?.toString() ?? '',
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
+
+  Map<String, dynamic> toMap() {
+    final map = <String, dynamic>{
+      'address': formattedAddress,
+    };
+    if (placeId.isNotEmpty) {
+      map['placeId'] = placeId;
+    }
+    if (latitude != null) {
+      map['latitude'] = latitude;
+    }
+    if (longitude != null) {
+      map['longitude'] = longitude;
+    }
+    return map;
+  }
 }
+
 
 class VehicleDriver {
   final int id;
@@ -388,15 +405,49 @@ class VehicleDistanceResult {
   });
 
   factory VehicleDistanceResult.fromJson(Map<String, dynamic> json) {
-    final durationRaw = json['duration']?.toString() ?? '';
+    double distKm = _asDouble(json['distanceKm']) ??
+        _asDouble(json['distance_km']) ??
+        _asDouble(json['distance']) ??
+        0.0;
+
+    if (distKm == 0 && json['distanceMeters'] != null) {
+      final meters = _asDouble(json['distanceMeters']) ?? 0.0;
+      distKm = meters / 1000.0;
+    }
+
+    int durationSecs = _asInt(json['durationSeconds']) ?? 0;
+    int durationMins = _asInt(json['durationMinutes']) ??
+        _asInt(json['duration_minutes']) ??
+        (durationSecs > 0 ? (durationSecs / 60).round() : 0);
+
+    String durText = json['durationText']?.toString() ??
+        json['duration_text']?.toString() ??
+        json['duration']?.toString() ??
+        '';
+
+    if (durText.isEmpty) {
+      if (durationMins > 0) {
+        final hours = durationMins ~/ 60;
+        final mins = durationMins % 60;
+        if (hours > 0) {
+          durText = '${hours} h ${mins} min';
+        } else {
+          durText = '${mins} min';
+        }
+      } else {
+        durText = '—';
+      }
+    }
+
+    String distText = json['distanceText']?.toString() ??
+        json['distance_text']?.toString() ??
+        '${distKm.toStringAsFixed(2)} km';
+
     return VehicleDistanceResult(
-      distanceKm: _asDouble(json['distance']) ?? 0,
-      distanceText: json['text']?.toString() ??
-          '${_asDouble(json['distance']) ?? 0} km',
-      durationText: durationRaw.isEmpty ? '—' : durationRaw,
-      durationMinutes: _parseDurationMinutes(durationRaw) ??
-          _asInt(json['duration_minutes']) ??
-          0,
+      distanceKm: distKm,
+      distanceText: distText,
+      durationText: durText,
+      durationMinutes: durationMins,
       polyline: json['polyline']?.toString(),
     );
   }

@@ -1,9 +1,7 @@
 import 'package:docelix_mobileapp/components/app_button.dart';
 import 'package:docelix_mobileapp/components/app_textfield.dart';
 import 'package:docelix_mobileapp/controllers/controller_auth/forgotpassword_controller.dart';
-import 'package:docelix_mobileapp/controllers/controller_auth/login_controller.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,10 +15,6 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final ForgotPasswordController forgotController = Get.put(ForgotPasswordController());
 
-  bool checkLoginProgressbar = false;
-  bool _obscureText = true;
-  bool _rememberMe = false;
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -30,31 +24,34 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: colorsList.iconColor,
+            size: 20,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: width * 0.07,
             ),
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
-                // ======================================================
-                // LOGO
-                // ======================================================
-
                 SizedBox(
-                  height: height * 0.035,
+                  height: height * 0.02,
                 ),
 
                 Align(
                   alignment: Alignment.centerLeft,
-
                   child: Image.asset(
                     'assets/main_logo.png',
                     width: width * 0.40,
@@ -62,37 +59,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                 ),
 
-                // ======================================================
-                // RESET YOUR PASSWORD
-                // ======================================================
-
                 SizedBox(
-                  height: height * 0.105,
+                  height: height * 0.06,
                 ),
 
                 Text(
                   "Reset your password",
                   style: TextStyle(
-                    fontSize: width * 0.085,
-                    fontWeight: FontWeight.w900,
+                    fontSize: width * 0.08,
+                    fontWeight: FontWeight.normal,
                     color: colorsList.primaryBlue,
-                    letterSpacing: -1.0,
+                    letterSpacing: -0.5,
                   ),
                 ),
 
                 SizedBox(
-                  height: height * 0.045,
+                  height: height * 0.04,
                 ),
-
-                // ======================================================
-                // EMAIL LABEL
-                // ======================================================
 
                 Text(
                   "Email address",
                   style: TextStyle(
                     fontSize: width * 0.040,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.normal,
                     color: const Color(0xFF333333),
                   ),
                 ),
@@ -105,53 +94,37 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   controller: forgotController.emailController,
                   hintText: 'Email address',
                   keyboardType: TextInputType.emailAddress,
-
+                  prefixIcon: Icons.alternate_email_rounded,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
-
                     return null;
                   },
                 ),
-
-                // ======================================================
-                // FORGOT PASSWORD BUTTON
-                // ======================================================
 
                 SizedBox(
                   height: height * 0.035,
                 ),
 
                 Obx(
-                      () => AppButton(
+                  () => AppButton(
                     text: 'Send Reset Link',
-
                     isLoading: forgotController.isLoading.value,
-
                     onPressed: () {
-                      forgotController.login();
+                      forgotController.sendPasswordResetEmail();
                     },
-
                     width: double.infinity,
                     height: height * 0.062,
-
                     backgroundColor: colorsList.primaryBlue,
                     disabledBackgroundColor: colorsList.primaryBlue,
-
                     foregroundColor: Colors.white,
                     loadingColor: Colors.white,
-
-                    borderRadius: 4,
-
-                    fontSize: width * 0.043,
-                    fontWeight: FontWeight.w700,
+                    borderRadius: 8,
+                    fontSize: width * 0.040,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
-
-                // ======================================================
-                // OR CONTINUE WITH
-                // ======================================================
 
                 SizedBox(
                   height: height * 0.040,
@@ -159,28 +132,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                 Row(
                   children: [
-
                     const Expanded(
                       child: Divider(
                         color: colorsList.dividerColor,
                         thickness: 1,
                       ),
                     ),
-
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: width * 0.035,
                       ),
-
                       child: Text(
-                        "or continue with",
+                        "or back to login",
                         style: TextStyle(
                           fontSize: width * 0.035,
                           color: colorsList.textColor,
                         ),
                       ),
                     ),
-
                     const Expanded(
                       child: Divider(
                         color: colorsList.dividerColor,
@@ -190,50 +159,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ],
                 ),
 
-                // ======================================================
-                // REQUEST DEMO
-                // ======================================================
+                SizedBox(
+                  height: height * 0.03,
+                ),
 
-                /*SizedBox(
-                  height: height * 0.035,
-                ),*/
-
-                /*Center(
-                  child: RichText(
-                    text: TextSpan(
-                      text: "Request for ",
-
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                    label: const Text(
+                      'Back to Sign In',
                       style: TextStyle(
-                        fontSize: width * 0.037,
-                        color: colorsList.textColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
+                        color: colorsList.primaryBlue,
                       ),
-
-                      children: [
-
-                        TextSpan(
-                          text: "Demo",
-                          style: TextStyle(
-                            fontSize: width * 0.037,
-                            color: colorsList.green,
-                            fontWeight: FontWeight.w600,
-                          ),
-
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Get.toNamed(
-                                '/RegisterScreen',
-                                arguments: 'Register Screen',
-                              );
-                            },
-                        ),
-                      ],
                     ),
                   ),
                 ),
-
-                SizedBox(
-                  height: height * 0.045,
-                ),*/
               ],
             ),
           ),

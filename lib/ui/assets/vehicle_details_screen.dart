@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 double _designWidth(BuildContext context) {
   final rs = context.rs;
@@ -1364,6 +1365,102 @@ class _AddTripSheetState extends State<_AddTripSheet> {
     );
   }
 
+  Widget _buildOdometerComparisonBanner() {
+    return Obx(() {
+      final routeResult = widget.controller.calculatedDistance.value;
+      final routeKm = routeResult?.distanceKm ?? 0.0;
+
+      final startOdo = double.tryParse(widget.controller.tripStartOdometerController.text.trim()) ?? 0.0;
+      final endOdo = double.tryParse(widget.controller.tripEndOdometerController.text.trim()) ?? 0.0;
+      final odoKm = (endOdo > startOdo) ? (endOdo - startOdo) : 0.0;
+
+      if (routeKm <= 0) {
+        return const SizedBox.shrink();
+      }
+
+      if (odoKm <= 0) {
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF64748B)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Calculated route: ${routeResult!.distanceText} (estimate only).',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF475569)),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      final diffKm = (odoKm - routeKm).abs();
+      final diffPercent = (diffKm / routeKm) * 100.0;
+
+      if (diffPercent > 30.0) {
+        final String formattedOdo = _formatNum(odoKm);
+        final String formattedRoute = routeResult!.distanceText;
+        final String formattedDiff = _formatNum(diffPercent);
+
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 10),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFEFCE8),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFFDE047)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.warning_amber_rounded, size: 18, color: Color(0xFFA16207)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'The odometer shows $formattedOdo km, the calculated route $formattedRoute ($formattedDiff % difference). Please check the readings.',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFFA16207), height: 1.35),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF64748B)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Calculated route: ${routeResult!.distanceText} (estimate only).',
+                style: const TextStyle(fontSize: 12, color: Color(0xFF475569)),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
   Future<void> _close([bool saved = false]) async {
     FocusManager.instance.primaryFocus?.unfocus();
     await Future<void>.delayed(const Duration(milliseconds: 40));
@@ -1944,7 +2041,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
               const SizedBox(height: 14),
 
               // ======================================================
-              // SECTION 3: ROUTE (WITH REAL-TIME AUTOCOMPLETE)
+              // SECTION 3: ROUTE (WITH REAL-TIME AUTOCOMPLETE & ROUTE PREVIEW)
               // ======================================================
               _sectionCard(
                 stepNumber: '3',
@@ -1955,21 +2052,32 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                   children: [
                     _FieldLabel(text: 'Starting address *', required: true),
                     const SizedBox(height: 6),
-                    TextFormField(
-                      controller: widget.controller.tripFromController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: _inputDecoration(width, hint: 'Street, city or place'),
-                      onChanged: (val) {
-                        if (widget.controller.calculatedDistance.value != null) {
-                          widget.controller.calculatedDistance.value = null;
-                        }
-                        widget.controller.searchPlaceAutocomplete(input: val, isStart: true);
-                      },
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Starting address is required';
-                        }
-                        return null;
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: widget.controller.tripFromController,
+                      builder: (context, value, _) {
+                        return TextFormField(
+                          controller: widget.controller.tripFromController,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: _inputDecoration(
+                            width,
+                            hint: 'Street, city or place',
+                            suffixIcon: value.text.trim().isNotEmpty
+                                ? const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 20)
+                                : null,
+                          ),
+                          onChanged: (val) {
+                            if (widget.controller.calculatedDistance.value != null) {
+                              widget.controller.calculatedDistance.value = null;
+                            }
+                            widget.controller.searchPlaceAutocomplete(input: val, isStart: true);
+                          },
+                          validator: (valStr) {
+                            if (valStr == null || valStr.trim().isEmpty) {
+                              return 'Starting address is required';
+                            }
+                            return null;
+                          },
+                        );
                       },
                     ),
                     Obx(() {
@@ -2015,7 +2123,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: suggestions.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          separatorBuilder: (_, _) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
                           itemBuilder: (context, index) {
                             final item = suggestions[index];
                             return ListTile(
@@ -2037,21 +2145,32 @@ class _AddTripSheetState extends State<_AddTripSheet> {
 
                     _FieldLabel(text: 'Destination address *', required: true),
                     const SizedBox(height: 6),
-                    TextFormField(
-                      controller: widget.controller.tripToController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: _inputDecoration(width, hint: 'Street, city or place'),
-                      onChanged: (val) {
-                        if (widget.controller.calculatedDistance.value != null) {
-                          widget.controller.calculatedDistance.value = null;
-                        }
-                        widget.controller.searchPlaceAutocomplete(input: val, isStart: false);
-                      },
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Destination address is required';
-                        }
-                        return null;
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: widget.controller.tripToController,
+                      builder: (context, value, _) {
+                        return TextFormField(
+                          controller: widget.controller.tripToController,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: _inputDecoration(
+                            width,
+                            hint: 'Street, city or place',
+                            suffixIcon: value.text.trim().isNotEmpty
+                                ? const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 20)
+                                : null,
+                          ),
+                          onChanged: (val) {
+                            if (widget.controller.calculatedDistance.value != null) {
+                              widget.controller.calculatedDistance.value = null;
+                            }
+                            widget.controller.searchPlaceAutocomplete(input: val, isStart: false);
+                          },
+                          validator: (valStr) {
+                            if (valStr == null || valStr.trim().isEmpty) {
+                              return 'Destination address is required';
+                            }
+                            return null;
+                          },
+                        );
                       },
                     ),
                     Obx(() {
@@ -2097,7 +2216,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: suggestions.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          separatorBuilder: (_, _) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
                           itemBuilder: (context, index) {
                             final item = suggestions[index];
                             return ListTile(
@@ -2111,6 +2230,229 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                               onTap: () => widget.controller.selectDestinationSuggestion(item),
                             );
                           },
+                        ),
+                      );
+                    }),
+
+                    const SizedBox(height: 14),
+
+                    // ROUTE PREVIEW CARD (MATCHES WEB SCREENSHOT 100%)
+                    Obx(() {
+                      final dist = widget.controller.calculatedDistance.value;
+                      final isCalculating = widget.controller.isCalculatingDistance.value;
+                      final from = widget.controller.tripFromController.text.trim();
+                      final to = widget.controller.tripToController.text.trim();
+
+                      if (isCalculating) {
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: const Row(
+                            children: [
+                              SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+                              SizedBox(width: 10),
+                              Text('Calculating distance and route...', style: TextStyle(fontSize: 12, color: colorsList.secondaryText)),
+                            ],
+                          ),
+                        );
+                      }
+
+                      if (dist == null || from.isEmpty || to.isEmpty) {
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.outlined_flag_rounded, size: 18, color: colorsList.textHintColor),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Enter a starting and a destination address to see the route.',
+                                  style: TextStyle(fontSize: 12, color: colorsList.textHintColor),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // START PIN ROW
+                            Row(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: const Color(0xFF16A34A), width: 2.5),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    from,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.normal,
+                                      color: Color(0xFF0A2342),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+
+                            // DESTINATION PIN ROW
+                            Row(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color(0xFFDC2626),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    to,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.normal,
+                                      color: Color(0xFF0A2342),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            ),
+
+                            // METRICS ROW (DISTANCE & EST DURATION)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'DISTANCE',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.normal,
+                                          color: Color(0xFF64748B),
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        dist.distanceText,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.normal,
+                                          color: Color(0xFF0A2342),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'EST. DURATION',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.normal,
+                                          color: Color(0xFF64748B),
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        dist.durationText,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.normal,
+                                          color: Color(0xFF0A2342),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            ),
+
+                            // MAP PREVIEW FOOTER & GOOGLE MAPS LINK
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Map preview unavailable.',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    final mapsUrl =
+                                        'https://www.google.com/maps/dir/?api=1&origin=${Uri.encodeComponent(from)}&destination=${Uri.encodeComponent(to)}';
+                                    launchUrl(Uri.parse(mapsUrl), mode: LaunchMode.externalApplication);
+                                  },
+                                  child: const Row(
+                                    children: [
+                                      Text(
+                                        'Open in Google Maps',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF2563EB),
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Icon(Icons.open_in_new_rounded, size: 14, color: Color(0xFF2563EB)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       );
                     }),
@@ -2141,7 +2483,8 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                               TextFormField(
                                 controller: widget.controller.tripStartOdometerController,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                decoration: _inputDecoration(width, hint: '200'),
+                                decoration: _inputDecoration(width, hint: '1000'),
+                                onChanged: (_) => setState(() {}),
                               ),
                             ],
                           ),
@@ -2156,7 +2499,8 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                               TextFormField(
                                 controller: widget.controller.tripEndOdometerController,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                decoration: _inputDecoration(width, hint: 'e.g. 250'),
+                                decoration: _inputDecoration(width, hint: '2500'),
+                                onChanged: (_) => setState(() {}),
                               ),
                             ],
                           ),
@@ -2183,37 +2527,45 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                             children: [
                               _FieldLabel(text: 'Actual distance (km)'),
                               const SizedBox(height: 6),
-                              Obx(() {
-                                final dist = widget.controller.calculatedDistance.value;
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF8FAFC),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: colorsList.borderColor),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          dist != null ? dist.distanceText : '—',
-                                          style: TextStyle(
-                                            color: colorsList.primaryText,
-                                            fontSize: width.fontSizeW(0.033),
-                                          ),
-                                        ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: colorsList.borderColor),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Builder(
+                                        builder: (_) {
+                                          final start = double.tryParse(widget.controller.tripStartOdometerController.text.trim()) ?? 0.0;
+                                          final end = double.tryParse(widget.controller.tripEndOdometerController.text.trim()) ?? 0.0;
+                                          final odoKm = (end > start) ? (end - start) : 0.0;
+                                          final displayText = odoKm > 0
+                                              ? _formatNum(odoKm)
+                                              : (widget.controller.calculatedDistance.value?.distanceText ?? '—');
+
+                                          return Text(
+                                            displayText,
+                                            style: TextStyle(
+                                              color: colorsList.primaryText,
+                                              fontSize: width.fontSizeW(0.033),
+                                            ),
+                                          );
+                                        },
                                       ),
-                                      Text(
-                                        'ODOMETER',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: colorsList.textHintColor,
-                                        ),
+                                    ),
+                                    Text(
+                                      'ODOMETER',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: colorsList.textHintColor,
                                       ),
-                                    ],
-                                  ),
-                                );
-                              }),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -2247,6 +2599,9 @@ class _AddTripSheetState extends State<_AddTripSheet> {
                         color: colorsList.textHintColor,
                       ),
                     ),
+
+                    // ODOMETER COMPARISON & VALIDATION BANNER
+                    _buildOdometerComparisonBanner(),
                   ],
                 ),
               ),
@@ -2385,7 +2740,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
     );
   }
 
-  InputDecoration _inputDecoration(double width, {String? hint}) {
+  InputDecoration _inputDecoration(double width, {String? hint, Widget? suffixIcon}) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
@@ -2393,6 +2748,7 @@ class _AddTripSheetState extends State<_AddTripSheet> {
         fontSize: width.fontSizeW(0.031),
         fontWeight: FontWeight.normal,
       ),
+      suffixIcon: suffixIcon,
       isDense: true,
       contentPadding: EdgeInsets.symmetric(
         horizontal: width * 0.03,

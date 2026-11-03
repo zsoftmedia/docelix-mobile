@@ -184,6 +184,14 @@ class AuthServices {
     }
   }*/
 
+  // RESET / RECOVER PASSWORD
+  Future<void> resetPasswordForEmail(String email) async {
+    await _supabaseClient.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'https://docelixstaging.netlify.app/',
+    );
+  }
+
   // Sign out
   Future<void> signOut() async {
     await _supabaseClient.auth.signOut();

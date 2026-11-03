@@ -178,6 +178,17 @@ class VehicleDetailsController extends GetxController {
     }
   }
 
+  final Rxn<PlaceDetails> startingPlaceDetails = Rxn<PlaceDetails>();
+  final Rxn<PlaceDetails> destinationPlaceDetails = Rxn<PlaceDetails>();
+
+  void autoCalculateIfReady() {
+    final from = tripFromController.text.trim();
+    final to = tripToController.text.trim();
+    if (from.isNotEmpty && to.isNotEmpty) {
+      calculateDistance(startAddress: from, destination: to);
+    }
+  }
+
   Future<void> selectStartingSuggestion(PlaceSuggestion suggestion) async {
     startingAddressSuggestions.clear();
     calculatedDistance.value = null;
@@ -192,13 +203,14 @@ class VehicleDetailsController extends GetxController {
           accessToken: session.token,
         );
 
-        // Refresh session token for next search session
         _placeSessionToken = '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(999999)}';
 
         if (response.statusCode == 200 && response.data != null) {
           final details = PlaceDetails.fromJson(Map<String, dynamic>.from(response.data as Map));
+          startingPlaceDetails.value = details;
           if (details.formattedAddress.isNotEmpty) {
             tripFromController.text = details.formattedAddress;
+            autoCalculateIfReady();
             return;
           }
         }
@@ -207,7 +219,12 @@ class VehicleDetailsController extends GetxController {
       }
     }
 
+    startingPlaceDetails.value = PlaceDetails(
+      placeId: suggestion.placeId,
+      formattedAddress: suggestion.fullAddress,
+    );
     tripFromController.text = suggestion.fullAddress;
+    autoCalculateIfReady();
   }
 
   Future<void> selectDestinationSuggestion(PlaceSuggestion suggestion) async {
@@ -224,13 +241,14 @@ class VehicleDetailsController extends GetxController {
           accessToken: session.token,
         );
 
-        // Refresh session token for next search session
         _placeSessionToken = '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(999999)}';
 
         if (response.statusCode == 200 && response.data != null) {
           final details = PlaceDetails.fromJson(Map<String, dynamic>.from(response.data as Map));
+          destinationPlaceDetails.value = details;
           if (details.formattedAddress.isNotEmpty) {
             tripToController.text = details.formattedAddress;
+            autoCalculateIfReady();
             return;
           }
         }
@@ -239,7 +257,12 @@ class VehicleDetailsController extends GetxController {
       }
     }
 
+    destinationPlaceDetails.value = PlaceDetails(
+      placeId: suggestion.placeId,
+      formattedAddress: suggestion.fullAddress,
+    );
     tripToController.text = suggestion.fullAddress;
+    autoCalculateIfReady();
   }
 
   String get currencyCode {
@@ -440,23 +463,44 @@ class VehicleDetailsController extends GetxController {
   Future<VehicleDistanceResult?> calculateDistance({
     required String startAddress,
     required String destination,
-  }) async
-  {
+  }) async {
     final session = _sessionOrNull(showError: true);
     if (session == null) return null;
 
     final from = startAddress.trim();
     final to = destination.trim();
     if (from.isEmpty || to.isEmpty) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: 'From and To locations are required.',
-      );
       return null;
     }
 
     try {
       isCalculatingDistance.value = true;
+
+      // 1. Try POST /api/vehicles/maps/routes first
+      final originMap = startingPlaceDetails.value?.toMap() ?? {'address': from};
+      final destMap = destinationPlaceDetails.value?.toMap() ?? {'address': to};
+
+      try {
+        final routeResponse = await _dioClient.calculateVehicleRoute(
+          origin: originMap,
+          destination: destMap,
+          companyId: session.companyId,
+          accessToken: session.token,
+        );
+
+        if ((routeResponse.statusCode == 200 || routeResponse.statusCode == 201) &&
+            routeResponse.data != null) {
+          final map = _extractMap(routeResponse.data) ??
+              Map<String, dynamic>.from(routeResponse.data as Map);
+          final result = VehicleDistanceResult.fromJson(map);
+          calculatedDistance.value = result;
+          return result;
+        }
+      } catch (e) {
+        debugPrint('[VehicleDetailsController] calculateVehicleRoute info ($e). Trying legacy distance...');
+      }
+
+      // 2. Fallback to POST /api/vehicles/calculate-distance
       final response = await _dioClient.calculateVehicleDistance(
         startAddress: from,
         destination: to,
@@ -464,28 +508,20 @@ class VehicleDetailsController extends GetxController {
         accessToken: session.token,
       );
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        AppSnackbar.error(
-          title: 'Error',
-          message: _responseMessage(
-            response.data,
-            'Unable to calculate distance.',
-          ),
-        );
-        return null;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final map = _extractMap(response.data) ??
+            Map<String, dynamic>.from(response.data as Map);
+        final result = VehicleDistanceResult.fromJson(map);
+        calculatedDistance.value = result;
+        return result;
       }
 
-      final map = _extractMap(response.data);
-      if (map == null) return null;
-      return VehicleDistanceResult.fromJson(map);
+      return null;
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to calculate distance.'),
-      );
+      debugPrint('[VehicleDetailsController] calculateDistance DioError: ${e.message}');
       return null;
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] calculateDistance Exception: $e');
       return null;
     } finally {
       isCalculatingDistance.value = false;
