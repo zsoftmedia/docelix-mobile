@@ -589,6 +589,7 @@ class VehicleDetailsController extends GetxController {
 
     final resolvedDriverId = driverId ??
         selectedTripDriverId.value ??
+        (drivers.isNotEmpty ? drivers.first.id : null) ??
         vehicle.value.vehicleDriverAssignments
             .where((a) => a.isPrimary)
             .map((a) => a.driverId)
@@ -610,15 +611,25 @@ class VehicleDetailsController extends GetxController {
 
       final startOdo = double.tryParse(tripStartOdometerController.text.trim()) ?? 0.0;
       final endOdo = double.tryParse(tripEndOdometerController.text.trim()) ?? 0.0;
-      final bool hasOdometer = endOdo > startOdo;
+      final bool hasOdometer = (endOdo > startOdo) && startOdo >= 0;
 
-      final String? startTimeStr = tripStartTime.value != null
-          ? '${tripStartTime.value!.hour.toString().padLeft(2, '0')}:${tripStartTime.value!.minute.toString().padLeft(2, '0')}'
-          : null;
+      final double recordedDistance = hasOdometer
+          ? (endOdo - startOdo)
+          : (distance.distanceKm > 0 ? distance.distanceKm : 10.0);
 
-      final String? endTimeStr = tripEndTime.value != null
-          ? '${tripEndTime.value!.hour.toString().padLeft(2, '0')}:${tripEndTime.value!.minute.toString().padLeft(2, '0')}'
-          : null;
+      String? startTimeStr;
+      if (tripStartTime.value != null) {
+        final h = tripStartTime.value!.hour.toString().padLeft(2, '0');
+        final m = tripStartTime.value!.minute.toString().padLeft(2, '0');
+        startTimeStr = '$h:$m';
+      }
+
+      String? endTimeStr;
+      if (tripEndTime.value != null) {
+        final h = tripEndTime.value!.hour.toString().padLeft(2, '0');
+        final m = tripEndTime.value!.minute.toString().padLeft(2, '0');
+        endTimeStr = '$h:$m';
+      }
 
       final String? endDateStr = tripArrivalDate.value != null
           ? DateFormat('yyyy-MM-dd').format(tripArrivalDate.value!)
@@ -631,12 +642,15 @@ class VehicleDetailsController extends GetxController {
         'end_date': endDateStr,
         'start_time': startTimeStr,
         'end_time': endTimeStr,
-        'trip_type': tripType.value.toLowerCase(),
-        'purpose': purpose.trim(),
+        'trip_type': tripType.value.toLowerCase().trim(),
+        'purpose': purpose.trim().isNotEmpty
+            ? purpose.trim()
+            : (tripType.value.toLowerCase() == 'private' ? 'Private Trip' : 'Business Trip'),
         'passenger_count': int.tryParse(tripPassengersController.text.trim()) ?? 0,
         'partner_name': tripVisitedCustomerController.text.trim().isNotEmpty
             ? tripVisitedCustomerController.text.trim()
             : null,
+        'partner_client_id': null,
         'start_address': fromAddress.trim(),
         'start_place_id': startingPlaceDetails.value?.placeId,
         'start_latitude': startingPlaceDetails.value?.latitude,
@@ -647,9 +661,10 @@ class VehicleDetailsController extends GetxController {
         'destination_longitude': destinationPlaceDetails.value?.longitude,
         'odometer_start_km': startOdo,
         'odometer_end_km': endOdo,
-        'distance_km': distance.distanceKm,
+        'distance_km': recordedDistance,
         'distance_source': hasOdometer ? 'odometer' : 'route',
         'route_distance_km': calculatedDistance.value?.distanceKm ?? distance.distanceKm,
+        'duration_minutes': distance.durationMinutes > 0 ? distance.durationMinutes : 15,
         'notes': tripNotesController.text.trim().isNotEmpty
             ? tripNotesController.text.trim()
             : null,
@@ -657,7 +672,8 @@ class VehicleDetailsController extends GetxController {
         'change_reason': null,
       };
 
-      debugPrint('Anees_CreateTrip_Body: ${const JsonEncoder.withIndent('  ').convert(body)}');
+      print(const JsonEncoder.withIndent('  ').convert(body));
+      //debugPrint('Anees_CreateTrip_Body: ${const JsonEncoder.withIndent('  ').convert(body)}');
       final response = await _dioClient.createVehicleTrip(
         body: body,
         companyId: session.companyId,
