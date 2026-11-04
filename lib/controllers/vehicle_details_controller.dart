@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
-
+import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/models/vehicle_model.dart';
@@ -609,9 +609,21 @@ class VehicleDetailsController extends GetxController {
     try {
       isSavingTrip.value = true;
 
-      final startOdo = double.tryParse(tripStartOdometerController.text.trim()) ?? 0.0;
-      final endOdo = double.tryParse(tripEndOdometerController.text.trim()) ?? 0.0;
-      final bool hasOdometer = (endOdo > startOdo) && startOdo >= 0;
+      /*final startOdo = double.tryParse(tripStartOdometerController.text.trim()) ?? null;
+      final endOdo = double.tryParse(tripEndOdometerController.text.trim()) ?? null;
+      final bool hasOdometer = (endOdo > startOdo) && startOdo >= 0;*/
+
+      final double? startOdo =
+      double.tryParse(tripStartOdometerController.text.trim());
+
+      final double? endOdo =
+      double.tryParse(tripEndOdometerController.text.trim());
+
+      final bool hasOdometer =
+          startOdo != null &&
+              endOdo != null &&
+              endOdo > startOdo &&
+              startOdo >= 0;
 
       final double recordedDistance = hasOdometer
           ? (endOdo - startOdo)
@@ -662,17 +674,18 @@ class VehicleDetailsController extends GetxController {
         'odometer_start_km': startOdo,
         'odometer_end_km': endOdo,
         'distance_km': recordedDistance,
-        'distance_source': hasOdometer ? 'odometer' : 'route',
+        'distance_source': hasOdometer ? 'route' : 'automatic',
         'route_distance_km': calculatedDistance.value?.distanceKm ?? distance.distanceKm,
         'duration_minutes': distance.durationMinutes > 0 ? distance.durationMinutes : 15,
         'notes': tripNotesController.text.trim().isNotEmpty
             ? tripNotesController.text.trim()
             : null,
-        'client_request_id': '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(999999)}',
+        'client_request_id': const Uuid().v4(),
+       // 'client_request_id': '${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(999999)}',
         'change_reason': null,
       };
 
-      print(const JsonEncoder.withIndent('  ').convert(body));
+      print('Anees_CreateTrip_Body: ${JsonEncoder.withIndent('  ').convert(body)}');
       //debugPrint('Anees_CreateTrip_Body: ${const JsonEncoder.withIndent('  ').convert(body)}');
       final response = await _dioClient.createVehicleTrip(
         body: body,
