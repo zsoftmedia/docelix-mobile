@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/config/api_constants.dart';
 import 'package:docelix_mobileapp/controllers/vehicle_details_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/vehicle_model.dart';
@@ -4527,54 +4528,95 @@ class _DocumentsTab extends StatelessWidget {
   }
 
   void _openDocumentPreview(VehicleDocument document) {
-    final url = document.url?.trim();
-    if (url == null || url.isEmpty) {
+    final String? rawUrl = document.url?.trim();
+    if (rawUrl == null || rawUrl.isEmpty) {
       AppSnackbar.error(
         title: 'Unavailable',
-        message: 'No preview URL for this document.',
+        message: 'No file URL available for this document.',
       );
       return;
     }
 
-    final lower = url.toLowerCase();
-    final isPdf =
-        lower.contains('.pdf') ||
+    String fullUrl = rawUrl;
+    if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+      if (fullUrl.startsWith('/')) {
+        fullUrl = '${ApiConstants.baseUrl}$fullUrl';
+      } else {
+        fullUrl = '${ApiConstants.baseUrl}/$fullUrl';
+      }
+    }
+
+    final lower = fullUrl.toLowerCase();
+    final isPdf = lower.contains('.pdf') ||
         (document.documentType?.toLowerCase().contains('pdf') ?? false);
-    final isImage = [
-      '.png',
-      '.jpg',
-      '.jpeg',
-      '.webp',
-      '.heic',
-      '.gif',
-    ].any(lower.contains);
+    final isImage = ['.png', '.jpg', '.jpeg', '.webp', '.heic', '.gif', '.svg']
+        .any(lower.contains);
+
+    if (!isPdf && !isImage) {
+      launchUrl(
+        Uri.parse(fullUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      return;
+    }
 
     Get.to(
       () => Scaffold(
         backgroundColor: colorsList.backgroundColor,
         appBar: AppBar(
           backgroundColor: colorsList.colorWhite,
+          elevation: 0,
+          leading: IconButton(
+            onPressed: () => Get.back(),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: colorsList.iconColor,
+              size: 20,
+            ),
+          ),
           title: Text(
             document.titleLabel,
-            style: TextStyle(
+            style: const TextStyle(
               color: colorsList.primaryText,
+              fontSize: 16,
               fontWeight: FontWeight.normal,
             ),
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.open_in_browser_rounded,
+                color: colorsList.iconColor,
+              ),
+              onPressed: () => launchUrl(
+                Uri.parse(fullUrl),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+          ],
         ),
         body: isPdf
-            ? SfPdfViewer.network(url)
-            : isImage
-            ? InteractiveViewer(
+            ? SfPdfViewer.network(
+                fullUrl,
+                onDocumentLoadFailed: (details) {
+                  debugPrint('PDF Load Error: ${details.description}');
+                },
+              )
+            : InteractiveViewer(
                 child: Center(
                   child: Image.network(
-                    url,
+                    fullUrl,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => _UrlFallback(url: url),
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
+                    errorBuilder: (_, __, ___) => _UrlFallback(url: fullUrl),
                   ),
                 ),
-              )
-            : _UrlFallback(url: url),
+              ),
       ),
     );
   }
@@ -4977,10 +5019,54 @@ class _UrlFallback extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: SelectableText(
-          url,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: colorsList.secondaryText),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: Color(0xFFEFF6FF),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.open_in_new_rounded,
+                color: Color(0xFF2563EB),
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Online Document',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0A2342),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SelectableText(
+              url,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => launchUrl(
+                Uri.parse(url),
+                mode: LaunchMode.externalApplication,
+              ),
+              icon: const Icon(Icons.open_in_browser_rounded, size: 18),
+              label: const Text('Open Document Online'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF063C70),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

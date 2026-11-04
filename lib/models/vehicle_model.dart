@@ -735,12 +735,17 @@ class VehicleDocument {
       id: _asInt(json['id']) ?? 0,
       name: json['name']?.toString() ??
           json['file_name']?.toString() ??
+          json['filename']?.toString() ??
           json['title']?.toString(),
       documentType: json['document_type']?.toString() ??
           json['type']?.toString(),
       url: json['url']?.toString() ??
           json['signed_url']?.toString() ??
-          json['file_url']?.toString(),
+          json['file_url']?.toString() ??
+          json['download_url']?.toString() ??
+          json['path']?.toString() ??
+          json['file_path']?.toString() ??
+          json['file']?.toString(),
       createdAt: json['created_at']?.toString() ??
           json['uploaded_at']?.toString(),
       notes: json['notes']?.toString() ?? json['description']?.toString(),
