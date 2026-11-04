@@ -2163,7 +2163,7 @@ class DioClient {
     );
   }
 
-  Future<Response> deleteVehicleAssignment({
+  Future<Response> deleteVehicleDriverAssignment({
     required int vehicleId,
     required int assignmentId,
     required int companyId,

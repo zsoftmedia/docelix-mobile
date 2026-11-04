@@ -1344,7 +1344,7 @@ class VehicleDetailsController extends GetxController {
 
     try {
       isDeletingAssignment.value = true;
-      final response = await _dioClient.deleteVehicleAssignment(
+      final response = await _dioClient.deleteVehicleDriverAssignment(
         vehicleId: vehicle.value.id,
         assignmentId: assignment.id,
         companyId: session.companyId,

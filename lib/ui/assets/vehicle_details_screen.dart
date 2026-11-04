@@ -648,7 +648,7 @@ class _DriverAssignmentCard extends StatelessWidget {
               ],
             ),
           ),
-          /*IconButton(
+          IconButton(
             onPressed: onDelete,
             tooltip: 'Remove',
             icon: Icon(
@@ -656,7 +656,7 @@ class _DriverAssignmentCard extends StatelessWidget {
               color: colorsList.red,
               size: width * 0.055,
             ),
-          ),*/
+          ),
         ],
       ),
     );
