@@ -1388,6 +1388,52 @@ class VehicleDetailsController extends GetxController {
     }
   }
 
+  Future<bool> deleteVehicleDocument(VehicleDocument doc) async {
+    final session = _sessionOrNull(showError: true);
+    if (session == null) return false;
+
+    try {
+      isSavingDocument.value = true;
+      final response = await _dioClient.deleteVehicleDocument(
+        vehicleId: vehicle.value.id,
+        documentId: doc.id,
+        companyId: session.companyId,
+        accessToken: session.token,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 204 ||
+          response.statusCode == 201) {
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Vehicle document deleted successfully.',
+        );
+        await loadDocuments();
+        return true;
+      }
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: _responseMessage(
+          response.data,
+          'Unable to delete vehicle document.',
+        ),
+      );
+      return false;
+    } on DioException catch (e) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: _dioMessage(e, 'Unable to delete vehicle document.'),
+      );
+      return false;
+    } catch (e) {
+      AppSnackbar.error(title: 'Error', message: e.toString());
+      return false;
+    } finally {
+      isSavingDocument.value = false;
+    }
+  }
+
   Future<void> loadDrivers() async {
     final session = _sessionOrNull();
     if (session == null) return;

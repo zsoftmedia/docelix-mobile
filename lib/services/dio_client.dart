@@ -2180,6 +2180,25 @@ class DioClient {
     );
   }
 
+  Future<Response> deleteVehicleDocument({
+    required int vehicleId,
+    required dynamic documentId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/documents/$documentId',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
   Future<Response> getVehicleDrivers({
     required int companyId,
     required String accessToken,

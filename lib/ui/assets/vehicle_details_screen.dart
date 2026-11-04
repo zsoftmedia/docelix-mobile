@@ -4527,6 +4527,45 @@ class _DocumentsTab extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmDeleteDocument(
+    BuildContext context,
+    VehicleDocument doc,
+  ) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => ResponsiveDialogBody(
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Delete Document'),
+          content: Text(
+            'Are you sure you want to delete this document (${doc.titleLabel})?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorsList.red,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed == true) {
+      await controller.deleteVehicleDocument(doc);
+    }
+  }
+
   void _openDocumentPreview(VehicleDocument document) {
     final String? rawUrl = document.url?.trim();
     if (rawUrl == null || rawUrl.isEmpty) {
@@ -4706,13 +4745,30 @@ class _DocumentsTab extends StatelessWidget {
                         doc.documentType!,
                       controller.formatDate(doc.createdAt),
                     ].join(' · '),
-                    trailing: Text(
-                      'View File',
-                      style: TextStyle(
-                        color: colorsList.colorButton,
-                        fontSize: width.fontSizeW(0.028),
-                        fontWeight: FontWeight.normal,
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () => _openDocumentPreview(doc),
+                          child: Text(
+                            'View File',
+                            style: TextStyle(
+                              color: colorsList.colorButton,
+                              fontSize: width.fontSizeW(0.028),
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => _confirmDeleteDocument(context, doc),
+                          tooltip: 'Delete document',
+                          icon: Icon(
+                            Icons.delete_outline_rounded,
+                            color: colorsList.red,
+                            size: width * 0.05,
+                          ),
+                        ),
+                      ],
                     ),
                     onTap: () => _openDocumentPreview(doc),
                   ),
