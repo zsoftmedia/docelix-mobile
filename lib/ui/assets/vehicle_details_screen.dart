@@ -4136,6 +4136,45 @@ class _InsuranceTab extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmDeleteInsurance(
+    BuildContext context,
+    VehicleInsurance policy,
+  ) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => ResponsiveDialogBody(
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Delete Insurance Policy'),
+          content: Text(
+            'Are you sure you want to delete this insurance policy (${policy.titleLabel})?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorsList.red,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed == true) {
+      await controller.deleteInsurancePolicy(policy);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = _designWidth(context);
@@ -4222,13 +4261,28 @@ class _InsuranceTab extends StatelessWidget {
                         policy.policyNumber!,
                       '${controller.formatDate(policy.startDate)} → ${controller.formatDate(policy.endDate)}',
                     ].join(' · '),
-                    trailing: Text(
-                      controller.formatMoney(policy.premium),
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.normal,
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          controller.formatMoney(policy.premium),
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontSize: width.fontSizeW(0.032),
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          onPressed: () => _confirmDeleteInsurance(context, policy),
+                          tooltip: 'Delete insurance policy',
+                          icon: Icon(
+                            Icons.delete_outline_rounded,
+                            color: colorsList.red,
+                            size: width * 0.05,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );

@@ -1283,6 +1283,52 @@ class VehicleDetailsController extends GetxController {
     }
   }
 
+  Future<bool> deleteInsurancePolicy(VehicleInsurance policy) async {
+    final session = _sessionOrNull(showError: true);
+    if (session == null) return false;
+
+    try {
+      isSavingInsurance.value = true;
+      final response = await _dioClient.deleteVehicleInsurancePolicy(
+        vehicleId: vehicle.value.id,
+        insuranceId: policy.id,
+        companyId: session.companyId,
+        accessToken: session.token,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 204 ||
+          response.statusCode == 201) {
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Insurance policy deleted successfully.',
+        );
+        await Future.wait([loadVehicle(), loadInsurance()]);
+        return true;
+      }
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: _responseMessage(
+          response.data,
+          'Unable to delete insurance policy.',
+        ),
+      );
+      return false;
+    } on DioException catch (e) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: _dioMessage(e, 'Unable to delete insurance policy.'),
+      );
+      return false;
+    } catch (e) {
+      AppSnackbar.error(title: 'Error', message: e.toString());
+      return false;
+    } finally {
+      isSavingInsurance.value = false;
+    }
+  }
+
   Future<bool> createVehicleDocument({
     required String name,
     required String documentType,
