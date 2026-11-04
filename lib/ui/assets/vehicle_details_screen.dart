@@ -439,7 +439,8 @@ class _DriversTab extends StatelessWidget {
   Future<void> _confirmDelete(
     BuildContext context,
     VehicleDriverAssignment assignment,
-  ) async {
+  ) async
+  {
     final name = assignment.driverName?.trim().isNotEmpty == true
         ? assignment.driverName!
         : 'this driver';
@@ -1053,30 +1054,219 @@ class _TripsTab extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, VehicleTrip trip) async {
-    final confirmed = await Get.dialog<bool>(
-      ResponsiveDialogBody(
-        child: AlertDialog(
-          title: const Text('Delete trip'),
-          content: Text('Delete trip ${trip.routeLabel}?'),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: const Text('Cancel'),
+  void _openTripMenu(BuildContext context, VehicleTrip trip) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final width = _designWidth(context);
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              style: TextButton.styleFrom(foregroundColor: colorsList.red),
-              child: const Text('Delete'),
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.all(width * 0.04),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.content_copy_rounded, color: Color(0xFF2563EB)),
+                      title: const Text('Duplicate'),
+                      subtitle: const Text('Create a new trip with same route & details', style: TextStyle(fontSize: 11)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _duplicateTrip(context, trip);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.swap_horiz_rounded, color: Color(0xFF16A34A)),
+                      title: const Text('Add return trip'),
+                      subtitle: const Text('Swap start & destination addresses', style: TextStyle(fontSize: 11)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _addReturnTrip(context, trip);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.block_rounded, color: Color(0xFFDC2626)),
+                      title: const Text('Void trip', style: TextStyle(color: Color(0xFFDC2626))),
+                      subtitle: const Text('Mark trip as void in logbook', style: TextStyle(fontSize: 11)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showVoidTripDialog(context, trip);
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _duplicateTrip(BuildContext context, VehicleTrip trip) {
+    controller.tripFromController.text = trip.startLocation ?? '';
+    controller.tripToController.text = trip.endLocation ?? '';
+    controller.tripPurposeController.text = trip.purpose ?? '';
+    _openAddTrip(context);
+  }
+
+  void _addReturnTrip(BuildContext context, VehicleTrip trip) {
+    controller.tripFromController.text = trip.endLocation ?? '';
+    controller.tripToController.text = trip.startLocation ?? '';
+    controller.tripPurposeController.text = 'Return: ${trip.purpose ?? 'Trip'}';
+    _openAddTrip(context);
+  }
+
+  void _showVoidTripDialog(BuildContext context, VehicleTrip trip) {
+    final reasonController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => ResponsiveDialogBody(
+        child: Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // HEADER WITH CLOSE BUTTON
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Void this trip?',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0A2342),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Color(0xFF64748B),
+                        size: 20,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // BODY DESCRIPTION TEXT
+                const Text(
+                  'The trip stays in the logbook, marked as void, and no longer counts in totals or Kilometergeld. This cannot be undone. Record a new trip if it is needed again.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF475569),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // REASON LABEL
+                const Text(
+                  'Reason',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 6),
+
+                // REASON TEXTFIELD
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: '',
+                    isDense: true,
+                    contentPadding: const EdgeInsets.all(12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // REASON HELPER TEXT
+                const Text(
+                  'Optional, but recommended for the audit trail.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // ACTION BUTTONS (CANCEL & VOID TRIP)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(90, 42),
+                        foregroundColor: const Color(0xFF334155),
+                        side: const BorderSide(color: Color(0xFFCBD5E1)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(ctx).pop();
+                        await controller.voidTrip(
+                          trip: trip,
+                          reason: reasonController.text,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(100, 42),
+                        backgroundColor: const Color(0xFFDC2626),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Void trip'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
-
-    if (confirmed == true) {
-      await controller.deleteTrip(trip);
-    }
   }
 
   @override
@@ -1177,9 +1367,7 @@ class _TripsTab extends StatelessWidget {
                     reimbursementLabel: trip.reimbursement == null
                         ? null
                         : controller.formatMoney(trip.reimbursement),
-                    onDelete: controller.isDeletingTrip.value
-                        ? null
-                        : () => _confirmDelete(context, trip),
+                    onMenuTap: () => _openTripMenu(context, trip),
                   ),
                 );
               }),
@@ -1226,14 +1414,14 @@ class _TripCard extends StatelessWidget {
     required this.dateLabel,
     required this.distanceLabel,
     required this.reimbursementLabel,
-    required this.onDelete,
+    required this.onMenuTap,
   });
 
   final VehicleTrip trip;
   final String dateLabel;
   final String distanceLabel;
   final String? reimbursementLabel;
-  final VoidCallback? onDelete;
+  final VoidCallback? onMenuTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1299,15 +1487,15 @@ class _TripCard extends StatelessWidget {
                   fontWeight: FontWeight.normal,
                 ),
               ),
-              /*IconButton(
-                onPressed: onDelete,
-                tooltip: 'Delete',
+              IconButton(
+                onPressed: onMenuTap,
+                tooltip: 'More actions',
                 icon: Icon(
-                  Icons.delete_outline_rounded,
-                  color: colorsList.red,
+                  Icons.more_vert_rounded,
+                  color: colorsList.iconColor,
                   size: width * 0.055,
                 ),
-              ),*/
+              ),
             ],
           ),
         ],
@@ -2846,6 +3034,45 @@ class _FuelTab extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmDeleteFuelLog(
+    BuildContext context,
+    VehicleFuelLog log,
+  ) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => ResponsiveDialogBody(
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Delete Fuel Log'),
+          content: Text(
+            'Are you sure you want to delete this fuel log entry (${controller.formatLiters(log.liters)} on ${controller.formatDate(log.date)})?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorsList.red,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed == true) {
+      await controller.deleteFuelLog(log);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = _designWidth(context);
@@ -2933,13 +3160,28 @@ class _FuelTab extends StatelessWidget {
                       if (costPerL != null)
                         '${controller.formatMoney(costPerL)}/L',
                     ].join(' · '),
-                    trailing: Text(
-                      controller.formatMoney(log.cost),
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.normal,
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          controller.formatMoney(log.cost),
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontSize: width.fontSizeW(0.032),
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          onPressed: () => _confirmDeleteFuelLog(context, log),
+                          tooltip: 'Delete fuel log',
+                          icon: Icon(
+                            Icons.delete_outline_rounded,
+                            color: colorsList.red,
+                            size: width * 0.05,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -3426,6 +3668,45 @@ class _ServicesTab extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmDeleteService(
+    BuildContext context,
+    VehicleServiceLog service,
+  ) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => ResponsiveDialogBody(
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Delete Service Record'),
+          content: Text(
+            'Are you sure you want to delete this service record (${service.titleLabel} on ${controller.formatDate(service.date)})?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorsList.red,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed == true) {
+      await controller.deleteServiceLog(service);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = _designWidth(context);
@@ -3510,13 +3791,28 @@ class _ServicesTab extends StatelessWidget {
                       controller.formatDate(service.date),
                       controller.formatKm(service.odometerKm),
                     ].join(' · '),
-                    trailing: Text(
-                      controller.formatMoney(service.cost),
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width.fontSizeW(0.032),
-                        fontWeight: FontWeight.normal,
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          controller.formatMoney(service.cost),
+                          style: TextStyle(
+                            color: colorsList.primaryText,
+                            fontSize: width.fontSizeW(0.032),
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          onPressed: () => _confirmDeleteService(context, service),
+                          tooltip: 'Delete service record',
+                          icon: Icon(
+                            Icons.delete_outline_rounded,
+                            color: colorsList.red,
+                            size: width * 0.05,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );

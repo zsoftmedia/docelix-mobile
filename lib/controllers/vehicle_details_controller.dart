@@ -770,6 +770,56 @@ class VehicleDetailsController extends GetxController {
     }
   }
 
+  Future<bool> voidTrip({
+    required VehicleTrip trip,
+    String? reason,
+  }) async {
+    final session = _sessionOrNull(showError: true);
+    if (session == null) return false;
+
+    try {
+      isDeletingTrip.value = true;
+      final response = await _dioClient.voidVehicleTrip(
+        vehicleId: vehicle.value.id,
+        tripId: trip.id,
+        companyId: session.companyId,
+        accessToken: session.token,
+        reason: reason?.trim().isNotEmpty == true ? reason!.trim() : null,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 204) {
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Trip voided successfully.',
+        );
+        await Future.wait([loadVehicle(), loadTrips()]);
+        return true;
+      }
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: _responseMessage(
+          response.data,
+          'Unable to void trip.',
+        ),
+      );
+      return false;
+    } on DioException catch (e) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: _dioMessage(e, 'Unable to void trip.'),
+      );
+      return false;
+    } catch (e) {
+      AppSnackbar.error(title: 'Error', message: e.toString());
+      return false;
+    } finally {
+      isDeletingTrip.value = false;
+    }
+  }
+
   Future<void> loadFuelLogs() async {
     final session = _sessionOrNull();
     if (session == null) return;
@@ -845,6 +895,52 @@ class VehicleDetailsController extends GetxController {
       AppSnackbar.error(
         title: 'Error',
         message: _dioMessage(e, 'Unable to save fuel log.'),
+      );
+      return false;
+    } catch (e) {
+      AppSnackbar.error(title: 'Error', message: e.toString());
+      return false;
+    } finally {
+      isSavingFuel.value = false;
+    }
+  }
+
+  Future<bool> deleteFuelLog(VehicleFuelLog log) async {
+    final session = _sessionOrNull(showError: true);
+    if (session == null) return false;
+
+    try {
+      isSavingFuel.value = true;
+      final response = await _dioClient.deleteVehicleFuelLog(
+        vehicleId: vehicle.value.id,
+        fuelLogId: log.id,
+        companyId: session.companyId,
+        accessToken: session.token,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 204 ||
+          response.statusCode == 201) {
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Fuel log deleted successfully.',
+        );
+        await Future.wait([loadVehicle(), loadFuelLogs()]);
+        return true;
+      }
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: _responseMessage(
+          response.data,
+          'Unable to delete fuel log.',
+        ),
+      );
+      return false;
+    } on DioException catch (e) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: _dioMessage(e, 'Unable to delete fuel log.'),
       );
       return false;
     } catch (e) {
@@ -989,6 +1085,52 @@ class VehicleDetailsController extends GetxController {
       AppSnackbar.error(
         title: 'Error',
         message: _dioMessage(e, 'Unable to save service.'),
+      );
+      return false;
+    } catch (e) {
+      AppSnackbar.error(title: 'Error', message: e.toString());
+      return false;
+    } finally {
+      isSavingService.value = false;
+    }
+  }
+
+  Future<bool> deleteServiceLog(VehicleServiceLog service) async {
+    final session = _sessionOrNull(showError: true);
+    if (session == null) return false;
+
+    try {
+      isSavingService.value = true;
+      final response = await _dioClient.deleteVehicleServiceLog(
+        vehicleId: vehicle.value.id,
+        serviceId: service.id,
+        companyId: session.companyId,
+        accessToken: session.token,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 204 ||
+          response.statusCode == 201) {
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Service record deleted successfully.',
+        );
+        await Future.wait([loadVehicle(), loadServices()]);
+        return true;
+      }
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: _responseMessage(
+          response.data,
+          'Unable to delete service record.',
+        ),
+      );
+      return false;
+    } on DioException catch (e) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: _dioMessage(e, 'Unable to delete service record.'),
       );
       return false;
     } catch (e) {

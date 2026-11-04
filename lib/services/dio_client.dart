@@ -1891,6 +1891,30 @@ class DioClient {
     );
   }
 
+  Future<Response> voidVehicleTrip({
+    required int vehicleId,
+    required String tripId,
+    required int companyId,
+    required String accessToken,
+    String? reason,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/trips/$tripId/void',
+      data: {
+        'company_id': companyId,
+        'reason': reason,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
   Future<Response> getVehicleFuelLogs({
     required int vehicleId,
     required int companyId,
@@ -1929,6 +1953,25 @@ class DioClient {
           'Authorization': 'Bearer $accessToken',
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> deleteVehicleFuelLog({
+    required int vehicleId,
+    required dynamic fuelLogId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/fuel/$fuelLogId',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
           'x-company-id': companyId.toString(),
         },
       ),
@@ -2003,6 +2046,25 @@ class DioClient {
           'Authorization': 'Bearer $accessToken',
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  Future<Response> deleteVehicleServiceLog({
+    required int vehicleId,
+    required dynamic serviceId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/vehicles/$vehicleId/services/$serviceId',
+      queryParameters: {'company_id': companyId},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
           'x-company-id': companyId.toString(),
         },
       ),
