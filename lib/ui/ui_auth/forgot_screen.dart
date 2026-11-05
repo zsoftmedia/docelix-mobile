@@ -43,72 +43,226 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             padding: EdgeInsets.symmetric(
               horizontal: width * 0.07,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: height * 0.02,
-                ),
+            child: Obx(() {
+              // ======================================================
+              // STATE 2: CHECK YOUR EMAIL SUCCESS STATE
+              // ======================================================
 
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Image.asset(
-                    'assets/main_logo.png',
-                    width: width * 0.40,
-                    fit: BoxFit.contain,
+              if (forgotController.isEmailSent.value) {
+                final userEmail = forgotController.emailController.text.trim();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: height * 0.02),
+
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Image.asset(
+                        'assets/main_logo.png',
+                        width: width * 0.40,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.05),
+
+                    Text(
+                      "Check your email",
+                      style: TextStyle(
+                        fontSize: width * 0.08,
+                        fontWeight: FontWeight.bold,
+                        color: colorsList.primaryBlue,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.015),
+
+                    Text(
+                      "Follow the link in the email to choose a new password.",
+                      style: TextStyle(
+                        fontSize: width * 0.038,
+                        color: const Color(0xFF475569),
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.03),
+
+                    // GREEN INFORMATIONAL BANNER CARD
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFECFDF5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFA7F3D0)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFD1FAE5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.mark_email_read_outlined,
+                              color: Color(0xFF059669),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text.rich(
+                              TextSpan(
+                                style: TextStyle(
+                                  fontSize: width * 0.034,
+                                  color: const Color(0xFF065F46),
+                                  height: 1.4,
+                                ),
+                                children: [
+                                  const TextSpan(text: "If an account exists for "),
+                                  TextSpan(
+                                    text: userEmail,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const TextSpan(
+                                    text: ", we've sent a link to reset your password. The link expires after a short time.",
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.04),
+
+                    // DIDN'T GET EMAIL / SEND AGAIN
+                    Center(
+                      child: Text.rich(
+                        TextSpan(
+                          style: TextStyle(
+                            fontSize: width * 0.035,
+                            color: const Color(0xFF64748B),
+                          ),
+                          children: [
+                            const TextSpan(text: "Didn't get the email? Check your spam folder or "),
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: GestureDetector(
+                                onTap: forgotController.isLoading.value
+                                    ? null
+                                    : () => forgotController.sendPasswordResetEmail(),
+                                child: Text(
+                                  "send it again",
+                                  style: TextStyle(
+                                    fontSize: width * 0.035,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorsList.primaryBlue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.03),
+
+                    // BACK TO SIGN IN BUTTON
+                    Center(
+                      child: TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text(
+                          'Back to sign in',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: colorsList.primaryBlue,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              // ======================================================
+              // STATE 1: INITIAL RESET PASSWORD FORM
+              // ======================================================
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: height * 0.02,
                   ),
-                ),
 
-                SizedBox(
-                  height: height * 0.06,
-                ),
-
-                Text(
-                  "Reset your password",
-                  style: TextStyle(
-                    fontSize: width * 0.08,
-                    fontWeight: FontWeight.normal,
-                    color: colorsList.primaryBlue,
-                    letterSpacing: -0.5,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Image.asset(
+                      'assets/main_logo.png',
+                      width: width * 0.40,
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
 
-                SizedBox(
-                  height: height * 0.04,
-                ),
-
-                Text(
-                  "Email address",
-                  style: TextStyle(
-                    fontSize: width * 0.040,
-                    fontWeight: FontWeight.normal,
-                    color: const Color(0xFF333333),
+                  SizedBox(
+                    height: height * 0.06,
                   ),
-                ),
 
-                SizedBox(
-                  height: height * 0.012,
-                ),
+                  Text(
+                    "Reset your password",
+                    style: TextStyle(
+                      fontSize: width * 0.08,
+                      fontWeight: FontWeight.normal,
+                      color: colorsList.primaryBlue,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
 
-                AppTextField(
-                  controller: forgotController.emailController,
-                  hintText: 'Email address',
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: Icons.alternate_email_rounded,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
-                ),
+                  SizedBox(
+                    height: height * 0.04,
+                  ),
 
-                SizedBox(
-                  height: height * 0.035,
-                ),
+                  Text(
+                    "Email address",
+                    style: TextStyle(
+                      fontSize: width * 0.040,
+                      fontWeight: FontWeight.normal,
+                      color: const Color(0xFF333333),
+                    ),
+                  ),
 
-                Obx(
-                  () => AppButton(
+                  SizedBox(
+                    height: height * 0.012,
+                  ),
+
+                  AppTextField(
+                    controller: forgotController.emailController,
+                    hintText: 'Email address',
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: Icons.alternate_email_rounded,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  SizedBox(
+                    height: height * 0.035,
+                  ),
+
+                  AppButton(
                     text: 'Send Reset Link',
                     isLoading: forgotController.isLoading.value,
                     onPressed: () {
@@ -124,61 +278,61 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     fontSize: width * 0.040,
                     fontWeight: FontWeight.normal,
                   ),
-                ),
 
-                SizedBox(
-                  height: height * 0.040,
-                ),
+                  SizedBox(
+                    height: height * 0.040,
+                  ),
 
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Divider(
-                        color: colorsList.dividerColor,
-                        thickness: 1,
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(
+                          color: colorsList.dividerColor,
+                          thickness: 1,
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: width * 0.035,
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: width * 0.035,
+                        ),
+                        child: Text(
+                          "or back to login",
+                          style: TextStyle(
+                            fontSize: width * 0.035,
+                            color: colorsList.textColor,
+                          ),
+                        ),
                       ),
-                      child: Text(
-                        "or back to login",
+                      const Expanded(
+                        child: Divider(
+                          color: colorsList.dividerColor,
+                          thickness: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(
+                    height: height * 0.03,
+                  ),
+
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => Get.back(),
+                      icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                      label: const Text(
+                        'Back to Sign In',
                         style: TextStyle(
-                          fontSize: width * 0.035,
-                          color: colorsList.textColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                          color: colorsList.primaryBlue,
                         ),
                       ),
                     ),
-                    const Expanded(
-                      child: Divider(
-                        color: colorsList.dividerColor,
-                        thickness: 1,
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(
-                  height: height * 0.03,
-                ),
-
-                Center(
-                  child: TextButton.icon(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                    label: const Text(
-                      'Back to Sign In',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.normal,
-                        color: colorsList.primaryBlue,
-                      ),
-                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            }),
           ),
         ),
       ),

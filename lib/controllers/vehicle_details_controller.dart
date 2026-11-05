@@ -421,12 +421,9 @@ class VehicleDetailsController extends GetxController {
         );
       trips.refresh();
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to load trips.'),
-      );
+      debugPrint('[VehicleDetailsController] loadTrips DioError: ${e.message}');
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] loadTrips Exception: $e');
     } finally {
       isLoadingTrips.value = false;
     }
@@ -452,12 +449,9 @@ class VehicleDetailsController extends GetxController {
         );
       locations.refresh();
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to load locations.'),
-      );
+      debugPrint('[VehicleDetailsController] loadLocations DioError: ${e.message}');
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] loadLocations Exception: $e');
     }
   }
 
@@ -842,12 +836,9 @@ class VehicleDetailsController extends GetxController {
         );
       fuelLogs.refresh();
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to load fuel logs.'),
-      );
+      debugPrint('[VehicleDetailsController] loadFuelLogs DioError: ${e.message}');
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] loadFuelLogs Exception: $e');
     } finally {
       isLoadingFuel.value = false;
     }
@@ -1023,12 +1014,9 @@ class VehicleDetailsController extends GetxController {
         );
       services.refresh();
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to load services.'),
-      );
+      debugPrint('[VehicleDetailsController] loadServices DioError: ${e.message}');
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] loadServices Exception: $e');
     } finally {
       isLoadingServices.value = false;
     }
@@ -1175,12 +1163,9 @@ class VehicleDetailsController extends GetxController {
         ..addAll(items);
       insurancePolicies.refresh();
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to load insurance.'),
-      );
+      debugPrint('[VehicleDetailsController] loadInsurance DioError: ${e.message}');
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] loadInsurance Exception: $e');
     } finally {
       isLoadingInsurance.value = false;
     }
@@ -1208,12 +1193,9 @@ class VehicleDetailsController extends GetxController {
         );
       documents.refresh();
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to load documents.'),
-      );
+      debugPrint('[VehicleDetailsController] loadDocuments DioError: ${e.message}');
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] loadDocuments Exception: $e');
     } finally {
       isLoadingDocuments.value = false;
     }
@@ -1453,12 +1435,9 @@ class VehicleDetailsController extends GetxController {
         );
       drivers.refresh();
     } on DioException catch (e) {
-      AppSnackbar.error(
-        title: 'Error',
-        message: _dioMessage(e, 'Unable to load drivers.'),
-      );
+      debugPrint('[VehicleDetailsController] loadDrivers DioError: ${e.message}');
     } catch (e) {
-      AppSnackbar.error(title: 'Error', message: e.toString());
+      debugPrint('[VehicleDetailsController] loadDrivers Exception: $e');
     } finally {
       isLoadingDrivers.value = false;
     }

@@ -8,6 +8,7 @@ class ForgotPasswordController extends GetxController {
   final authService = AuthServices();
 
   final isLoading = false.obs;
+  final isEmailSent = false.obs;
   final emailController = TextEditingController();
 
   Future<void> sendPasswordResetEmail() async {
@@ -38,13 +39,12 @@ class ForgotPasswordController extends GetxController {
 
       await authService.resetPasswordForEmail(email);
 
+      isEmailSent.value = true;
+
       AppSnackbar.success(
         title: 'Reset Link Sent',
-        message: 'Password reset link has been sent to $email. Please check your inbox.',
+        message: 'Password reset link has been sent to $email.',
       );
-
-      // Navigate back to login screen after successful request
-      Get.back();
     } on AuthException catch (e) {
       debugPrint('Supabase Reset Password Auth Exception: ${e.message}');
 

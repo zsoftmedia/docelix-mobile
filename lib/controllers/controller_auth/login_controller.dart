@@ -215,10 +215,10 @@ class LoginController extends GetxController {
   // ======================================================
 
   Future<void> _handlePostLogin(
-    Session session, {
-    String? email,
-    String? password,
-  }) async
+      Session session, {
+        String? email,
+        String? password,
+      }) async
   {
     if (_isProcessingLogin) return;
     _isProcessingLogin = true;
