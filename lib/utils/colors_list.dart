@@ -102,6 +102,7 @@ class colorsList {
   // ================================================================
 
   static const Color backgroundColor = Color(0xFFFFFFFF);
+  static const Color bottomsheetColor = Color(0xFFE5EDF6);
   static const Color surfaceColor = Color(0xFFFFFFFF);
   static const Color cardColor = Colors.white;
 

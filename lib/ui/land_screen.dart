@@ -490,19 +490,25 @@ class _LandScreenState extends State<LandScreen> {
     final rs = context.rs;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorsList.bottomsheetColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 15,
-            offset: const Offset(0, -3),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.only(top: rs.s(6), bottom: rs.s(4)),
+          padding: EdgeInsets.fromLTRB(
+            rs.s(6),
+            rs.s(8),
+            rs.s(6),
+            rs.s(4),
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -510,7 +516,7 @@ class _LandScreenState extends State<LandScreen> {
                 child: _BottomNavItem(
                   index: 0,
                   selectedIndex: _selectedIndex,
-                  icon: Icons.home_outlined,
+                  icon: Icons.home_rounded,
                   activeIcon: Icons.home_rounded,
                   label: 'Home',
                   onTap: _onItemTapped,
@@ -520,8 +526,8 @@ class _LandScreenState extends State<LandScreen> {
                 child: _BottomNavItem(
                   index: 1,
                   selectedIndex: _selectedIndex,
-                  icon: Icons.auto_graph_outlined,
-                  activeIcon: Icons.auto_graph_rounded,
+                  icon: Icons.show_chart_rounded,
+                  activeIcon: Icons.show_chart_rounded,
                   label: 'Sales',
                   onTap: _onItemTapped,
                 ),
@@ -541,8 +547,8 @@ class _LandScreenState extends State<LandScreen> {
                 child: _BottomNavItem(
                   index: 4,
                   selectedIndex: _selectedIndex,
-                  icon: Icons.more_horiz_rounded,
-                  activeIcon: Icons.more_horiz_rounded,
+                  icon: Icons.grid_view_rounded,
+                  activeIcon: Icons.grid_view_rounded,
                   label: 'More',
                   onTap: _onItemTapped,
                 ),
@@ -1008,40 +1014,44 @@ class _BottomNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final rs = context.rs;
     final isSelected = selectedIndex == index;
+    final activeColor = colorsList.colorButton;
+    final inactiveColor = const Color(0xFF556578);
 
     return InkWell(
       onTap: () => onTap(index),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             isSelected ? activeIcon : icon,
-            color: isSelected ? colorsList.colorButton : const Color(0xFF71829A),
+            color: isSelected ? activeColor : inactiveColor,
             size: rs.s(22),
           ),
-          SizedBox(height: rs.s(3)),
+          SizedBox(height: rs.s(4)),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: isSelected ? colorsList.colorButton : const Color(0xFF71829A),
-              fontSize: rs.sp(10),
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: isSelected ? activeColor : inactiveColor,
+              fontSize: rs.sp(11),
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
+          SizedBox(height: rs.s(4)),
           if (isSelected)
             Container(
-              margin: EdgeInsets.only(top: rs.s(3)),
-              width: rs.s(26),
-              height: 2,
+              width: rs.s(24),
+              height: 3,
               decoration: BoxDecoration(
-                color: colorsList.colorButton,
+                color: activeColor,
                 borderRadius: BorderRadius.circular(10),
               ),
             )
           else
-            SizedBox(height: rs.s(6)),
+            SizedBox(height: rs.s(3)),
         ],
       ),
     );
@@ -1059,24 +1069,28 @@ class _ScanBottomButton extends StatelessWidget {
 
       return InkWell(
         onTap: isLoading ? null : controller.captureFromCamera,
-        borderRadius: BorderRadius.circular(50),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Transform.translate(
-              offset: Offset(0, -rs.s(11)),
+              offset: Offset(0, -rs.s(16)),
               child: Container(
-                width: rs.s(48),
-                height: rs.s(48),
+                width: rs.s(54),
+                height: rs.s(54),
                 decoration: BoxDecoration(
                   color: isLoading ? Colors.grey : colorsList.colorButton,
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFE5EDF6),
+                    width: 4,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: (isLoading ? Colors.grey : colorsList.colorButton)
-                          .withValues(alpha: 0.30),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
+                      color: colorsList.colorButton.withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -1091,19 +1105,19 @@ class _ScanBottomButton extends StatelessWidget {
                     : Icon(
                         Icons.camera_alt_outlined,
                         color: Colors.white,
-                        size: rs.s(23),
+                        size: rs.s(24),
                       ),
               ),
             ),
             Transform.translate(
-              offset: Offset(0, -rs.s(7)),
+              offset: Offset(0, -rs.s(12)),
               child: Text(
                 isLoading ? 'Uploading...' : 'Scan',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: const Color(0xFF71829A),
-                  fontSize: rs.sp(10),
+                  color: const Color(0xFF556578),
+                  fontSize: rs.sp(11),
                   fontWeight: FontWeight.normal,
                 ),
               ),
