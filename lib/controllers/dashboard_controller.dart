@@ -40,6 +40,38 @@ class DashboardController extends GetxController {
   String get fromDateText => DateFormat('dd MMM yyyy').format(fromDate.value);
   String get toDateText => DateFormat('dd MMM yyyy').format(toDate.value);
 
+  // Search input controller
+  final searchController = TextEditingController();
+
+  // Dynamic header date & greeting
+  String get dateHeaderText {
+    final now = DateTime.now();
+    return DateFormat('EEEE, MMMM d').format(now).toUpperCase();
+  }
+
+  String get greetingText {
+    final hour = DateTime.now().hour;
+    String greeting;
+    if (hour >= 5 && hour < 12) {
+      greeting = 'Good morning';
+    } else if (hour >= 12 && hour < 17) {
+      greeting = 'Good afternoon';
+    } else {
+      greeting = 'Good evening';
+    }
+
+    final rawEmail = SessionManager.email ?? '';
+    String userName = 'Admin';
+    if (rawEmail.isNotEmpty) {
+      final namePart = rawEmail.split('@').first;
+      if (namePart.isNotEmpty) {
+        userName = namePart[0].toUpperCase() + namePart.substring(1);
+      }
+    }
+
+    return '$greeting, $userName!';
+  }
+
   // ============================================================
   // DYNAMIC CURRENCY
   // ============================================================

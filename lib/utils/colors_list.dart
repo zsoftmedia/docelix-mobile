@@ -101,7 +101,7 @@ class colorsList {
   // LIGHT THEME COLORS
   // ================================================================
 
-  static const Color backgroundColor = Color(0xFFFFFFFF);
+  static const Color backgroundColor = Color(0xFFF6F6F6);
   static const Color bottomsheetColor = Color(0xFFE5EDF6);
   static const Color surfaceColor = Color(0xFFFFFFFF);
   static const Color cardColor = Colors.white;
@@ -119,7 +119,9 @@ class colorsList {
 
   static const Color borderColor = Color(0xFFE8EAED);
   static const Color focusedBorderColor = Color(0xFF5f626a);
-  static const Color iconColor = Color(0xFF344E6F);
+  static const Color iconColor = Color(0xFF063C70);
+  static const Color dashboardhintColor = Color(0xFF94A3B8);
+  static const Color dashboardBorderColor = Color(0xFFD0E1F5);
   static const Color dividerColor = Color(0xFFD5D5D5);
   static const Color progressBackground = Color(0xFFE9EEF4);
   static const Color colorButton = Color(0xFF063C70);
@@ -138,4 +140,12 @@ class colorsList {
   static const Color cyan = Color(0xFF25BEEB);
   static const Color purple = Color(0xFF9B5DE5);
   static const Color orange = Color(0xFFFFB52E);
+
+  static const Color financialCardBg = Color(0xFFE2ECF8);
+  static const Color lightGreenPillBg = Color(0xFFDCFCE7);
+  static const Color lightGreenPillText = Color(0xFF16A34A);
+  static const Color lightRedPillBg = Color(0xFFFEE2E2);
+  static const Color lightRedPillText = Color(0xFFDC2626);
+  static const Color lightYellowPillBg = Color(0xFFFEF3C7);
+  static const Color lightYellowPillText = Color(0xFFD97706);
 }
