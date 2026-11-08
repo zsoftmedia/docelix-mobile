@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/quotation_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/quotation_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
       // ==========================================================
 
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorsList.backgroundColor,
         elevation: 0,
         leading: Obx(() {
           final bool searching = controller.isSearching.value;
@@ -117,7 +118,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
         icon: const Icon(Icons.add_rounded),
         label: const Text(
           'Create Offer',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.normal),
         ),
       ),
 
@@ -236,6 +237,37 @@ class _QuotationScreenState extends State<QuotationScreen> {
     );
   }
 
+  void _showQuotationActions(BuildContext context, QuotationModel item) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colorsList.colorWhite,
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.visibility_outlined, color: Color(0xFF2563EB)),
+                  title: const Text('View Quotation Details'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    Get.toNamed('/QuotationDetailsScreen', arguments: item);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // ================================================================
   // QUOTATION CARD WIDGET
   // ================================================================
@@ -246,40 +278,52 @@ class _QuotationScreenState extends State<QuotationScreen> {
     required double height,
   }) {
     final String statusStr = item.status.toLowerCase().trim();
-    Color statusColor;
+    Color pillBg;
+    Color pillBorder;
+    Color pillText;
 
     if (statusStr == 'accepted') {
-      statusColor = const Color(0xFF12A150);
+      pillBg = const Color(0xFFECFDF5);
+      pillBorder = const Color(0xFFA7F3D0);
+      pillText = const Color(0xFF059669);
     } else if (statusStr == 'sent') {
-      statusColor = colorsList.primaryBlue;
+      pillBg = const Color(0xFFEFF6FF);
+      pillBorder = const Color(0xFFBFDBFE);
+      pillText = const Color(0xFF2563EB);
     } else if (statusStr == 'rejected') {
-      statusColor = const Color(0xFFD64545);
+      pillBg = const Color(0xFFFEF2F2);
+      pillBorder = const Color(0xFFFECACA);
+      pillText = const Color(0xFFDC2626);
     } else {
-      statusColor = const Color(0xFF71829A);
+      pillBg = const Color(0xFFF1F5F9);
+      pillBorder = const Color(0xFFE2E8F0);
+      pillText = const Color(0xFF64748B);
     }
 
     final String displayStatus =
         statusStr.isNotEmpty ? statusStr[0].toUpperCase() + statusStr.substring(1) : 'Draft';
 
     final String dateStr = _formatDate(item.issueDate);
+    final String validUntilStr = _formatDate(item.validUntil);
+    final String acceptedStr = _formatDate(item.acceptedAt);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE4EAF1)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE8EAED)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        color: colorsList.colorWhite,
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () {
             Get.toNamed(
@@ -287,89 +331,125 @@ class _QuotationScreenState extends State<QuotationScreen> {
               arguments: item,
             );
           },
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: EdgeInsets.all(width * 0.04),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // TOP ROW: OFFER NUMBER & STATUS BADGE
+                // 1. TOP HEADER ROW (OFFER NUMBER + STATUS BADGE + MORE MENU)
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: width * 0.11,
-                      height: width * 0.11,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFF4F9),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        Icons.request_quote_outlined,
-                        color: colorsList.iconColor,
-                        size: width * 0.06,
-                      ),
-                    ),
-                    SizedBox(width: width * 0.03),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.offerNumber.isNotEmpty ? item.offerNumber : 'OFFER',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: width * 0.038,
-                              fontWeight: FontWeight.normal,
-                              color: const Color(0xFF063C70),
-                            ),
-                          ),
-                          SizedBox(height: height * 0.003),
-                          Text(
-                            item.clientName ?? 'Customer',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: width * 0.030,
-                              color: colorsList.textHintColor,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        item.offerNumber.isNotEmpty ? item.offerNumber : 'OFFER-#${item.id}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                          color: Color(0xFF0A2342),
+                        ),
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
+                        horizontal: 12,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.10),
-                        borderRadius: BorderRadius.circular(12),
+                        color: pillBg,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: pillBorder),
                       ),
                       child: Text(
                         displayStatus,
                         style: TextStyle(
-                          fontSize: width * 0.027,
+                          fontSize: 12,
                           fontWeight: FontWeight.normal,
-                          color: statusColor,
+                          color: pillText,
                         ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      onPressed: () {
+                        _showQuotationActions(context, item);
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(
+                        Icons.more_horiz_rounded,
+                        color: Color(0xFF94A3B8),
+                        size: 20,
                       ),
                     ),
                   ],
                 ),
 
-                SizedBox(height: height * 0.012),
-                const Divider(height: 1, color: Color(0xFFF0F4F8)),
-                SizedBox(height: height * 0.010),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ),
 
-                // DETAILS ROW: DATE | VALID UNTIL | ACCEPTED
+                // 2. MIDDLE DETAILS 2X3 GRID
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // LEFT COLUMN (CUSTOMER, VALID UNTIL, SIGNATURE)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _statField('CUSTOMER', item.clientName ?? '—'),
+                          const SizedBox(height: 10),
+                          _statField('VALID UNTIL', validUntilStr),
+                          const SizedBox(height: 10),
+                          _statField('SIGNATURE', '—'),
+                        ],
+                      ),
+                    ),
+
+                    // RIGHT COLUMN (DATE, ACCEPTED)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _statField('DATE', dateStr),
+                          const SizedBox(height: 10),
+                          _statField('ACCEPTED', acceptedStr),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ),
+
+                // 3. BOTTOM AMOUNTS ROW (TOTAL)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _cardStat('Date', dateStr, width),
-                    _cardStat('Valid Until', '—', width),
-                    _cardStat('Accepted', '—', width),
+                    const Text(
+                      'TOTAL',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.normal,
+                        color: Color(0xFF94A3B8),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    Text(
+                      '${item.totalAmount.toStringAsFixed(2)} €',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.normal,
+                        color: Color(0xFF0A2342),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -380,24 +460,28 @@ class _QuotationScreenState extends State<QuotationScreen> {
     );
   }
 
-  Widget _cardStat(String label, String value, double width) {
+  Widget _statField(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: width * 0.025,
-            color: colorsList.textHintColor,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.normal,
+            color: Color(0xFF94A3B8),
+            letterSpacing: 0.5,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: TextStyle(
-            fontSize: width * 0.030,
-            fontWeight: FontWeight.w500,
-            color: colorsList.textColor,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.normal,
+            color: Color(0xFF0A2342),
           ),
         ),
       ],
@@ -408,11 +492,9 @@ class _QuotationScreenState extends State<QuotationScreen> {
     if (dateStr == null || dateStr.trim().isEmpty) return '—';
     try {
       final parsed = DateTime.parse(dateStr);
-      final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ];
-      return '${parsed.day} ${months[parsed.month - 1]} ${parsed.year}';
+      final day = parsed.day.toString().padLeft(2, '0');
+      final month = parsed.month.toString().padLeft(2, '0');
+      return '$day.$month.${parsed.year}';
     } catch (_) {
       return dateStr;
     }
