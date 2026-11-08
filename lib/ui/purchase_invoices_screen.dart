@@ -23,7 +23,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorsList.backgroundColor,
         elevation: 0,
         leading: Obx(() {
           final bool searching = incomingInvoicesController.isSearching.value;
@@ -206,7 +206,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                         crossAxisCount: cols,
                         crossAxisSpacing: rs.s(12),
                         mainAxisSpacing: rs.s(12),
-                        childAspectRatio: rs.isLandscape ? 2.6 : 2.2,
+                        childAspectRatio: rs.isLandscape ? 2.6 : 1.8,
                       ),
                       itemCount: invoices.length,
                       itemBuilder: (context, index) {
@@ -259,48 +259,52 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
     required PurchaseInvoicesModel invoice,
     required bool asGridTile,
   }) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: asGridTile ? BorderRadius.circular(context.s(12)) : null,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(context.s(12)),
-        onTap: () async {
-          final result = await Get.toNamed(
-            '/IncomingInvoicesDetailsScreen',
-            arguments: invoice,
-          );
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () async {
+        final result = await Get.toNamed(
+          '/IncomingInvoicesDetailsScreen',
+          arguments: invoice,
+        );
 
-          if (result == true) {
-            await incomingInvoicesController.refreshInvoices();
-          }
-        },
-        child: asGridTile
-            ? DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(context.s(12)),
-                  border: Border.all(color: colorsList.borderColor),
+        if (result == true) {
+          await incomingInvoicesController.refreshInvoices();
+        }
+      },
+      child: _invoiceCard(
+        context: context,
+        invoice: invoice,
+      ),
+    );
+  }
+
+  void _showInvoiceActions(BuildContext context, PurchaseInvoicesModel invoice) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.visibility_outlined, color: Color(0xFF2563EB)),
+                  title: const Text('View Purchase Invoice Details'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    Get.toNamed('/IncomingInvoicesDetailsScreen', arguments: invoice);
+                  },
                 ),
-                child: _invoiceCard(
-                  context: context,
-                  invoice: invoice,
-                  asGridTile: true,
-                ),
-              )
-            : Column(
-                children: [
-                  _invoiceCard(
-                    context: context,
-                    invoice: invoice,
-                    asGridTile: false,
-                  ),
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: colorsList.dividerColor,
-                  ),
-                ],
-              ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -308,115 +312,267 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
   Widget _invoiceCard({
     required BuildContext context,
     required PurchaseInvoicesModel invoice,
-    required bool asGridTile,
   }) {
     final rs = context.rs;
-    final String status = invoice.status.toLowerCase();
+    final String status = invoice.status.toLowerCase().trim();
 
-    Color statusColor;
+    Color pillBg;
+    Color pillBorder;
+    Color pillText;
 
     if (status == 'paid') {
-      statusColor = const Color(0xFF00B894);
-    } else if (status == 'pending' || status == 'unpaid') {
-      statusColor = const Color(0xFFF39C12);
-    } else if (status == 'draft') {
-      statusColor = const Color(0xFF71829A);
-    } else if (status == 'overdue') {
-      statusColor = Colors.red;
+      pillBg = const Color(0xFFECFDF5);
+      pillBorder = const Color(0xFFA7F3D0);
+      pillText = const Color(0xFF059669);
+    } else if (status == 'posted') {
+      pillBg = const Color(0xFFEFF6FF);
+      pillBorder = const Color(0xFFBFDBFE);
+      pillText = const Color(0xFF2563EB);
+    } else if (status == 'overdue' || status == 'rejected') {
+      pillBg = const Color(0xFFFEF2F2);
+      pillBorder = const Color(0xFFFECACA);
+      pillText = const Color(0xFFDC2626);
     } else {
-      statusColor = const Color(0xFF71829A);
+      pillBg = const Color(0xFFF1F5F9);
+      pillBorder = const Color(0xFFE2E8F0);
+      pillText = const Color(0xFF64748B);
     }
 
     final String displayStatus = status.isNotEmpty
         ? status[0].toUpperCase() + status.substring(1)
-        : 'Unknown';
+        : 'Draft';
+
+    final String formattedDate = _formatDate(invoice.invoiceDate);
+    final String formattedDueDate = _formatDate(invoice.dueDate);
+
+    final String formattedTotal = incomingInvoicesController.formatCurrency(
+      invoice.totalAmount,
+      invoice.currency,
+    );
 
     return Container(
-      color: asGridTile ? Colors.transparent : Colors.white,
-      padding: EdgeInsets.symmetric(
-        horizontal: asGridTile ? rs.s(12) : rs.s(16),
-        vertical: rs.s(14),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: EdgeInsets.all(rs.s(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorsList.borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: rs.s(44),
-            height: rs.s(44),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(rs.s(12)),
-            ),
-            child: Icon(
-              Icons.receipt_long_sharp,
-              color: colorsList.iconColor,
-              size: rs.s(28),
-            ),
-          ),
-          SizedBox(width: rs.s(12)),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  invoice.invoiceNumber ?? 'No Invoice Number',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorsList.textColor,
-                    fontSize: rs.sp(14),
-                  ),
-                ),
-                SizedBox(height: rs.s(5)),
-                Text(
-                  invoice.supplierName ?? 'Unknown Supplier',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorsList.textHintColor,
-                    fontSize: rs.sp(12),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: rs.s(8)),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.center,
+          // 1. TOP HEADER ROW (PURCHASE NUMBER + INVOICE TYPE PILL + MORE MENU)
+          Row(
             children: [
+              Expanded(
+                child: Text(
+                  invoice.purchaseNumber?.isNotEmpty == true
+                      ? invoice.purchaseNumber!
+                      : (invoice.invoiceNumber?.isNotEmpty == true
+                          ? invoice.invoiceNumber!
+                          : 'PUR-#${invoice.id}'),
+                  style: TextStyle(
+                    color: const Color(0xFF0A2342),
+                    fontSize: rs.sp(16),
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ),
               Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: rs.s(10),
                   vertical: rs.s(4),
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.10),
+                  color: pillBg,
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: pillBorder),
                 ),
-                child: Text(
-                  displayStatus,
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: rs.sp(12),
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: pillText,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: rs.s(5)),
+                    Text(
+                      displayStatus,
+                      style: TextStyle(
+                        color: pillText,
+                        fontSize: rs.sp(11),
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: rs.s(5)),
-              Text(
-                incomingInvoicesController.formatCurrency(
-                  invoice.totalAmount,
-                  invoice.currency,
+              SizedBox(width: rs.s(4)),
+              IconButton(
+                onPressed: () {
+                  _showInvoiceActions(context, invoice);
+                },
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(
+                  Icons.more_horiz_rounded,
+                  color: Color(0xFF94A3B8),
+                  size: 20,
                 ),
-                style: TextStyle(
-                  color: colorsList.textColor,
-                  fontSize: rs.sp(14),
+              ),
+            ],
+          ),
+
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+          ),
+
+          // 2. MIDDLE DETAILS 2X3 GRID
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // LEFT COLUMN (SUPPLIER, DATE, ACCOUNT)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _statField('SUPPLIER', invoice.supplierName ?? '—', isItalic: true),
+                    SizedBox(height: rs.s(10)),
+                    _statField('DATE', formattedDate),
+                    SizedBox(height: rs.s(10)),
+                    _statField('ACCOUNT', invoice.expenseAccountCode ?? invoice.expenseCategory ?? '—'),
+                  ],
                 ),
+              ),
+
+              // RIGHT COLUMN (SUPPLIER INV NO, DUE DATE)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _statField('SUPPLIER INV NO.', invoice.supplierInvoiceNumber ?? '—'),
+                    SizedBox(height: rs.s(10)),
+                    _statField('DUE DATE', formattedDueDate),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+          ),
+
+          // 3. BOTTOM AMOUNTS ROW (PAID | TOTAL)
+          Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'PAID',
+                    style: TextStyle(
+                      fontSize: rs.sp(10),
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF94A3B8),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(height: rs.s(2)),
+                  Text(
+                    '${incomingInvoicesController.getCurrencySymbol(invoice.currency)}0.00',
+                    style: TextStyle(
+                      fontSize: rs.sp(13),
+                      fontWeight: FontWeight.normal,
+                      color: const Color(0xFF0A2342),
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'TOTAL',
+                    style: TextStyle(
+                      fontSize: rs.sp(10),
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF94A3B8),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(height: rs.s(2)),
+                  Text(
+                    formattedTotal,
+                    style: TextStyle(
+                      fontSize: rs.sp(16),
+                      fontWeight: FontWeight.normal,
+                      color: const Color(0xFF0A2342),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Widget _statField(String label, String value, {bool isItalic = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF94A3B8),
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.normal,
+            fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+            color: const Color(0xFF0A2342),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty) return '—';
+    try {
+      final parsed = DateTime.parse(dateStr);
+      final months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      return '${parsed.day} ${months[parsed.month - 1]} ${parsed.year}';
+    } catch (_) {
+      return dateStr;
+    }
   }
 }
