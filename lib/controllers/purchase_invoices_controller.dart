@@ -26,6 +26,58 @@ class PurchaseInvoicesController extends GetxController {
       <PurchaseInvoicesModel>[].obs;
 
   // ============================================================
+  // STATUS TABS & FILTERING
+  // ============================================================
+
+  final RxInt selectedStatusTabIndex = 0.obs;
+
+  static const statusTabs = <String>[
+    'All Purchase Invoices',
+    'Draft',
+    'Posted',
+    'Paid',
+    'Overdue',
+  ];
+
+  void selectStatusTab(int index) {
+    selectedStatusTabIndex.value = index;
+    applyFilters();
+  }
+
+  void applyFilters() {
+    List<PurchaseInvoicesModel> list = invoices;
+
+    final tabName = statusTabs[selectedStatusTabIndex.value].toLowerCase();
+    if (tabName != 'all purchase invoices') {
+      list = list.where((inv) {
+        final st = inv.status.toLowerCase().trim();
+        return st == tabName;
+      }).toList();
+    }
+
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      list = list.where((invoice) {
+        final String invoiceNumber = invoice.invoiceNumber?.toLowerCase() ?? '';
+        final String supplierName = invoice.supplierName?.toLowerCase() ?? '';
+        final String status = invoice.status.toLowerCase();
+        final String issueDate = invoice.invoiceDate?.toLowerCase() ?? '';
+        final String currency = invoice.currency?.toLowerCase() ?? '';
+        final String amount = invoice.totalAmount?.toString().toLowerCase() ?? '';
+
+        return invoiceNumber.contains(query) ||
+            supplierName.contains(query) ||
+            status.contains(query) ||
+            issueDate.contains(query) ||
+            currency.contains(query) ||
+            amount.contains(query);
+      }).toList();
+    }
+
+    filteredInvoices.assignAll(list);
+  }
+
+  // ============================================================
   // SEARCH
   // ============================================================
 
@@ -169,12 +221,7 @@ class PurchaseInvoicesController extends GetxController {
             .toList();
 
         invoices.assignAll(loadedInvoices);
-
-        if (isSearching.value && searchQuery.value.trim().isNotEmpty) {
-          searchIncomingInvoices(searchQuery.value);
-        } else {
-          filteredInvoices.assignAll(loadedInvoices);
-        }
+        applyFilters();
 
         print('================================');
         print('PURCHASES INVOICES LOADED: ${invoices.length}');
@@ -216,35 +263,7 @@ class PurchaseInvoicesController extends GetxController {
 
   void searchIncomingInvoices(String value) {
     searchQuery.value = value;
-    final String query = value.trim().toLowerCase();
-
-    if (query.isEmpty) {
-      filteredInvoices.assignAll(invoices);
-      return;
-    }
-
-    final List<PurchaseInvoicesModel> results = invoices.where((invoice) {
-      final String invoiceNumber =
-          invoice.invoiceNumber?.toString().toLowerCase() ?? '';
-      final String supplierName =
-          invoice.supplierName?.toString().toLowerCase() ?? '';
-      final String status = invoice.status.toLowerCase();
-      final String issueDate =
-          invoice.invoiceDate?.toString().toLowerCase() ?? '';
-      final String currency =
-          invoice.currency?.toString().toLowerCase() ?? '';
-      final String amount =
-          invoice.totalAmount?.toString().toLowerCase() ?? '';
-
-      return invoiceNumber.contains(query) ||
-          supplierName.contains(query) ||
-          status.contains(query) ||
-          issueDate.contains(query) ||
-          currency.contains(query) ||
-          amount.contains(query);
-    }).toList();
-
-    filteredInvoices.assignAll(results);
+    applyFilters();
   }
 
   // ============================================================
@@ -254,7 +273,7 @@ class PurchaseInvoicesController extends GetxController {
   void openSearch() {
     isSearching.value = true;
     searchQuery.value = '';
-    filteredInvoices.assignAll(invoices);
+    applyFilters();
   }
 
   // ============================================================
@@ -264,7 +283,7 @@ class PurchaseInvoicesController extends GetxController {
   void closeSearch() {
     isSearching.value = false;
     searchQuery.value = '';
-    filteredInvoices.assignAll(invoices);
+    applyFilters();
   }
 
   // ============================================================

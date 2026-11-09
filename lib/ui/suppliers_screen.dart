@@ -46,118 +46,216 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
     const primaryColor = colorsList.colorButton;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          'Suppliers',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.normal,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            // SEARCH BAR CONTAINER
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Obx(
-                () => TextField(
-                  onChanged: controller.onSearchChanged,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
+        child: ResponsivePage(
+          padding: EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ======================================================
+              // 1. TOP BAR (BACK BUTTON & TITLE)
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: rs.pagePaddingH,
+                  vertical: rs.s(12),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE2ECF8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: Color(0xFF063C70),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Suppliers',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: const Color(0xFF0A2342),
+                          fontSize: rs.sp(18),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 40), // Balance back button
+                  ],
+                ),
+              ),
+
+              SizedBox(height: rs.s(8)),
+
+              // ======================================================
+              // 2. TITLE & SUBTITLE SECTION
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Suppliers',
+                      style: TextStyle(
+                        color: const Color(0xFF0A2342),
+                        fontSize: rs.sp(22),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: rs.s(2)),
+                    Text(
+                      'Who you buy from, what you have purchased and what is still open.',
+                      style: TextStyle(
+                        color: const Color(0xFF64748B),
+                        fontSize: rs.sp(12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: rs.s(14)),
+
+              // ======================================================
+              // 3. SEARCH BAR
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+                child: Container(
+                  height: rs.s(44),
+                  padding: EdgeInsets.symmetric(horizontal: rs.s(14)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: colorsList.borderColor),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
-                  decoration: InputDecoration(
-                    hintText: 'Search suppliers...',
-                    hintStyle: const TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.normal,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Colors.grey,
-                    ),
-                    suffixIcon: controller.searchQuery.value.isNotEmpty
-                        ? IconButton(
-                            onPressed: controller.clearSearch,
-                            icon: const Icon(Icons.close, size: 20),
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: const Color(0xFFF1F5F9),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.search_rounded,
+                        color: Color(0xFF94A3B8),
+                        size: 20,
+                      ),
+                      SizedBox(width: rs.s(10)),
+                      Expanded(
+                        child: TextField(
+                          onChanged: controller.onSearchChanged,
+                          style: TextStyle(
+                            color: const Color(0xFF0A2342),
+                            fontSize: rs.sp(13),
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: 'Search here',
+                            hintStyle: TextStyle(
+                              color: Color(0xFF94A3B8),
+                              fontSize: 13,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                      Obx(() {
+                        if (controller.searchQuery.value.isNotEmpty) {
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () => controller.clearSearch(),
+                          );
+                        }
+                        return const Icon(
+                          Icons.tune_rounded,
+                          color: Color(0xFF94A3B8),
+                          size: 18,
+                        );
+                      }),
+                    ],
                   ),
                 ),
               ),
-            ),
 
-            // SUPPLIER LIST
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value && controller.suppliers.isEmpty) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: primaryColor,
+              SizedBox(height: rs.s(14)),
+
+              // ======================================================
+              // 4. SUPPLIER LIST
+              // ======================================================
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value && controller.suppliers.isEmpty) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: primaryColor,
+                      ),
+                    );
+                  }
+
+                  if (controller.errorMessage.value.isNotEmpty &&
+                      controller.suppliers.isEmpty) {
+                    return _buildErrorState();
+                  }
+
+                  if (controller.filteredSuppliers.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: controller.refreshSuppliers,
+                    color: primaryColor,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(
+                        left: rs.pagePaddingH,
+                        right: rs.pagePaddingH,
+                        bottom: rs.s(96),
+                      ),
+                      itemCount: controller.filteredSuppliers.length +
+                          (controller.isLoadingMore.value ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= controller.filteredSuppliers.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: primaryColor,
+                              ),
+                            ),
+                          );
+                        }
+
+                        final supplier = controller.filteredSuppliers[index];
+                        return _buildSupplierCard(supplier, context);
+                      },
                     ),
                   );
-                }
-
-                if (controller.errorMessage.value.isNotEmpty &&
-                    controller.suppliers.isEmpty) {
-                  return _buildErrorState();
-                }
-
-                if (controller.filteredSuppliers.isEmpty) {
-                  return _buildEmptyState();
-                }
-
-                return RefreshIndicator(
-                  onRefresh: controller.refreshSuppliers,
-                  color: primaryColor,
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
-                    itemCount: controller.filteredSuppliers.length +
-                        (controller.isLoadingMore.value ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index >= controller.filteredSuppliers.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: primaryColor,
-                            ),
-                          ),
-                        );
-                      }
-
-                      final supplier = controller.filteredSuppliers[index];
-                      return _buildSupplierCard(supplier);
-                    },
-                  ),
-                );
-              }),
-            ),
-          ],
+                }),
+              ),
+            ],
+          ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final result = await Get.toNamed('/AddSupplierScreen');
@@ -167,10 +265,16 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
         },
         backgroundColor: colorsList.colorButton,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
+        elevation: 4,
+        icon: const Icon(
+          Icons.add_rounded,
+        ),
+        label: Text(
           'Add Supplier',
-          style: TextStyle(fontWeight: FontWeight.normal),
+          style: TextStyle(
+            fontSize: rs.sp(15),
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -207,12 +311,13 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
     );
   }
 
-  Widget _buildSupplierCard(SupplierModel supplier) {
+  Widget _buildSupplierCard(SupplierModel supplier, BuildContext context) {
+    final rs = context.rs;
     final initials = _getInitials(supplier.name);
     final contactStr = _getContactString(supplier);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: EdgeInsets.only(bottom: rs.s(14)),
       decoration: BoxDecoration(
         color: colorsList.colorWhite,
         borderRadius: BorderRadius.circular(16),
@@ -234,7 +339,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(rs.s(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -242,8 +347,8 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                 Row(
                   children: [
                     Container(
-                      width: 38,
-                      height: 38,
+                      width: rs.s(38),
+                      height: rs.s(38),
                       decoration: const BoxDecoration(
                         color: Color(0xFF0D9488),
                         shape: BoxShape.circle,
@@ -251,30 +356,30 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                       alignment: Alignment.center,
                       child: Text(
                         initials,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.normal,
+                          fontSize: rs.sp(13),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: rs.s(12)),
                     Expanded(
                       child: Text(
                         supplier.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal,
-                          color: Color(0xFF0A2342),
+                        style: TextStyle(
+                          fontSize: rs.sp(16),
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0A2342),
                         ),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: rs.s(10),
+                        vertical: rs.s(4),
                       ),
                       decoration: BoxDecoration(
                         color: supplier.isActive ? const Color(0xFFECFDF5) : const Color(0xFFF1F5F9),
@@ -294,19 +399,19 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 5),
+                          SizedBox(width: rs.s(5)),
                           Text(
                             supplier.isActive ? 'Active' : 'Inactive',
                             style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.normal,
+                              fontSize: rs.sp(11),
+                              fontWeight: FontWeight.w600,
                               color: supplier.isActive ? const Color(0xFF059669) : const Color(0xFF64748B),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: rs.s(4)),
                     IconButton(
                       onPressed: () => _showSupplierActions(context, supplier),
                       padding: EdgeInsets.zero,
@@ -334,11 +439,11 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _statField('CONTACT', contactStr),
-                          const SizedBox(height: 10),
-                          _statField('CITY', supplier.city?.trim().isNotEmpty == true ? supplier.city! : '—'),
-                          const SizedBox(height: 10),
-                          _statField('TOTAL PURCHASES', '€${supplier.purchasesTotal.toStringAsFixed(2)}'),
+                          _statField(context, 'CONTACT', contactStr),
+                          SizedBox(height: rs.s(10)),
+                          _statField(context, 'CITY', supplier.city?.trim().isNotEmpty == true ? supplier.city! : '—'),
+                          SizedBox(height: rs.s(10)),
+                          _statField(context, 'TOTAL PURCHASES', '€${supplier.purchasesTotal.toStringAsFixed(2)}'),
                         ],
                       ),
                     ),
@@ -348,11 +453,11 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _statField('TOTAL PAID', '€${supplier.paidTotal.toStringAsFixed(2)}'),
-                          const SizedBox(height: 10),
-                          _statField('OUTSTANDING', '€${supplier.outstanding.toStringAsFixed(2)}'),
-                          const SizedBox(height: 10),
-                          _statField('LAST PURCHASE', _formatDate(supplier.lastPurchaseDate)),
+                          _statField(context, 'TOTAL PAID', '€${supplier.paidTotal.toStringAsFixed(2)}'),
+                          SizedBox(height: rs.s(10)),
+                          _statField(context, 'OUTSTANDING', '€${supplier.outstanding.toStringAsFixed(2)}'),
+                          SizedBox(height: rs.s(10)),
+                          _statField(context, 'LAST PURCHASE', _formatDate(supplier.lastPurchaseDate)),
                         ],
                       ),
                     ),
@@ -366,28 +471,29 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
     );
   }
 
-  Widget _statField(String label, String value) {
+  Widget _statField(BuildContext context, String label, String value) {
+    final rs = context.rs;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF94A3B8),
+          style: TextStyle(
+            fontSize: rs.sp(10),
+            fontWeight: FontWeight.normal,
+            color: const Color(0xFF94A3B8),
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: rs.s(2)),
         Text(
           value,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 13,
+          style: TextStyle(
+            fontSize: rs.sp(13),
             fontWeight: FontWeight.normal,
-            color: Color(0xFF0A2342),
+            color: const Color(0xFF0A2342),
           ),
         ),
       ],
