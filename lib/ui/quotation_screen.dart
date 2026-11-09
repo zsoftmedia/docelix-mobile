@@ -17,95 +17,215 @@ class _QuotationScreenState extends State<QuotationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final rs = context.rs;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-
-      // ==========================================================
-      // APP BAR
-      // ==========================================================
-
-      appBar: AppBar(
-        backgroundColor: colorsList.backgroundColor,
-        elevation: 0,
-        leading: Obx(() {
-          final bool searching = controller.isSearching.value;
-          return IconButton(
-            onPressed: () {
-              if (searching) {
-                controller.closeSearch();
-              } else {
-                Get.back();
-              }
-            },
-            icon: Icon(
-              searching ? Icons.close_rounded : Icons.arrow_back_ios_new_rounded,
-              color: colorsList.iconColor,
-              size: width * 0.05,
-            ),
-          );
-        }),
-        title: Obx(() {
-          if (controller.isSearching.value) {
-            return TextField(
-              autofocus: true,
-              onChanged: controller.onSearchChanged,
-              style: TextStyle(
-                color: colorsList.textColor,
-                fontSize: width * 0.04,
+      body: SafeArea(
+        child: ResponsivePage(
+          padding: EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ======================================================
+              // 1. TOP BAR (BACK BUTTON & TITLE)
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: rs.pagePaddingH,
+                  vertical: rs.s(12),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE2ECF8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: Color(0xFF063C70),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Quotations',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: const Color(0xFF0A2342),
+                          fontSize: rs.sp(18),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 40), // Balance back button
+                  ],
+                ),
               ),
-              decoration: const InputDecoration(
-                hintText: 'Search quotation # or client...',
-                border: InputBorder.none,
-                isDense: true,
+
+              SizedBox(height: rs.s(8)),
+
+              // ======================================================
+              // 2. TITLE & SUBTITLE SECTION
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quotations',
+                      style: TextStyle(
+                        color: const Color(0xFF0A2342),
+                        fontSize: rs.sp(22),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: rs.s(2)),
+                    Text(
+                      'Create, manage, and track your sales quotes & offers.',
+                      style: TextStyle(
+                        color: const Color(0xFF64748B),
+                        fontSize: rs.sp(12),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            );
-          }
 
-          return Text(
-            'Quotations',
-            style: TextStyle(
-              color: colorsList.textColor,
-              fontSize: 20,
-              fontWeight: FontWeight.normal,
-            ),
-          );
-        }),
-        actions: [
-          Obx(() {
-            if (controller.isSearching.value) return const SizedBox.shrink();
+              SizedBox(height: rs.s(14)),
 
-            return Row(
-              children: [
-                IconButton(
-                  onPressed: controller.openSearch,
-                  icon: Icon(
-                    Icons.search_rounded,
-                    color: colorsList.iconColor,
-                    size: width * 0.065,
+              // ======================================================
+              // 3. SEARCH BAR
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+                child: Container(
+                  height: rs.s(44),
+                  padding: EdgeInsets.symmetric(horizontal: rs.s(14)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: colorsList.borderColor),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.search_rounded,
+                        color: Color(0xFF94A3B8),
+                        size: 20,
+                      ),
+                      SizedBox(width: rs.s(10)),
+                      Expanded(
+                        child: TextField(
+                          onChanged: controller.onSearchChanged,
+                          style: TextStyle(
+                            color: const Color(0xFF0A2342),
+                            fontSize: rs.sp(13),
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: 'Search here',
+                            hintStyle: TextStyle(
+                              color: Color(0xFF94A3B8),
+                              fontSize: 13,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                      Obx(() {
+                        if (controller.searchQuery.value.isNotEmpty) {
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () => controller.closeSearch(),
+                          );
+                        }
+                        return const Icon(
+                          Icons.tune_rounded,
+                          color: Color(0xFF94A3B8),
+                          size: 18,
+                        );
+                      }),
+                    ],
                   ),
                 ),
-                /*IconButton(
-                  onPressed: () async {
-                    final result = await Get.toNamed('/CreateQuotationScreen');
-                    if (result == true) {
-                      controller.refreshQuotations();
-                    }
-                  },
-                  icon: const Icon(
-                    Icons.add_circle_outline_rounded,
-                    color: colorsList.primaryBlue,
-                    size: 24,
-                  ),
-                ),*/
-              ],
-            );
-          }),
-          SizedBox(width: width * 0.02),
-        ],
+              ),
+
+              SizedBox(height: rs.s(14)),
+
+              // ======================================================
+              // 4. QUOTATION LIST
+              // ======================================================
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (controller.filteredQuotations.isEmpty) {
+                    return RefreshIndicator(
+                      onRefresh: controller.refreshQuotations,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(height: rs.s(120)),
+                          Center(
+                            child: Text(
+                              controller.searchQuery.value.isNotEmpty
+                                  ? 'No matching quotations found.'
+                                  : 'No quotations available.',
+                              style: TextStyle(
+                                color: colorsList.textHintColor,
+                                fontSize: rs.sp(15),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: controller.refreshQuotations,
+                    child: ListView.builder(
+                      padding: EdgeInsets.only(
+                        left: rs.pagePaddingH,
+                        right: rs.pagePaddingH,
+                        bottom: rs.s(96),
+                      ),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: controller.filteredQuotations.length,
+                      itemBuilder: (context, index) {
+                        final item = controller.filteredQuotations[index];
+                        return _buildQuotationCard(
+                          item: item,
+                          context: context,
+                        );
+                      },
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final result = await Get.toNamed('/CreateQuotationScreen');
@@ -113,125 +233,18 @@ class _QuotationScreenState extends State<QuotationScreen> {
             controller.refreshQuotations();
           }
         },
-        backgroundColor: colorsList.primaryBlue,
+        backgroundColor: colorsList.colorButton,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'Create Offer',
-          style: TextStyle(fontWeight: FontWeight.normal),
+        elevation: 4,
+        icon: const Icon(
+          Icons.add_rounded,
         ),
-      ),
-
-      // ==========================================================
-      // BODY
-      // ==========================================================
-
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ======================================================
-            // HEADER BAR
-            // ======================================================
-
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: width * 0.045,
-                vertical: height * 0.012,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'All Offers',
-                    style: TextStyle(
-                      color: colorsList.textColor,
-                      fontSize: width * 0.040,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  Obx(
-                    () => Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: width * 0.03,
-                        vertical: height * 0.006,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFE4EAF1)),
-                      ),
-                      child: Text(
-                        '${controller.filteredQuotations.length} Offers',
-                        style: TextStyle(
-                          color: colorsList.textColor,
-                          fontSize: width * 0.028,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ======================================================
-            // QUOTATION LIST
-            // ======================================================
-
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (controller.filteredQuotations.isEmpty) {
-                  return RefreshIndicator(
-                    onRefresh: controller.refreshQuotations,
-                    child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        SizedBox(height: height * 0.15),
-                        Center(
-                          child: Text(
-                            controller.searchQuery.value.isNotEmpty
-                                ? 'No matching quotations found.'
-                                : 'No quotations available.',
-                            style: const TextStyle(
-                              color: colorsList.textHintColor,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: controller.refreshQuotations,
-                  child: ListView.builder(
-                    padding: EdgeInsets.only(
-                      left: width * 0.045,
-                      right: width * 0.045,
-                      bottom: height * 0.05,
-                    ),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: controller.filteredQuotations.length,
-                    itemBuilder: (context, index) {
-                      final item = controller.filteredQuotations[index];
-                      return _buildQuotationCard(
-                        item: item,
-                        width: width,
-                        height: height,
-                      );
-                    },
-                  ),
-                );
-              }),
-            ),
-          ],
+        label: Text(
+          'Create Offer',
+          style: TextStyle(
+            fontSize: rs.sp(15),
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -274,9 +287,9 @@ class _QuotationScreenState extends State<QuotationScreen> {
 
   Widget _buildQuotationCard({
     required QuotationModel item,
-    required double width,
-    required double height,
+    required BuildContext context,
   }) {
+    final rs = context.rs;
     final String statusStr = item.status.toLowerCase().trim();
     Color pillBg;
     Color pillBorder;
@@ -308,7 +321,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
     final String acceptedStr = _formatDate(item.acceptedAt);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: EdgeInsets.only(bottom: rs.s(14)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -333,7 +346,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(rs.s(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -345,17 +358,17 @@ class _QuotationScreenState extends State<QuotationScreen> {
                         item.offerNumber.isNotEmpty ? item.offerNumber : 'OFFER-#${item.id}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: rs.sp(16),
                           fontWeight: FontWeight.normal,
-                          color: Color(0xFF0A2342),
+                          color: const Color(0xFF0A2342),
                         ),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: rs.s(12),
+                        vertical: rs.s(4),
                       ),
                       decoration: BoxDecoration(
                         color: pillBg,
@@ -365,13 +378,13 @@ class _QuotationScreenState extends State<QuotationScreen> {
                       child: Text(
                         displayStatus,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: rs.sp(12),
                           fontWeight: FontWeight.normal,
                           color: pillText,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: rs.s(4)),
                     IconButton(
                       onPressed: () {
                         _showQuotationActions(context, item);
@@ -401,11 +414,11 @@ class _QuotationScreenState extends State<QuotationScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _statField('CUSTOMER', item.clientName ?? '—'),
-                          const SizedBox(height: 10),
-                          _statField('VALID UNTIL', validUntilStr),
-                          const SizedBox(height: 10),
-                          _statField('SIGNATURE', '—'),
+                          _statField(context, 'CUSTOMER', item.clientName ?? '—'),
+                          SizedBox(height: rs.s(10)),
+                          _statField(context, 'VALID UNTIL', validUntilStr),
+                          SizedBox(height: rs.s(10)),
+                          _statField(context, 'SIGNATURE', '—'),
                         ],
                       ),
                     ),
@@ -415,9 +428,9 @@ class _QuotationScreenState extends State<QuotationScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _statField('DATE', dateStr),
-                          const SizedBox(height: 10),
-                          _statField('ACCEPTED', acceptedStr),
+                          _statField(context, 'DATE', dateStr),
+                          SizedBox(height: rs.s(10)),
+                          _statField(context, 'ACCEPTED', acceptedStr),
                         ],
                       ),
                     ),
@@ -433,21 +446,21 @@ class _QuotationScreenState extends State<QuotationScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'TOTAL',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: rs.sp(10),
                         fontWeight: FontWeight.normal,
-                        color: Color(0xFF94A3B8),
+                        color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
                     ),
                     Text(
                       '${item.totalAmount.toStringAsFixed(2)} €',
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: rs.sp(16),
                         fontWeight: FontWeight.normal,
-                        color: Color(0xFF0A2342),
+                        color: const Color(0xFF0A2342),
                       ),
                     ),
                   ],
@@ -460,28 +473,29 @@ class _QuotationScreenState extends State<QuotationScreen> {
     );
   }
 
-  Widget _statField(String label, String value) {
+  Widget _statField(BuildContext context, String label, String value) {
+    final rs = context.rs;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 10,
+          style: TextStyle(
+            fontSize: rs.sp(10),
             fontWeight: FontWeight.normal,
-            color: Color(0xFF94A3B8),
+            color: const Color(0xFF94A3B8),
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: rs.s(2)),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 13,
+          style: TextStyle(
+            fontSize: rs.sp(13),
             fontWeight: FontWeight.normal,
-            color: Color(0xFF0A2342),
+            color: const Color(0xFF0A2342),
           ),
         ),
       ],
