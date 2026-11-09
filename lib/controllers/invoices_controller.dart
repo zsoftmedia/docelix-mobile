@@ -24,6 +24,59 @@ class InvoicesController extends GetxController {
   final RxList<InvoicesModel> filteredInvoices = <InvoicesModel>[].obs;
 
   // ============================================================
+  // STATUS TABS & FILTERING
+  // ============================================================
+
+  final RxInt selectedStatusTabIndex = 0.obs;
+
+  static const statusTabs = <String>[
+    'All Invoices',
+    'Paid',
+    'Unpaid',
+    'Pending',
+    'Overdue',
+  ];
+
+  void selectStatusTab(int index) {
+    selectedStatusTabIndex.value = index;
+    applyFilters();
+  }
+
+  void applyFilters() {
+    List<InvoicesModel> list = invoices;
+
+    final tabName = statusTabs[selectedStatusTabIndex.value].toLowerCase();
+    if (tabName != 'all invoices') {
+      list = list.where((inv) {
+        final st = inv.status.toLowerCase().trim();
+        if (tabName == 'unpaid') {
+          return st == 'unpaid' || st == 'pending' || st == 'draft';
+        }
+        return st == tabName;
+      }).toList();
+    }
+
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      list = list.where((invoice) {
+        final String invoiceNumber = invoice.invoiceNumber.toLowerCase();
+        final String status = invoice.status.toLowerCase();
+        final String issueDate = invoice.issueDate.toLowerCase();
+        final String amount = invoice.grossAmount.toString();
+        final String clientId = 'client #${invoice.clientId}';
+
+        return invoiceNumber.contains(query) ||
+            status.contains(query) ||
+            issueDate.contains(query) ||
+            amount.contains(query) ||
+            clientId.contains(query);
+      }).toList();
+    }
+
+    filteredInvoices.assignAll(list);
+  }
+
+  // ============================================================
   // SEARCH
   // ============================================================
 
@@ -150,7 +203,7 @@ class InvoicesController extends GetxController {
 
           invoices.assignAll(loadedInvoices);
           totalInvoices.value = loadedInvoices.length;
-          filteredInvoices.assignAll(loadedInvoices);
+          applyFilters();
         } else {
           invoices.clear();
           filteredInvoices.clear();
@@ -180,32 +233,7 @@ class InvoicesController extends GetxController {
 
   void searchInvoices(String value) {
     searchQuery.value = value;
-    final String query = value.trim().toLowerCase();
-
-    if (query.isEmpty) {
-      filteredInvoices.assignAll(invoices);
-      return;
-    }
-
-    final List<InvoicesModel> results = invoices.where((invoice) {
-      final String invoiceNumber =
-          invoice.invoiceNumber?.toString().toLowerCase() ?? '';
-      final String status = invoice.status.toString().toLowerCase();
-      final String issueDate =
-          invoice.issueDate?.toString().toLowerCase() ?? '';
-      final String currency =
-          invoice.currencyCode?.toString().toLowerCase() ?? '';
-      final String amount =
-          invoice.paidAmount?.toString().toLowerCase() ?? '';
-
-      return invoiceNumber.contains(query) ||
-          status.contains(query) ||
-          issueDate.contains(query) ||
-          currency.contains(query) ||
-          amount.contains(query);
-    }).toList();
-
-    filteredInvoices.assignAll(results);
+    applyFilters();
   }
 
   // ============================================================
@@ -215,7 +243,7 @@ class InvoicesController extends GetxController {
   void openSearch() {
     isSearching.value = true;
     searchQuery.value = '';
-    filteredInvoices.assignAll(invoices);
+    applyFilters();
   }
 
   // ============================================================
@@ -225,7 +253,7 @@ class InvoicesController extends GetxController {
   void closeSearch() {
     isSearching.value = false;
     searchQuery.value = '';
-    filteredInvoices.assignAll(invoices);
+    applyFilters();
   }
 
   // ============================================================
@@ -235,9 +263,5 @@ class InvoicesController extends GetxController {
   Future<void> refreshInvoices() async {
     currentPage.value = 1;
     await getInvoices();
-
-    if (isSearching.value && searchQuery.value.trim().isNotEmpty) {
-      searchInvoices(searchQuery.value);
-    }
   }
 }

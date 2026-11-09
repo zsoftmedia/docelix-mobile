@@ -21,117 +21,217 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: colorsList.backgroundColor,
-        elevation: 0,
-        leading: Obx(() {
-          final bool searching = invoicesController.isSearching.value;
-
-          return IconButton(
-            onPressed: () {
-              if (searching) {
-                invoicesController.closeSearch();
-              } else {
-                Get.back();
-              }
-            },
-            icon: Icon(
-              searching
-                  ? Icons.close_rounded
-                  : Icons.arrow_back_ios_new_rounded,
-              color: colorsList.iconColor,
-              size: rs.s(20),
-            ),
-          );
-        }),
-        title: Obx(() {
-          if (invoicesController.isSearching.value) {
-            return TextField(
-              autofocus: true,
-              onChanged: invoicesController.searchInvoices,
-              style: TextStyle(
-                color: colorsList.textColor,
-                fontSize: rs.sp(16),
-              ),
-              decoration: const InputDecoration(
-                hintText: 'Search invoices...',
-                border: InputBorder.none,
-                isDense: true,
-              ),
-            );
-          }
-
-          return Text(
-            'Invoices',
-            style: TextStyle(
-              color: colorsList.textColor,
-              fontSize: rs.sp(20),
-              fontWeight: FontWeight.normal,
-            ),
-          );
-        }),
-        centerTitle: false,
-        actions: [
-          Obx(() {
-            if (invoicesController.isSearching.value) {
-              return const SizedBox.shrink();
-            }
-
-            return IconButton(
-              onPressed: invoicesController.openSearch,
-              icon: Icon(
-                Icons.search_rounded,
-                color: colorsList.iconColor,
-                size: rs.s(24),
-              ),
-            );
-          }),
-          SizedBox(width: rs.s(8)),
-        ],
-      ),
       body: SafeArea(
         child: ResponsivePage(
           padding: EdgeInsets.zero,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ======================================================
+              // 1. TOP BAR (BACK BUTTON & TITLE)
+              // ======================================================
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: rs.pagePaddingH,
-                  vertical: rs.s(16),
+                  vertical: rs.s(12),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'All Invoices',
-                      style: TextStyle(
-                        color: colorsList.textColor,
-                        fontSize: rs.sp(18),
-                        fontWeight: FontWeight.normal,
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE2ECF8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: Color(0xFF063C70),
+                          size: 20,
+                        ),
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: rs.s(14),
-                        vertical: rs.s(6),
+                    Expanded(
+                      child: Text(
+                        'Invoices',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: const Color(0xFF0A2342),
+                          fontSize: rs.sp(18),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        color: colorsList.colorBoxDecoration,
-                        borderRadius: BorderRadius.circular(20),
+                    ),
+                    const SizedBox(width: 40), // Balance back button
+                  ],
+                ),
+              ),
+
+              // ======================================================
+              // 2. STATUS TABS SEGMENT
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+                child: Container(
+                  height: rs.s(42),
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Obx(() {
+                    final selectedIndex = invoicesController.selectedStatusTabIndex.value;
+
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: List.generate(
+                          InvoicesController.statusTabs.length,
+                          (index) {
+                            final isSelected = selectedIndex == index;
+                            final tabLabel = InvoicesController.statusTabs[index];
+
+                            return GestureDetector(
+                              onTap: () => invoicesController.selectStatusTab(index),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: rs.s(16),
+                                  vertical: rs.s(6),
+                                ),
+                                margin: EdgeInsets.only(right: rs.s(4)),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? colorsList.colorButton
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  tabLabel,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : const Color(0xFF64748B),
+                                    fontSize: rs.sp(12),
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                      child: Obx(() {
-                        return Text(
-                          '${invoicesController.invoices.length} Invoices',
-                          style: TextStyle(
-                            color: colorsList.textColor,
-                            fontSize: rs.sp(14),
-                          ),
-                        );
-                      }),
+                    );
+                  }),
+                ),
+              ),
+
+              SizedBox(height: rs.s(16)),
+
+              // ======================================================
+              // 3. TITLE & SUBTITLE SECTION
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Invoices',
+                      style: TextStyle(
+                        color: const Color(0xFF0A2342),
+                        fontSize: rs.sp(22),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: rs.s(2)),
+                    Text(
+                      'Manage, track, and organize your sales invoices.',
+                      style: TextStyle(
+                        color: const Color(0xFF64748B),
+                        fontSize: rs.sp(12),
+                      ),
                     ),
                   ],
                 ),
               ),
+
+              SizedBox(height: rs.s(14)),
+
+              // ======================================================
+              // 4. SEARCH BAR
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+                child: Container(
+                  height: rs.s(44),
+                  padding: EdgeInsets.symmetric(horizontal: rs.s(14)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: colorsList.borderColor),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.search_rounded,
+                        color: Color(0xFF94A3B8),
+                        size: 20,
+                      ),
+                      SizedBox(width: rs.s(10)),
+                      Expanded(
+                        child: TextField(
+                          onChanged: invoicesController.searchInvoices,
+                          style: TextStyle(
+                            color: const Color(0xFF0A2342),
+                            fontSize: rs.sp(13),
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: 'Search here',
+                            hintStyle: TextStyle(
+                              color: Color(0xFF94A3B8),
+                              fontSize: 13,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                      Obx(() {
+                        if (invoicesController.searchQuery.value.isNotEmpty) {
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () => invoicesController.closeSearch(),
+                          );
+                        }
+                        return const Icon(
+                          Icons.tune_rounded,
+                          color: Color(0xFF94A3B8),
+                          size: 18,
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(height: rs.s(14)),
+
+              // ======================================================
+              // 5. INVOICES LIST
+              // ======================================================
               Expanded(
                 child: Obx(() {
                   if (invoicesController.isLoading.value) {
@@ -141,22 +241,15 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   }
 
                   if (invoicesController.filteredInvoices.isEmpty) {
-                    final bool hasSearch = invoicesController
-                        .searchQuery.value
-                        .trim()
-                        .isNotEmpty;
-
                     return RefreshIndicator(
                       onRefresh: invoicesController.refreshInvoices,
                       child: ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          SizedBox(height: rs.s(150)),
+                          SizedBox(height: rs.s(120)),
                           Center(
                             child: Text(
-                              hasSearch
-                                  ? 'No invoices found.'
-                                  : 'No invoices found.',
+                              'No invoices found.',
                               style: TextStyle(
                                 color: colorsList.textHintColor,
                                 fontSize: rs.sp(15),
@@ -381,7 +474,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   style: TextStyle(
                     color: const Color(0xFF0A2342),
                     fontSize: rs.sp(17),
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -400,7 +493,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   style: TextStyle(
                     color: pillText,
                     fontSize: rs.sp(12),
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -438,7 +531,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       'CUSTOMER',
                       style: TextStyle(
                         fontSize: rs.sp(10),
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
@@ -450,7 +543,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                           : 'no9r',
                       style: TextStyle(
                         fontSize: rs.sp(13),
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF0A2342),
                       ),
                     ),
@@ -459,7 +552,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       'DUE DATE',
                       style: TextStyle(
                         fontSize: rs.sp(10),
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
@@ -497,7 +590,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       'DATE',
                       style: TextStyle(
                         fontSize: rs.sp(10),
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
@@ -506,10 +599,10 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     Text(
                       invoice.issueDate.isNotEmpty
                           ? invoice.issueDate
-                          : 'DD.MM.YYYY',
+                          : '29.09.2026',
                       style: TextStyle(
                         fontSize: rs.sp(13),
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF0A2342),
                       ),
                     ),
@@ -518,7 +611,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       'REMINDERS',
                       style: TextStyle(
                         fontSize: rs.sp(10),
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
@@ -562,7 +655,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     formattedNet,
                     style: TextStyle(
                       fontSize: rs.sp(13),
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.w600,
                       color: const Color(0xFF0A2342),
                     ),
                   ),
@@ -590,7 +683,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     '${invoicesController.getCurrencySymbol(invoice.currencyCode)}0.00',
                     style: TextStyle(
                       fontSize: rs.sp(13),
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.w600,
                       color: const Color(0xFF0A2342),
                     ),
                   ),
@@ -604,7 +697,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     'TOTAL',
                     style: TextStyle(
                       fontSize: rs.sp(10),
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.w600,
                       color: const Color(0xFF94A3B8),
                       letterSpacing: 0.5,
                     ),
@@ -614,7 +707,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     formattedTotal,
                     style: TextStyle(
                       fontSize: rs.sp(15),
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.bold,
                       color: const Color(0xFF0A2342),
                     ),
                   ),
