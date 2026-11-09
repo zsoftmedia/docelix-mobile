@@ -28,9 +28,21 @@ class CreateAdjustStockController extends GetxController {
   final RxList<InventoryItem> items = <InventoryItem>[].obs;
   final RxnInt selectedItemId = RxnInt();
   final RxString quantityText = ''.obs;
+  final RxString productSearchQuery = ''.obs;
 
   final RxBool isLoadingItems = false.obs;
   final RxBool isSubmitting = false.obs;
+
+  List<InventoryItem> get filteredItems {
+    final query = productSearchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return items;
+    return items.where((item) {
+      final name = item.articleName.toLowerCase();
+      final sku = (item.articleNumber ?? '').toLowerCase();
+      final category = (item.groupCode ?? '').toLowerCase();
+      return name.contains(query) || sku.contains(query) || category.contains(query);
+    }).toList();
+  }
 
   // Tabs: 0 -> Add stock ("increase"), 1 -> Remove stock ("decrease"), 2 -> Set count ("set")
   final RxInt selectedActionIndex = 0.obs;

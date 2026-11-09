@@ -1,5 +1,5 @@
 import 'package:docelix_mobileapp/controllers/create_adjust_stock_controller.dart';
-import 'package:docelix_mobileapp/models/inventory_model.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,6 +18,155 @@ class _CreateAdjustStockScreenState extends State<CreateAdjustStockScreen> {
   String _formatNum(double num) {
     if (num % 1 == 0) return num.toInt().toString();
     return num.toStringAsFixed(2);
+  }
+
+  void _showProductSearchSheet(BuildContext context) {
+    controller.productSearchQuery.value = '';
+    final searchInputController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final height = MediaQuery.of(ctx).size.height;
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: height * 0.75,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                // SHEET HANDLE & HEADER
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Select Product',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A2342),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // REAL-TIME SEARCH BAR
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: searchInputController,
+                    autofocus: true,
+                    onChanged: (val) => controller.productSearchQuery.value = val,
+                    decoration: InputDecoration(
+                      hintText: 'Search product name or SKU...',
+                      hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: searchInputController,
+                        builder: (context, value, _) {
+                          if (value.text.isEmpty) return const SizedBox.shrink();
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () {
+                              searchInputController.clear();
+                              controller.productSearchQuery.value = '';
+                            },
+                          );
+                        },
+                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.2),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+
+                // PRODUCT LIST
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoadingItems.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final list = controller.filteredItems;
+
+                    if (list.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No products found.',
+                          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
+                      itemCount: list.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      itemBuilder: (context, index) {
+                        final item = list[index];
+                        final isSelected = controller.selectedItemId.value == item.id;
+
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          title: Text(
+                            item.articleName,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0A2342),
+                            ),
+                          ),
+                          subtitle: Text(
+                            'SKU: ${item.skuLabel} · Stock: ${item.stockLabel}',
+                            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                          ),
+                          trailing: isSelected
+                              ? const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB), size: 20)
+                              : null,
+                          onTap: () {
+                            controller.selectItem(item);
+                            Navigator.of(ctx).pop();
+                          },
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -55,18 +204,12 @@ class _CreateAdjustStockScreenState extends State<CreateAdjustStockScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ======================================================
-              // 1. PRODUCT DROPDOWN
+              // 1. PRODUCT SELECTOR BUTTON (OPENS BOTTOM SHEET)
               // ======================================================
               const _FieldLabel(text: 'Product *', required: true),
               const SizedBox(height: 6),
               Obx(() {
-                final rawList = controller.items;
-                final Map<int, InventoryItem> uniqueMap = {};
-                for (final it in rawList) {
-                  uniqueMap[it.id] = it;
-                }
-                final itemsList = uniqueMap.values.toList();
-                final selectedId = controller.selectedItemId.value;
+                final selected = controller.selectedItem;
 
                 if (controller.isLoadingItems.value) {
                   return Container(
@@ -90,36 +233,36 @@ class _CreateAdjustStockScreenState extends State<CreateAdjustStockScreen> {
                   );
                 }
 
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: colorsList.borderColor),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: itemsList.any((it) => it.id == selectedId) ? selectedId : null,
-                      isExpanded: true,
-                      hint: const Text('Search product or SKU...'),
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                      items: itemsList.map((item) {
-                        return DropdownMenuItem<int>(
-                          value: item.id,
+                return InkWell(
+                  onTap: () => _showProductSearchSheet(context),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colorsList.borderColor),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
                           child: Text(
-                            item.articleName,
-                            style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342)),
+                            selected != null ? selected.articleName : 'Search product or SKU...',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: selected != null ? const Color(0xFF0A2342) : const Color(0xFF94A3B8),
+                              fontWeight: selected != null ? FontWeight.w500 : FontWeight.normal,
+                            ),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          final matched = itemsList.firstWhereOrNull((it) => it.id == val);
-                          if (matched != null) {
-                            controller.selectItem(matched);
-                          }
-                        }
-                      },
+                        ),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Color(0xFF64748B),
+                        ),
+                      ],
                     ),
                   ),
                 );
