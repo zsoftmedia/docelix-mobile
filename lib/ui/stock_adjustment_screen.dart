@@ -14,7 +14,7 @@ class StockAdjustmentScreen extends StatefulWidget {
 }
 
 class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
-  final StockAdjustmentController controller =
+  final StockAdjustmentController _stockAdjustmentController =
       Get.put(StockAdjustmentController());
 
   @override
@@ -35,8 +35,8 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
         surfaceTintColor: Colors.white,
         leading: IconButton(
           onPressed: () {
-            if (controller.isSearching.value) {
-              controller.closeSearch();
+            if (_stockAdjustmentController.isSearching.value) {
+              _stockAdjustmentController.closeSearch();
             } else {
               Get.back();
             }
@@ -48,10 +48,10 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
           ),
         ),
         title: Obx(() {
-          if (controller.isSearching.value) {
+          if (_stockAdjustmentController.isSearching.value) {
             return TextField(
               autofocus: true,
-              onChanged: controller.onSearchChanged,
+              onChanged: _stockAdjustmentController.onSearchChanged,
               style: TextStyle(
                 color: colorsList.textColor,
                 fontSize: width * 0.04,
@@ -75,9 +75,9 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
         }),
         actions: [
           Obx(() {
-            if (controller.isSearching.value) {
+            if (_stockAdjustmentController.isSearching.value) {
               return IconButton(
-                onPressed: controller.closeSearch,
+                onPressed: _stockAdjustmentController.closeSearch,
                 icon: Icon(
                   Icons.close_rounded,
                   color: colorsList.iconColor,
@@ -87,7 +87,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
             }
 
             return IconButton(
-              onPressed: controller.openSearch,
+              onPressed: _stockAdjustmentController.openSearch,
               icon: Icon(
                 Icons.search_rounded,
                 color: colorsList.iconColor,
@@ -104,17 +104,17 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
       // ==========================================================
 
       body: Obx(() {
-        if (controller.isLoading.value && controller.filteredAdjustments.isEmpty) {
+        if (_stockAdjustmentController.isLoading.value && _stockAdjustmentController.filteredAdjustments.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
 
-        if (controller.errorMessage.value.isNotEmpty &&
-            controller.filteredAdjustments.isEmpty) {
+        if (_stockAdjustmentController.errorMessage.value.isNotEmpty &&
+            _stockAdjustmentController.filteredAdjustments.isEmpty) {
           return Center(
             child: Text(
-              controller.errorMessage.value,
+              _stockAdjustmentController.errorMessage.value,
               style: TextStyle(
                 color: colorsList.red,
                 fontSize: rs.sp(14),
@@ -123,10 +123,10 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
           );
         }
 
-        if (controller.filteredAdjustments.isEmpty) {
+        if (_stockAdjustmentController.filteredAdjustments.isEmpty) {
           return Center(
             child: Text(
-              controller.searchQuery.value.isNotEmpty
+              _stockAdjustmentController.searchQuery.value.isNotEmpty
                   ? 'No matching adjustments found.'
                   : 'No stock adjustments recorded.',
               style: TextStyle(
@@ -137,12 +137,12 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
           );
         }
 
-        final items = controller.filteredAdjustments;
+        final items = _stockAdjustmentController.filteredAdjustments;
 
         return ResponsivePage(
           padding: EdgeInsets.zero,
           child: RefreshIndicator(
-            onRefresh: controller.refreshAdjustments,
+            onRefresh: _stockAdjustmentController.refreshAdjustments,
             child: ListView.builder(
               padding: EdgeInsets.only(
                 left: rs.pagePaddingH,
@@ -162,6 +162,34 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
           ),
         );
       }),
+
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          await Get.toNamed(
+            '/CreateAdjustStockScreen',
+            arguments: 'Create Adjust Stock Screen',
+          );
+
+          await _stockAdjustmentController.refreshAdjustments();
+        },
+        backgroundColor: colorsList.colorButton,
+        foregroundColor: colorsList.colorWhite,
+        elevation: 4,
+        icon: const Icon(
+          Icons.add_rounded,
+        ),
+        label: Text(
+          'Adjust Stock',
+          style: TextStyle(
+            fontSize: rs.sp(15),
+            fontWeight: FontWeight.normal,
+            color: colorsList.colorWhite,
+          ),
+        ),
+      ),
+
     );
   }
 

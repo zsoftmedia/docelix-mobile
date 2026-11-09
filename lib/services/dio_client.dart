@@ -1061,6 +1061,28 @@ class DioClient {
     );
   }
 
+  Future<Response> createInventoryAdjustment({
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/inventory/adjustments',
+      data: {
+        'company_id': companyId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
   // ==============================
   // UPDATE INVOICE STATUS
   // ==============================

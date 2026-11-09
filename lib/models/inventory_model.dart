@@ -11,6 +11,7 @@ class InventoryItem {
   final bool trackStock;
   final String? itemType;
   final double? minStock;
+  final double? purchasePriceNet;
   final bool isActive;
 
   const InventoryItem({
@@ -26,6 +27,7 @@ class InventoryItem {
     this.trackStock = true,
     this.itemType,
     this.minStock,
+    this.purchasePriceNet,
     this.isActive = true,
   });
 
@@ -33,19 +35,30 @@ class InventoryItem {
     return InventoryItem(
       id: _asInt(json['id']) ?? 0,
       companyId: _asInt(json['company_id']) ?? 0,
-      articleName: json['article_name']?.toString() ?? '',
+      articleName: json['article_name']?.toString() ?? json['name']?.toString() ?? '',
       description: json['description']?.toString(),
-      articleNumber: json['article_number']?.toString(),
-      unitCode: json['unit_code']?.toString(),
-      groupCode: json['group_code']?.toString(),
-      stockQty: _asDouble(json['stock_qty']) ?? 0,
+      articleNumber: json['article_number']?.toString() ?? json['sku']?.toString(),
+      unitCode: json['unit_code']?.toString() ?? json['unit']?.toString(),
+      groupCode: json['group_code']?.toString() ?? json['category']?.toString(),
+      stockQty: _asDouble(json['stock_qty']) ?? _asDouble(json['quantity']) ?? 0,
       calculatedStock: _asDouble(json['calculated_stock']),
       trackStock: json['track_stock'] != false,
       itemType: json['item_type']?.toString(),
       minStock: _asDouble(json['min_stock']),
+      purchasePriceNet: _asDouble(json['purchase_price_net']) ?? _asDouble(json['purchase_price']),
       isActive: json['is_active'] != false,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is InventoryItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 
   double get currentStock => calculatedStock ?? stockQty;
 
