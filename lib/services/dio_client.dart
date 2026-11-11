@@ -1313,6 +1313,29 @@ class DioClient {
     );
   }
 
+  Future<Response> updateLedgerAccount({
+    required int accountId,
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.patch(
+      '${ApiConstants.baseUrl}/ledger/accounts/$accountId',
+      data: {
+        'company_id': companyId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
   Future<Response> searchDepreciationEngine({
     required String query,
     required String accessToken,
