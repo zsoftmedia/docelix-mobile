@@ -140,7 +140,7 @@ class CreateInvoiceController extends GetxController {
   // ============================================================
 
   final currentStep = 0.obs;
-  final int totalSteps = 4;
+  final int totalSteps = 5;
 
   // ============================================================
   // CLIENT TEXT CONTROLLERS
@@ -200,6 +200,12 @@ class CreateInvoiceController extends GetxController {
   final Rxn<ExchangeRateModel> exchangeRateData = Rxn<ExchangeRateModel>();
   final RxBool isLoadingExchangeRate = false.obs;
   final exchangeRateController = TextEditingController();
+
+  String formatCurrency(num? amount, String? currencyCode) {
+    final double value = (amount ?? 0).toDouble();
+    final String curr = currencyCode ?? selectedCurrency.value;
+    return '$curr ${value.toStringAsFixed(2)}';
+  }
 
   Future<void> selectCurrency(String currency) async {
     selectedCurrency.value = currency;
@@ -270,6 +276,39 @@ class CreateInvoiceController extends GetxController {
   void selectVatTreatment(String treatment) {
     selectedVatTreatment.value = treatment;
   }
+
+  // ============================================================
+  // RECURRING INVOICE FIELDS
+  // ============================================================
+
+  final RxString recurringFrequency = 'Yearly'.obs;
+  static const recurringFrequencyOptions = <String>['Weekly', 'Monthly', 'Yearly'];
+
+  final repeatEveryController = TextEditingController(text: '1');
+
+  String get repeatEveryUnitLabel {
+    final freq = recurringFrequency.value.toLowerCase();
+    if (freq == 'weekly') return 'week(s)';
+    if (freq == 'monthly') return 'month(s)';
+    return 'year(s)';
+  }
+
+  final recurringStartDateController = TextEditingController(
+    text: DateFormat('dd.MM.yyyy').format(DateTime.now()),
+  );
+
+  final RxString recurringEndsOption = 'Never'.obs;
+  static const recurringEndsOptions = <String>[
+    'Never',
+    'On a date',
+    'After a number of invoices',
+  ];
+
+  final recurringEndDateController = TextEditingController(
+    text: DateFormat('dd.MM.yyyy').format(DateTime.now()),
+  );
+  final recurringTotalInvoicesController = TextEditingController(text: '10');
+  final RxBool autoEmailGeneratedInvoice = true.obs;
 
   /*void toggleAutoGenerate(bool value) {
     autoGenerate.value = value;
@@ -1036,13 +1075,27 @@ class CreateInvoiceController extends GetxController {
       // ============================================================
 
       if (recurringInvoice.value) {
+        String endType = 'never';
+        String? endDate;
+        int? totalInvoices;
+
+        if (recurringEndsOption.value == 'On a date') {
+          endType = 'date';
+          endDate = _formatInvoiceDateForApi(recurringEndDateController.text);
+        } else if (recurringEndsOption.value == 'After a number of invoices') {
+          endType = 'count';
+          totalInvoices = int.tryParse(recurringTotalInvoicesController.text.trim()) ?? 10;
+        }
+
         payload['schedule'] = {
           'enabled': true,
-          'frequency': 'monthly',
-          'interval': 1,
-          'startDate': issueDate,
-          'endType': 'never',
-          'autoSendEmail': false,
+          'frequency': recurringFrequency.value.toLowerCase(),
+          'interval': int.tryParse(repeatEveryController.text.trim()) ?? 1,
+          'startDate': _formatInvoiceDateForApi(recurringStartDateController.text) ?? issueDate,
+          'endType': endType,
+          if (endDate != null) 'endDate': endDate,
+          if (totalInvoices != null) 'totalInvoices': totalInvoices,
+          'autoSendEmail': autoEmailGeneratedInvoice.value,
         };
       }
 

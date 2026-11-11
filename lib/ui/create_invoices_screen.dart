@@ -11,8 +11,7 @@ class CreateInvoiceScreen extends StatefulWidget {
   const CreateInvoiceScreen({super.key});
 
   @override
-  State<CreateInvoiceScreen> createState() =>
-      _CreateInvoiceScreenState();
+  State<CreateInvoiceScreen> createState() => _CreateInvoiceScreenState();
 }
 
 class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
@@ -29,61 +28,23 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         final currentStep = controllerCreateInvoice.currentStep.value;
 
         return ResponsivePage(
-          padding: EdgeInsets.symmetric(
-            horizontal: rs.isPhone ? 0 : rs.pagePaddingH,
-          ),
-          child: Stepper(
-            type: StepperType.horizontal,
-            currentStep: currentStep,
-            onStepTapped: controllerCreateInvoice.goToStep,
-            onStepContinue: controllerCreateInvoice.nextStep,
-            onStepCancel: controllerCreateInvoice.previousStep,
-            elevation: 0,
-            margin: EdgeInsets.zero,
-            controlsBuilder: _buildControls,
-            steps: [
-              Step(
-                title: Text(
-                  'Sender',
-                  style: TextStyle(fontSize: rs.sp(10)),
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              _buildCustomHorizontalStepperHeader(context, currentStep, rs),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: rs.isPhone ? rs.s(16) : rs.pagePaddingH,
+                    vertical: rs.s(12),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildCurrentStepContent(currentStep),
+                      _buildControls(context, currentStep),
+                    ],
+                  ),
                 ),
-                isActive: currentStep >= 0,
-                state: currentStep > 0
-                    ? StepState.complete
-                    : StepState.indexed,
-                content: _senderStep(),
-              ),
-              Step(
-                title: Text(
-                  'Client',
-                  style: TextStyle(fontSize: rs.sp(10)),
-                ),
-                isActive: currentStep >= 1,
-                state: currentStep > 1
-                    ? StepState.complete
-                    : StepState.indexed,
-                content: _clientStep(),
-              ),
-              Step(
-                title: Text(
-                  'Details',
-                  style: TextStyle(fontSize: rs.sp(10)),
-                ),
-                isActive: currentStep >= 2,
-                state: currentStep > 2
-                    ? StepState.complete
-                    : StepState.indexed,
-                content: _serviceStep(),
-              ),
-
-              Step(
-                title: Text(
-                  'Items',
-                  style: TextStyle(fontSize: rs.sp(10)),
-                ),
-                isActive: currentStep >= 3,
-                state: StepState.indexed,
-                content: _itemsStep(),
               ),
             ],
           ),
@@ -115,37 +76,112 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     );
   }
 
-  Widget _buildControls(
-      BuildContext context,
-      ControlsDetails details,
-      )
-  {
-    final isFirstStep = controllerCreateInvoice.currentStep.value == 0;
-    final isLastStep =
-        controllerCreateInvoice.currentStep.value == controllerCreateInvoice.totalSteps - 1;
+  Widget _buildCustomHorizontalStepperHeader(BuildContext context, int currentStep, ResponsiveMetrics rs) {
+    final steps = ['Sender', 'Client', 'Details', 'Items', 'Recurring'];
+
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(vertical: rs.s(12), horizontal: rs.s(12)),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: List.generate(steps.length, (index) {
+            final isCurrent = currentStep == index;
+            final isCompleted = currentStep > index;
+
+            return GestureDetector(
+              onTap: () => controllerCreateInvoice.goToStep(index),
+              child: Row(
+                children: [
+                  Container(
+                    width: rs.s(26),
+                    height: rs.s(26),
+                    decoration: BoxDecoration(
+                      color: isCompleted
+                          ? colorsList.colorButton
+                          : (isCurrent ? colorsList.colorButton : const Color(0xFFF1F5F9)),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: isCompleted
+                        ? Icon(Icons.check_rounded, color: Colors.white, size: rs.s(16))
+                        : Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: isCurrent ? Colors.white : const Color(0xFF64748B),
+                              fontSize: rs.sp(11),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                  SizedBox(width: rs.s(6)),
+                  Text(
+                    steps[index],
+                    style: TextStyle(
+                      color: isCurrent ? const Color(0xFF0A2342) : const Color(0xFF64748B),
+                      fontSize: rs.sp(12),
+                      fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  if (index < steps.length - 1)
+                    Container(
+                      width: rs.s(20),
+                      height: 1,
+                      margin: EdgeInsets.symmetric(horizontal: rs.s(8)),
+                      color: isCompleted ? colorsList.colorButton : const Color(0xFFE2E8F0),
+                    ),
+                ],
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrentStepContent(int step) {
+    switch (step) {
+      case 0:
+        return _senderStep();
+      case 1:
+        return _clientStep();
+      case 2:
+        return _serviceStep();
+      case 3:
+        return _itemsStep();
+      case 4:
+        return _recurringStep();
+      default:
+        return _senderStep();
+    }
+  }
+
+  Widget _buildControls(BuildContext context, int currentStep) {
+    final isFirstStep = currentStep == 0;
+    final isLastStep = currentStep == controllerCreateInvoice.totalSteps - 1;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 24, bottom: 8),
+      padding: const EdgeInsets.only(top: 24, bottom: 16),
       child: Row(
         children: [
           if (!isFirstStep) ...[
             Expanded(
               child: OutlinedButton(
-                onPressed: details.onStepCancel,
+                onPressed: controllerCreateInvoice.previousStep,
                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
+                  minimumSize: const Size.fromHeight(48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  side: BorderSide(
-                    color: colorsList.borderColor,
-                  ),
+                  side: const BorderSide(color: colorsList.borderColor),
                 ),
                 child: const Text(
                   'Back',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
+                    color: Color(0xFF334155),
                   ),
                 ),
               ),
@@ -157,34 +193,32 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
               final isLoading = controllerCreateInvoice.isLoading.value;
 
               return ElevatedButton(
-                onPressed: isLoading
-                    ? null
-                    : details.onStepContinue,
+                onPressed: isLoading ? null : controllerCreateInvoice.nextStep,
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor: colorsList.primaryColor,
+                  minimumSize: const Size.fromHeight(48),
+                  backgroundColor: colorsList.colorButton,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey.shade400,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: isLoading
                     ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : Text(
-                  isLastStep ? 'Save Invoice' : 'Next',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                        isLastStep ? 'Save Invoice' : 'Continue',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               );
             }),
           ),
@@ -201,29 +235,72 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle('Sender Details'),
+        _sectionTitle('Sender Information'),
         const SizedBox(height: 16),
+
         Obx(
-              () => AppTextField(
-            isDropdown: true,
-            hintText: 'Select sender',
-            prefixIcon: Icons.business_outlined,
-            dropdownItems: controllerCreateInvoice.companyNames,
-            selectedValue:
-            controllerCreateInvoice.selectedCompany.value?.name,
-            onDropdownChanged:
-            controllerCreateInvoice.selectCompanyByName,
+          () => InkWell(
+            onTap: () => _showCompanySearch(),
+            borderRadius: BorderRadius.circular(8),
+            child: IgnorePointer(
+              child: AppTextField(
+                controller: TextEditingController(
+                  text: controllerCreateInvoice.selectedCompany.value?.name ?? '',
+                ),
+                hintText: controllerCreateInvoice.isLoading.value
+                    ? 'Loading senders...'
+                    : 'Select sender (company)',
+                prefixIcon: Icons.business_outlined,
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 12),
-        Obx(
-              () => _infoField(
-            icon: Icons.email_outlined,
-            text: controllerCreateInvoice.sessionEmail.value.isEmpty
-                ? 'No email available'
-                : controllerCreateInvoice.sessionEmail.value,
-          ),
-        ),
+
+        const SizedBox(height: 16),
+
+        Obx(() {
+          final company = controllerCreateInvoice.selectedCompany.value;
+
+          if (company == null) {
+            return const SizedBox.shrink();
+          }
+
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: colorsList.borderColor),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  company.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: colorsList.textColor,
+                  ),
+                ),
+                if ((company.city ?? '').isNotEmpty ||
+                    (company.country ?? '').isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    [company.city, company.country]
+                        .where((e) => (e ?? '').isNotEmpty)
+                        .join(', '),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: colorsList.textHintColor,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }),
       ],
     );
   }
@@ -236,90 +313,48 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle('Client Details'),
+        _sectionTitle('Client Information'),
         const SizedBox(height: 16),
-        Obx(() {
-          final client = controllerCreateInvoice.selectedClient.value;
-          final displayText = client != null
-              ? client.name
-              : (controllerCreateInvoice.isLoading.value
-                  ? 'Loading clients...'
-                  : 'Select client');
 
-          return InkWell(
-            onTap: () => _showClientSearchBottomSheet(context),
-            borderRadius: BorderRadius.circular(7),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 15,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(7),
-                border: Border.all(
-                  color: const Color(0xFFD1D5DB),
-                  width: 1.2,
+        Obx(
+          () => InkWell(
+            onTap: () => _showClientSearch(),
+            borderRadius: BorderRadius.circular(8),
+            child: IgnorePointer(
+              child: AppTextField(
+                controller: TextEditingController(
+                  text: controllerCreateInvoice.selectedClientName.value ?? '',
                 ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.person_search_outlined,
-                    color: Color(0xFF4b4f57),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      displayText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: client != null
-                            ? const Color(0xFF172033)
-                            : const Color(0xFFA8A8A8),
-                        fontWeight: client != null
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: Color(0xFF4b4f57),
-                  ),
-                ],
+                hintText: controllerCreateInvoice.isLoading.value
+                    ? 'Loading clients...'
+                    : 'Select client',
+                prefixIcon: Icons.person_outline,
               ),
             ),
-          );
-        }),
-        const SizedBox(height: 14),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
         AppTextField(
           controller: controllerCreateInvoice.customerController,
-          hintText: 'Customer / Company',
+          hintText: 'Client / Company Name',
           prefixIcon: Icons.business_outlined,
         ),
-
         const SizedBox(height: 12),
-
         AppTextField(
           controller: controllerCreateInvoice.addressController,
-          hintText: 'Street / Address',
+          hintText: 'Address Line',
           prefixIcon: Icons.location_on_outlined,
         ),
-
         const SizedBox(height: 12),
-
         Row(
           children: [
             Expanded(
               child: AppTextField(
                 controller: controllerCreateInvoice.zipController,
-                hintText: 'ZIP',
+                hintText: 'ZIP Code',
                 prefixIcon: Icons.markunread_mailbox_outlined,
-                keyboardType: TextInputType.number,
               ),
             ),
             const SizedBox(width: 12),
@@ -332,29 +367,23 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
             ),
           ],
         ),
-
         const SizedBox(height: 12),
-
         AppTextField(
           controller: controllerCreateInvoice.attnController,
-          hintText: 'Attn',
-          prefixIcon: Icons.person_outline_rounded,
+          hintText: 'Attn / Contact Person',
+          prefixIcon: Icons.person_outline,
         ),
-
         const SizedBox(height: 12),
-
         AppTextField(
           controller: controllerCreateInvoice.emailController,
-          hintText: 'Email',
+          hintText: 'Client Email',
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
         ),
-
         const SizedBox(height: 12),
-
         AppTextField(
           controller: controllerCreateInvoice.phoneController,
-          hintText: 'Phone',
+          hintText: 'Client Phone',
           prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
         ),
@@ -363,7 +392,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Service
+  // Service Step
   // ---------------------------------------------------------------------------
 
   void _showCurrencySheet(BuildContext context) {
@@ -555,10 +584,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Service Step
-  // ---------------------------------------------------------------------------
-
   Widget _serviceStep() {
     if (controllerCreateInvoice.invoiceDateController.text.trim().isEmpty) {
       final now = DateTime.now();
@@ -604,7 +629,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         const Divider(height: 1, color: Color(0xFFF1F5F9)),
         const SizedBox(height: 16),
 
-        // ROW: SERVICE / DELIVERY DATE & CURRENCY (MATCHING SCREENSHOT 1 & 3)
+        // ROW: SERVICE / DELIVERY DATE & CURRENCY
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -695,7 +720,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
             const SizedBox(width: 12),
 
-            // CURRENCY DROPDOWN (MATCHING SCREENSHOT 1 & 2)
+            // CURRENCY DROPDOWN
             Expanded(
               flex: 4,
               child: Column(
@@ -749,7 +774,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
         const SizedBox(height: 14),
 
-        // EXCHANGE RATE BOX (WHEN SELECTED CURRENCY != COMPANY CURRENCY e.g. INR) [SCREENSHOT 3]
+        // EXCHANGE RATE BOX (WHEN SELECTED CURRENCY != COMPANY CURRENCY e.g. INR)
         Obx(() {
           final selectedCurr = controllerCreateInvoice.selectedCurrency.value;
           final rateData = controllerCreateInvoice.exchangeRateData.value;
@@ -829,7 +854,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         }),
 
         // ==========================================================
-        // VAT TREATMENT & EXEMPTIONS (SCREENSHOTS 4, 5, 6, 7, 8)
+        // VAT TREATMENT & EXEMPTIONS
         // ==========================================================
         const Text(
           'VAT treatment',
@@ -877,14 +902,13 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
         const SizedBox(height: 10),
 
-        // EXPLANATORY VAT CARDS (MATCHING SCREENSHOTS 4, 5, 6, 7, 8)
+        // EXPLANATORY VAT CARDS
         Obx(() {
           final treatment = controllerCreateInvoice.selectedVatTreatment.value;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // BASE EXPLANATORY TEXT FOR NON-VAT REGISTERED COMPANY
               const Text(
                 'Your company is set up as not VAT-registered, so this invoice cannot charge VAT. If you are VAT-registered, update it in the company settings.',
                 style: TextStyle(fontSize: 12, color: Color(0xFF64748B), height: 1.4),
@@ -897,7 +921,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
               const SizedBox(height: 12),
 
-              // OPTION 2: Exempt / zero-rated (reason required) [SCREENSHOT 4]
               if (treatment == 'Exempt / zero-rated (reason required)') ...[
                 const Text(
                   'Exemption reason / legal basis',
@@ -918,7 +941,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                 ),
               ],
 
-              // OPTION 3: Kleinunternehmer exemption [SCREENSHOT 5]
               if (treatment == 'Kleinunternehmer exemption') ...[
                 Obx(
                   () => CheckboxListTile(
@@ -939,7 +961,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                 ),
               ],
 
-              // OPTION 4: Reverse charge [SCREENSHOT 6]
               if (treatment == 'Reverse charge' || treatment == 'Intra-EU supply of goods') ...[
                 Obx(
                   () => CheckboxListTile(
@@ -973,7 +994,6 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                 ),
               ],
 
-              // OPTION 6: Export outside the EU [SCREENSHOT 8]
               if (treatment == 'Export outside the EU') ...[
                 Obx(
                   () => CheckboxListTile(
@@ -999,6 +1019,378 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   }
 
   // ---------------------------------------------------------------------------
+  // Recurring
+  // ---------------------------------------------------------------------------
+
+  Widget _recurringStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Recurring Schedule'),
+        const SizedBox(height: 16),
+
+        // HEADER ROW WITH SWITCH
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Obx(
+            () => Row(
+              children: [
+                const Icon(Icons.sync_rounded, color: Color(0xFF063C70), size: 20),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Recurring invoice',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0A2342),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Enable recurring invoice',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: controllerCreateInvoice.recurringInvoice.value
+                        ? const Color(0xFF063C70)
+                        : const Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Switch.adaptive(
+                  value: controllerCreateInvoice.recurringInvoice.value,
+                  activeThumbColor: const Color(0xFF063C70),
+                  onChanged: controllerCreateInvoice.toggleRecurringInvoice,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // CONDITIONAL FORM FIELDS (SHOWN WHEN RECURRING INVOICE IS ENABLED)
+        Obx(() {
+          if (!controllerCreateInvoice.recurringInvoice.value) {
+            return const SizedBox.shrink();
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+
+              // ROW 1: FREQUENCY, REPEAT EVERY, START DATE
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth > 500;
+
+                  final frequencyWidget = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Frequency',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: colorsList.borderColor),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: controllerCreateInvoice.recurringFrequency.value,
+                            isExpanded: true,
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                            items: CreateInvoiceController.recurringFrequencyOptions.map((opt) {
+                              return DropdownMenuItem<String>(
+                                value: opt,
+                                child: Text(opt, style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342))),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) controllerCreateInvoice.recurringFrequency.value = val;
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+
+                  final repeatEveryWidget = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Repeat every',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                      ),
+                      const SizedBox(height: 6),
+                      Obx(
+                        () => TextFormField(
+                          controller: controllerCreateInvoice.repeatEveryController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                            suffixIcon: Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: Text(
+                                controllerCreateInvoice.repeatEveryUnitLabel,
+                                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: colorsList.borderColor),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+
+                  final startDateWidget = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Start date',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                      ),
+                      const SizedBox(height: 6),
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            controllerCreateInvoice.recurringStartDateController.text =
+                                '${picked.day.toString().padLeft(2, '0')}.'
+                                '${picked.month.toString().padLeft(2, '0')}.'
+                                '${picked.year}';
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: colorsList.borderColor),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                controllerCreateInvoice.recurringStartDateController.text.isNotEmpty
+                                    ? controllerCreateInvoice.recurringStartDateController.text
+                                    : 'Select date',
+                                style: const TextStyle(fontSize: 13, color: Color(0xFF0A2342)),
+                              ),
+                              const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF94A3B8)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+
+                  if (isWide) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: frequencyWidget),
+                        const SizedBox(width: 10),
+                        Expanded(child: repeatEveryWidget),
+                        const SizedBox(width: 10),
+                        Expanded(child: startDateWidget),
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: frequencyWidget),
+                          const SizedBox(width: 10),
+                          Expanded(child: repeatEveryWidget),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      startDateWidget,
+                    ],
+                  );
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // ROW 2: ENDS DROPDOWN & CONDITIONAL END FIELD
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final endsWidget = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Ends',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: colorsList.borderColor),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: controllerCreateInvoice.recurringEndsOption.value,
+                            isExpanded: true,
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                            items: CreateInvoiceController.recurringEndsOptions.map((opt) {
+                              return DropdownMenuItem<String>(
+                                value: opt,
+                                child: Text(opt, style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342))),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) controllerCreateInvoice.recurringEndsOption.value = val;
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+
+                  final endsOption = controllerCreateInvoice.recurringEndsOption.value;
+
+                  Widget? conditionalEndWidget;
+
+                  if (endsOption == 'On a date') {
+                    conditionalEndWidget = Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'End date',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                        ),
+                        const SizedBox(height: 6),
+                        InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now().add(const Duration(days: 30)),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              controllerCreateInvoice.recurringEndDateController.text =
+                                  '${picked.day.toString().padLeft(2, '0')}.'
+                                  '${picked.month.toString().padLeft(2, '0')}.'
+                                  '${picked.year}';
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: colorsList.borderColor),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  controllerCreateInvoice.recurringEndDateController.text.isNotEmpty
+                                      ? controllerCreateInvoice.recurringEndDateController.text
+                                      : 'Select date',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: controllerCreateInvoice.recurringEndDateController.text.isNotEmpty
+                                        ? const Color(0xFF0A2342)
+                                        : const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                                const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF94A3B8)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  } else if (endsOption == 'After a number of invoices') {
+                    conditionalEndWidget = Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Total invoices',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: controllerCreateInvoice.recurringTotalInvoicesController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: colorsList.borderColor),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  if (conditionalEndWidget != null) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: endsWidget),
+                        const SizedBox(width: 12),
+                        Expanded(child: conditionalEndWidget),
+                      ],
+                    );
+                  }
+
+                  return endsWidget;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // ROW 3: AUTOMATICALLY EMAIL SWITCH
+              Obx(
+                () => _switchRow(
+                  title: 'Automatically email each invoice when it is generated',
+                  value: controllerCreateInvoice.autoEmailGeneratedInvoice.value,
+                  onChanged: (val) => controllerCreateInvoice.autoEmailGeneratedInvoice.value = val,
+                ),
+              ),
+            ],
+          );
+        }),
+
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
   // Items
   // ---------------------------------------------------------------------------
 
@@ -1010,13 +1402,12 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         const SizedBox(height: 16),
 
         Obx(
-              () => InkWell(
+          () => InkWell(
             onTap: () => _showCatalogSearch(),
             borderRadius: BorderRadius.circular(8),
             child: IgnorePointer(
               child: AppTextField(
-                controller:
-                controllerCreateInvoice.descriptionController,
+                controller: controllerCreateInvoice.descriptionController,
                 hintText: controllerCreateInvoice.isLoading.value
                     ? 'Loading catalog...'
                     : 'Search catalog item',
@@ -1032,109 +1423,65 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           children: [
             Expanded(
               child: AppTextField(
-                controller:
-                controllerCreateInvoice.quantityController,
-                hintText: 'Quantity',
-                prefixIcon: Icons.numbers_outlined,
-                keyboardType:
-                const TextInputType.numberWithOptions(
+                controller: controllerCreateInvoice.quantityController,
+                hintText: 'Qty',
+                prefixIcon: Icons.pin_outlined,
+                keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
               ),
             ),
-
-            const SizedBox(width: 8),
-
+            const SizedBox(width: 12),
             Expanded(
-              child: Obx(() {
-                final selected =
-                    controllerCreateInvoice.currentSelectedUnitLabel ??
-                        'Select Unit';
-
-                return InkWell(
-                  onTap: () => _showUnitSearchBottomSheet(context),
-                  borderRadius: BorderRadius.circular(7),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 15,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(7),
-                      border: Border.all(
-                        color: const Color(0xFFD1D5DB),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.straighten_outlined,
-                          color: Color(0xFF4b4f57),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            selected,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Color(0xFF4b4f57),
-                            ),
-                          ),
-                        ),
-                        const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: Color(0xFF4b4f57),
-                          size: 20,
-                        ),
-                      ],
+              child: Obx(
+                () => InkWell(
+                  onTap: () => _showUnitSearch(),
+                  borderRadius: BorderRadius.circular(8),
+                  child: IgnorePointer(
+                    child: AppTextField(
+                      controller: controllerCreateInvoice.unitController,
+                      hintText: controllerCreateInvoice.isLoading.value
+                          ? 'Loading units...'
+                          : 'Unit',
+                      prefixIcon: Icons.straighten_outlined,
                     ),
                   ),
-                );
-              }),
+                ),
+              ),
             ),
           ],
         ),
-
         const SizedBox(height: 12),
 
         AppTextField(
-          controller:
-          controllerCreateInvoice.unitPriceController,
-          hintText: 'Unit price',
-          prefixIcon: Icons.euro_outlined,
-          keyboardType:
-          const TextInputType.numberWithOptions(
+          controller: controllerCreateInvoice.unitPriceController,
+          hintText: 'Unit Price',
+          prefixIcon: Icons.attach_money_outlined,
+          keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
           ),
         ),
-
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
 
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed:
-            controllerCreateInvoice.addLine,
-            icon: const Icon(
-              Icons.add,
-              size: 19,
-            ),
-            label: const Text('Add line'),
-            style: OutlinedButton.styleFrom(
-              minimumSize:
-              const Size.fromHeight(46),
-              shape:
-              RoundedRectangleBorder(
-                borderRadius:
-                BorderRadius.circular(8),
+          height: 48,
+          child: ElevatedButton.icon(
+            onPressed: controllerCreateInvoice.addLine,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorsList.colorButton,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-              side: const BorderSide(
-                color: Color(0xFFD1D5DB),
+            ),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text(
+              'Add Line Item',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -1142,180 +1489,508 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
         const SizedBox(height: 20),
 
-        _buildItemsList(),
+        // Line Items List
+        Obx(() {
+          if (controllerCreateInvoice.lineItems.isEmpty) {
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colorsList.borderColor),
+              ),
+              child: const Column(
+                children: [
+                  Icon(
+                    Icons.format_list_bulleted_outlined,
+                    size: 36,
+                    color: colorsList.textHintColor,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'No items added yet',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: colorsList.textHintColor,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
 
-        const SizedBox(height: 12),
+          return Column(
+            children: List.generate(
+              controllerCreateInvoice.lineItems.length,
+              (index) {
+                final item = controllerCreateInvoice.lineItems[index];
 
-        _buildSubtotal(),
-
-        const SizedBox(height: 20),
-
-        _sectionTitle('Closing Text'),
-
-        const SizedBox(height: 12),
-
-        AppTextField(
-          controller: controllerCreateInvoice.closingTextController,
-          hintText: 'Enter closing text',
-          prefixIcon: Icons.notes_outlined,
-          maxLines: 4,
-        ),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colorsList.borderColor),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item['description']?.toString() ?? '',
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: colorsList.textColor,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${item['quantity']} ${item['unit']} x ${controllerCreateInvoice.formatCurrency(item['unit_price'] as num?, null)}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: colorsList.textHintColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        controllerCreateInvoice.formatCurrency(
+                          item['gross_amount'] as num?,
+                          null,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: colorsList.textColor,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => controllerCreateInvoice.removeLine(index),
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+        }),
 
         const SizedBox(height: 16),
 
-      ],
-    );
-  }
-
-  Widget _buildItemsList() {
-    return Obx(() {
-      if (controllerCreateInvoice.lineItems.isEmpty) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Center(
-            child: Text(
-              'No items added yet.',
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF9CA3AF),
-              ),
-            ),
-          ),
-        );
-      }
-
-      return Column(
-        children: List.generate(
-          controllerCreateInvoice.lineItems.length,
-              (index) => _itemRow(
-            index,
-                controllerCreateInvoice.lineItems[index],
-          ),
-        ),
-      );
-    });
-  }
-
-  Widget _buildSubtotal() {
-    return Obx(
+        // Subtotal Card
+        Obx(
           () => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.only(
-          top: 14,
-          bottom: 4,
-        ),
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: colorsList.borderColor,
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: colorsList.borderColor),
             ),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Subtotal',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              '€${controllerCreateInvoice.subtotal.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Item Row
-  // ---------------------------------------------------------------------------
-
-  Widget _itemRow(
-      int index,
-      Map<String, dynamic> item,
-      )
-  {
-    final description = item['description']?.toString() ?? '';
-    final quantity = (item['quantity'] as num?)?.toDouble() ?? 0;
-    final unit = item['unit']?.toString() ?? '';
-    final unitPrice = (item['unitPrice'] as num?)?.toDouble() ?? 0;
-    final total = (item['total'] as num?)?.toDouble() ?? 0;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: colorsList.borderColor,
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                const Text(
+                  'Total Amount',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                     color: colorsList.textColor,
                   ),
                 ),
-                const SizedBox(height: 4),
                 Text(
-                  '$quantity $unit × €${unitPrice.toStringAsFixed(2)}',
+                  controllerCreateInvoice.formatCurrency(
+                    controllerCreateInvoice.subtotal,
+                    controllerCreateInvoice.selectedCurrency.value,
+                  ),
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: colorsList.secondaryTextColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colorsList.primaryColor,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          Text(
-            '€${total.toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+        ),
+
+        const SizedBox(height: 16),
+
+        _sectionTitle('Closing Text'),
+        const SizedBox(height: 8),
+        AppTextField(
+          controller: controllerCreateInvoice.closingTextController,
+          hintText: 'Enter closing text or notes (optional)',
+          prefixIcon: Icons.notes_outlined,
+          maxLines: 3,
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Search Bottom Sheets
+  // ---------------------------------------------------------------------------
+
+  void _showCompanySearch() {
+    controllerCreateInvoice.getCompanies();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
-          IconButton(
-            onPressed: () => controllerCreateInvoice.removeLine(index),
-            icon: const Icon(
-              Icons.delete_outline_rounded,
-              size: 20,
-            ),
-            color: colorsList.secondaryTextColor,
-            tooltip: 'Delete',
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 36,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Select Sender Company',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: colorsList.textColor,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Obx(() {
+                if (controllerCreateInvoice.isLoading.value) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (controllerCreateInvoice.companies.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Text('No companies available'),
+                  );
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: controllerCreateInvoice.companies.length,
+                  itemBuilder: (context, index) {
+                    final company = controllerCreateInvoice.companies[index];
+
+                    return ListTile(
+                      title: Text(company.name),
+                      subtitle: Text(
+                        [company.city, company.country]
+                            .where((e) => (e ?? '').isNotEmpty)
+                            .join(', '),
+                      ),
+                      onTap: () {
+                        controllerCreateInvoice.selectCompany(company);
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                );
+              }),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  void _showClientSearch() {
+    controllerCreateInvoice.clientSearchQuery.value = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Select Client',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: colorsList.textColor,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  onChanged: controllerCreateInvoice.updateClientSearchQuery,
+                  decoration: InputDecoration(
+                    hintText: 'Search client name, email, phone...',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              Obx(() {
+                if (controllerCreateInvoice.isLoading.value) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final list = controllerCreateInvoice.filteredClients;
+
+                if (list.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Text('No clients found'),
+                  );
+                }
+
+                return SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  child: ListView.builder(
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      final client = list[index];
+
+                      return ListTile(
+                        title: Text(client.name),
+                        subtitle: Text(
+                          [client.email, client.phone, client.city]
+                              .where((e) => (e ?? '').isNotEmpty)
+                              .join(' • '),
+                        ),
+                        onTap: () {
+                          controllerCreateInvoice.selectClientByModel(client);
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCatalogSearch() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Select Item from Catalog',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: colorsList.textColor,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Obx(() {
+                if (controllerCreateInvoice.isLoading.value) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (controllerCreateInvoice.catalogList.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Text('No catalog items available'),
+                  );
+                }
+
+                return SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  child: ListView.builder(
+                    itemCount: controllerCreateInvoice.catalogList.length,
+                    itemBuilder: (context, index) {
+                      final item = controllerCreateInvoice.catalogList[index];
+
+                      return ListTile(
+                        title: Text(item.articleName ?? 'Item'),
+                        subtitle: Text(
+                          'Price: ${item.unitPriceNet ?? 0.0} ${item.unitCode ?? ''}',
+                        ),
+                        onTap: () {
+                          controllerCreateInvoice.selectCatalogItem(item.articleName);
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showUnitSearch() {
+    controllerCreateInvoice.unitSearchQuery.value = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Select Unit',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: colorsList.textColor,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  onChanged: controllerCreateInvoice.updateUnitSearchQuery,
+                  decoration: InputDecoration(
+                    hintText: 'Search unit...',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              Obx(() {
+                final list = controllerCreateInvoice.filteredUnits;
+
+                if (list.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Text('No units found'),
+                  );
+                }
+
+                return SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  child: ListView.builder(
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      final unitLabel = list[index];
+
+                      return ListTile(
+                        title: Text(unitLabel),
+                        onTap: () {
+                          controllerCreateInvoice.selectUnit(unitLabel);
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   // ---------------------------------------------------------------------------
-  // Reusable Widgets
+  // Helpers
   // ---------------------------------------------------------------------------
 
   Widget _sectionTitle(String title) {
@@ -1323,44 +1998,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       title,
       style: const TextStyle(
         fontSize: 18,
-        fontWeight: FontWeight.normal,
+        fontWeight: FontWeight.bold,
         color: colorsList.textColor,
-      ),
-    );
-  }
-
-  Widget _infoField({
-    required IconData icon,
-    required String text,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 11,
-      ),
-      decoration: BoxDecoration(
-        color: colorsList.colorBoxDecoration,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 18,
-            color: colorsList.iconColor,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 13,
-                color: colorsList.textColor,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1370,564 +2009,25 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 8,
-      ),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: colorsList.colorBoxDecoration,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                color: colorsList.textColor,
-              ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: colorsList.textColor,
             ),
           ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
+        ),
+        Switch.adaptive(
+          value: value,
+          activeColor: colorsList.primaryColor,
+          onChanged: onChanged,
+        ),
+      ],
     );
-  }
-
-  void _showUnitSearchBottomSheet(BuildContext context) {
-    final searchController = TextEditingController();
-    controllerCreateInvoice.updateUnitSearchQuery('');
-
-    Get.bottomSheet(
-      backgroundColor: Colors.transparent,
-      ResponsiveSheetBody(
-        padding: EdgeInsets.zero,
-        child: Container(
-        height: context.rs.height * 0.75,
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: colorsList.borderColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Select Unit',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: colorsList.textColor,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: Get.back,
-                  icon: const Icon(
-                    Icons.close_rounded,
-                    color: colorsList.iconColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            AppTextField(
-              controller: searchController,
-              hintText: 'Search unit (e.g. hour, kg, pc)...',
-              prefixIcon: Icons.search_rounded,
-              onChanged: (val) {
-                controllerCreateInvoice.updateUnitSearchQuery(val);
-              },
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Obx(() {
-                final list = controllerCreateInvoice.filteredUnits;
-
-                if (list.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No matching units found.',
-                      style: TextStyle(
-                        color: colorsList.textHintColor,
-                        fontSize: 14,
-                      ),
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  itemCount: list.length,
-                  separatorBuilder: (context, index) => const Divider(
-                    height: 1,
-                    thickness: 0.8,
-                    color: colorsList.borderColor,
-                  ),
-                  itemBuilder: (context, index) {
-                    final unitLabel = list[index];
-                    final isSelected =
-                        unitLabel == controllerCreateInvoice.currentSelectedUnitLabel;
-
-                    return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      title: Text(
-                        unitLabel,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w500,
-                          color: isSelected
-                              ? colorsList.primaryColor
-                              : colorsList.textColor,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? const Icon(
-                              Icons.check_circle_rounded,
-                              color: colorsList.primaryColor,
-                              size: 22,
-                            )
-                          : null,
-                      onTap: () {
-                        controllerCreateInvoice.selectUnit(unitLabel);
-                        Get.back();
-                      },
-                    );
-                  },
-                );
-              }),
-            ),
-          ],
-        ),
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
-  void _showClientSearchBottomSheet(BuildContext context) {
-    final searchController = TextEditingController();
-    controllerCreateInvoice.updateClientSearchQuery('');
-
-    Get.bottomSheet(
-      backgroundColor: Colors.transparent,
-      ResponsiveSheetBody(
-        padding: EdgeInsets.zero,
-        child: Container(
-        height: context.rs.height * 0.75,
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: colorsList.borderColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Select Client',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: colorsList.textColor,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: Get.back,
-                  icon: const Icon(
-                    Icons.close_rounded,
-                    color: colorsList.iconColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            AppTextField(
-              controller: searchController,
-              hintText: 'Search client by name, email, city...',
-              prefixIcon: Icons.search_rounded,
-              onChanged: (val) {
-                controllerCreateInvoice.updateClientSearchQuery(val);
-              },
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Obx(() {
-                final list = controllerCreateInvoice.filteredClients;
-
-                if (list.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No matching clients found.',
-                      style: TextStyle(
-                        color: colorsList.textHintColor,
-                        fontSize: 14,
-                      ),
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  itemCount: list.length,
-                  separatorBuilder: (context, index) => const Divider(
-                    height: 1,
-                    thickness: 0.8,
-                    color: colorsList.borderColor,
-                  ),
-                  itemBuilder: (context, index) {
-                    final client = list[index];
-                    final isSelected =
-                        client.id == controllerCreateInvoice.selectedClient.value?.id;
-
-                    final subtitleParts = <String>[];
-                    if (client.email != null && client.email!.trim().isNotEmpty) {
-                      subtitleParts.add(client.email!.trim());
-                    }
-                    if (client.city != null && client.city!.trim().isNotEmpty) {
-                      subtitleParts.add(client.city!.trim());
-                    }
-
-                    return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      leading: Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: colorsList.colorBoxDecoration,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.person_outline_rounded,
-                          color: colorsList.iconColor,
-                          size: 20,
-                        ),
-                      ),
-                      title: Text(
-                        client.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w500,
-                          color: isSelected
-                              ? colorsList.primaryColor
-                              : colorsList.textColor,
-                        ),
-                      ),
-                      subtitle: subtitleParts.isNotEmpty
-                          ? Text(
-                              subtitleParts.join(' • '),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: colorsList.textHintColor,
-                              ),
-                            )
-                          : null,
-                      trailing: isSelected
-                          ? const Icon(
-                              Icons.check_circle_rounded,
-                              color: colorsList.primaryColor,
-                              size: 22,
-                            )
-                          : null,
-                      onTap: () {
-                        controllerCreateInvoice.selectClientByModel(client);
-                        Get.back();
-                      },
-                    );
-                  },
-                );
-              }),
-            ),
-          ],
-        ),
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
-  void _showCatalogSearch() {
-    final searchController = TextEditingController();
-    final searchText = ''.obs;
-    final filteredItems = <CatalogModel>[].obs;
-
-    filteredItems.assignAll(
-      controllerCreateInvoice.catalogList,
-    );
-
-    void search(String value) {
-      searchText.value = value;
-
-      final query = value.trim().toLowerCase();
-
-      if (query.isEmpty) {
-        filteredItems.assignAll(
-          controllerCreateInvoice.catalogList,
-        );
-        return;
-      }
-
-      filteredItems.assignAll(
-        controllerCreateInvoice.catalogList.where(
-              (item) {
-            final name =
-                item.articleName?.toLowerCase() ?? '';
-
-            return name.contains(query);
-          },
-        ),
-      );
-    }
-
-    Get.bottomSheet(
-      backgroundColor: Colors.transparent,
-      ResponsiveSheetBody(
-        padding: EdgeInsets.zero,
-        child: Container(
-        height: Get.context!.rs.height * 0.75,
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(18),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ======================================================
-            // HEADER
-            // ======================================================
-
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Select Catalog Item',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  icon: const Icon(Icons.close,
-                    color: colorsList.iconColor,),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // ======================================================
-            // SEARCH
-            // ======================================================
-
-            TextField(
-              controller: searchController,
-              onChanged: search,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Search item or enter manually',
-                prefixIcon: Icon(Icons.search,
-                  color: colorsList.iconColor,),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // ======================================================
-            // RESULTS
-            // ======================================================
-
-            Expanded(
-              child: Obx(
-                    () {
-                  final query = searchText.value.trim();
-
-                  return ListView(
-                    children: [
-                      // ==================================================
-                      // MANUAL ENTRY
-                      // ==================================================
-
-                      if (query.isNotEmpty)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(
-                            Icons.edit_outlined,
-                            color: colorsList.iconColor,
-                          ),
-                          title: Text(
-                            'Use "$query"',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          subtitle: const Text(
-                            'Add this item manually',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: colorsList.textColor,
-                            ),
-                          ),
-                          onTap: () {
-                            controllerCreateInvoice
-                                .descriptionController
-                                .text = query;
-
-                            Get.back();
-                          },
-                        ),
-
-                      if (query.isNotEmpty)
-                        const Divider(height: 1),
-
-                      // ==================================================
-                      // CATALOG ITEMS
-                      // ==================================================
-
-                      if (filteredItems.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: 40,
-                          ),
-                          child: Center(
-                            child: Text(
-                              query.isEmpty
-                                  ? 'No catalog items available.'
-                                  : 'No catalog item found.',
-                              style: const TextStyle(
-                                color: colorsList.textHintColor,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        ...filteredItems.map(
-                              (item) {
-                            return Column(
-                              children: [
-                                ListTile(
-                                  contentPadding:
-                                  EdgeInsets.zero,
-                                  title: Text(
-                                    item.articleName ?? '',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight:
-                                      FontWeight.w500,
-                                      color: colorsList.textColor
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    _catalogSubtitle(item),
-                                  ),
-                                  onTap: () {
-                                    controllerCreateInvoice
-                                        .selectCatalogItem(
-                                      item.articleName,
-                                    );
-
-                                    Get.back();
-                                  },
-                                ),
-                                Divider(
-                                  height: 1,
-                                  color: colorsList.dividerColor,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
-  String _catalogSubtitle(CatalogModel item) {
-    final unit = item.unitCode?.trim() ?? '';
-
-    final price =
-        item.unitPriceNet?.toString() ?? '';
-
-    if (unit.isEmpty && price.isEmpty) {
-      return '';
-    }
-
-    if (unit.isEmpty) {
-      return '€$price';
-    }
-
-    if (price.isEmpty) {
-      return unit;
-    }
-
-    return '$unit • €$price';
   }
 }
