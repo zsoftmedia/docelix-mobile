@@ -310,6 +310,17 @@ class CreateInvoiceController extends GetxController {
   final recurringTotalInvoicesController = TextEditingController(text: '10');
   final RxBool autoEmailGeneratedInvoice = true.obs;
 
+  void setFrequency(String freq) {
+    recurringFrequency.value = freq;
+  }
+
+  void setEndsOption(String option) {
+    recurringEndsOption.value = option;
+    if (option == 'On a date' && recurringEndDateController.text.trim().isEmpty) {
+      recurringEndDateController.text = DateFormat('dd.MM.yyyy').format(DateTime.now());
+    }
+  }
+
   /*void toggleAutoGenerate(bool value) {
     autoGenerate.value = value;
   }*/

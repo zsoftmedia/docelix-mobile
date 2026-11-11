@@ -3,6 +3,7 @@ import 'package:docelix_mobileapp/controllers/create_invoice_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -260,6 +261,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
         Obx(() {
           final company = controllerCreateInvoice.selectedCompany.value;
+          final userEmail = SessionManager.email ?? controllerCreateInvoice.sessionEmail.value;
 
           if (company == null) {
             return const SizedBox.shrink();
@@ -269,32 +271,79 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFFFFFBEB),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colorsList.borderColor),
+              border: Border.all(color: const Color(0xFFFDE68A)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  company.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: colorsList.textColor,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFEF3C7),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.business_rounded,
+                        color: Color(0xFFD97706),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            company.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0A2342),
+                            ),
+                          ),
+                          if (userEmail.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              userEmail,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF92400E),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 if ((company.city ?? '').isNotEmpty ||
                     (company.country ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    [company.city, company.country]
-                        .where((e) => (e ?? '').isNotEmpty)
-                        .join(', '),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: colorsList.textHintColor,
-                    ),
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: Color(0xFFFDE68A)),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: Color(0xFFB45309),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        [company.city, company.country]
+                            .where((e) => (e ?? '').isNotEmpty)
+                            .join(', '),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF78350F),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ],
@@ -1097,27 +1146,29 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
                       ),
                       const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: colorsList.borderColor),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: controllerCreateInvoice.recurringFrequency.value,
-                            isExpanded: true,
-                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                            items: CreateInvoiceController.recurringFrequencyOptions.map((opt) {
-                              return DropdownMenuItem<String>(
-                                value: opt,
-                                child: Text(opt, style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342))),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) controllerCreateInvoice.recurringFrequency.value = val;
-                            },
+                      Obx(
+                        () => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: colorsList.borderColor),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: controllerCreateInvoice.recurringFrequency.value,
+                              isExpanded: true,
+                              icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                              items: CreateInvoiceController.recurringFrequencyOptions.map((opt) {
+                                return DropdownMenuItem<String>(
+                                  value: opt,
+                                  child: Text(opt, style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342))),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) controllerCreateInvoice.setFrequency(val);
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -1237,107 +1288,104 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
               const SizedBox(height: 16),
 
               // ROW 2: ENDS DROPDOWN & CONDITIONAL END FIELD
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final endsWidget = Column(
+              Obx(() {
+                final endsOption = controllerCreateInvoice.recurringEndsOption.value;
+
+                final endsWidget = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Ends',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: colorsList.borderColor),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: endsOption,
+                          isExpanded: true,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                          items: CreateInvoiceController.recurringEndsOptions.map((opt) {
+                            return DropdownMenuItem<String>(
+                              value: opt,
+                              child: Text(opt, style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342))),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) controllerCreateInvoice.setEndsOption(val);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+
+                Widget? conditionalEndWidget;
+
+                if (endsOption == 'On a date') {
+                  conditionalEndWidget = Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Ends',
+                        'End date',
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
                       ),
                       const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: colorsList.borderColor),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: controllerCreateInvoice.recurringEndsOption.value,
-                            isExpanded: true,
-                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                            items: CreateInvoiceController.recurringEndsOptions.map((opt) {
-                              return DropdownMenuItem<String>(
-                                value: opt,
-                                child: Text(opt, style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342))),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) controllerCreateInvoice.recurringEndsOption.value = val;
-                            },
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now().add(const Duration(days: 30)),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            controllerCreateInvoice.recurringEndDateController.text =
+                                '${picked.day.toString().padLeft(2, '0')}.'
+                                '${picked.month.toString().padLeft(2, '0')}.'
+                                '${picked.year}';
+                            setState(() {});
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: colorsList.borderColor),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  controllerCreateInvoice.recurringEndDateController.text.isNotEmpty
+                                      ? controllerCreateInvoice.recurringEndDateController.text
+                                      : 'Select date',
+                                  style: const TextStyle(fontSize: 13, color: Color(0xFF0A2342)),
+                                ),
+                              ),
+                              const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF94A3B8)),
+                            ],
                           ),
                         ),
                       ),
                     ],
                   );
-
-                  final endsOption = controllerCreateInvoice.recurringEndsOption.value;
-
-                  Widget? conditionalEndWidget;
-
-                  if (endsOption == 'On a date') {
-                    conditionalEndWidget = Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'End date',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
-                        ),
-                        const SizedBox(height: 6),
-                        InkWell(
-                          onTap: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now().add(const Duration(days: 30)),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked != null) {
-                              controllerCreateInvoice.recurringEndDateController.text =
-                                  '${picked.day.toString().padLeft(2, '0')}.'
-                                  '${picked.month.toString().padLeft(2, '0')}.'
-                                  '${picked.year}';
-                            }
-                          },
-                          borderRadius: BorderRadius.circular(10),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: colorsList.borderColor),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  controllerCreateInvoice.recurringEndDateController.text.isNotEmpty
-                                      ? controllerCreateInvoice.recurringEndDateController.text
-                                      : 'Select date',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: controllerCreateInvoice.recurringEndDateController.text.isNotEmpty
-                                        ? const Color(0xFF0A2342)
-                                        : const Color(0xFF94A3B8),
-                                  ),
-                                ),
-                                const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF94A3B8)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  } else if (endsOption == 'After a number of invoices') {
-                    conditionalEndWidget = Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Total invoices',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                } else if (endsOption == 'After a number of invoices') {
+                  conditionalEndWidget = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Total invoices',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
                         ),
                         const SizedBox(height: 6),
                         TextFormField(
