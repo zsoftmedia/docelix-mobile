@@ -198,4 +198,57 @@ class LedgerController extends GetxController {
       return false;
     }
   }
+
+  Future<bool> deleteAccount(LedgerAccountModel targetAccount) async {
+    if (targetAccount.isSystem) {
+      AppSnackbar.error(
+        title: 'Protected Account',
+        message: 'Standard chart accounts are protected and cannot be deleted.',
+      );
+      return false;
+    }
+
+    final token = SessionManager.accessToken;
+    final companyId = SessionManager.accessCompanyid;
+
+    if (token == null || token.isEmpty || companyId == null || companyId == 0) {
+      AppSnackbar.error(title: 'Session Error', message: 'Missing session or company ID.');
+      return false;
+    }
+
+    try {
+      final response = await _dioClient.deleteLedgerAccount(
+        accountId: targetAccount.id,
+        companyId: companyId,
+        accessToken: token,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 204 ||
+          (response.data is Map && response.data['ok'] == true)) {
+        AppSnackbar.success(
+          title: 'Success',
+          message: 'Account deleted successfully.',
+        );
+
+        await refreshAccounts();
+        return true;
+      }
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: response.data?['message']?.toString() ?? 'Unable to delete account.',
+      );
+      return false;
+    } on DioException catch (e) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: e.response?.data?['message']?.toString() ?? e.message ?? 'Unable to delete account.',
+      );
+      return false;
+    } catch (e) {
+      AppSnackbar.error(title: 'Error', message: e.toString());
+      return false;
+    }
+  }
 }

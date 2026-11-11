@@ -646,9 +646,13 @@ class _LedgerScreenState extends State<LedgerScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '${account.code} - ${account.name}',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                      Expanded(
+                        child: Text(
+                          '${account.code} - ${account.name}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                        ),
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(ctx),
@@ -684,12 +688,33 @@ class _LedgerScreenState extends State<LedgerScreen> {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.delete_outline_rounded, color: Color(0xFFDC2626)),
-                  title: const Text('Delete account', style: TextStyle(fontSize: 14, color: Color(0xFFDC2626))),
-                  subtitle: const Text('Standard chart accounts are protected.', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+                  leading: Icon(
+                    Icons.delete_outline_rounded,
+                    color: account.isSystem ? const Color(0xFF94A3B8) : const Color(0xFFDC2626),
+                  ),
+                  title: Text(
+                    'Delete account',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: account.isSystem ? const Color(0xFF94A3B8) : const Color(0xFFDC2626),
+                    ),
+                  ),
+                  subtitle: Text(
+                    account.isSystem
+                        ? 'Standard chart accounts are protected.'
+                        : 'Remove this custom account.',
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
-                    AppSnackbar.info(title: 'Protected', message: 'Standard chart accounts are protected.');
+                    if (account.isSystem) {
+                      AppSnackbar.error(
+                        title: 'Protected Account',
+                        message: 'Standard chart accounts are protected and cannot be deleted.',
+                      );
+                    } else {
+                      _confirmDeleteAccount(context, account);
+                    }
                   },
                 ),
                 const SizedBox(height: 12),
@@ -697,6 +722,34 @@ class _LedgerScreenState extends State<LedgerScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _confirmDeleteAccount(BuildContext context, LedgerAccountModel account) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0A2342))),
+        content: Text('Are you sure you want to delete "${account.code} - ${account.name}"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF64748B))),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              controller.deleteAccount(account);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

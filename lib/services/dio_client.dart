@@ -1336,6 +1336,26 @@ class DioClient {
     );
   }
 
+  Future<Response> deleteLedgerAccount({
+    required int accountId,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.delete(
+      '${ApiConstants.baseUrl}/ledger/accounts/$accountId',
+      queryParameters: {
+        'company_id': companyId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
   Future<Response> searchDepreciationEngine({
     required String query,
     required String accessToken,
