@@ -301,7 +301,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                             company.name,
                             style: const TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.normal,
                               color: Color(0xFF0A2342),
                             ),
                           ),
@@ -312,7 +312,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: Color(0xFF92400E),
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                           ],
@@ -1096,7 +1096,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     'Recurring invoice',
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.normal,
                       color: Color(0xFF0A2342),
                     ),
                   ),
@@ -1108,7 +1108,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     color: controllerCreateInvoice.recurringInvoice.value
                         ? const Color(0xFF063C70)
                         : const Color(0xFF64748B),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1143,7 +1143,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     children: [
                       const Text(
                         'Frequency',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            color: Color(0xFF475569)),
                       ),
                       const SizedBox(height: 6),
                       Obx(
@@ -1162,7 +1165,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                               items: CreateInvoiceController.recurringFrequencyOptions.map((opt) {
                                 return DropdownMenuItem<String>(
                                   value: opt,
-                                  child: Text(opt, style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342))),
+                                  child: Text(opt,
+                                      style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF0A2342))),
                                 );
                               }).toList(),
                               onChanged: (val) {
@@ -1180,7 +1186,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     children: [
                       const Text(
                         'Repeat every',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            color: Color(0xFF475569)),
                       ),
                       const SizedBox(height: 6),
                       Obx(
@@ -1195,12 +1204,15 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                               padding: const EdgeInsets.only(right: 12),
                               child: Text(
                                 controllerCreateInvoice.repeatEveryUnitLabel,
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B)),
                               ),
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: colorsList.borderColor),
+                              borderSide: const BorderSide(
+                                  color: colorsList.borderColor),
                             ),
                           ),
                         ),
@@ -1213,7 +1225,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     children: [
                       const Text(
                         'Start date',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            color: Color(0xFF475569)),
                       ),
                       const SizedBox(height: 6),
                       InkWell(
@@ -1233,7 +1248,9 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                         },
                         borderRadius: BorderRadius.circular(10),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -1246,9 +1263,13 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                                 controllerCreateInvoice.recurringStartDateController.text.isNotEmpty
                                     ? controllerCreateInvoice.recurringStartDateController.text
                                     : 'Select date',
-                                style: const TextStyle(fontSize: 13, color: Color(0xFF0A2342)),
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF0A2342)),
                               ),
-                              const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF94A3B8)),
+                              const Icon(
+                                  Icons.calendar_month_outlined,
+                                  size: 16, color: Color(0xFF94A3B8)),
                             ],
                           ),
                         ),
@@ -1296,7 +1317,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   children: [
                     const Text(
                       'Ends',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          color: Color(0xFF475569)),
                     ),
                     const SizedBox(height: 6),
                     Container(
@@ -1314,7 +1338,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                           items: CreateInvoiceController.recurringEndsOptions.map((opt) {
                             return DropdownMenuItem<String>(
                               value: opt,
-                              child: Text(opt, style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342))),
+                              child: Text(opt,
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF0A2342))),
                             );
                           }).toList(),
                           onChanged: (val) {
@@ -1334,7 +1361,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     children: [
                       const Text(
                         'End date',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            color: Color(0xFF475569)),
                       ),
                       const SizedBox(height: 6),
                       InkWell(
@@ -1369,10 +1399,14 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                                   controllerCreateInvoice.recurringEndDateController.text.isNotEmpty
                                       ? controllerCreateInvoice.recurringEndDateController.text
                                       : 'Select date',
-                                  style: const TextStyle(fontSize: 13, color: Color(0xFF0A2342)),
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF0A2342)),
                                 ),
                               ),
-                              const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF94A3B8)),
+                              const Icon(Icons.calendar_month_outlined,
+                                  size: 16,
+                                  color: Color(0xFF94A3B8)),
                             ],
                           ),
                         ),
@@ -1385,7 +1419,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     children: [
                       const Text(
                         'Total invoices',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF475569)),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            color: Color(0xFF475569)),
                         ),
                         const SizedBox(height: 6),
                         TextFormField(
@@ -1592,7 +1629,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                               item['description']?.toString() ?? '',
                               style: const TextStyle(
                                 fontSize: 15,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.normal,
                                 color: colorsList.textColor,
                               ),
                             ),
@@ -1614,7 +1651,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                         ),
                         style: const TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.normal,
                           color: colorsList.textColor,
                         ),
                       ),
@@ -1652,7 +1689,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   'Total Amount',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.normal,
                     color: colorsList.textColor,
                   ),
                 ),
@@ -1663,7 +1700,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   ),
                   style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.normal,
                     color: colorsList.primaryColor,
                   ),
                 ),
@@ -1717,7 +1754,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                       'Select Sender Company',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.normal,
                         color: colorsList.textColor,
                       ),
                     ),
@@ -1798,7 +1835,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                       'Select Client',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.normal,
                         color: colorsList.textColor,
                       ),
                     ),
@@ -1895,7 +1932,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                       'Select Item from Catalog',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.normal,
                         color: colorsList.textColor,
                       ),
                     ),
@@ -1976,7 +2013,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                       'Select Unit',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.normal,
                         color: colorsList.textColor,
                       ),
                     ),
@@ -2046,7 +2083,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       title,
       style: const TextStyle(
         fontSize: 18,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.normal,
         color: colorsList.textColor,
       ),
     );
@@ -2065,7 +2102,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
             title,
             style: const TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.normal,
               color: colorsList.textColor,
             ),
           ),

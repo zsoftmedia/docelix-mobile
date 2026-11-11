@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -277,6 +278,32 @@ class CreateInvoiceController extends GetxController {
     selectedVatTreatment.value = treatment;
   }
 
+  String? _buildNotesPost() {
+    final treatment = selectedVatTreatment.value;
+    final reasonText = exemptionReasonController.text.trim();
+
+    switch (treatment) {
+      case 'Exempt / zero-rated (reason required)':
+        final encodedReason = Uri.encodeComponent(reasonText);
+        return '<br>\n\nVAT exemption: $reasonText.\n\n[[EA_VAT_TREATMENT:%7B%22treatment%22%3A%22exempt%22%2C%22reason%22%3A%22$encodedReason%22%7D]]';
+
+      case 'Kleinunternehmer exemption':
+        return '<br>\n\nVAT exemption: Small business exemption under § 6(1)(27) UStG.\n\n[[EA_VAT_TREATMENT:%7B%22treatment%22%3A%22kleinunternehmer%22%7D]]';
+
+      case 'Reverse charge':
+        return '<br>\n\nReverse charge: VAT to be paid by recipient.\n\n[[EA_VAT_TREATMENT:%7B%22treatment%22%3A%22reverse_charge%22%7D]]';
+
+      case 'Intra-EU supply of goods':
+        return '<br>\n\nIntra-Community supply exempt from VAT.\n\n[[EA_VAT_TREATMENT:%7B%22treatment%22%3A%22intra_eu%22%7D]]';
+
+      case 'Export outside the EU':
+        return '<br>\n\nExport supply exempt from VAT.\n\n[[EA_VAT_TREATMENT:%7B%22treatment%22%3A%22export%22%7D]]';
+
+      default:
+        return '';
+    }
+  }
+
   // ============================================================
   // RECURRING INVOICE FIELDS
   // ============================================================
@@ -402,7 +429,8 @@ class CreateInvoiceController extends GetxController {
   Future<void> getClients({
     int page = 1,
     int pageSize = 20,
-  }) async {
+  }) async
+  {
     try {
       isLoading.value = true;
 
@@ -1044,42 +1072,39 @@ class CreateInvoiceController extends GetxController {
       // BUILD PAYLOAD
       // ============================================================
 
+      final String serviceDate = _formatInvoiceDateForApi(serviceDateController.text) ?? issueDate;
+      final String currCode = selectedCurrency.value.trim().toUpperCase();
+
+      double? fxRate;
+      if (exchangeRateData.value != null) {
+        fxRate = exchangeRateData.value!.rate;
+      } else if (exchangeRateController.text.trim().isNotEmpty) {
+        fxRate = double.tryParse(exchangeRateController.text.trim());
+      }
+
       final Map<String, dynamic> payload = {
         'company_id': companyId,
         'client_id': clientId,
-
-        // If auto generation is enabled, backend should generate it.
-        // If backend requires a string, send empty string.
+        'currency_code': currCode,
+        'fx_rate': fxRate,
+        'service_date': serviceDate,
         'invoice_number': autoGenerate.value
             ? invoiceNumberController.text.trim()
             : invoiceNumber,
-
         'issue_date': issueDate,
-
         'due_date': null,
-
         'notes': closingTextController.text.trim().isEmpty
             ? null
             : closingTextController.text.trim(),
-
-        'notes_pre': null,
-
-        'notes_post': null,
-
+        'notes_pre': '',
+        'notes_post': _buildNotesPost(),
         'layout_order': [
           'pretext',
           'items',
           'posttext',
         ],
-
         'items': items,
       };
-
-      /*debugPrint(
-        '========== INVOICE PAYLOAD ==========\n'
-            '${JsonEncoder.withIndent('  ').convert(payload)}\n'
-            '=====================================',
-      );*/
 
       // ============================================================
       // RECURRING SCHEDULE
@@ -1109,6 +1134,17 @@ class CreateInvoiceController extends GetxController {
           'autoSendEmail': autoEmailGeneratedInvoice.value,
         };
       }
+
+      debugPrint(
+        '========== INVOICE PAYLOAD ==========\n'
+        '${const JsonEncoder.withIndent('  ').convert(payload)}\n'
+        '=====================================',
+      );
+      print(
+        '========== INVOICE PAYLOAD ==========\n'
+        '${const JsonEncoder.withIndent('  ').convert(payload)}\n'
+        '=====================================',
+      );
 
       // ============================================================
       // API CALL
@@ -1265,7 +1301,8 @@ class CreateInvoiceController extends GetxController {
   Future<void> getCatalog({
     int page = 1,
     int pageSize = 20,
-  }) async {
+  }) async
+  {
     try {
       isLoading.value = true;
       errorMessage.value = '';
