@@ -185,8 +185,8 @@ class DashboardController extends GetxController {
     final DateTime? picked = await showDatePicker(
       context: Get.context!,
       initialDate: fromDate.value,
-      firstDate: DateTime(2020),
-      lastDate: toDate.value,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2035),
     );
 
     if (picked == null) return;
@@ -201,7 +201,7 @@ class DashboardController extends GetxController {
     final DateTime? picked = await showDatePicker(
       context: Get.context!,
       initialDate: toDate.value,
-      firstDate: fromDate.value,
+      firstDate: DateTime(2000),
       lastDate: DateTime(2035),
     );
 

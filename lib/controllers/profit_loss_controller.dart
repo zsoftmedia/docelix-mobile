@@ -106,6 +106,9 @@ class ProfitLossController extends GetxController {
         break;
 
       case 'custom':
+        toDate.value = now;
+        fromDate.value = DateTime(now.year - 1, now.month, now.day);
+        fetchReport();
         break;
 
       default:
@@ -123,8 +126,8 @@ class ProfitLossController extends GetxController {
     final picked = await showDatePicker(
       context: context,
       initialDate: fromDate.value,
-      firstDate: DateTime(2020),
-      lastDate: toDate.value,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2035),
     );
     if (picked != null) {
       selectedPeriod.value = 'custom';
@@ -137,7 +140,7 @@ class ProfitLossController extends GetxController {
     final picked = await showDatePicker(
       context: context,
       initialDate: toDate.value,
-      firstDate: fromDate.value,
+      firstDate: DateTime(2000),
       lastDate: DateTime(2035),
     );
     if (picked != null) {

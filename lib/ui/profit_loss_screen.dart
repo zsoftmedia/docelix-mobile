@@ -189,8 +189,6 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
   // ================================================================
 
   Widget _buildFilterControlCard(BuildContext context) {
-    final rs = context.rs;
-
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -207,13 +205,15 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
       ),
       child: Column(
         children: [
-          Row(
-            children: [
-              // PERIOD DROPDOWN
-              Expanded(
-                flex: 4,
-                child: Container(
+          // PERIOD DROPDOWN
+          Obx(() {
+            final isCustom = controller.selectedPeriod.value == 'custom';
+
+            return Column(
+              children: [
+                Container(
                   height: 40,
+                  width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
@@ -221,104 +221,102 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: DropdownButtonHideUnderline(
-                    child: Obx(
-                      () => DropdownButton<String>(
-                        value: controller.selectedPeriod.value,
-                        isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
-                        items: ProfitLossController.periodOptions.map((opt) {
-                          return DropdownMenuItem<String>(
-                            value: opt.key,
-                            child: Row(
-                              children: [
-                                const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF475569)),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    opt.value,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 12, color: Color(0xFF0A2342)),
-                                  ),
+                    child: DropdownButton<String>(
+                      value: controller.selectedPeriod.value,
+                      isExpanded: true,
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                      items: ProfitLossController.periodOptions.map((opt) {
+                        return DropdownMenuItem<String>(
+                          value: opt.key,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF475569)),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  opt.value,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12, color: Color(0xFF0A2342)),
                                 ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) controller.selectPeriod(val);
+                      },
+                    ),
+                  ),
+                ),
+
+                // SHOW FROM & TO DATES ONLY WHEN CUSTOM IS SELECTED
+                if (isCustom) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      // FROM DATE
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => controller.selectFromDate(context),
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            height: 40,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "From: ${controller.fromDateText}",
+                                  style: const TextStyle(fontSize: 11, color: Color(0xFF0A2342)),
+                                ),
+                                const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF94A3B8)),
                               ],
                             ),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) controller.selectPeriod(val);
-                        },
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-              ),
 
-              const SizedBox(width: 8),
+                      const SizedBox(width: 8),
 
-              // FROM DATE
-              Expanded(
-                flex: 3,
-                child: InkWell(
-                  onTap: () => controller.selectFromDate(context),
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    height: 40,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Obx(
-                          () => Text(
-                            controller.fromDateText,
-                            style: const TextStyle(fontSize: 11, color: Color(0xFF0A2342)),
+                      // TO DATE
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => controller.selectToDate(context),
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            height: 40,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "To: ${controller.toDateText}",
+                                  style: const TextStyle(fontSize: 11, color: Color(0xFF0A2342)),
+                                ),
+                                const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF94A3B8)),
+                              ],
+                            ),
                           ),
                         ),
-                        const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF94A3B8)),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-
-              const SizedBox(width: 8),
-
-              // TO DATE
-              Expanded(
-                flex: 3,
-                child: InkWell(
-                  onTap: () => controller.selectToDate(context),
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    height: 40,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Obx(
-                          () => Text(
-                            controller.toDateText,
-                            style: const TextStyle(fontSize: 11, color: Color(0xFF0A2342)),
-                          ),
-                        ),
-                        const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF94A3B8)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+                ],
+              ],
+            );
+          }),
 
           const SizedBox(height: 10),
 
@@ -328,7 +326,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
               Obx(
                 () => Switch.adaptive(
                   value: controller.compareLastYear.value,
-                  activeColor: const Color(0xFF063C70),
+                  activeThumbColor: const Color(0xFF063C70),
                   onChanged: controller.toggleCompareLastYear,
                 ),
               ),

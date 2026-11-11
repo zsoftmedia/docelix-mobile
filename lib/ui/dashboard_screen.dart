@@ -636,7 +636,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildTabs({
     required double width,
     required double height,
-  }) {
+  })
+  {
     return Container(
       height: width * 0.11,
       padding: EdgeInsets.all(width * 0.010),
@@ -784,6 +785,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.credit_card_outlined,
                 iconColor: const Color(0xFFDC2626),
                 iconBgColor: const Color(0xFFFEE2E2),
+                onTap: () {
+                  Get.to(() => const ProfitLossScreen());
+                },
               ),
               _financialCard(
                 width: width,
@@ -806,6 +810,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.receipt_long_outlined,
                 iconColor: const Color(0xFF2563EB),
                 iconBgColor: const Color(0xFFEFF6FF),
+                onTap: () {
+                  Get.to(() => const ProfitLossScreen());
+                },
               ),
             ];
 
