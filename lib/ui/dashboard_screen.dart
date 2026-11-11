@@ -4,6 +4,7 @@ import 'package:docelix_mobileapp/controllers/dashboard_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
+import 'package:docelix_mobileapp/ui/profit_loss_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -543,79 +544,87 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildNetProfitMainCard({
     required double width,
     required double height,
-  })
-  {
+  }) {
     final netProfit =
         dashboardController.dashboardData.value?.kpis?.netResult?.value ?? 0;
     final profitPercent =
         dashboardController.dashboardData.value?.kpis?.netResult?.changePercent ?? 0;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
-      decoration: BoxDecoration(
-        color: colorsList.financialCardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colorsList.dashboardBorderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Financial Overview",
-            style: TextStyle(
-              fontSize: width.fontSizeW(0.028),
-              color: const Color(0xFF64748B),
-              fontWeight: FontWeight.normal,
+    return InkWell(
+      onTap: () {
+        AppSnackbar.info(
+          title: 'Coming Soon',
+          message: 'Financial Overview feature is coming soon.',
+        );
+      },
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(width * 0.045),
+        decoration: BoxDecoration(
+          color: colorsList.financialCardBg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: colorsList.dashboardBorderColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Financial Overview",
+              style: TextStyle(
+                fontSize: width.fontSizeW(0.028),
+                color: const Color(0xFF64748B),
+                fontWeight: FontWeight.normal,
+              ),
             ),
-          ),
-          SizedBox(height: height * 0.006),
-          Text(
-            "Net Profit",
-            style: TextStyle(
-              fontSize: width.fontSizeW(0.036),
-              fontWeight: FontWeight.normal,
-              color: colorsList.primaryText,
+            SizedBox(height: height * 0.006),
+            Text(
+              "Net Profit",
+              style: TextStyle(
+                fontSize: width.fontSizeW(0.036),
+                fontWeight: FontWeight.normal,
+                color: colorsList.primaryText,
+              ),
             ),
-          ),
-          SizedBox(height: height * 0.008),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Text(
-                  _formatCurrency(netProfit),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: width.fontSizeW(0.06),
-                    fontWeight: FontWeight.normal,
-                    color: colorsList.primaryText,
+            SizedBox(height: height * 0.008),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    _formatCurrency(netProfit),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: width.fontSizeW(0.06),
+                      fontWeight: FontWeight.normal,
+                      color: colorsList.primaryText,
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: width * 0.028,
-                  vertical: height * 0.006,
-                ),
-                decoration: BoxDecoration(
-                  color: colorsList.lightGreenPillBg,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  "$profitPercent% of profit margin",
-                  style: TextStyle(
-                    fontSize: width.fontSizeW(0.026),
-                    fontWeight: FontWeight.normal,
-                    color: colorsList.lightGreenPillText,
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: width * 0.028,
+                    vertical: height * 0.006,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorsList.lightGreenPillBg,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    "$profitPercent% of profit margin",
+                    style: TextStyle(
+                      fontSize: width.fontSizeW(0.026),
+                      fontWeight: FontWeight.normal,
+                      color: colorsList.lightGreenPillText,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -761,6 +770,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.trending_up_rounded,
                 iconColor: const Color(0xFF16A34A),
                 iconBgColor: const Color(0xFFDCFCE7),
+                onTap: () {
+                  Get.to(() => const ProfitLossScreen());
+                },
               ),
               _financialCard(
                 width: width,
@@ -787,7 +799,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _financialCard(
                 width: width,
                 height: height,
-                title: "Outstanding",
+                title: "Net Profit",
                 value: _formatCurrency(netProfit),
                 percentage: "$netProfitPercent%",
                 subtitle: "vs last month",
@@ -844,25 +856,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required IconData icon,
     required Color iconColor,
     required Color iconBgColor,
-  })
-  {
+    VoidCallback? onTap,
+  }) {
     final bool isNegative = percentage.startsWith("-");
 
-    return Container(
-      padding: EdgeInsets.all(width * 0.038),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorsList.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
+    return InkWell(
+      onTap: onTap ??
+          () {
+            AppSnackbar.info(
+              title: 'Coming Soon',
+              message: '$title feature is coming soon.',
+            );
+          },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: EdgeInsets.all(width * 0.038),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colorsList.borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -933,6 +954,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 

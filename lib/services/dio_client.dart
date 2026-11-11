@@ -2304,4 +2304,31 @@ class DioClient {
     );
   }
 
+  // ==============================
+  // PROFIT & LOSS REPORT
+  // ==============================
+
+  Future<Response> getProfitLossReport({
+    required int companyId,
+    required String fromDate,
+    required String toDate,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/accounting/reports/profit-loss',
+      queryParameters: {
+        'companyId': companyId,
+        'fromDate': fromDate,
+        'toDate': toDate,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
 }
