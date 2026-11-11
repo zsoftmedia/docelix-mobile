@@ -668,11 +668,19 @@ class _LedgerScreenState extends State<LedgerScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.power_settings_new_rounded, color: Color(0xFF0A2342)),
-                  title: const Text('Deactivate', style: TextStyle(fontSize: 14)),
-                  subtitle: const Text('Hide from account pickers; history stays.', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                  title: Text(
+                    account.isActive ? 'Deactivate' : 'Activate',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    account.isActive
+                        ? 'Hide from account pickers; history stays.'
+                        : 'Show in account pickers.',
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
-                    AppSnackbar.info(title: 'Coming Soon', message: 'Deactivate feature coming soon.');
+                    controller.toggleAccountActive(account);
                   },
                 ),
                 ListTile(

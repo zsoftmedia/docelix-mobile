@@ -146,4 +146,56 @@ class LedgerController extends GetxController {
   Future<void> refreshAccounts() async {
     await fetchAccounts();
   }
+
+  Future<bool> toggleAccountActive(LedgerAccountModel targetAccount) async {
+    final token = SessionManager.accessToken;
+    final companyId = SessionManager.accessCompanyid;
+
+    if (token == null || token.isEmpty || companyId == null || companyId == 0) {
+      AppSnackbar.error(title: 'Session Error', message: 'Missing session or company ID.');
+      return false;
+    }
+
+    final bool newActiveState = !targetAccount.isActive;
+
+    try {
+      final response = await _dioClient.updateLedgerAccount(
+        accountId: targetAccount.id,
+        body: {
+          'is_active': newActiveState,
+        },
+        companyId: companyId,
+        accessToken: token,
+      );
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          (response.data is Map && response.data['ok'] == true)) {
+        AppSnackbar.success(
+          title: 'Success',
+          message: newActiveState
+              ? 'Account activated successfully.'
+              : 'Account deactivated successfully.',
+        );
+
+        await refreshAccounts();
+        return true;
+      }
+
+      AppSnackbar.error(
+        title: 'Error',
+        message: response.data?['message']?.toString() ?? 'Unable to update account status.',
+      );
+      return false;
+    } on DioException catch (e) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: e.response?.data?['message']?.toString() ?? e.message ?? 'Unable to update account status.',
+      );
+      return false;
+    } catch (e) {
+      AppSnackbar.error(title: 'Error', message: e.toString());
+      return false;
+    }
+  }
 }
