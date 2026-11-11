@@ -6,11 +6,13 @@ import 'package:docelix_mobileapp/controllers/invoices_controller.dart';
 import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/models/clients_screen_model.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
+import 'package:docelix_mobileapp/models/exchange_rate_model.dart';
 import 'package:docelix_mobileapp/models/unit_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class CreateInvoiceController extends GetxController {
 
@@ -167,6 +169,107 @@ class CreateInvoiceController extends GetxController {
   final enableVat = false.obs;
 
   final recurringInvoice = false.obs;
+
+  // ============================================================
+  // SERVICE STEP & CURRENCY & EXCHANGE RATE
+  // ============================================================
+
+  final serviceDateController = TextEditingController(
+    text: DateFormat('dd.MM.yyyy').format(DateTime.now()),
+  );
+
+  final RxString selectedCurrency = 'EUR'.obs;
+  final RxString currencySearchQuery = ''.obs;
+
+  final RxList<String> availableCurrencies = <String>[
+    'EUR',
+    'GBP',
+    'INR',
+    'PKR',
+    'AED',
+    'USD',
+    'CHF',
+  ].obs;
+
+  List<String> get filteredCurrencies {
+    final query = currencySearchQuery.value.trim().toUpperCase();
+    if (query.isEmpty) return availableCurrencies;
+    return availableCurrencies.where((c) => c.contains(query)).toList();
+  }
+
+  final Rxn<ExchangeRateModel> exchangeRateData = Rxn<ExchangeRateModel>();
+  final RxBool isLoadingExchangeRate = false.obs;
+  final exchangeRateController = TextEditingController();
+
+  Future<void> selectCurrency(String currency) async {
+    selectedCurrency.value = currency;
+    currencySearchQuery.value = '';
+
+    final companyCurrency = SessionManager.accessCorrencycode ?? 'EUR';
+
+    if (currency.toUpperCase() != companyCurrency.toUpperCase()) {
+      await fetchExchangeRate(from: currency, to: companyCurrency);
+    } else {
+      exchangeRateData.value = null;
+      exchangeRateController.clear();
+    }
+  }
+
+  Future<void> fetchExchangeRate({
+    required String from,
+    required String to,
+  }) async {
+    final token = SessionManager.accessToken;
+    if (token == null || token.isEmpty) return;
+
+    try {
+      isLoadingExchangeRate.value = true;
+      final formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      final response = await dioClient.getExchangeRate(
+        from: from,
+        to: to,
+        date: formattedDate,
+        accessToken: token,
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final rateModel = ExchangeRateModel.fromJson(
+          Map<String, dynamic>.from(response.data as Map),
+        );
+        exchangeRateData.value = rateModel;
+        exchangeRateController.text = rateModel.rate.toStringAsFixed(6);
+      }
+    } catch (e) {
+      debugPrint('[CreateInvoiceController] fetchExchangeRate Error: $e');
+    } finally {
+      isLoadingExchangeRate.value = false;
+    }
+  }
+
+  // ============================================================
+  // VAT TREATMENT & EXEMPTIONS
+  // ============================================================
+
+  final RxString selectedVatTreatment = 'Standard / domestic'.obs;
+
+  static const vatTreatmentOptions = <String>[
+    'Standard / domestic',
+    'Exempt / zero-rated (reason required)',
+    'Kleinunternehmer exemption',
+    'Reverse charge',
+    'Intra-EU supply of goods',
+    'Export outside the EU',
+  ];
+
+  final exemptionReasonController = TextEditingController();
+  final RxBool isSmallBusinessConfirmed = false.obs;
+  final RxBool isViesChecked = false.obs;
+  final RxBool isExportEvidenceChecked = false.obs;
+
+  void selectVatTreatment(String treatment) {
+    selectedVatTreatment.value = treatment;
+  }
 
   /*void toggleAutoGenerate(bool value) {
     autoGenerate.value = value;

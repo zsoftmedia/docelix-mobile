@@ -2331,4 +2331,30 @@ class DioClient {
     );
   }
 
+  // ==============================
+  // EXCHANGE RATE API
+  // ==============================
+
+  Future<Response> getExchangeRate({
+    required String from,
+    required String to,
+    required String date,
+    required String accessToken,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/exchange-rates',
+      queryParameters: {
+        'from': from,
+        'to': to,
+        'date': date,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+  }
+
 }
