@@ -4,6 +4,7 @@ import 'package:docelix_mobileapp/controllers/dashboard_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/company_model.dart';
 import 'package:docelix_mobileapp/models/dashboard_model.dart';
+import 'package:docelix_mobileapp/ui/ledger_screen.dart';
 import 'package:docelix_mobileapp/ui/profit_loss_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -772,7 +773,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 iconColor: const Color(0xFF16A34A),
                 iconBgColor: const Color(0xFFDCFCE7),
                 onTap: () {
-                  Get.to(() => const ProfitLossScreen());
+
+                  Get.toNamed(
+                    '/ProfitLossScreen',
+                    arguments: 'Profit Loss Screen',
+                  );
+
                 },
               ),
               _financialCard(
@@ -786,7 +792,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 iconColor: const Color(0xFFDC2626),
                 iconBgColor: const Color(0xFFFEE2E2),
                 onTap: () {
-                  Get.to(() => const ProfitLossScreen());
+
+                  Get.toNamed(
+                    '/ProfitLossScreen',
+                    arguments: 'Profit Loss Screen',
+                  );
+
                 },
               ),
               _financialCard(
@@ -799,6 +810,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.account_balance_wallet_outlined,
                 iconColor: const Color(0xFFD97706),
                 iconBgColor: const Color(0xFFFEF3C7),
+                onTap: () {
+
+                  Get.toNamed(
+                    '/LedgerScreen',
+                    arguments: 'Ledger Screen',
+                  );
+                  
+                },
               ),
               _financialCard(
                 width: width,
@@ -811,7 +830,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 iconColor: const Color(0xFF2563EB),
                 iconBgColor: const Color(0xFFEFF6FF),
                 onTap: () {
-                  Get.to(() => const ProfitLossScreen());
+
+                  Get.toNamed(
+                    '/ProfitLossScreen',
+                    arguments: 'Profit Loss Screen',
+                  );
+
                 },
               ),
             ];
