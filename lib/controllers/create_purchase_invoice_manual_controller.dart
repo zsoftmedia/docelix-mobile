@@ -88,6 +88,80 @@ class CreatePurchaseInvoiceManualController extends GetxController {
   }
 
   // ============================================================
+  // RECEIPT TAB STEPPER
+  // ============================================================
+
+  final RxInt currentReceiptStep = 0.obs;
+  final int totalReceiptSteps = 4;
+
+  static const receiptSteps = <String>[
+    'Supplier details',
+    'Purchased items / services',
+    'Payment details',
+    'Internal notes',
+  ];
+
+  void goToReceiptStep(int step) {
+    if (step <= currentReceiptStep.value) {
+      currentReceiptStep.value = step;
+    }
+  }
+
+  void nextReceiptStep() {
+    if (currentReceiptStep.value < totalReceiptSteps - 1) {
+      currentReceiptStep.value++;
+    } else {
+      submitPurchaseInvoice();
+    }
+  }
+
+  void previousReceiptStep() {
+    if (currentReceiptStep.value > 0) {
+      currentReceiptStep.value--;
+    }
+  }
+
+  void nextStep() {
+    if (selectedTabIndex.value == 0) {
+      if (currentInvoiceStep.value < totalInvoiceSteps - 1) {
+        currentInvoiceStep.value++;
+      } else {
+        submitPurchaseInvoice();
+      }
+    } else if (selectedTabIndex.value == 1) {
+      if (currentReceiptStep.value < totalReceiptSteps - 1) {
+        currentReceiptStep.value++;
+      } else {
+        submitPurchaseInvoice();
+      }
+    }
+  }
+
+  void previousStep() {
+    if (selectedTabIndex.value == 0) {
+      if (currentInvoiceStep.value > 0) {
+        currentInvoiceStep.value--;
+      }
+    } else if (selectedTabIndex.value == 1) {
+      if (currentReceiptStep.value > 0) {
+        currentReceiptStep.value--;
+      }
+    }
+  }
+
+  void goToStep(int step) {
+    if (selectedTabIndex.value == 0) {
+      if (step <= currentInvoiceStep.value) {
+        currentInvoiceStep.value = step;
+      }
+    } else if (selectedTabIndex.value == 1) {
+      if (step <= currentReceiptStep.value) {
+        currentReceiptStep.value = step;
+      }
+    }
+  }
+
+  // ============================================================
   // STEP 1: SUPPLIER DETAILS FIELDS & CONTROLLERS
   // ============================================================
 
@@ -443,6 +517,13 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     attachedDocumentName.value = null;
     attachedDocumentPath.value = null;
   }
+
+  // ============================================================
+  // STEP 4: INTERNAL NOTES
+  // ============================================================
+
+  final internalNotesController = TextEditingController();
+  final RxBool isSubmittingInvoice = false.obs;
 
   @override
   void onInit() {

@@ -1226,7 +1226,7 @@ class _CreatePurchaseInvoiceManualScreenState
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ElevatedButton(
-                onPressed: controller.nextInvoiceStep,
+                onPressed: controller.nextStep,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF063C70),
                   foregroundColor: Colors.white,
@@ -1841,7 +1841,7 @@ class _CreatePurchaseInvoiceManualScreenState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             OutlinedButton(
-              onPressed: controller.previousInvoiceStep,
+              onPressed: controller.previousStep,
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF334155),
                 side: const BorderSide(color: Color(0xFFCBD5E1)),
@@ -1851,7 +1851,7 @@ class _CreatePurchaseInvoiceManualScreenState
               child: const Text('Back'),
             ),
             ElevatedButton(
-              onPressed: controller.nextInvoiceStep,
+              onPressed: controller.nextStep,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF063C70),
                 foregroundColor: Colors.white,
@@ -2286,7 +2286,7 @@ class _CreatePurchaseInvoiceManualScreenState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             OutlinedButton(
-              onPressed: controller.previousInvoiceStep,
+              onPressed: controller.previousStep,
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF334155),
                 side: const BorderSide(color: Color(0xFFCBD5E1)),
@@ -2296,7 +2296,7 @@ class _CreatePurchaseInvoiceManualScreenState
               child: const Text('Back'),
             ),
             ElevatedButton(
-              onPressed: controller.nextInvoiceStep,
+              onPressed: controller.nextStep,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF063C70),
                 foregroundColor: Colors.white,
@@ -2313,35 +2313,118 @@ class _CreatePurchaseInvoiceManualScreenState
   }
 
   // ================================================================
-  // STEP 4: INTERNAL NOTES (PLACEHOLDER FOR NEXT STEP)
+  // STEP 4: INTERNAL NOTES (MATCHING SCREENSHOT 100%)
   // ================================================================
 
   Widget _buildInternalNotesStep(BuildContext context) {
+    final rs = context.rs;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Internal Notes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342))),
+          Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF063C70),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  '5',
+                  style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Internal notes',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+              ),
+            ],
+          ),
+
           const SizedBox(height: 16),
+
+          TextFormField(
+            controller: controller.internalNotesController,
+            minLines: 4,
+            maxLines: 8,
+            keyboardType: TextInputType.multiline,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF0A2342)),
+            decoration: InputDecoration(
+              hintText: 'Internal notes (not shown to the supplier)',
+              hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+              isDense: true,
+              contentPadding: const EdgeInsets.all(16),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: colorsList.borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: colorsList.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.2),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // STEPPER CONTROLS (BACK & SAVE PURCHASE INVOICE)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               OutlinedButton(
-                onPressed: controller.previousInvoiceStep,
+                onPressed: controller.previousStep,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF334155),
+                  side: const BorderSide(color: Color(0xFFCBD5E1)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
                 child: const Text('Back'),
               ),
-              ElevatedButton(
-                onPressed: controller.submitPurchaseInvoice,
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF063C70), foregroundColor: Colors.white),
-                child: const Text('Save Purchase Invoice'),
-              ),
+              Obx(() {
+                final isSubmitting = controller.isSubmittingInvoice.value;
+
+                return ElevatedButton(
+                  onPressed: isSubmitting ? null : controller.submitPurchaseInvoice,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF063C70),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Save Purchase Invoice', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                );
+              }),
             ],
           ),
         ],
@@ -2350,44 +2433,103 @@ class _CreatePurchaseInvoiceManualScreenState
   }
 
   // ================================================================
-  // TAB 2: RECEIPT
+  // TAB 2: RECEIPT WITH STEPPER (SAME AS INVOICE TAB)
   // ================================================================
 
   Widget _buildReceiptTab(BuildContext context) {
     final rs = context.rs;
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH, vertical: 8),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(rs.s(16)),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Receipt Details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0A2342),
+    return Column(
+      children: [
+        // STEPPER HEADER FOR RECEIPT TAB
+        Obx(() {
+          final currentStep = controller.currentReceiptStep.value;
+
+          return Container(
+            color: Colors.white,
+            padding: EdgeInsets.symmetric(vertical: rs.s(10), horizontal: rs.s(12)),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: List.generate(CreatePurchaseInvoiceManualController.receiptSteps.length, (index) {
+                  final isCurrent = currentStep == index;
+                  final isCompleted = currentStep > index;
+                  final label = CreatePurchaseInvoiceManualController.receiptSteps[index];
+
+                  return GestureDetector(
+                    onTap: () => controller.goToReceiptStep(index),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: rs.s(24),
+                          height: rs.s(24),
+                          decoration: BoxDecoration(
+                            color: isCompleted
+                                ? colorsList.colorButton
+                                : (isCurrent ? colorsList.colorButton : const Color(0xFFF1F5F9)),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: isCompleted
+                              ? Icon(Icons.check_rounded, color: Colors.white, size: rs.s(14))
+                              : Text(
+                                  '${index + 1}',
+                                  style: TextStyle(
+                                    color: isCurrent ? Colors.white : const Color(0xFF64748B),
+                                    fontSize: rs.sp(11),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                        SizedBox(width: rs.s(6)),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: isCurrent ? const Color(0xFF0A2342) : const Color(0xFF64748B),
+                            fontSize: rs.sp(12),
+                            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        if (index < CreatePurchaseInvoiceManualController.receiptSteps.length - 1)
+                          Container(
+                            width: rs.s(20),
+                            height: 1,
+                            margin: EdgeInsets.symmetric(horizontal: rs.s(8)),
+                            color: isCompleted ? colorsList.colorButton : const Color(0xFFE2E8F0),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ),
-            SizedBox(height: 4),
-            Text(
-              'Enter receipt details manually.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF64748B),
-              ),
-            ),
-          ],
+          );
+        }),
+
+        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+
+        // STEP CONTENT FOR RECEIPT
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(rs.pagePaddingH, rs.s(14), rs.pagePaddingH, rs.s(40)),
+            child: Obx(() {
+              switch (controller.currentReceiptStep.value) {
+                case 0:
+                  return _buildSupplierDetailsStep(context);
+                case 1:
+                  return _buildPurchasedItemsStep(context);
+                case 2:
+                  return _buildPaymentDetailsStep(context);
+                case 3:
+                  return _buildInternalNotesStep(context);
+                default:
+                  return _buildSupplierDetailsStep(context);
+              }
+            }),
+          ),
         ),
-      ),
+      ],
     );
   }
 
