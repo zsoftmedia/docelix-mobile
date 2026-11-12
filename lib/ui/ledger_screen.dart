@@ -2,6 +2,7 @@ import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/ledger_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/ledger_account_model.dart';
+import 'package:docelix_mobileapp/ui/add_ledger_account_screen.dart';
 import 'package:docelix_mobileapp/ui/bank_transactions_screen.dart';
 import 'package:docelix_mobileapp/ui/edit_ledger_account_screen.dart';
 import 'package:docelix_mobileapp/ui/general_ledger_screen.dart';
@@ -410,7 +411,13 @@ class _LedgerScreenState extends State<LedgerScreen> {
                     // ADD ACCOUNT BUTTON
                     ElevatedButton(
                       onPressed: () {
-                        AppSnackbar.info(title: 'Coming Soon', message: 'Add account feature coming soon.');
+                       // Get.to(() => const AddLedgerAccountScreen());
+
+                        Get.toNamed(
+                          '/AddLedgerAccountScreen',
+                          arguments: 'Add Ledger Account Screen',
+                        );
+
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF063C70),

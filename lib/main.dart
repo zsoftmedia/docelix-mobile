@@ -8,6 +8,7 @@ import 'package:docelix_mobileapp/ui/add_customer_screen.dart';
 import 'package:docelix_mobileapp/ui/add_item_screen.dart';
 import 'package:docelix_mobileapp/ui/accounting/general_ledger_screen.dart';
 import 'package:docelix_mobileapp/ui/accounting/journal_entry_details_screen.dart';
+import 'package:docelix_mobileapp/ui/add_ledger_account_screen.dart';
 import 'package:docelix_mobileapp/ui/assets/asset_details_screen.dart';
 import 'package:docelix_mobileapp/ui/assets/create_asset_screen.dart';
 import 'package:docelix_mobileapp/ui/assets/fixed_assets_screen.dart';
@@ -151,6 +152,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/SearchScreen', page: () => const SearchScreen(),),
         GetPage(name: '/ProfitLossScreen', page: () => const ProfitLossScreen(),),
         GetPage(name: '/LedgerScreen', page: () => const LedgerScreen(),),
+        GetPage(name: '/AddLedgerAccountScreen', page: () => const AddLedgerAccountScreen(),),
       ],
     );
   }

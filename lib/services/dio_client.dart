@@ -1313,6 +1313,28 @@ class DioClient {
     );
   }
 
+  Future<Response> createLedgerAccount({
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/ledger/accounts',
+      data: {
+        'company_id': companyId,
+        ...body,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
   Future<Response> updateLedgerAccount({
     required int accountId,
     required Map<String, dynamic> body,
