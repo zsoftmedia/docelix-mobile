@@ -275,6 +275,141 @@ class _CreatePurchaseInvoiceManualScreenState
     );
   }
 
+  void _showCorrectsInvoiceSearchSheet(BuildContext context) {
+    controller.correctsInvoiceSearchQuery.value = '';
+    final searchInputController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final height = MediaQuery.of(ctx).size.height;
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: height * 0.70,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Corrects invoice',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A2342),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: searchInputController,
+                    autofocus: true,
+                    onChanged: (val) => controller.correctsInvoiceSearchQuery.value = val,
+                    decoration: InputDecoration(
+                      hintText: 'Search purchase or invoice number...',
+                      hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: searchInputController,
+                        builder: (context, value, _) {
+                          if (value.text.isEmpty) return const SizedBox.shrink();
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () {
+                              searchInputController.clear();
+                              controller.correctsInvoiceSearchQuery.value = '';
+                            },
+                          );
+                        },
+                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoadingSupplierInvoices.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final list = controller.filteredSupplierInvoices;
+
+                    if (list.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No invoices found for this supplier.',
+                          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      itemBuilder: (context, index) {
+                        final invoiceItem = list[index];
+                        final isSelected = controller.selectedCorrectsInvoice.value?.id == invoiceItem.id;
+
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          title: Text(
+                            invoiceItem.displayText,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0A2342),
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Date: ${invoiceItem.purchaseDate} · Status: ${invoiceItem.status}',
+                            style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                          ),
+                          trailing: isSelected
+                              ? const Icon(Icons.check_rounded, color: Color(0xFF2563EB), size: 20)
+                              : null,
+                          onTap: () {
+                            controller.selectCorrectsInvoice(invoiceItem);
+                            Navigator.of(ctx).pop();
+                          },
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showCatalogItemSearchSheet(BuildContext context, int lineIndex) {
     controller.catalogSearchQuery.value = '';
     final searchInputController = TextEditingController();
@@ -846,21 +981,30 @@ class _CreatePurchaseInvoiceManualScreenState
 
           const SizedBox(height: 14),
 
-          // SUPPLIER INVOICE NUMBER & REFERENCE
+          // SUPPLIER INVOICE / CREDIT NOTE NUMBER & REFERENCE
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _FieldLabel(text: 'Supplier invoice number'),
+              Obx(
+                () => _FieldLabel(
+                  text: controller.selectedTabIndex.value == 2 ? 'Credit note number' : 'Supplier invoice number',
+                ),
+              ),
               const SizedBox(height: 6),
               TextFormField(
-                controller: controller.supplierInvoiceNumberController,
+                controller: controller.selectedTabIndex.value == 2
+                    ? controller.creditNoteNumberController
+                    : controller.supplierInvoiceNumberController,
                 decoration: _inputDecoration(''),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 4),
               Obx(() {
                 final noNum = controller.hasNoDocumentNumber.value;
-                final hasNum = controller.supplierInvoiceNumberController.text.trim().isNotEmpty;
+                final currentCtrl = controller.selectedTabIndex.value == 2
+                    ? controller.creditNoteNumberController
+                    : controller.supplierInvoiceNumberController;
+                final hasNum = currentCtrl.text.trim().isNotEmpty;
 
                 if (!hasNum && !noNum) {
                   return const Text(
@@ -1060,6 +1204,71 @@ class _CreatePurchaseInvoiceManualScreenState
               );
             },
           ),
+
+          // CORRECTS INVOICE (ONLY FOR CREDIT NOTE TAB - SCREENSHOT)
+          Obx(() {
+            if (controller.selectedTabIndex.value != 2) return const SizedBox.shrink();
+
+            final selectedSupplier = controller.selectedSupplier.value;
+            final selectedInv = controller.selectedCorrectsInvoice.value;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 14),
+                const _FieldLabel(text: 'Corrects invoice'),
+                const SizedBox(height: 6),
+                InkWell(
+                  onTap: selectedSupplier != null
+                      ? () {
+                          controller.fetchSupplierInvoices(selectedSupplier.id);
+                          _showCorrectsInvoiceSearchSheet(context);
+                        }
+                      : () {
+                          AppSnackbar.info(
+                            title: 'Select Supplier',
+                            message: 'Please select a supplier first to view invoices.',
+                          );
+                        },
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                    decoration: BoxDecoration(
+                      color: selectedSupplier != null ? Colors.white : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colorsList.borderColor),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            selectedInv != null
+                                ? selectedInv.displayText
+                                : (selectedSupplier != null ? 'Choose the invoice (optional)' : 'Select a supplier first'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: selectedInv != null
+                                  ? const Color(0xFF0A2342)
+                                  : const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'When posted, the credit is applied to this invoice.',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                ),
+              ],
+            );
+          }),
 
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
@@ -2534,44 +2743,103 @@ class _CreatePurchaseInvoiceManualScreenState
   }
 
   // ================================================================
-  // TAB 3: CREDIT NOTE
+  // TAB 3: CREDIT NOTE WITH STEPPER (MATCHING SCREENSHOT 100%)
   // ================================================================
 
   Widget _buildCreditNoteTab(BuildContext context) {
     final rs = context.rs;
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH, vertical: 8),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(rs.s(16)),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Credit Note Details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0A2342),
+    return Column(
+      children: [
+        // STEPPER HEADER FOR CREDIT NOTE TAB
+        Obx(() {
+          final currentStep = controller.currentCreditNoteStep.value;
+
+          return Container(
+            color: Colors.white,
+            padding: EdgeInsets.symmetric(vertical: rs.s(10), horizontal: rs.s(12)),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: List.generate(CreatePurchaseInvoiceManualController.creditNoteSteps.length, (index) {
+                  final isCurrent = currentStep == index;
+                  final isCompleted = currentStep > index;
+                  final label = CreatePurchaseInvoiceManualController.creditNoteSteps[index];
+
+                  return GestureDetector(
+                    onTap: () => controller.goToCreditNoteStep(index),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: rs.s(24),
+                          height: rs.s(24),
+                          decoration: BoxDecoration(
+                            color: isCompleted
+                                ? colorsList.colorButton
+                                : (isCurrent ? colorsList.colorButton : const Color(0xFFF1F5F9)),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: isCompleted
+                              ? Icon(Icons.check_rounded, color: Colors.white, size: rs.s(14))
+                              : Text(
+                                  '${index + 1}',
+                                  style: TextStyle(
+                                    color: isCurrent ? Colors.white : const Color(0xFF64748B),
+                                    fontSize: rs.sp(11),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                        SizedBox(width: rs.s(6)),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: isCurrent ? const Color(0xFF0A2342) : const Color(0xFF64748B),
+                            fontSize: rs.sp(12),
+                            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        if (index < CreatePurchaseInvoiceManualController.creditNoteSteps.length - 1)
+                          Container(
+                            width: rs.s(20),
+                            height: 1,
+                            margin: EdgeInsets.symmetric(horizontal: rs.s(8)),
+                            color: isCompleted ? colorsList.colorButton : const Color(0xFFE2E8F0),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ),
-            SizedBox(height: 4),
-            Text(
-              'Enter credit note details manually.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF64748B),
-              ),
-            ),
-          ],
+          );
+        }),
+
+        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+
+        // STEP CONTENT FOR CREDIT NOTE
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(rs.pagePaddingH, rs.s(14), rs.pagePaddingH, rs.s(40)),
+            child: Obx(() {
+              switch (controller.currentCreditNoteStep.value) {
+                case 0:
+                  return _buildSupplierDetailsStep(context);
+                case 1:
+                  return _buildPurchasedItemsStep(context);
+                case 2:
+                  return _buildPaymentDetailsStep(context);
+                case 3:
+                  return _buildInternalNotesStep(context);
+                default:
+                  return _buildSupplierDetailsStep(context);
+              }
+            }),
+          ),
         ),
-      ),
+      ],
     );
   }
 

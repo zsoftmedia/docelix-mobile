@@ -192,6 +192,31 @@ class DioClient {
   }
 
   // ==============================
+  // GET SUPPLIER INVOICES
+  // ==============================
+
+  Future<Response> getSupplierInvoices({
+    required int supplierId,
+    required String accessToken,
+    int? companyId,
+  }) async {
+    final compId = companyId ?? SessionManager.accessCompanyid ?? 0;
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/purchases/suppliers/$supplierId/invoices',
+      queryParameters: {
+        if (compId > 0) 'company_id': compId,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          if (compId > 0) 'x-company-id': compId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // GET SUPPLIER LEDGER
   // ==============================
 

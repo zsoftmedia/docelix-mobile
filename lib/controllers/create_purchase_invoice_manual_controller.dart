@@ -37,6 +37,58 @@ class PurchaseLineItem {
         category = categoryName.obs;
 }
 
+class SupplierInvoiceModel {
+  final int id;
+  final String purchaseNumber;
+  final String supplierInvoiceNumber;
+  final String purchaseDate;
+  final double total;
+  final String currency;
+  final String status;
+
+  SupplierInvoiceModel({
+    required this.id,
+    required this.purchaseNumber,
+    required this.supplierInvoiceNumber,
+    required this.purchaseDate,
+    required this.total,
+    required this.currency,
+    required this.status,
+  });
+
+  factory SupplierInvoiceModel.fromJson(Map<String, dynamic> json) {
+    return SupplierInvoiceModel(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      purchaseNumber: json['purchase_number']?.toString() ?? json['purchase_no']?.toString() ?? '',
+      supplierInvoiceNumber: json['supplier_invoice_number']?.toString() ?? json['invoice_number']?.toString() ?? '',
+      purchaseDate: json['purchase_date']?.toString() ?? json['invoice_date']?.toString() ?? '',
+      total: (json['total'] as num?)?.toDouble() ?? (json['total_amount'] as num?)?.toDouble() ?? (json['gross_amount'] as num?)?.toDouble() ?? 0.0,
+      currency: json['currency']?.toString() ?? json['currency_code']?.toString() ?? 'EUR',
+      status: json['status']?.toString() ?? '',
+    );
+  }
+
+  String get displayText {
+    final formattedTotal = total.toStringAsFixed(2).replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+    final currSymbol = (currency == 'EUR' || currency.isEmpty) ? '€' : currency;
+
+    final String suppInv = supplierInvoiceNumber.trim();
+    final String purNo = purchaseNumber.trim();
+
+    if (suppInv.isNotEmpty && purNo.isNotEmpty) {
+      return '$suppInv - $purNo --- $currSymbol $formattedTotal';
+    } else if (suppInv.isNotEmpty) {
+      return '$suppInv --- $currSymbol $formattedTotal';
+    } else if (purNo.isNotEmpty) {
+      return '$purNo --- $currSymbol $formattedTotal';
+    }
+    return 'Invoice #$id --- $currSymbol $formattedTotal';
+  }
+}
+
 class CreatePurchaseInvoiceManualController extends GetxController {
   final DioClient _dioClient = DioClient();
 
@@ -118,6 +170,40 @@ class CreatePurchaseInvoiceManualController extends GetxController {
   void previousReceiptStep() {
     if (currentReceiptStep.value > 0) {
       currentReceiptStep.value--;
+    }
+  }
+
+  // ============================================================
+  // CREDIT NOTE TAB STEPPER
+  // ============================================================
+
+  final RxInt currentCreditNoteStep = 0.obs;
+  final int totalCreditNoteSteps = 4;
+
+  static const creditNoteSteps = <String>[
+    'Supplier details',
+    'Purchased items / services',
+    'Payment details',
+    'Internal notes',
+  ];
+
+  void goToCreditNoteStep(int step) {
+    if (step <= currentCreditNoteStep.value) {
+      currentCreditNoteStep.value = step;
+    }
+  }
+
+  void nextCreditNoteStep() {
+    if (currentCreditNoteStep.value < totalCreditNoteSteps - 1) {
+      currentCreditNoteStep.value++;
+    } else {
+      submitPurchaseInvoice();
+    }
+  }
+
+  void previousCreditNoteStep() {
+    if (currentCreditNoteStep.value > 0) {
+      currentCreditNoteStep.value--;
     }
   }
 
@@ -587,6 +673,73 @@ class CreatePurchaseInvoiceManualController extends GetxController {
         dueDateController.text = DateFormat('dd.MM.yyyy').format(calculatedDueDate);
       }
     } catch (_) {}
+
+    // 3. Fetch supplier invoices for Credit Note tab
+    fetchSupplierInvoices(supplier.id);
+  }
+
+  // ============================================================
+  // CREDIT NOTE: CORRECTS INVOICE DROPDOWN & API
+  // ============================================================
+
+  final creditNoteNumberController = TextEditingController();
+  final RxList<SupplierInvoiceModel> supplierInvoices = <SupplierInvoiceModel>[].obs;
+  final Rxn<SupplierInvoiceModel> selectedCorrectsInvoice = Rxn<SupplierInvoiceModel>();
+  final RxBool isLoadingSupplierInvoices = false.obs;
+  final RxString correctsInvoiceSearchQuery = ''.obs;
+
+  List<SupplierInvoiceModel> get filteredSupplierInvoices {
+    final query = correctsInvoiceSearchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return supplierInvoices;
+    return supplierInvoices.where((inv) {
+      final disp = inv.displayText.toLowerCase();
+      return disp.contains(query);
+    }).toList();
+  }
+
+  Future<void> fetchSupplierInvoices(int supplierId) async {
+    final token = SessionManager.accessToken;
+    final companyId = SessionManager.accessCompanyid;
+    if (token == null || token.isEmpty) return;
+
+    try {
+      isLoadingSupplierInvoices.value = true;
+
+      final response = await _dioClient.getSupplierInvoices(
+        supplierId: supplierId,
+        accessToken: token,
+        companyId: companyId,
+      );
+
+      debugPrint('[CreatePurchaseInvoiceManualController] fetchSupplierInvoices status: ${response.statusCode}');
+      debugPrint('[CreatePurchaseInvoiceManualController] fetchSupplierInvoices data: ${response.data}');
+
+      if (response.statusCode == 200 && response.data != null) {
+        List<dynamic> rawItems = [];
+
+        if (response.data is Map) {
+          final Map<String, dynamic> body = Map<String, dynamic>.from(response.data as Map);
+          rawItems = (body['items'] as List<dynamic>?) ?? (body['data'] as List<dynamic>?) ?? (body['invoices'] as List<dynamic>?) ?? [];
+        } else if (response.data is List) {
+          rawItems = response.data as List<dynamic>;
+        }
+
+        final parsed = rawItems
+            .whereType<Map>()
+            .map((json) => SupplierInvoiceModel.fromJson(Map<String, dynamic>.from(json)))
+            .toList();
+
+        supplierInvoices.assignAll(parsed);
+      }
+    } catch (e) {
+      debugPrint('[CreatePurchaseInvoiceManualController] fetchSupplierInvoices Error: $e');
+    } finally {
+      isLoadingSupplierInvoices.value = false;
+    }
+  }
+
+  void selectCorrectsInvoice(SupplierInvoiceModel invoice) {
+    selectedCorrectsInvoice.value = invoice;
   }
 
   void selectCurrency(String currency) {
