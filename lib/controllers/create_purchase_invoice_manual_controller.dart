@@ -220,6 +220,12 @@ class CreatePurchaseInvoiceManualController extends GetxController {
       } else {
         submitPurchaseInvoice();
       }
+    } else if (selectedTabIndex.value == 2) {
+      if (currentCreditNoteStep.value < totalCreditNoteSteps - 1) {
+        currentCreditNoteStep.value++;
+      } else {
+        submitPurchaseInvoice();
+      }
     }
   }
 
@@ -232,6 +238,10 @@ class CreatePurchaseInvoiceManualController extends GetxController {
       if (currentReceiptStep.value > 0) {
         currentReceiptStep.value--;
       }
+    } else if (selectedTabIndex.value == 2) {
+      if (currentCreditNoteStep.value > 0) {
+        currentCreditNoteStep.value--;
+      }
     }
   }
 
@@ -243,6 +253,10 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     } else if (selectedTabIndex.value == 1) {
       if (step <= currentReceiptStep.value) {
         currentReceiptStep.value = step;
+      }
+    } else if (selectedTabIndex.value == 2) {
+      if (step <= currentCreditNoteStep.value) {
+        currentCreditNoteStep.value = step;
       }
     }
   }

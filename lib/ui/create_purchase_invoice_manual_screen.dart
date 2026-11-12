@@ -2615,6 +2615,10 @@ class _CreatePurchaseInvoiceManualScreenState
               ),
               Obx(() {
                 final isSubmitting = controller.isSubmittingInvoice.value;
+                final tabIndex = controller.selectedTabIndex.value;
+                String btnText = 'Save Purchase Invoice';
+                if (tabIndex == 1) btnText = 'Save Receipt';
+                if (tabIndex == 2) btnText = 'Save Credit Note';
 
                 return ElevatedButton(
                   onPressed: isSubmitting ? null : controller.submitPurchaseInvoice,
@@ -2631,7 +2635,7 @@ class _CreatePurchaseInvoiceManualScreenState
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
-                      : const Text('Save Purchase Invoice', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      : Text(btnText, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 );
               }),
             ],
