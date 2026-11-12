@@ -21,6 +21,7 @@ import 'package:docelix_mobileapp/ui/create_adjust_stock_screen.dart';
 import 'package:docelix_mobileapp/ui/edit_catalogs_screen.dart';
 import 'package:docelix_mobileapp/ui/accounts_payable_details_screen.dart';
 import 'package:docelix_mobileapp/ui/catalogs_screen.dart';
+import 'package:docelix_mobileapp/ui/create_purchase_invoice_manual_screen.dart';
 import 'package:docelix_mobileapp/ui/ledger_screen.dart';
 import 'package:docelix_mobileapp/ui/profit_loss_screen.dart';
 import 'package:docelix_mobileapp/ui/stock_adjustment_screen.dart';
@@ -153,6 +154,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/ProfitLossScreen', page: () => const ProfitLossScreen(),),
         GetPage(name: '/LedgerScreen', page: () => const LedgerScreen(),),
         GetPage(name: '/AddLedgerAccountScreen', page: () => const AddLedgerAccountScreen(),),
+        GetPage(name: '/CreatePurchaseInvoiceManualScreen', page: () => const CreatePurchaseInvoiceManualScreen(),),
       ],
     );
   }
