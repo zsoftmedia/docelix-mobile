@@ -300,7 +300,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                         crossAxisCount: cols,
                         crossAxisSpacing: rs.s(12),
                         mainAxisSpacing: rs.s(12),
-                        childAspectRatio: rs.isLandscape ? 2.6 : 1.8,
+                        childAspectRatio: rs.isTablet
+                            ? (rs.isLandscape ? 1.6 : 1.25)
+                            : (rs.isLandscape ? 2.6 : 1.8),
                       ),
                       itemCount: invoices.length,
                       itemBuilder: (context, index) {
@@ -367,6 +369,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       child: _invoiceCard(
         context: context,
         invoice: invoice,
+        asGridTile: asGridTile,
       ),
     );
   }
@@ -405,8 +408,10 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   Widget _invoiceCard({
     required BuildContext context,
     required InvoicesModel invoice,
+    bool asGridTile = false,
   }) {
     final rs = context.rs;
+    final isTab = rs.isTablet;
     final String status = invoice.status.toLowerCase().trim();
 
     Color pillBg;
@@ -446,8 +451,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
     );
 
     return Container(
-      margin: EdgeInsets.only(bottom: rs.s(14)),
-      padding: EdgeInsets.all(rs.s(16)),
+      margin: EdgeInsets.only(bottom: asGridTile ? 0 : rs.s(14)),
+      padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -462,6 +467,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // 1. TOP HEADER ROW (INVOICE NUMBER + STATUS PILL + MORE MENU)
           Row(
@@ -471,17 +477,19 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   invoice.invoiceNumber.isNotEmpty
                       ? invoice.invoiceNumber
                       : 'Invoice #${invoice.id}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: const Color(0xFF0A2342),
-                    fontSize: rs.sp(17),
+                    fontSize: isTab ? 15 : rs.sp(17),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: rs.s(12),
-                  vertical: rs.s(4),
+                  horizontal: isTab ? 8 : rs.s(12),
+                  vertical: isTab ? 3 : rs.s(4),
                 ),
                 decoration: BoxDecoration(
                   color: pillBg,
@@ -492,12 +500,12 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   displayStatus,
                   style: TextStyle(
                     color: pillText,
-                    fontSize: rs.sp(12),
+                    fontSize: isTab ? 11 : rs.sp(12),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              SizedBox(width: rs.s(4)),
+              SizedBox(width: isTab ? 2 : rs.s(4)),
               IconButton(
                 onPressed: () {
                   _showInvoiceActions(context, invoice);
@@ -513,9 +521,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             ],
           ),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+            child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
           // 2. MIDDLE DETAILS 2X2 GRID
@@ -530,34 +538,36 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     Text(
                       'CUSTOMER',
                       style: TextStyle(
-                        fontSize: rs.sp(10),
+                        fontSize: isTab ? 10 : rs.sp(10),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
                     ),
-                    SizedBox(height: rs.s(2)),
+                    SizedBox(height: isTab ? 2 : rs.s(2)),
                     Text(
                       invoice.clientId > 0
                           ? 'Client #${invoice.clientId}'
                           : 'no9r',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: rs.sp(13),
+                        fontSize: isTab ? 12 : rs.sp(13),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF0A2342),
                       ),
                     ),
-                    SizedBox(height: rs.s(10)),
+                    SizedBox(height: isTab ? 6 : rs.s(10)),
                     Text(
                       'DUE DATE',
                       style: TextStyle(
-                        fontSize: rs.sp(10),
+                        fontSize: isTab ? 10 : rs.sp(10),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
                     ),
-                    SizedBox(height: rs.s(2)),
+                    SizedBox(height: isTab ? 2 : rs.s(2)),
                     Row(
                       children: [
                         const Icon(
@@ -565,14 +575,18 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                           size: 14,
                           color: Color(0xFF16A34A),
                         ),
-                        SizedBox(width: rs.s(4)),
-                        Text(
-                          invoice.dueDate?.isNotEmpty == true
-                              ? invoice.dueDate!
-                              : '—',
-                          style: TextStyle(
-                            fontSize: rs.sp(13),
-                            color: const Color(0xFF475569),
+                        SizedBox(width: isTab ? 3 : rs.s(4)),
+                        Expanded(
+                          child: Text(
+                            invoice.dueDate?.isNotEmpty == true
+                                ? invoice.dueDate!
+                                : '—',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: isTab ? 12 : rs.sp(13),
+                              color: const Color(0xFF475569),
+                            ),
                           ),
                         ),
                       ],
@@ -589,40 +603,42 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     Text(
                       'DATE',
                       style: TextStyle(
-                        fontSize: rs.sp(10),
+                        fontSize: isTab ? 10 : rs.sp(10),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
                     ),
-                    SizedBox(height: rs.s(2)),
+                    SizedBox(height: isTab ? 2 : rs.s(2)),
                     Text(
                       invoice.issueDate.isNotEmpty
                           ? invoice.issueDate
                           : '29.09.2026',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: rs.sp(13),
+                        fontSize: isTab ? 12 : rs.sp(13),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF0A2342),
                       ),
                     ),
-                    SizedBox(height: rs.s(10)),
+                    SizedBox(height: isTab ? 6 : rs.s(10)),
                     Text(
                       'REMINDERS',
                       style: TextStyle(
-                        fontSize: rs.sp(10),
+                        fontSize: isTab ? 10 : rs.sp(10),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
                     ),
-                    SizedBox(height: rs.s(2)),
+                    SizedBox(height: isTab ? 2 : rs.s(2)),
                     Text(
                       invoice.reminderCount > 0
                           ? '${invoice.reminderCount}'
                           : '—',
                       style: TextStyle(
-                        fontSize: rs.sp(13),
+                        fontSize: isTab ? 12 : rs.sp(13),
                         color: const Color(0xFF475569),
                       ),
                     ),
@@ -632,9 +648,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             ],
           ),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+            child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
           // 3. BOTTOM AMOUNTS ROW (NET | VAT | TOTAL)
@@ -646,43 +662,43 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   Text(
                     'Net',
                     style: TextStyle(
-                      fontSize: rs.sp(10),
+                      fontSize: isTab ? 10 : rs.sp(10),
                       color: const Color(0xFF94A3B8),
                     ),
                   ),
-                  SizedBox(height: rs.s(2)),
+                  SizedBox(height: isTab ? 2 : rs.s(2)),
                   Text(
                     formattedNet,
                     style: TextStyle(
-                      fontSize: rs.sp(13),
+                      fontSize: isTab ? 12 : rs.sp(13),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF0A2342),
                     ),
                   ),
                 ],
               ),
-              SizedBox(width: rs.s(12)),
+              SizedBox(width: isTab ? 8 : rs.s(12)),
               Container(
                 width: 1,
-                height: rs.s(24),
+                height: isTab ? 18 : rs.s(24),
                 color: const Color(0xFFE2E8F0),
               ),
-              SizedBox(width: rs.s(12)),
+              SizedBox(width: isTab ? 8 : rs.s(12)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'VAT (0%)',
                     style: TextStyle(
-                      fontSize: rs.sp(10),
+                      fontSize: isTab ? 10 : rs.sp(10),
                       color: const Color(0xFF94A3B8),
                     ),
                   ),
-                  SizedBox(height: rs.s(2)),
+                  SizedBox(height: isTab ? 2 : rs.s(2)),
                   Text(
                     '${invoicesController.getCurrencySymbol(invoice.currencyCode)}0.00',
                     style: TextStyle(
-                      fontSize: rs.sp(13),
+                      fontSize: isTab ? 12 : rs.sp(13),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF0A2342),
                     ),
@@ -696,17 +712,16 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   Text(
                     'TOTAL',
                     style: TextStyle(
-                      fontSize: rs.sp(10),
-                      fontWeight: FontWeight.w600,
+                      fontSize: isTab ? 10 : rs.sp(10),
                       color: const Color(0xFF94A3B8),
                       letterSpacing: 0.5,
                     ),
                   ),
-                  SizedBox(height: rs.s(2)),
+                  SizedBox(height: isTab ? 2 : rs.s(2)),
                   Text(
                     formattedTotal,
                     style: TextStyle(
-                      fontSize: rs.sp(15),
+                      fontSize: isTab ? 14 : rs.sp(15),
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF0A2342),
                     ),

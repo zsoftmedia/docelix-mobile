@@ -1,11 +1,41 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
+import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/models/supplier_model.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
+class PurchaseLineItem {
+  final String id;
+  TextEditingController itemController;
+  TextEditingController descriptionController;
+  TextEditingController qtyController;
+  TextEditingController unitPriceController;
+  TextEditingController discountController;
+  TextEditingController taxRateController;
+  RxString category;
+
+  PurchaseLineItem({
+    required this.id,
+    required String item,
+    required String description,
+    required double qty,
+    required double unitPrice,
+    double discount = 0,
+    double taxRate = 20,
+    String categoryName = 'Travelling expenses',
+  })  : itemController = TextEditingController(text: item),
+        descriptionController = TextEditingController(text: description),
+        qtyController = TextEditingController(text: qty.toStringAsFixed(0)),
+        unitPriceController = TextEditingController(text: unitPrice.toStringAsFixed(0)),
+        discountController = TextEditingController(text: discount.toStringAsFixed(0)),
+        taxRateController = TextEditingController(text: taxRate.toStringAsFixed(0)),
+        category = categoryName.obs;
+}
 
 class CreatePurchaseInvoiceManualController extends GetxController {
   final DioClient _dioClient = DioClient();
@@ -120,10 +150,306 @@ class CreatePurchaseInvoiceManualController extends GetxController {
   final serviceFromDateController = TextEditingController();
   final serviceToDateController = TextEditingController();
 
+  // ============================================================
+  // STEP 2: PURCHASED ITEMS / SERVICES FIELDS & CALCULATIONS
+  // ============================================================
+
+  final RxString priceMode = 'Net'.obs; // 'Net' or 'Gross'
+  final RxBool showAccountCodes = false.obs;
+
+  final RxList<PurchaseLineItem> purchaseLineItems = <PurchaseLineItem>[].obs;
+
+  static const purchaseCategoryOptions = <String>[
+    'Travelling expenses',
+    'Operating Expenses',
+    'Office Supplies',
+    'Software Subscriptions',
+    'Vehicle Leasing',
+    'Fuel Expense',
+    'Professional Fees',
+  ];
+
+  void setPriceMode(String mode) {
+    if (priceMode.value == mode) return;
+
+    final oldMode = priceMode.value;
+    priceMode.value = mode;
+
+    // Recalculate prices for existing items when switching Net <-> Gross
+    for (final item in purchaseLineItems) {
+      final currentPrice = double.tryParse(item.unitPriceController.text) ?? 0;
+      final taxRate = double.tryParse(item.taxRateController.text) ?? 20;
+
+      if (oldMode == 'Net' && mode == 'Gross') {
+        final grossPrice = currentPrice * (1 + taxRate / 100);
+        item.unitPriceController.text = grossPrice.toStringAsFixed(0);
+      } else if (oldMode == 'Gross' && mode == 'Net') {
+        final netPrice = currentPrice / (1 + taxRate / 100);
+        item.unitPriceController.text = netPrice.toStringAsFixed(0);
+      }
+    }
+    purchaseLineItems.refresh();
+  }
+
+  void addLineItem() {
+    final newId = DateTime.now().millisecondsSinceEpoch.toString();
+    final defaultPrice = priceMode.value == 'Net' ? 1000.0 : 1200.0;
+
+    purchaseLineItems.add(
+      PurchaseLineItem(
+        id: newId,
+        item: 'Item ${purchaseLineItems.length + 1}',
+        description: 'Item ${purchaseLineItems.length + 1}',
+        qty: 1,
+        unitPrice: defaultPrice,
+        discount: 0,
+        taxRate: 20,
+        categoryName: 'Travelling expenses',
+      ),
+    );
+  }
+
+  void removeLineItem(int index) {
+    if (index >= 0 && index < purchaseLineItems.length) {
+      purchaseLineItems.removeAt(index);
+    }
+  }
+
+  // CALCULATED TOTALS
+  double get calculatedSubtotal {
+    double totalNet = 0.0;
+    for (final item in purchaseLineItems) {
+      final qty = double.tryParse(item.qtyController.text) ?? 1;
+      final price = double.tryParse(item.unitPriceController.text) ?? 0;
+      final disc = double.tryParse(item.discountController.text) ?? 0;
+      final taxRate = double.tryParse(item.taxRateController.text) ?? 20;
+
+      final basePrice = qty * price * (1 - disc / 100);
+
+      if (priceMode.value == 'Net') {
+        totalNet += basePrice;
+      } else {
+        final net = basePrice / (1 + taxRate / 100);
+        totalNet += net;
+      }
+    }
+    return totalNet;
+  }
+
+  double get calculatedTaxTotal {
+    double totalTax = 0.0;
+    for (final item in purchaseLineItems) {
+      final qty = double.tryParse(item.qtyController.text) ?? 1;
+      final price = double.tryParse(item.unitPriceController.text) ?? 0;
+      final disc = double.tryParse(item.discountController.text) ?? 0;
+      final taxRate = double.tryParse(item.taxRateController.text) ?? 20;
+
+      final basePrice = qty * price * (1 - disc / 100);
+
+      if (priceMode.value == 'Net') {
+        totalTax += basePrice * (taxRate / 100);
+      } else {
+        final net = basePrice / (1 + taxRate / 100);
+        totalTax += (basePrice - net);
+      }
+    }
+    return totalTax;
+  }
+
+  double get calculatedGrandTotal => calculatedSubtotal + calculatedTaxTotal;
+  double get amountPaid => 0.0;
+  double get outstandingBalance => calculatedGrandTotal - amountPaid;
+
+  String getCurrencySymbol(String? code) {
+    final raw = (code ?? selectedCurrency.value).trim().toUpperCase();
+    switch (raw) {
+      case 'EUR':
+        return '€';
+      case 'USD':
+        return '\$';
+      case 'GBP':
+        return '£';
+      case 'INR':
+        return '₹';
+      case 'PKR':
+        return 'Rs.';
+      default:
+        return raw;
+    }
+  }
+
+  String formatCurrency(num amount) {
+    final symbol = getCurrencySymbol(selectedCurrency.value);
+    final value = amount.toDouble();
+    final parts = value.toStringAsFixed(2).split('.');
+    final formattedInt = parts[0].replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+    return '$symbol$formattedInt.${parts[1]}';
+  }
+
+  // ============================================================
+  // CATALOG ITEMS SEARCH & FETCHING
+  // ============================================================
+
+  final RxList<CatalogModel> catalogItems = <CatalogModel>[].obs;
+  final RxBool isLoadingCatalog = false.obs;
+  final RxString catalogSearchQuery = ''.obs;
+
+  List<CatalogModel> get filteredCatalogItems {
+    final query = catalogSearchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return catalogItems;
+    return catalogItems.where((item) {
+      final name = (item.articleName ?? '').toLowerCase();
+      final code = (item.articleNumber ?? '').toLowerCase();
+      final group = (item.groupCode ?? '').toLowerCase();
+      return name.contains(query) || code.contains(query) || group.contains(query);
+    }).toList();
+  }
+
+  Future<void> loadCatalogItems() async {
+    final token = SessionManager.accessToken;
+    final companyId = SessionManager.accessCompanyid;
+
+    if (token == null || token.isEmpty || companyId == null || companyId == 0) {
+      return;
+    }
+
+    try {
+      isLoadingCatalog.value = true;
+      final response = await _dioClient.getCatalog(
+        companyId: companyId,
+        accessToken: token,
+        page: 1,
+        pageSize: 50,
+        sort: 'article_name',
+        dir: 'asc',
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        List<dynamic> dataList = [];
+        if (response.data is Map) {
+          dataList = (response.data as Map)['data'] as List<dynamic>? ?? [];
+        } else if (response.data is List) {
+          dataList = response.data as List<dynamic>;
+        }
+
+        final parsed = dataList
+            .whereType<Map>()
+            .map((json) => CatalogModel.fromJson(Map<String, dynamic>.from(json)))
+            .toList();
+
+        catalogItems.assignAll(parsed);
+      }
+    } catch (e) {
+      debugPrint('[CreatePurchaseInvoiceManualController] loadCatalogItems Error: $e');
+    } finally {
+      isLoadingCatalog.value = false;
+    }
+  }
+
+  void selectCatalogItemForLine(int lineIndex, CatalogModel catalog) {
+    if (lineIndex < 0 || lineIndex >= purchaseLineItems.length) return;
+
+    final item = purchaseLineItems[lineIndex];
+    item.itemController.text = catalog.articleName ?? '';
+    item.descriptionController.text = catalog.articleName ?? '';
+
+    final double priceNet = (catalog.unitPriceNet ?? catalog.purchasePriceNet ?? 0.0).toDouble();
+    final double vatRate = (catalog.vatRate ?? 20.0).toDouble();
+
+    if (priceMode.value == 'Gross') {
+      final grossPrice = priceNet * (1 + vatRate / 100);
+      item.unitPriceController.text = grossPrice.toStringAsFixed(0);
+    } else {
+      item.unitPriceController.text = priceNet.toStringAsFixed(0);
+    }
+
+    item.taxRateController.text = vatRate.toStringAsFixed(0);
+
+    if ((catalog.groupCode ?? '').isNotEmpty) {
+      final matchingCat = purchaseCategoryOptions.firstWhereOrNull(
+        (c) => c.toLowerCase() == catalog.groupCode!.toLowerCase(),
+      );
+      if (matchingCat != null) {
+        item.category.value = matchingCat;
+      }
+    }
+
+    purchaseLineItems.refresh();
+  }
+
+  // ============================================================
+  // STEP 3: PAYMENT DETAILS & SUPPORTING DOCUMENT
+  // ============================================================
+
+  final RxString paymentStatus = 'Paid in full'.obs;
+  static const paymentStatusOptions = <String>[
+    'Unpaid',
+    'Partially paid',
+    'Paid in full',
+  ];
+
+  final RxString paidFrom = 'Choose bank or cash'.obs;
+  static const paidFromOptions = <String>[
+    'Bank',
+    'Cash',
+  ];
+
+  final amountPaidController = TextEditingController();
+  final paymentDateController = TextEditingController(
+    text: DateFormat('dd.MM.yyyy').format(DateTime.now()),
+  );
+  final paymentReferenceController = TextEditingController();
+
+  final RxnString attachedDocumentName = RxnString();
+  final RxnString attachedDocumentPath = RxnString();
+
+  void setPaymentStatus(String status) {
+    paymentStatus.value = status;
+  }
+
+  void setPaidFrom(String option) {
+    paidFrom.value = option;
+  }
+
+  Future<void> pickSupportingDocument() async {
+    try {
+      final List<PlatformFile> result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
+      );
+
+      if (result.isNotEmpty) {
+        final file = result.first;
+        attachedDocumentName.value = file.name;
+        attachedDocumentPath.value = file.path;
+        AppSnackbar.success(
+          title: 'Document Attached',
+          message: 'Selected: ${file.name}',
+        );
+      }
+    } catch (e) {
+      debugPrint('[CreatePurchaseInvoiceManualController] pickSupportingDocument Error: $e');
+      AppSnackbar.error(
+        title: 'File Selection Error',
+        message: 'Unable to select file from storage.',
+      );
+    }
+  }
+
+  void removeSupportingDocument() {
+    attachedDocumentName.value = null;
+    attachedDocumentPath.value = null;
+  }
+
   @override
   void onInit() {
     super.onInit();
     loadSuppliers();
+    loadCatalogItems();
+    purchaseLineItems.clear();
   }
 
   Future<void> loadSuppliers() async {
@@ -140,7 +466,7 @@ class CreatePurchaseInvoiceManualController extends GetxController {
         companyId: companyId,
         accessToken: token,
         page: 1,
-        pageSize: 20
+        pageSize: 20,
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -206,6 +532,16 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     orderReferenceController.dispose();
     serviceFromDateController.dispose();
     serviceToDateController.dispose();
+
+    for (final item in purchaseLineItems) {
+      item.itemController.dispose();
+      item.descriptionController.dispose();
+      item.qtyController.dispose();
+      item.unitPriceController.dispose();
+      item.discountController.dispose();
+      item.taxRateController.dispose();
+    }
+
     super.onClose();
   }
 }

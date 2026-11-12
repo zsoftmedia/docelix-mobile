@@ -301,7 +301,9 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                         crossAxisCount: cols,
                         crossAxisSpacing: rs.s(12),
                         mainAxisSpacing: rs.s(12),
-                        childAspectRatio: rs.isLandscape ? 2.6 : 1.8,
+                        childAspectRatio: rs.isTablet
+                            ? (rs.isLandscape ? 1.45 : 1.02)
+                            : (rs.isLandscape ? 2.6 : 1.8),
                       ),
                       itemCount: invoices.length,
                       itemBuilder: (context, index) {
@@ -474,6 +476,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
       child: _invoiceCard(
         context: context,
         invoice: invoice,
+        asGridTile: asGridTile,
       ),
     );
   }
@@ -512,8 +515,10 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
   Widget _invoiceCard({
     required BuildContext context,
     required PurchaseInvoicesModel invoice,
+    bool asGridTile = false,
   }) {
     final rs = context.rs;
+    final isTab = rs.isTablet;
     final String status = invoice.status.toLowerCase().trim();
 
     Color pillBg;
@@ -551,8 +556,8 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
     );
 
     return Container(
-      margin: EdgeInsets.only(bottom: rs.s(14)),
-      padding: EdgeInsets.all(rs.s(16)),
+      margin: EdgeInsets.only(bottom: asGridTile ? 0 : rs.s(14)),
+      padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -567,6 +572,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // 1. TOP HEADER ROW (PURCHASE NUMBER + INVOICE TYPE PILL + MORE MENU)
           Row(
@@ -578,17 +584,19 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                       : (invoice.invoiceNumber?.isNotEmpty == true
                           ? invoice.invoiceNumber!
                           : 'PUR-#${invoice.id}'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: const Color(0xFF0A2342),
-                    fontSize: rs.sp(16),
+                    fontSize: isTab ? 15 : rs.sp(16),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: rs.s(10),
-                  vertical: rs.s(4),
+                  horizontal: isTab ? 8 : rs.s(10),
+                  vertical: isTab ? 3 : rs.s(4),
                 ),
                 decoration: BoxDecoration(
                   color: pillBg,
@@ -606,19 +614,19 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    SizedBox(width: rs.s(5)),
+                    SizedBox(width: isTab ? 3 : rs.s(5)),
                     Text(
                       displayStatus,
                       style: TextStyle(
                         color: pillText,
-                        fontSize: rs.sp(11),
+                        fontSize: isTab ? 11 : rs.sp(11),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(width: rs.s(4)),
+              SizedBox(width: isTab ? 2 : rs.s(4)),
               IconButton(
                 onPressed: () {
                   _showInvoiceActions(context, invoice);
@@ -634,9 +642,9 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
             ],
           ),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+            child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
           // 2. MIDDLE DETAILS 2X3 GRID
@@ -648,11 +656,11 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _statField('SUPPLIER', invoice.supplierName ?? '—', isItalic: true),
-                    SizedBox(height: rs.s(10)),
-                    _statField('DATE', formattedDate),
-                    SizedBox(height: rs.s(10)),
-                    _statField('ACCOUNT', invoice.expenseAccountCode ?? invoice.expenseCategory ?? '—'),
+                    _statField('SUPPLIER', invoice.supplierName ?? '—', isItalic: true, isTab: isTab),
+                    SizedBox(height: isTab ? 6 : rs.s(10)),
+                    _statField('DATE', formattedDate, isTab: isTab),
+                    SizedBox(height: isTab ? 6 : rs.s(10)),
+                    _statField('ACCOUNT', invoice.expenseAccountCode ?? invoice.expenseCategory ?? '—', isTab: isTab),
                   ],
                 ),
               ),
@@ -662,18 +670,18 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _statField('SUPPLIER INV NO.', invoice.supplierInvoiceNumber ?? '—'),
-                    SizedBox(height: rs.s(10)),
-                    _statField('DUE DATE', formattedDueDate),
+                    _statField('SUPPLIER INV NO.', invoice.supplierInvoiceNumber ?? '—', isTab: isTab),
+                    SizedBox(height: isTab ? 6 : rs.s(10)),
+                    _statField('DUE DATE', formattedDueDate, isTab: isTab),
                   ],
                 ),
               ),
             ],
           ),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+            child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
           // 3. BOTTOM AMOUNTS ROW (PAID | TOTAL)
@@ -685,17 +693,17 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   Text(
                     'PAID',
                     style: TextStyle(
-                      fontSize: rs.sp(10),
+                      fontSize: isTab ? 10 : rs.sp(10),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF94A3B8),
                       letterSpacing: 0.5,
                     ),
                   ),
-                  SizedBox(height: rs.s(2)),
+                  SizedBox(height: isTab ? 2 : rs.s(2)),
                   Text(
                     '${incomingInvoicesController.getCurrencySymbol(invoice.currency)}0.00',
                     style: TextStyle(
-                      fontSize: rs.sp(13),
+                      fontSize: isTab ? 12 : rs.sp(13),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF0A2342),
                     ),
@@ -709,17 +717,17 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   Text(
                     'TOTAL',
                     style: TextStyle(
-                      fontSize: rs.sp(10),
+                      fontSize: isTab ? 10 : rs.sp(10),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF94A3B8),
                       letterSpacing: 0.5,
                     ),
                   ),
-                  SizedBox(height: rs.s(2)),
+                  SizedBox(height: isTab ? 2 : rs.s(2)),
                   Text(
                     formattedTotal,
                     style: TextStyle(
-                      fontSize: rs.sp(16),
+                      fontSize: isTab ? 15 : rs.sp(16),
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF0A2342),
                     ),
@@ -733,16 +741,16 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
     );
   }
 
-  Widget _statField(String label, String value, {bool isItalic = false}) {
+  Widget _statField(String label, String value, {bool isItalic = false, bool isTab = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 10,
+          style: TextStyle(
+            fontSize: isTab ? 9.5 : 10,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF94A3B8),
+            color: const Color(0xFF94A3B8),
             letterSpacing: 0.5,
           ),
         ),

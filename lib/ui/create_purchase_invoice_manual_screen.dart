@@ -1,6 +1,6 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/create_purchase_invoice_manual_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
-import 'package:docelix_mobileapp/models/supplier_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -260,6 +260,139 @@ class _CreatePurchaseInvoiceManualScreenState
                               : null,
                           onTap: () {
                             controller.selectCurrency(currency);
+                            Navigator.of(ctx).pop();
+                          },
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCatalogItemSearchSheet(BuildContext context, int lineIndex) {
+    controller.catalogSearchQuery.value = '';
+    final searchInputController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final height = MediaQuery.of(ctx).size.height;
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: height * 0.70,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Select Catalog Item',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A2342),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: searchInputController,
+                    autofocus: true,
+                    onChanged: (val) => controller.catalogSearchQuery.value = val,
+                    decoration: InputDecoration(
+                      hintText: 'Search catalog item name, code...',
+                      hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: searchInputController,
+                        builder: (context, value, _) {
+                          if (value.text.isEmpty) return const SizedBox.shrink();
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () {
+                              searchInputController.clear();
+                              controller.catalogSearchQuery.value = '';
+                            },
+                          );
+                        },
+                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoadingCatalog.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final list = controller.filteredCatalogItems;
+
+                    if (list.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No catalog items found.',
+                          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      itemBuilder: (context, index) {
+                        final catalog = list[index];
+                        final titleStr = catalog.articleName ?? 'Unnamed Item';
+                        final priceStr = controller.formatCurrency((catalog.unitPriceNet ?? 0).toDouble());
+
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          title: Text(
+                            titleStr,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF0A2342),
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Code: ${catalog.articleNumber ?? '—'} · Price: $priceStr',
+                            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                          ),
+                          onTap: () {
+                            controller.selectCatalogItemForLine(lineIndex, catalog);
                             Navigator.of(ctx).pop();
                           },
                         );
@@ -1111,76 +1244,1071 @@ class _CreatePurchaseInvoiceManualScreenState
   }
 
   // ================================================================
-  // STEP 2: PURCHASED ITEMS / SERVICES (PLACEHOLDER FOR NEXT STEP)
+  // STEP 2: PURCHASED ITEMS / SERVICES (MATCHING SCREENSHOTS 1 & 2 100%)
   // ================================================================
 
   Widget _buildPurchasedItemsStep(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Purchased Items / Services', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342))),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              OutlinedButton(
-                onPressed: controller.previousInvoiceStep,
-                child: const Text('Back'),
-              ),
-              ElevatedButton(
-                onPressed: controller.nextInvoiceStep,
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF063C70), foregroundColor: Colors.white),
-                child: const Text('Continue'),
+    final rs = context.rs;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // MAIN CARD CONTAINER
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(rs.s(16)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // TITLE & PRICES ENTERED (NET / GROSS TOGGLE) & SHOW ACCOUNT CODES
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth > 480;
+
+                  final toggleWidget = Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Prices entered',
+                        style: TextStyle(
+                          fontSize: rs.sp(12),
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // NET / GROSS SEGMENT TOGGLE
+                      Container(
+                        height: 34,
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Obx(() {
+                          final currentMode = controller.priceMode.value;
+
+                          return Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () => controller.setPriceMode('Net'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: currentMode == 'Net' ? const Color(0xFF063C70) : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    'Net',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: currentMode == 'Net' ? FontWeight.bold : FontWeight.normal,
+                                      color: currentMode == 'Net' ? Colors.white : const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => controller.setPriceMode('Gross'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: currentMode == 'Gross' ? const Color(0xFF063C70) : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    'Gross',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: currentMode == 'Gross' ? FontWeight.bold : FontWeight.normal,
+                                      color: currentMode == 'Gross' ? Colors.white : const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+                      ),
+                    ],
+                  );
+
+                  final checkboxWidget = Obx(
+                    () => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Checkbox(
+                          value: controller.showAccountCodes.value,
+                          onChanged: (val) => controller.showAccountCodes.value = val ?? false,
+                          activeColor: const Color(0xFF063C70),
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        const SizedBox(width: 4),
+                        const Text(
+                          'Show account codes',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF475569)),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (isWide) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        toggleWidget,
+                        checkboxWidget,
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      toggleWidget,
+                      const SizedBox(height: 8),
+                      Align(alignment: Alignment.centerRight, child: checkboxWidget),
+                    ],
+                  );
+                },
+              ),
+
+              // HELPER NOTE WHEN GROSS MODE IS SELECTED (SCREENSHOT 2)
+              Obx(() {
+                if (controller.priceMode.value != 'Gross') return const SizedBox.shrink();
+
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Enter prices including VAT — net and VAT are calculated from them.',
+                    style: TextStyle(fontSize: rs.sp(11), color: const Color(0xFF64748B)),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 16),
+
+              // LINE ITEMS LIST
+              Obx(() {
+                final items = controller.purchaseLineItems;
+
+                if (items.isEmpty) {
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.inventory_2_outlined, size: 36, color: Color(0xFF94A3B8)),
+                        SizedBox(height: 8),
+                        Text(
+                          'No items added yet',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Click "+ Add line" below to add purchased items or services.',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: List.generate(items.length, (index) {
+                    final item = items[index];
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ITEM HEADER ROW
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Item #${index + 1}',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                              ),
+                              IconButton(
+                                onPressed: () => controller.removeLineItem(index),
+                                icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFDC2626), size: 20),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+
+                          // ITEM / SERVICE & DESCRIPTION
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 4,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(text: 'Item / service'),
+                                    const SizedBox(height: 4),
+                                    InkWell(
+                                      onTap: () => _showCatalogItemSearchSheet(context, index),
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: colorsList.borderColor),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                item.itemController.text.isNotEmpty
+                                                    ? item.itemController.text
+                                                    : 'Select item',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: item.itemController.text.isNotEmpty
+                                                      ? const Color(0xFF0A2342)
+                                                      : const Color(0xFF94A3B8),
+                                                ),
+                                              ),
+                                            ),
+                                            const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: Color(0xFF64748B)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(text: 'Description'),
+                                    const SizedBox(height: 4),
+                                    TextFormField(
+                                      controller: item.descriptionController,
+                                      decoration: _inputDecoration('Description'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          // QTY, UNIT PRICE (NET / GROSS), DISC %, TAX %
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(text: 'Qty'),
+                                    const SizedBox(height: 4),
+                                    TextFormField(
+                                      controller: item.qtyController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: _inputDecoration('1'),
+                                      onChanged: (_) => controller.purchaseLineItems.refresh(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 4,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Obx(
+                                      () => _FieldLabel(
+                                        text: 'Unit price (${controller.priceMode.value.toLowerCase()})',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    TextFormField(
+                                      controller: item.unitPriceController,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      decoration: _inputDecoration('0'),
+                                      onChanged: (_) => controller.purchaseLineItems.refresh(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(text: 'Disc. %'),
+                                    const SizedBox(height: 4),
+                                    TextFormField(
+                                      controller: item.discountController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: _inputDecoration('0'),
+                                      onChanged: (_) => controller.purchaseLineItems.refresh(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(text: 'Tax %'),
+                                    const SizedBox(height: 4),
+                                    TextFormField(
+                                      controller: item.taxRateController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: _inputDecoration('20'),
+                                      onChanged: (_) => controller.purchaseLineItems.refresh(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          // PURCHASE CATEGORY & LINE TOTAL
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                flex: 6,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const _FieldLabel(text: 'Purchase category'),
+                                    const SizedBox(height: 4),
+                                    Obx(
+                                      () => Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: colorsList.borderColor),
+                                        ),
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButton<String>(
+                                            value: item.category.value,
+                                            isExpanded: true,
+                                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                            items: CreatePurchaseInvoiceManualController.purchaseCategoryOptions.map((cat) {
+                                              return DropdownMenuItem<String>(
+                                                value: cat,
+                                                child: Text(cat, style: const TextStyle(fontSize: 12, color: Color(0xFF0A2342))),
+                                              );
+                                            }).toList(),
+                                            onChanged: (val) {
+                                              if (val != null) item.category.value = val;
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 4,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    const Text('Line total', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                                    const SizedBox(height: 4),
+                                    Obx(() {
+                                      final qty = double.tryParse(item.qtyController.text) ?? 1;
+                                      final price = double.tryParse(item.unitPriceController.text) ?? 0;
+                                      final disc = double.tryParse(item.discountController.text) ?? 0;
+                                      final taxRate = double.tryParse(item.taxRateController.text) ?? 20;
+
+                                      final isGross = controller.priceMode.value == 'Gross';
+
+                                      double lineTotal = 0;
+                                      double lineVat = 0;
+
+                                      if (!isGross) {
+                                        final net = qty * price * (1 - disc / 100);
+                                        lineVat = net * (taxRate / 100);
+                                        lineTotal = net + lineVat;
+                                      } else {
+                                        lineTotal = qty * price * (1 - disc / 100);
+                                        final net = lineTotal / (1 + taxRate / 100);
+                                        lineVat = lineTotal - net;
+                                      }
+
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            controller.formatCurrency(lineTotal),
+                                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                                          ),
+                                          if (isGross) ...[
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '· VAT ${controller.formatCurrency(lineVat)}',
+                                              style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
+                                            ),
+                                          ],
+                                        ],
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                );
+              }),
+
+              const SizedBox(height: 12),
+
+              // + ADD LINE BUTTON & HINT
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: controller.addLineItem,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF0A2342),
+                      side: const BorderSide(color: Color(0xFFCBD5E1)),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    icon: const Icon(Icons.add_rounded, size: 16),
+                    label: const Text('Add line', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Enter: next line · ↑/↓: move between lines',
+                      style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // TAX & TOTALS SUMMARY CARD (MATCHING SCREENSHOTS 1 & 2)
+        Obx(() {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tax & totals',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                ),
+                const SizedBox(height: 14),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Subtotal', style: TextStyle(fontSize: 13, color: Color(0xFF64748B))),
+                    Text(
+                      controller.formatCurrency(controller.calculatedSubtotal),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Tax', style: TextStyle(fontSize: 13, color: Color(0xFF64748B))),
+                    Text(
+                      controller.formatCurrency(controller.calculatedTaxTotal),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                    ),
+                  ],
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Grand total',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                    ),
+                    Text(
+                      controller.formatCurrency(controller.calculatedGrandTotal),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Amount paid', style: TextStyle(fontSize: 13, color: Color(0xFF64748B))),
+                    Text(
+                      controller.formatCurrency(controller.amountPaid),
+                      style: const TextStyle(fontSize: 13, color: Color(0xFF0A2342)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Outstanding balance', style: TextStyle(fontSize: 13, color: Color(0xFF64748B))),
+                    Text(
+                      controller.formatCurrency(controller.outstandingBalance),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
+
+        const SizedBox(height: 24),
+
+        // STEPPER CONTROLS (BACK & CONTINUE)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            OutlinedButton(
+              onPressed: controller.previousInvoiceStep,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF334155),
+                side: const BorderSide(color: Color(0xFFCBD5E1)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Back'),
+            ),
+            ElevatedButton(
+              onPressed: controller.nextInvoiceStep,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF063C70),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Continue', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
   // ================================================================
-  // STEP 3: PAYMENT DETAILS (PLACEHOLDER FOR NEXT STEP)
+  // STEP 3: PAYMENT DETAILS & SUPPORTING DOCUMENT (MATCHING SCREENSHOT 100%)
   // ================================================================
 
   Widget _buildPaymentDetailsStep(BuildContext context) {
-    return Container(
+    final rs = context.rs;
+
+    final paymentCard = Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Payment Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342))),
-          const SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              OutlinedButton(
-                onPressed: controller.previousInvoiceStep,
-                child: const Text('Back'),
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF063C70),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Text('3', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
-              ElevatedButton(
-                onPressed: controller.nextInvoiceStep,
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF063C70), foregroundColor: Colors.white),
-                child: const Text('Continue'),
+              const SizedBox(width: 8),
+              const Text(
+                'Payment details',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
               ),
             ],
           ),
+
+          const SizedBox(height: 16),
+
+          // PAYMENT STATUS & CONDITIONAL FIELDS
+          Obx(() {
+            final status = controller.paymentStatus.value;
+
+            final statusDropdown = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _FieldLabel(text: 'Payment status'),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: colorsList.borderColor),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: status,
+                      isExpanded: true,
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                      items: CreatePurchaseInvoiceManualController.paymentStatusOptions.map((opt) {
+                        return DropdownMenuItem<String>(
+                          value: opt,
+                          child: Text(opt, style: const TextStyle(fontSize: 13, color: Color(0xFF0A2342))),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) controller.setPaymentStatus(val);
+                      },
+                    ),
+                  ),
+                ),
+                if (status == 'Paid in full') ...[
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Payment recorded when posted',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                  ),
+                ],
+              ],
+            );
+
+            final paidFromDropdown = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _FieldLabel(text: 'Paid from (bank or cash)'),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: colorsList.borderColor),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: controller.paidFrom.value.contains('bank') && controller.paidFrom.value != 'Bank' && controller.paidFrom.value != 'Cash'
+                          ? null
+                          : controller.paidFrom.value,
+                      hint: Text(
+                        controller.paidFrom.value,
+                        style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                      ),
+                      isExpanded: true,
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                      items: CreatePurchaseInvoiceManualController.paidFromOptions.map((opt) {
+                        return DropdownMenuItem<String>(
+                          value: opt,
+                          child: Text(opt, style: const TextStyle(fontSize: 13, color: Color(0xFF0A2342))),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) controller.setPaidFrom(val);
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Required for a paid purchase.',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                ),
+              ],
+            );
+
+            final amountPaidWidget = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _FieldLabel(text: 'Amount paid'),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: controller.amountPaidController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: _inputDecoration('0.00'),
+                ),
+              ],
+            );
+
+            final paymentDateWidget = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _FieldLabel(text: 'Payment date'),
+                const SizedBox(height: 6),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) {
+                      controller.paymentDateController.text =
+                          '${picked.day.toString().padLeft(2, '0')}.'
+                          '${picked.month.toString().padLeft(2, '0')}.'
+                          '${picked.year}';
+                      setState(() {});
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colorsList.borderColor),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            controller.paymentDateController.text.isNotEmpty
+                                ? controller.paymentDateController.text
+                                : 'Same as purchase date',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: controller.paymentDateController.text.isNotEmpty
+                                  ? const Color(0xFF0A2342)
+                                  : const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF94A3B8)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+
+            final referenceWidget = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _FieldLabel(text: 'Reference (optional)'),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: controller.paymentReferenceController,
+                  decoration: _inputDecoration('e.g. bank transfer ID'),
+                ),
+              ],
+            );
+
+            if (status == 'Unpaid') {
+              return statusDropdown;
+            }
+
+            if (status == 'Partially paid') {
+              return Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: statusDropdown),
+                      const SizedBox(width: 10),
+                      Expanded(child: amountPaidWidget),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: paidFromDropdown),
+                      const SizedBox(width: 10),
+                      Expanded(child: paymentDateWidget),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  referenceWidget,
+                ],
+              );
+            }
+
+            // PAID IN FULL (MATCHING SCREENSHOT 100%)
+            return Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: statusDropdown),
+                    const SizedBox(width: 10),
+                    Expanded(child: paidFromDropdown),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: paymentDateWidget),
+                    const SizedBox(width: 10),
+                    Expanded(child: referenceWidget),
+                  ],
+                ),
+              ],
+            );
+          }),
         ],
       ),
+    );
+
+    final supportingDocumentCard = Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(rs.s(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF063C70),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Text('4', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Supporting document',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // DASHED ATTACHMENT UPLOAD BOX OR ATTACHED FILE CARD
+          Obx(() {
+            final fileName = controller.attachedDocumentName.value;
+
+            if (fileName != null && fileName.isNotEmpty) {
+              final ext = fileName.split('.').last.toLowerCase();
+              IconData iconData = Icons.insert_drive_file_rounded;
+              Color iconColor = const Color(0xFF2563EB);
+
+              if (ext == 'pdf') {
+                iconData = Icons.picture_as_pdf_rounded;
+                iconColor = const Color(0xFFDC2626);
+              } else if (['jpg', 'jpeg', 'png', 'webp'].contains(ext)) {
+                iconData = Icons.image_rounded;
+                iconColor = const Color(0xFF059669);
+              }
+
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFBFDBFE)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(iconData, color: iconColor, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            fileName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Document attached successfully',
+                            style: TextStyle(fontSize: 11, color: Color(0xFF059669), fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: controller.removeSupportingDocument,
+                      icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B), size: 20),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return InkWell(
+              onTap: controller.pickSupportingDocument,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFCBD5E1), style: BorderStyle.solid),
+                ),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.attach_file_rounded, size: 28, color: Color(0xFF0A2342)),
+                    SizedBox(height: 8),
+                    Text(
+                      'Attach or scan document',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'PDF, JPG or PNG of the supplier invoice or receipt (max 15 MB).',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        paymentCard,
+        const SizedBox(height: 16),
+        supportingDocumentCard,
+        const SizedBox(height: 24),
+
+        // STEPPER CONTROLS (BACK & CONTINUE)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            OutlinedButton(
+              onPressed: controller.previousInvoiceStep,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF334155),
+                side: const BorderSide(color: Color(0xFFCBD5E1)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Back'),
+            ),
+            ElevatedButton(
+              onPressed: controller.nextInvoiceStep,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF063C70),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Continue', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
