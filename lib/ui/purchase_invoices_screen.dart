@@ -321,16 +321,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Get.toNamed(
-            '/CreateIncomingInvoicesScreen',
-            arguments: 'Create Incoming Invoices Screen',
-          );
-
-          if (result == true) {
-            await incomingInvoicesController.refreshInvoices();
-          }
-        },
+        onPressed: () => _showAddInvoiceBottomSheet(context),
         backgroundColor: colorsList.colorButton,
         foregroundColor: colorsList.colorWhite,
         elevation: 4,
@@ -343,6 +334,120 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
             fontSize: rs.sp(15),
             fontWeight: FontWeight.w700,
             color: colorsList.colorWhite,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddInvoiceBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Add Purchase Document',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A2342),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.edit_note_rounded, color: Color(0xFF2563EB)),
+                  ),
+                  title: const Text(
+                    'Enter manually',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0A2342),
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Enter purchase invoice, receipt, or credit note details manually.',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  ),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final result = await Get.toNamed(
+                      '/CreatePurchaseInvoiceManualScreen',
+                      arguments: 'Create Purchase Invoice manually Screen',
+                    );
+
+                    if (result == true) {
+                      await incomingInvoicesController.refreshInvoices();
+                    }
+                  },
+                ),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFECFDF5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.upload_file_rounded, color: Color(0xFF059669)),
+                  ),
+                  title: const Text(
+                    'Upload documents',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0A2342),
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Upload supplier invoices or receipts for AI OCR processing.',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  ),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final result = await Get.toNamed(
+                      '/CreateIncomingInvoicesScreen',
+                      arguments: 'Create Incoming Invoices Screen',
+                    );
+
+                    if (result == true) {
+                      await incomingInvoicesController.refreshInvoices();
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
@@ -476,7 +581,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   style: TextStyle(
                     color: const Color(0xFF0A2342),
                     fontSize: rs.sp(16),
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -507,7 +612,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                       style: TextStyle(
                         color: pillText,
                         fontSize: rs.sp(11),
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -591,7 +696,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                     '${incomingInvoicesController.getCurrencySymbol(invoice.currency)}0.00',
                     style: TextStyle(
                       fontSize: rs.sp(13),
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.w600,
                       color: const Color(0xFF0A2342),
                     ),
                   ),
@@ -615,7 +720,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                     formattedTotal,
                     style: TextStyle(
                       fontSize: rs.sp(16),
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.bold,
                       color: const Color(0xFF0A2342),
                     ),
                   ),
@@ -648,7 +753,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 13,
-            fontWeight: FontWeight.normal,
+            fontWeight: FontWeight.w600,
             fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
             color: const Color(0xFF0A2342),
           ),
