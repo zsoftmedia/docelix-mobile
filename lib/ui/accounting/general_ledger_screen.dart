@@ -269,7 +269,9 @@ class GeneralLedgerScreen extends StatelessWidget {
                           crossAxisCount: columns,
                           crossAxisSpacing: cardGap,
                           mainAxisSpacing: cardGap,
-                          mainAxisExtent: rs.sp(176),
+                          childAspectRatio: rs.isTablet
+                              ? (rs.isLandscape ? 1.85 : 1.45)
+                              : (rs.isLandscape ? 2.4 : 1.6),
                         ),
                         itemCount: controller.entries.length,
                         itemBuilder: (context, index) {
@@ -495,13 +497,16 @@ class _SummaryCard extends StatelessWidget {
 class _LedgerEntryCard extends StatelessWidget {
   const _LedgerEntryCard({
     required this.controller,
-    required this.entry});
+    required this.entry,
+  });
 
   final GeneralLedgerController controller;
   final GeneralLedgerEntryGroup entry;
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
     final width = _designWidth(context);
     final dateParts = controller.parseDateParts(entry.entryDate);
 
@@ -513,7 +518,7 @@ class _LedgerEntryCard extends StatelessWidget {
             Get.toNamed('/JournalEntryDetailsScreen', arguments: entry),
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: EdgeInsets.all(width * 0.035),
+          padding: EdgeInsets.all(isTab ? 14 : width * 0.035),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: colorsList.borderColor),
@@ -527,28 +532,29 @@ class _LedgerEntryCard extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: width * 0.11,
+                    width: isTab ? 44 : width * 0.11,
                     child: Column(
                       children: [
                         Text(
                           dateParts['day']!,
                           style: TextStyle(
-                            fontSize: width.fontSizeW(0.05),
+                            fontSize: isTab ? 18 : width.fontSizeW(0.05),
                             fontWeight: FontWeight.normal,
                             color: colorsList.primaryText,
                             height: 1,
                           ),
                         ),
-                        SizedBox(height: width * 0.005),
+                        SizedBox(height: isTab ? 2 : width * 0.005),
                         Text(
                           dateParts['month']!,
                           style: TextStyle(
-                            fontSize: width.fontSizeW(0.026),
+                            fontSize: isTab ? 11 : width.fontSizeW(0.026),
                             fontWeight: FontWeight.normal,
                             color: colorsList.secondaryText,
                             letterSpacing: 0.4,
@@ -557,14 +563,14 @@ class _LedgerEntryCard extends StatelessWidget {
                         Text(
                           dateParts['year']!,
                           style: TextStyle(
-                            fontSize: width.fontSizeW(0.024),
+                            fontSize: isTab ? 10 : width.fontSizeW(0.024),
                             color: colorsList.mutedTextColor,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(width: width * 0.03),
+                  SizedBox(width: isTab ? 10 : width * 0.03),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -575,22 +581,24 @@ class _LedgerEntryCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width.fontSizeW(0.034),
+                            fontSize: isTab ? 13 : width.fontSizeW(0.034),
                             fontWeight: FontWeight.normal,
                           ),
                         ),
-                        SizedBox(height: width * 0.01),
+                        SizedBox(height: isTab ? 4 : width * 0.01),
                         Text(
                           'Ref #${entry.sourceId ?? '—'} · Journal #${entry.journalEntryId}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: colorsList.secondaryText,
-                            fontSize: width.fontSizeW(0.026),
+                            fontSize: isTab ? 11 : width.fontSizeW(0.026),
                           ),
                         ),
-                        SizedBox(height: width * 0.015),
+                        SizedBox(height: isTab ? 6 : width * 0.015),
                         Wrap(
-                          spacing: width * 0.015,
-                          runSpacing: width * 0.01,
+                          spacing: isTab ? 6 : width * 0.015,
+                          runSpacing: isTab ? 4 : width * 0.01,
                           children: [
                             _Badge(
                               label: entry.sourceTypeLabel,
@@ -607,18 +615,18 @@ class _LedgerEntryCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(width: width * 0.02),
+                  SizedBox(width: isTab ? 8 : width * 0.02),
                   Text(
                     controller.formatMoney(entry.totalAmount),
                     style: TextStyle(
                       color: colorsList.primaryText,
-                      fontSize: width.fontSizeW(0.034),
+                      fontSize: isTab ? 13 : width.fontSizeW(0.034),
                       fontWeight: FontWeight.normal,
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: width * 0.03),
+              SizedBox(height: isTab ? 10 : width * 0.03),
               Align(
                 alignment: Alignment.centerRight,
                 child: OutlinedButton.icon(
@@ -626,20 +634,20 @@ class _LedgerEntryCard extends StatelessWidget {
                     '/JournalEntryDetailsScreen',
                     arguments: entry,
                   ),
-                  icon: Icon(Icons.visibility_outlined, size: width * 0.04),
+                  icon: Icon(Icons.visibility_outlined, size: isTab ? 14 : width * 0.04),
                   label: Text(
                     'View',
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: width.fontSizeW(0.03),
+                      fontSize: isTab ? 11 : width.fontSizeW(0.03),
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: colorsList.colorButton,
                     side: BorderSide(color: colorsList.borderColor),
                     padding: EdgeInsets.symmetric(
-                      horizontal: width * 0.035,
-                      vertical: width * 0.02,
+                      horizontal: isTab ? 12 : width * 0.035,
+                      vertical: isTab ? 6 : width * 0.02,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
