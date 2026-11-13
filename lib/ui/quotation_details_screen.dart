@@ -1,5 +1,6 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/quotation_details_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,8 +18,8 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final rs = context.rs;
+    final isTab = rs.isTablet;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -44,20 +45,20 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Quotation',
                 style: TextStyle(
                   color: colorsList.textColor,
                   fontSize: 18,
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               if (numStr.isNotEmpty)
                 Text(
                   numStr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: colorsList.textHintColor,
-                    fontSize: width * 0.030,
+                    fontSize: 12,
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -73,7 +74,7 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
               size: 22,
             ),
           ),
-          SizedBox(width: width * 0.02),
+          const SizedBox(width: 8),
         ],
       ),
 
@@ -116,644 +117,665 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
             SafeArea(
               child: Column(
                 children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    width * 0.045,
-                    height * 0.018,
-                    width * 0.045,
-                    height * 0.04,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ====================================================
-                      // 1. CUSTOMER HEADER CARD
-                      // ====================================================
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: rs.pagePaddingH,
+                        vertical: rs.s(16),
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // ====================================================
+                              // 1. CUSTOMER HEADER CARD
+                              // ====================================================
 
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(width * 0.045),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE4EAF1)),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.clientName ?? 'Customer',
-                                    style: TextStyle(
-                                      fontSize: width * 0.045,
-                                      fontWeight: FontWeight.normal,
-                                      color: colorsList.textColor,
-                                    ),
-                                  ),
-                                  if ((item.clientEmail ?? '').isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      item.clientEmail!,
-                                      style: TextStyle(
-                                        fontSize: width * 0.031,
-                                        color: colorsList.textHintColor,
+                              Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: const Color(0xFFE4EAF1)),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.clientName ?? 'Customer',
+                                            style: TextStyle(
+                                              fontSize: isTab ? 18 : rs.sp(18),
+                                              fontWeight: FontWeight.bold,
+                                              color: colorsList.textColor,
+                                            ),
+                                          ),
+                                          if ((item.clientEmail ?? '').isNotEmpty) ...[
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              item.clientEmail!,
+                                              style: TextStyle(
+                                                fontSize: isTab ? 13 : rs.sp(13),
+                                                color: colorsList.textHintColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 5,
-                                    height: 5,
-                                    decoration: BoxDecoration(
-                                      color: statusColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    displayStatus,
-                                    style: TextStyle(
-                                      fontSize: width * 0.027,
-                                      color: statusColor,
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: height * 0.018),
-
-                      // ====================================================
-                      // 2. FINANCIAL & DATE STATS GRID (4 BOXES)
-                      // ====================================================
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _statBox(
-                              'Date',
-                              _formatDate(item.issueDate),
-                              width,
-                            ),
-                          ),
-                          SizedBox(width: width * 0.025),
-                          Expanded(
-                            child: _statBox(
-                              'Valid until',
-                              item.validUntil != null ? _formatDate(item.validUntil) : '—',
-                              width,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: height * 0.012),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Obx(
-                              () => _statBox(
-                                'Total',
-                                controller.formatCurrency(controller.totalAmount),
-                                width,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: width * 0.025),
-                          Expanded(
-                            child: _statBox(
-                              'Accepted',
-                              item.acceptedAt != null ? _formatDate(item.acceptedAt) : '—',
-                              width,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: height * 0.018),
-
-                      // ====================================================
-                      // 3. CUSTOMER ADDRESS CARD
-                      // ====================================================
-
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(width * 0.045),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE4EAF1)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Customer address',
-                              style: TextStyle(
-                                fontSize: width * 0.038,
-                                fontWeight: FontWeight.normal,
-                                color: colorsList.textColor,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              (item.clientAddress ?? '').isNotEmpty
-                                  ? item.clientAddress!
-                                  : '—',
-                              style: TextStyle(
-                                fontSize: width * 0.032,
-                                color: colorsList.secondaryText,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: height * 0.022),
-
-                      // ====================================================
-                      // 4. ITEMS TABLE CARD
-                      // ====================================================
-
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(width * 0.045),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE4EAF1)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Items',
-                              style: TextStyle(
-                                fontSize: width * 0.040,
-                                fontWeight: FontWeight.normal,
-                                color: colorsList.textColor,
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-
-                            Obx(() {
-                              if (controller.isLoadingItems.value && controller.offerItems.isEmpty) {
-                                return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              }
-
-                              if (controller.offerItems.isEmpty) {
-                                return const Text(
-                                  'No items in this quotation.',
-                                  style: TextStyle(
-                                    color: colorsList.textHintColor,
-                                    fontSize: 13,
-                                  ),
-                                );
-                              }
-
-                              return Column(
-                                children: [
-                                  // TABLE HEADER
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                      horizontal: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF8FAFC),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          flex: 4,
-                                          child: Text(
-                                            'DESCRIPTION',
-                                            style: TextStyle(
-                                              fontSize: width * 0.025,
-                                              color: colorsList.textHintColor,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: width * 0.10,
-                                          child: Text(
-                                            'QTY',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: width * 0.025,
-                                              color: colorsList.textHintColor,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: width * 0.18,
-                                          child: Text(
-                                            'UNIT',
-                                            textAlign: TextAlign.right,
-                                            style: TextStyle(
-                                              fontSize: width * 0.025,
-                                              color: colorsList.textHintColor,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: width * 0.12,
-                                          child: Text(
-                                            'VAT',
-                                            textAlign: TextAlign.right,
-                                            style: TextStyle(
-                                              fontSize: width * 0.025,
-                                              color: colorsList.textHintColor,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: width * 0.20,
-                                          child: Text(
-                                            'TOTAL',
-                                            textAlign: TextAlign.right,
-                                            style: TextStyle(
-                                              fontSize: width * 0.025,
-                                              color: colorsList.textHintColor,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 6),
-
-                                  // ITEM ROWS
-                                  ...controller.offerItems.map((line) {
-                                    return Padding(
+                                    Container(
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                        horizontal: 6,
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: statusColor.withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Expanded(
-                                            flex: 4,
-                                            child: Text(
-                                              line.description,
-                                              style: TextStyle(
-                                                fontSize: width * 0.030,
-                                                color: colorsList.textColor,
-                                              ),
+                                          Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: BoxDecoration(
+                                              color: statusColor,
+                                              shape: BoxShape.circle,
                                             ),
                                           ),
-                                          SizedBox(
-                                            width: width * 0.10,
-                                            child: Text(
-                                              _formatNum(line.quantity),
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: width * 0.030,
-                                                color: colorsList.textColor,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: width * 0.18,
-                                            child: Text(
-                                              controller.formatCurrency(line.unitPrice),
-                                              textAlign: TextAlign.right,
-                                              style: TextStyle(
-                                                fontSize: width * 0.030,
-                                                color: colorsList.textColor,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: width * 0.12,
-                                            child: Text(
-                                              '${_formatNum(line.vatRate)}%',
-                                              textAlign: TextAlign.right,
-                                              style: TextStyle(
-                                                fontSize: width * 0.030,
-                                                color: colorsList.textColor,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: width * 0.20,
-                                            child: Text(
-                                              controller.formatCurrency(line.total),
-                                              textAlign: TextAlign.right,
-                                              style: TextStyle(
-                                                fontSize: width * 0.030,
-                                                color: colorsList.textColor,
-                                              ),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            displayStatus,
+                                            style: TextStyle(
+                                              fontSize: isTab ? 11 : rs.sp(11),
+                                              color: statusColor,
+                                              fontWeight: FontWeight.w600,
                                             ),
                                           ),
                                         ],
                                       ),
-                                    );
-                                  }).toList(),
-
-                                  const Divider(height: 16, color: Color(0xFFE2E8F0)),
-
-                                  // TOTAL ROW
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                      horizontal: 6,
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Total',
-                                          style: TextStyle(
-                                            fontSize: width * 0.034,
-                                            color: colorsList.textColor,
-                                          ),
-                                        ),
-                                        Obx(
-                                          () => Text(
-                                            controller.formatCurrency(controller.totalAmount),
-                                            style: TextStyle(
-                                              fontSize: width * 0.036,
-                                              color: colorsList.textColor,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // ====================================================
+                              // 2. FINANCIAL & DATE STATS GRID (4 BOXES)
+                              // ====================================================
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _statBox(
+                                      context,
+                                      'Date',
+                                      _formatDate(item.issueDate),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _statBox(
+                                      context,
+                                      'Valid until',
+                                      item.validUntil != null ? _formatDate(item.validUntil) : '—',
                                     ),
                                   ),
                                 ],
-                              );
-                            }),
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Obx(
+                                      () => _statBox(
+                                        context,
+                                        'Total',
+                                        controller.formatCurrency(controller.totalAmount),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _statBox(
+                                      context,
+                                      'Accepted',
+                                      item.acceptedAt != null ? _formatDate(item.acceptedAt) : '—',
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // ====================================================
+                              // 3. CUSTOMER ADDRESS CARD
+                              // ====================================================
+
+                              Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: const Color(0xFFE4EAF1)),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Customer address',
+                                      style: TextStyle(
+                                        fontSize: isTab ? 14 : rs.sp(14),
+                                        fontWeight: FontWeight.bold,
+                                        color: colorsList.textColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      (item.clientAddress ?? '').isNotEmpty
+                                          ? item.clientAddress!
+                                          : '—',
+                                      style: TextStyle(
+                                        fontSize: isTab ? 13 : rs.sp(13),
+                                        color: colorsList.secondaryText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // ====================================================
+                              // 4. ITEMS TABLE CARD
+                              // ====================================================
+
+                              Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: const Color(0xFFE4EAF1)),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Items',
+                                      style: TextStyle(
+                                        fontSize: isTab ? 15 : rs.sp(15),
+                                        fontWeight: FontWeight.bold,
+                                        color: colorsList.textColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+
+                                    Obx(() {
+                                      if (controller.isLoadingItems.value && controller.offerItems.isEmpty) {
+                                        return const Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(20),
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+                                      }
+
+                                      if (controller.offerItems.isEmpty) {
+                                        return const Text(
+                                          'No items in this quotation.',
+                                          style: TextStyle(
+                                            color: colorsList.textHintColor,
+                                            fontSize: 13,
+                                          ),
+                                        );
+                                      }
+
+                                      return Column(
+                                        children: [
+                                          // TABLE HEADER
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 8,
+                                              horizontal: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF8FAFC),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  flex: 4,
+                                                  child: Text(
+                                                    'DESCRIPTION',
+                                                    style: TextStyle(
+                                                      fontSize: isTab ? 10.5 : rs.sp(10),
+                                                      fontWeight: FontWeight.w600,
+                                                      color: colorsList.textHintColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: isTab ? 50 : 40,
+                                                  child: Text(
+                                                    'QTY',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: isTab ? 10.5 : rs.sp(10),
+                                                      fontWeight: FontWeight.w600,
+                                                      color: colorsList.textHintColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: isTab ? 80 : 65,
+                                                  child: Text(
+                                                    'UNIT',
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                      fontSize: isTab ? 10.5 : rs.sp(10),
+                                                      fontWeight: FontWeight.w600,
+                                                      color: colorsList.textHintColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: isTab ? 50 : 40,
+                                                  child: Text(
+                                                    'VAT',
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                      fontSize: isTab ? 10.5 : rs.sp(10),
+                                                      fontWeight: FontWeight.w600,
+                                                      color: colorsList.textHintColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: isTab ? 85 : 70,
+                                                  child: Text(
+                                                    'TOTAL',
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                      fontSize: isTab ? 10.5 : rs.sp(10),
+                                                      fontWeight: FontWeight.w600,
+                                                      color: colorsList.textHintColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          const SizedBox(height: 6),
+
+                                          // ITEM ROWS
+                                          ...controller.offerItems.map((line) {
+                                            return Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                vertical: 8,
+                                                horizontal: 8,
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    flex: 4,
+                                                    child: Text(
+                                                      line.description,
+                                                      style: TextStyle(
+                                                        fontSize: isTab ? 13 : rs.sp(13),
+                                                        color: colorsList.textColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: isTab ? 50 : 40,
+                                                    child: Text(
+                                                      _formatNum(line.quantity),
+                                                      textAlign: TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontSize: isTab ? 13 : rs.sp(13),
+                                                        color: colorsList.textColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: isTab ? 80 : 65,
+                                                    child: Text(
+                                                      controller.formatCurrency(line.unitPrice),
+                                                      textAlign: TextAlign.right,
+                                                      style: TextStyle(
+                                                        fontSize: isTab ? 13 : rs.sp(13),
+                                                        color: colorsList.textColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: isTab ? 50 : 40,
+                                                    child: Text(
+                                                      '${_formatNum(line.vatRate)}%',
+                                                      textAlign: TextAlign.right,
+                                                      style: TextStyle(
+                                                        fontSize: isTab ? 13 : rs.sp(13),
+                                                        color: colorsList.textColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: isTab ? 85 : 70,
+                                                    child: Text(
+                                                      controller.formatCurrency(line.total),
+                                                      textAlign: TextAlign.right,
+                                                      style: TextStyle(
+                                                        fontSize: isTab ? 13 : rs.sp(13),
+                                                        fontWeight: FontWeight.w600,
+                                                        color: colorsList.textColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }),
+
+                                          const Divider(height: 16, color: Color(0xFFE2E8F0)),
+
+                                          // TOTAL ROW
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 4,
+                                              horizontal: 8,
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  'Total',
+                                                  style: TextStyle(
+                                                    fontSize: isTab ? 14 : rs.sp(14),
+                                                    fontWeight: FontWeight.bold,
+                                                    color: colorsList.textColor,
+                                                  ),
+                                                ),
+                                                Obx(
+                                                  () => Text(
+                                                    controller.formatCurrency(controller.totalAmount),
+                                                    style: TextStyle(
+                                                      fontSize: isTab ? 16 : rs.sp(16),
+                                                      fontWeight: FontWeight.bold,
+                                                      color: colorsList.textColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // ==========================================================
+                  // BOTTOM ACTIONS BAR
+                  // ==========================================================
+
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.fromLTRB(
+                      rs.pagePaddingH,
+                      12,
+                      rs.pagePaddingH,
+                      16,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                        top: BorderSide(color: Color(0xFFE5EAF0)),
+                      ),
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  AppSnackbar.info(
+                                    title: 'Send Quotation',
+                                    message: 'Send quotation feature is being prepared.',
+                                  );
+                                },
+                                icon: const Icon(Icons.send_outlined, size: 18),
+                                label: const Text(
+                                  'Send',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: colorsList.primaryBlue,
+                                  side: const BorderSide(color: colorsList.primaryBlue),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  _showMoreMenuSheet(context);
+                                },
+                                icon: const Icon(Icons.more_horiz_rounded, size: 20),
+                                label: const Text(
+                                  'More',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colorsList.colorButton,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
+            ),
 
-              // ==========================================================
-              // BOTTOM ACTIONS BAR
-              // ==========================================================
+            // DELETING OVERLAY
+            Obx(() {
+              if (!controller.isDeleting.value) {
+                return const SizedBox.shrink();
+              }
 
-              Container(
-                padding: EdgeInsets.fromLTRB(
-                  width * 0.045,
-                  height * 0.012,
-                  width * 0.045,
-                  height * 0.02,
-                ),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(color: Color(0xFFE5EAF0)),
+              return Container(
+                color: Colors.black.withValues(alpha: 0.45),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(
+                          color: colorsList.primaryBlue,
+                          strokeWidth: 3,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Deleting quotation...',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: colorsList.textColor,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Please wait a moment',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorsList.textHintColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          AppSnackbar.info(
-                            title: 'Send Quotation',
-                            message: 'Send quotation feature is being prepared.',
-                          );
-                        },
-                        icon: const Icon(Icons.send_outlined, size: 18),
-                        label: const Text(
-                          'Send',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colorsList.primaryBlue,
-                          side: const BorderSide(color: colorsList.primaryBlue),
-                          minimumSize: Size(0, height * 0.055),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          _showMoreMenuSheet(context);
-                        },
-                        icon: const Icon(Icons.more_horiz_rounded, size: 20),
-                        label: const Text(
-                          'More',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorsList.colorButton,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          minimumSize: Size(0, height * 0.055),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // DELETING OVERLAY
-              Obx(() {
-                if (!controller.isDeleting.value) {
-                  return const SizedBox.shrink();
-                }
-
-                return Container(
-                  color: Colors.black.withValues(alpha: 0.45),
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 28,
-                        vertical: 24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(
-                            color: colorsList.primaryBlue,
-                            strokeWidth: 3,
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Deleting quotation...',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: colorsList.textColor,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Please wait a moment',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: colorsList.textHintColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ],
-          );
-        }),
-      );
-    }
+              );
+            }),
+          ],
+        );
+      }),
+    );
+  }
 
   // ================================================================
   // MORE MENU BOTTOM SHEET
   // ================================================================
 
   void _showMoreMenuSheet(BuildContext context) {
-    Get.bottomSheet(
+    showModalBottomSheet(
+      context: context,
       backgroundColor: Colors.transparent,
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20),
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 38,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'More Options',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E293B),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'More Options',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
+                    ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () => Get.back(),
-                  icon: const Icon(
-                    Icons.close_rounded,
-                    color: Color(0xFF64748B),
-                    size: 20,
+                  IconButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFF64748B),
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _moreOptionTile(
-              title: 'Download document',
-              subtitle: 'View or print quotation document',
-              icon: Icons.file_download_outlined,
-              iconColor: const Color(0xFF0284C7),
-              onTap: () {
-                Get.back();
-                controller.downloadQuotationDocument();
-              },
-            ),
-            const SizedBox(height: 8),
-            _moreOptionTile(
-              title: 'Edit quotation',
-              subtitle: 'Modify quotation details or items',
-              icon: Icons.edit_outlined,
-              iconColor: colorsList.primaryBlue,
-              onTap: () async {
-                Get.back();
-                final currentOffer = controller.quotation.value;
-                if (currentOffer != null) {
-                  final result = await Get.toNamed('/EditQuotationScreen', arguments: currentOffer);
-                  if (result == true) {
-                    controller.getOfferItems();
+                ],
+              ),
+              const SizedBox(height: 12),
+              _moreOptionTile(
+                title: 'Download document',
+                subtitle: 'View or print quotation document',
+                icon: Icons.file_download_outlined,
+                iconColor: const Color(0xFF0284C7),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  controller.downloadQuotationDocument();
+                },
+              ),
+              const SizedBox(height: 8),
+              _moreOptionTile(
+                title: 'Edit quotation',
+                subtitle: 'Modify quotation details or items',
+                icon: Icons.edit_outlined,
+                iconColor: colorsList.primaryBlue,
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final currentOffer = controller.quotation.value;
+                  if (currentOffer != null) {
+                    final result = await Get.toNamed('/EditQuotationScreen', arguments: currentOffer);
+                    if (result == true) {
+                      controller.getOfferItems();
+                    }
                   }
-                }
-              },
-            ),
-            const SizedBox(height: 8),
-            _moreOptionTile(
-              title: 'Delete quotation',
-              subtitle: 'Permanently remove this quotation',
-              icon: Icons.delete_outline_rounded,
-              iconColor: const Color(0xFFDC2626),
-              onTap: () {
-                Get.back();
-                controller.deleteQuotation();
-              },
-            ),
-          ],
+                },
+              ),
+              const SizedBox(height: 8),
+              _moreOptionTile(
+                title: 'Delete quotation',
+                subtitle: 'Permanently remove this quotation',
+                icon: Icons.delete_outline_rounded,
+                iconColor: const Color(0xFFDC2626),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  controller.deleteQuotation();
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -800,7 +822,7 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
                         title,
                         style: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                           color: Color(0xFF1E293B),
                         ),
                       ),
@@ -832,9 +854,12 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
   // HELPER WIDGETS
   // ================================================================
 
-  Widget _statBox(String label, String value, double width) {
+  Widget _statBox(BuildContext context, String label, String value) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
-      padding: EdgeInsets.all(width * 0.035),
+      padding: EdgeInsets.all(isTab ? 14 : rs.s(14)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -846,16 +871,18 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
           Text(
             label,
             style: TextStyle(
-              fontSize: width * 0.027,
+              fontSize: isTab ? 11 : rs.sp(11),
               color: colorsList.textHintColor,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: width * 0.034,
-              fontWeight: FontWeight.normal,
+              fontSize: isTab ? 14 : rs.sp(14),
+              fontWeight: FontWeight.bold,
               color: colorsList.textColor,
             ),
           ),

@@ -163,6 +163,7 @@ class ResponsiveSheetBody extends StatelessWidget {
 
     return Align(
       alignment: Alignment.bottomCenter,
+      heightFactor: 1.0,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
         child: Padding(

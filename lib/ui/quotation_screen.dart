@@ -28,7 +28,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ======================================================
-              // 1. TOP BAR (BACK BUTTON & TITLE)
+              // 1. TOP HEADER BAR
               // ======================================================
               Padding(
                 padding: EdgeInsets.symmetric(
@@ -87,7 +87,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                     ),
                     SizedBox(height: rs.s(2)),
                     Text(
-                      'Create, manage, and track your sales quotes & offers.',
+                      'Manage, track, and send quotations to customers.',
                       style: TextStyle(
                         color: const Color(0xFF64748B),
                         fontSize: rs.sp(12),
@@ -135,7 +135,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                             fontSize: rs.sp(13),
                           ),
                           decoration: const InputDecoration(
-                            hintText: 'Search here',
+                            hintText: 'Search quotation here...',
                             hintStyle: TextStyle(
                               color: Color(0xFF94A3B8),
                               fontSize: 13,
@@ -200,21 +200,55 @@ class _QuotationScreenState extends State<QuotationScreen> {
                     );
                   }
 
+                  final cols = rs.listColumns;
+                  final quotations = controller.filteredQuotations;
+
+                  if (cols <= 1) {
+                    return RefreshIndicator(
+                      onRefresh: controller.refreshQuotations,
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(
+                          top: rs.s(4),
+                          left: rs.pagePaddingH,
+                          right: rs.pagePaddingH,
+                          bottom: rs.s(96),
+                        ),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: quotations.length,
+                        itemBuilder: (context, index) {
+                          return _buildQuotationCard(
+                            item: quotations[index],
+                            context: context,
+                            asGridTile: false,
+                          );
+                        },
+                      ),
+                    );
+                  }
+
                   return RefreshIndicator(
                     onRefresh: controller.refreshQuotations,
-                    child: ListView.builder(
+                    child: GridView.builder(
                       padding: EdgeInsets.only(
                         left: rs.pagePaddingH,
                         right: rs.pagePaddingH,
                         bottom: rs.s(96),
                       ),
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: controller.filteredQuotations.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: cols,
+                        crossAxisSpacing: rs.s(12),
+                        mainAxisSpacing: rs.s(12),
+                        childAspectRatio: rs.isTablet
+                            ? (rs.isLandscape ? 1.45 : 1.05)
+                            : (rs.isLandscape ? 2.6 : 1.8),
+                      ),
+                      itemCount: quotations.length,
                       itemBuilder: (context, index) {
-                        final item = controller.filteredQuotations[index];
                         return _buildQuotationCard(
-                          item: item,
+                          item: quotations[index],
                           context: context,
+                          asGridTile: true,
                         );
                       },
                     ),
@@ -253,7 +287,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
   void _showQuotationActions(BuildContext context, QuotationModel item) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: colorsList.colorWhite,
+      backgroundColor: Colors.transparent,
       builder: (ctx) => ResponsiveSheetBody(
         padding: EdgeInsets.zero,
         child: Container(
@@ -265,6 +299,23 @@ class _QuotationScreenState extends State<QuotationScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        item.offerNumber.isNotEmpty ? item.offerNumber : 'Quotation #${item.id}',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
                 ListTile(
                   leading: const Icon(Icons.visibility_outlined, color: Color(0xFF2563EB)),
                   title: const Text('View Quotation Details'),
@@ -273,6 +324,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                     Get.toNamed('/QuotationDetailsScreen', arguments: item);
                   },
                 ),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -288,8 +340,10 @@ class _QuotationScreenState extends State<QuotationScreen> {
   Widget _buildQuotationCard({
     required QuotationModel item,
     required BuildContext context,
+    bool asGridTile = false,
   }) {
     final rs = context.rs;
+    final isTab = rs.isTablet;
     final String statusStr = item.status.toLowerCase().trim();
     Color pillBg;
     Color pillBorder;
@@ -321,7 +375,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
     final String acceptedStr = _formatDate(item.acceptedAt);
 
     return Container(
-      margin: EdgeInsets.only(bottom: rs.s(14)),
+      margin: EdgeInsets.only(bottom: asGridTile ? 0 : rs.s(14)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -346,9 +400,10 @@ class _QuotationScreenState extends State<QuotationScreen> {
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: EdgeInsets.all(rs.s(16)),
+            padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // 1. TOP HEADER ROW (OFFER NUMBER + STATUS BADGE + MORE MENU)
                 Row(
@@ -359,7 +414,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: rs.sp(16),
+                          fontSize: isTab ? 15 : rs.sp(16),
                           fontWeight: FontWeight.normal,
                           color: const Color(0xFF0A2342),
                         ),
@@ -367,8 +422,8 @@ class _QuotationScreenState extends State<QuotationScreen> {
                     ),
                     Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: rs.s(12),
-                        vertical: rs.s(4),
+                        horizontal: isTab ? 8 : rs.s(12),
+                        vertical: isTab ? 3 : rs.s(4),
                       ),
                       decoration: BoxDecoration(
                         color: pillBg,
@@ -378,13 +433,13 @@ class _QuotationScreenState extends State<QuotationScreen> {
                       child: Text(
                         displayStatus,
                         style: TextStyle(
-                          fontSize: rs.sp(12),
+                          fontSize: isTab ? 11 : rs.sp(12),
                           fontWeight: FontWeight.normal,
                           color: pillText,
                         ),
                       ),
                     ),
-                    SizedBox(width: rs.s(4)),
+                    SizedBox(width: isTab ? 2 : rs.s(4)),
                     IconButton(
                       onPressed: () {
                         _showQuotationActions(context, item);
@@ -400,9 +455,9 @@ class _QuotationScreenState extends State<QuotationScreen> {
                   ],
                 ),
 
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+                  child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
                 ),
 
                 // 2. MIDDLE DETAILS 2X3 GRID
@@ -414,11 +469,11 @@ class _QuotationScreenState extends State<QuotationScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _statField(context, 'CUSTOMER', item.clientName ?? '—'),
-                          SizedBox(height: rs.s(10)),
-                          _statField(context, 'VALID UNTIL', validUntilStr),
-                          SizedBox(height: rs.s(10)),
-                          _statField(context, 'SIGNATURE', '—'),
+                          _statField(context, 'CUSTOMER', item.clientName ?? '—', isTab: isTab),
+                          SizedBox(height: isTab ? 6 : rs.s(10)),
+                          _statField(context, 'VALID UNTIL', validUntilStr, isTab: isTab),
+                          SizedBox(height: isTab ? 6 : rs.s(10)),
+                          _statField(context, 'SIGNATURE', '—', isTab: isTab),
                         ],
                       ),
                     ),
@@ -428,18 +483,18 @@ class _QuotationScreenState extends State<QuotationScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _statField(context, 'DATE', dateStr),
-                          SizedBox(height: rs.s(10)),
-                          _statField(context, 'ACCEPTED', acceptedStr),
+                          _statField(context, 'DATE', dateStr, isTab: isTab),
+                          SizedBox(height: isTab ? 6 : rs.s(10)),
+                          _statField(context, 'ACCEPTED', acceptedStr, isTab: isTab),
                         ],
                       ),
                     ),
                   ],
                 ),
 
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+                  child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
                 ),
 
                 // 3. BOTTOM AMOUNTS ROW (TOTAL)
@@ -449,7 +504,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                     Text(
                       'TOTAL',
                       style: TextStyle(
-                        fontSize: rs.sp(10),
+                        fontSize: isTab ? 10 : rs.sp(10),
                         fontWeight: FontWeight.normal,
                         color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
@@ -458,7 +513,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
                     Text(
                       '${item.totalAmount.toStringAsFixed(2)} €',
                       style: TextStyle(
-                        fontSize: rs.sp(16),
+                        fontSize: isTab ? 14 : rs.sp(16),
                         fontWeight: FontWeight.normal,
                         color: const Color(0xFF0A2342),
                       ),
@@ -473,7 +528,7 @@ class _QuotationScreenState extends State<QuotationScreen> {
     );
   }
 
-  Widget _statField(BuildContext context, String label, String value) {
+  Widget _statField(BuildContext context, String label, String value, {bool isTab = false}) {
     final rs = context.rs;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,19 +536,19 @@ class _QuotationScreenState extends State<QuotationScreen> {
         Text(
           label,
           style: TextStyle(
-            fontSize: rs.sp(10),
+            fontSize: isTab ? 9.5 : rs.sp(10),
             fontWeight: FontWeight.normal,
             color: const Color(0xFF94A3B8),
             letterSpacing: 0.5,
           ),
         ),
-        SizedBox(height: rs.s(2)),
+        const SizedBox(height: 2),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: rs.sp(13),
+            fontSize: isTab ? 12 : rs.sp(13),
             fontWeight: FontWeight.normal,
             color: const Color(0xFF0A2342),
           ),
