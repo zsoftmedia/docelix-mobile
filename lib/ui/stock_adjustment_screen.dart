@@ -1,4 +1,3 @@
-import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/stock_adjustment_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/stock_adjustment_model.dart';
@@ -20,7 +19,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
   @override
   Widget build(BuildContext context) {
     final rs = context.rs;
-    final width = MediaQuery.of(context).size.width;
+    final isTab = rs.isTablet;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -41,10 +40,10 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
               Get.back();
             }
           },
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
             color: colorsList.iconColor,
-            size: rs.s(20),
+            size: 20,
           ),
         ),
         title: Obx(() {
@@ -54,7 +53,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
               onChanged: _stockAdjustmentController.onSearchChanged,
               style: TextStyle(
                 color: colorsList.textColor,
-                fontSize: width * 0.04,
+                fontSize: isTab ? 14 : rs.sp(14),
               ),
               decoration: const InputDecoration(
                 hintText: 'Search product, code, or notes...',
@@ -64,12 +63,12 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
             );
           }
 
-          return Text(
+          return const Text(
             'Stock Adjustment',
             style: TextStyle(
               color: colorsList.textColor,
-              fontSize: rs.sp(18),
-              fontWeight: FontWeight.normal,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           );
         }),
@@ -78,24 +77,24 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
             if (_stockAdjustmentController.isSearching.value) {
               return IconButton(
                 onPressed: _stockAdjustmentController.closeSearch,
-                icon: Icon(
+                icon: const Icon(
                   Icons.close_rounded,
                   color: colorsList.iconColor,
-                  size: width * 0.06,
+                  size: 22,
                 ),
               );
             }
 
             return IconButton(
               onPressed: _stockAdjustmentController.openSearch,
-              icon: Icon(
+              icon: const Icon(
                 Icons.search_rounded,
                 color: colorsList.iconColor,
-                size: width * 0.065,
+                size: 22,
               ),
             );
           }),
-          SizedBox(width: width * 0.02),
+          const SizedBox(width: 8),
         ],
       ),
 
@@ -138,31 +137,67 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
         }
 
         final items = _stockAdjustmentController.filteredAdjustments;
+        final cols = rs.listColumns;
+
+        if (cols <= 1) {
+          return ResponsivePage(
+            padding: EdgeInsets.zero,
+            child: RefreshIndicator(
+              onRefresh: _stockAdjustmentController.refreshAdjustments,
+              child: ListView.builder(
+                padding: EdgeInsets.only(
+                  left: rs.pagePaddingH,
+                  right: rs.pagePaddingH,
+                  top: rs.s(12),
+                  bottom: rs.s(96),
+                ),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return _buildAdjustmentCard(
+                    context: context,
+                    item: item,
+                    asGridTile: false,
+                  );
+                },
+              ),
+            ),
+          );
+        }
 
         return ResponsivePage(
           padding: EdgeInsets.zero,
           child: RefreshIndicator(
             onRefresh: _stockAdjustmentController.refreshAdjustments,
-            child: ListView.builder(
+            child: GridView.builder(
               padding: EdgeInsets.only(
                 left: rs.pagePaddingH,
                 right: rs.pagePaddingH,
                 top: rs.s(12),
-                bottom: rs.s(24),
+                bottom: rs.s(96),
+              ),
+              physics: const AlwaysScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: cols,
+                crossAxisSpacing: rs.s(12),
+                mainAxisSpacing: rs.s(12),
+                childAspectRatio: rs.isTablet
+                    ? (rs.isLandscape ? 1.75 : 1.35)
+                    : (rs.isLandscape ? 2.6 : 1.8),
               ),
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
                 return _buildAdjustmentCard(
+                  context: context,
                   item: item,
-                  width: width,
+                  asGridTile: true,
                 );
               },
             ),
           ),
         );
       }),
-
 
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
@@ -183,13 +218,12 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
         label: Text(
           'Adjust Stock',
           style: TextStyle(
-            fontSize: rs.sp(15),
-            fontWeight: FontWeight.normal,
+            fontSize: rs.sp(14),
+            fontWeight: FontWeight.bold,
             color: colorsList.colorWhite,
           ),
         ),
       ),
-
     );
   }
 
@@ -198,9 +232,13 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
   // ================================================================
 
   Widget _buildAdjustmentCard({
+    required BuildContext context,
     required StockAdjustmentModel item,
-    required double width,
+    bool asGridTile = false,
   }) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     final String productName = item.articleName.isNotEmpty
         ? item.articleName
         : 'Product Item';
@@ -221,7 +259,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
     final String dateStr = _formatDate(item.date ?? item.createdAt);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: asGridTile ? 0 : 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -235,9 +273,10 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(width * 0.04),
+        padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // TOP ROW: PRODUCT NAME + CODE + TYPE BADGE
             Row(
@@ -252,16 +291,18 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: width * 0.038,
-                          fontWeight: FontWeight.normal,
+                          fontSize: isTab ? 15 : rs.sp(15),
+                          fontWeight: FontWeight.bold,
                           color: colorsList.textColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         articleCode,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: width * 0.029,
+                          fontSize: isTab ? 12 : rs.sp(12),
                           color: colorsList.textHintColor,
                         ),
                       ),
@@ -282,8 +323,8 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                   child: Text(
                     displayType,
                     style: TextStyle(
-                      fontSize: width * 0.027,
-                      fontWeight: FontWeight.normal,
+                      fontSize: isTab ? 11 : rs.sp(11),
+                      fontWeight: FontWeight.w600,
                       color: const Color(0xFF2563EB),
                     ),
                   ),
@@ -291,9 +332,9 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
               ],
             ),
 
-            SizedBox(height: width * 0.025),
+            const SizedBox(height: 10),
             const Divider(height: 1, color: Color(0xFFF0F4F8)),
-            SizedBox(height: width * 0.025),
+            const SizedBox(height: 10),
 
             // MIDDLE ROW: QUANTITY & DATE
             Row(
@@ -305,7 +346,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                     Text(
                       'Quantity',
                       style: TextStyle(
-                        fontSize: width * 0.026,
+                        fontSize: isTab ? 10.5 : rs.sp(10.5),
                         color: colorsList.textHintColor,
                       ),
                     ),
@@ -313,8 +354,8 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                     Text(
                       qtyText,
                       style: TextStyle(
-                        fontSize: width * 0.034,
-                        fontWeight: FontWeight.normal,
+                        fontSize: isTab ? 14 : rs.sp(14),
+                        fontWeight: FontWeight.bold,
                         color: isPositive
                             ? const Color(0xFF16A34A)
                             : const Color(0xFFDC2626),
@@ -329,7 +370,7 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                     Text(
                       'Date',
                       style: TextStyle(
-                        fontSize: width * 0.026,
+                        fontSize: isTab ? 10.5 : rs.sp(10.5),
                         color: colorsList.textHintColor,
                       ),
                     ),
@@ -337,8 +378,8 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                     Text(
                       dateStr,
                       style: TextStyle(
-                        fontSize: width * 0.030,
-                        fontWeight: FontWeight.normal,
+                        fontSize: isTab ? 12.5 : rs.sp(12.5),
+                        fontWeight: FontWeight.w500,
                         color: colorsList.textColor,
                       ),
                     ),
@@ -348,11 +389,11 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
             ),
 
             if (notesStr != '—') ...[
-              SizedBox(height: width * 0.022),
+              const SizedBox(height: 8),
               Text(
                 'Notes / Reason',
                 style: TextStyle(
-                  fontSize: width * 0.026,
+                  fontSize: isTab ? 10.5 : rs.sp(10.5),
                   color: colorsList.textHintColor,
                 ),
               ),
@@ -362,46 +403,11 @@ class _StockAdjustmentScreenState extends State<StockAdjustmentScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: width * 0.030,
+                  fontSize: isTab ? 12 : rs.sp(12),
                   color: colorsList.secondaryText,
                 ),
               ),
             ],
-
-            SizedBox(height: width * 0.025),
-            const Divider(height: 1, color: Color(0xFFF0F4F8)),
-            SizedBox(height: width * 0.022),
-
-            // ADJUST STOCK BUTTON
-            /*Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  AppSnackbar.info(
-                    title: 'Adjust Stock',
-                    message: 'Coming Soon!',
-                  );
-                },
-                icon: const Icon(Icons.tune_rounded, size: 16),
-                label: const Text(
-                  'Adjust Stock',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: colorsList.primaryBlue,
-                  side: const BorderSide(color: colorsList.primaryBlue),
-                  minimumSize: const Size(0, 36),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),*/
           ],
         ),
       ),

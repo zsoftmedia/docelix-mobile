@@ -18,7 +18,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
   @override
   Widget build(BuildContext context) {
     final rs = context.rs;
-    final width = MediaQuery.of(context).size.width;
+    final isTab = rs.isTablet;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -39,10 +39,10 @@ class _StockReportScreenState extends State<StockReportScreen> {
               Get.back();
             }
           },
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
             color: colorsList.iconColor,
-            size: rs.s(20),
+            size: 20,
           ),
         ),
         title: Obx(() {
@@ -52,7 +52,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
               onChanged: controller.onSearchChanged,
               style: TextStyle(
                 color: colorsList.textColor,
-                fontSize: width * 0.04,
+                fontSize: isTab ? 14 : rs.sp(14),
               ),
               decoration: const InputDecoration(
                 hintText: 'Search product, SKU or category...',
@@ -62,12 +62,12 @@ class _StockReportScreenState extends State<StockReportScreen> {
             );
           }
 
-          return Text(
+          return const Text(
             'Stock in & out report',
             style: TextStyle(
               color: colorsList.textColor,
-              fontSize: rs.sp(18),
-              fontWeight: FontWeight.normal,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           );
         }),
@@ -76,33 +76,33 @@ class _StockReportScreenState extends State<StockReportScreen> {
             if (controller.isSearching.value) {
               return IconButton(
                 onPressed: controller.closeSearch,
-                icon: Icon(
+                icon: const Icon(
                   Icons.close_rounded,
                   color: colorsList.iconColor,
-                  size: width * 0.06,
+                  size: 22,
                 ),
               );
             }
 
             return IconButton(
               onPressed: controller.openSearch,
-              icon: Icon(
+              icon: const Icon(
                 Icons.search_rounded,
                 color: colorsList.iconColor,
-                size: width * 0.06,
+                size: 22,
               ),
             );
           }),
           IconButton(
             onPressed: controller.exportReportPdf,
-            icon: Icon(
+            icon: const Icon(
               Icons.picture_as_pdf_outlined,
-              color: colorsList.primaryBlue,
-              size: width * 0.06,
+              color: colorsList.colorButton,
+              size: 22,
             ),
             tooltip: 'Export PDF',
           ),
-          SizedBox(width: width * 0.02),
+          const SizedBox(width: 8),
         ],
       ),
 
@@ -118,150 +118,155 @@ class _StockReportScreenState extends State<StockReportScreen> {
             // ======================================================
             Container(
               padding: EdgeInsets.symmetric(
-                horizontal: width * 0.04,
+                horizontal: rs.pagePaddingH,
                 vertical: 10,
               ),
               color: Colors.white,
-              child: Column(
-                children: [
-                  Row(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
+                  child: Column(
                     children: [
-                      // PRESET PERIOD DROPDOWN
-                      Expanded(
-                        flex: 4,
-                        child: Obx(
-                          () => Container(
-                            height: 38,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: controller.selectedPreset.value,
-                                isExpanded: true,
-                                icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                                    size: 18, color: Color(0xFF64748B)),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF1E293B),
+                      Row(
+                        children: [
+                          // PRESET PERIOD DROPDOWN
+                          Expanded(
+                            flex: 4,
+                            child: Obx(
+                              () => Container(
+                                height: 38,
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: const Color(0xFFE2E8F0)),
                                 ),
-                                items: const [
-                                  DropdownMenuItem(
-                                      value: 'this_month', child: Text('This month')),
-                                  DropdownMenuItem(
-                                      value: 'last_month', child: Text('Last month')),
-                                  DropdownMenuItem(
-                                      value: 'this_year', child: Text('This year')),
-                                  DropdownMenuItem(
-                                      value: 'custom', child: Text('Custom')),
-                                ],
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    controller.selectPresetPeriod(val);
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // FROM DATE PICKER
-                      Expanded(
-                        flex: 3,
-                        child: Obx(
-                          () => InkWell(
-                            onTap: () => controller.pickFromDate(context),
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              height: 38,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFE2E8F0)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _formatDateUI(controller.fromDate.value),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: controller.selectedPreset.value,
+                                    isExpanded: true,
+                                    icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                                        size: 18, color: Color(0xFF64748B)),
                                     style: const TextStyle(
-                                      fontSize: 11,
+                                      fontSize: 12,
                                       color: Color(0xFF1E293B),
                                     ),
+                                    items: const [
+                                      DropdownMenuItem(
+                                          value: 'this_month', child: Text('This month')),
+                                      DropdownMenuItem(
+                                          value: 'last_month', child: Text('Last month')),
+                                      DropdownMenuItem(
+                                          value: 'this_year', child: Text('This year')),
+                                      DropdownMenuItem(
+                                          value: 'custom', child: Text('Custom')),
+                                    ],
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        controller.selectPresetPeriod(val);
+                                      }
+                                    },
                                   ),
-                                  const Icon(
-                                    Icons.calendar_month_outlined,
-                                    size: 15,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
+                          const SizedBox(width: 8),
 
-                      // TO DATE PICKER
-                      Expanded(
-                        flex: 3,
-                        child: Obx(
-                          () => InkWell(
-                            onTap: () => controller.pickToDate(context),
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              height: 38,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
+                          // FROM DATE PICKER
+                          Expanded(
+                            flex: 3,
+                            child: Obx(
+                              () => InkWell(
+                                onTap: () => controller.pickFromDate(context),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFE2E8F0)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _formatDateUI(controller.toDate.value),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF1E293B),
-                                    ),
+                                child: Container(
+                                  height: 38,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFFE2E8F0)),
                                   ),
-                                  const Icon(
-                                    Icons.calendar_month_outlined,
-                                    size: 15,
-                                    color: Color(0xFF64748B),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        _formatDateUI(controller.fromDate.value),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.calendar_month_outlined,
+                                        size: 15,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
+                          const SizedBox(width: 8),
+
+                          // TO DATE PICKER
+                          Expanded(
+                            flex: 3,
+                            child: Obx(
+                              () => InkWell(
+                                onTap: () => controller.pickToDate(context),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  height: 38,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        _formatDateUI(controller.toDate.value),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.calendar_month_outlined,
+                                        size: 15,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // STATUS CHIPS (ALL STOCK, LOW STOCK, OUT OF STOCK)
+                      Obx(
+                        () => Row(
+                          children: [
+                            _filterChip('All stock', 'all', controller),
+                            const SizedBox(width: 8),
+                            _filterChip('Low stock', 'low', controller),
+                            const SizedBox(width: 8),
+                            _filterChip('Out of stock', 'out', controller),
+                          ],
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 10),
-
-                  // STATUS CHIPS (ALL STOCK, LOW STOCK, OUT OF STOCK)
-                  Obx(
-                    () => Row(
-                      children: [
-                        _filterChip('All stock', 'all', controller),
-                        const SizedBox(width: 8),
-                        _filterChip('Low stock', 'low', controller),
-                        const SizedBox(width: 8),
-                        _filterChip('Out of stock', 'out', controller),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
 
@@ -289,81 +294,134 @@ class _StockReportScreenState extends State<StockReportScreen> {
                   );
                 }
 
+                final rows = controller.filteredRows;
+                final cols = rs.listColumns;
+
                 return RefreshIndicator(
                   onRefresh: controller.fetchStockReport,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.all(width * 0.04),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // STATS SUMMARY GRID (4 BOXES)
-                        Row(
+                    padding: EdgeInsets.all(rs.pagePaddingH),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: _summaryStatBox(
-                                'STOCK ITEMS',
-                                '${controller.totalItems}',
-                                const Color(0xFF1E293B),
-                                width,
-                              ),
-                            ),
-                            SizedBox(width: width * 0.025),
-                            Expanded(
-                              child: _summaryStatBox(
-                                'MOVEMENTS',
-                                '${controller.totalMovements}',
-                                const Color(0xFF1E293B),
-                                width,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: width * 0.025),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _summaryStatBox(
-                                'LOW STOCK',
-                                '${controller.lowStockCount}',
-                                const Color(0xFFD97706),
-                                width,
-                              ),
-                            ),
-                            SizedBox(width: width * 0.025),
-                            Expanded(
-                              child: _summaryStatBox(
-                                'OUT OF STOCK',
-                                '${controller.outOfStockCount}',
-                                const Color(0xFFDC2626),
-                                width,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: width * 0.04),
-
-                        if (controller.filteredRows.isEmpty)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40),
-                              child: Text(
-                                'No stock report items found for selected period.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: colorsList.textHintColor,
+                            // STATS SUMMARY GRID (4 BOXES)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _summaryStatBox(
+                                    context,
+                                    'STOCK ITEMS',
+                                    '${controller.totalItems}',
+                                    const Color(0xFF1E293B),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _summaryStatBox(
+                                    context,
+                                    'MOVEMENTS',
+                                    '${controller.totalMovements}',
+                                    const Color(0xFF1E293B),
+                                  ),
+                                ),
+                                if (isTab) ...[
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _summaryStatBox(
+                                      context,
+                                      'LOW STOCK',
+                                      '${controller.lowStockCount}',
+                                      const Color(0xFFD97706),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _summaryStatBox(
+                                      context,
+                                      'OUT OF STOCK',
+                                      '${controller.outOfStockCount}',
+                                      const Color(0xFFDC2626),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                          )
-                        else
-                          ...controller.filteredRows.map((row) {
-                            return _buildReportCard(row: row, width: width);
-                          }).toList(),
-                      ],
+
+                            if (!isTab) ...[
+                              const SizedBox(height: 10),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _summaryStatBox(
+                                      context,
+                                      'LOW STOCK',
+                                      '${controller.lowStockCount}',
+                                      const Color(0xFFD97706),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _summaryStatBox(
+                                      context,
+                                      'OUT OF STOCK',
+                                      '${controller.outOfStockCount}',
+                                      const Color(0xFFDC2626),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+
+                            const SizedBox(height: 16),
+
+                            if (rows.isEmpty)
+                              const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 40),
+                                  child: Text(
+                                    'No stock report items found for selected period.',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: colorsList.textHintColor,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else if (cols > 1)
+                              GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: cols,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: rs.isLandscape ? 1.85 : 1.40,
+                                ),
+                                itemCount: rows.length,
+                                itemBuilder: (context, index) {
+                                  return _buildReportCard(
+                                    context: context,
+                                    row: rows[index],
+                                    asGridTile: true,
+                                  );
+                                },
+                              )
+                            else
+                              ...rows.map((row) {
+                                return _buildReportCard(
+                                  context: context,
+                                  row: row,
+                                  asGridTile: false,
+                                );
+                              }),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -399,7 +457,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
             ),
           ),
@@ -412,9 +470,12 @@ class _StockReportScreenState extends State<StockReportScreen> {
   // SUMMARY STAT BOX
   // ================================================================
 
-  Widget _summaryStatBox(String label, String value, Color textColor, double width) {
+  Widget _summaryStatBox(BuildContext context, String label, String value, Color textColor) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
-      padding: EdgeInsets.all(width * 0.035),
+      padding: EdgeInsets.all(isTab ? 14 : rs.s(14)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -426,8 +487,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
           Text(
             label,
             style: TextStyle(
-              fontSize: width * 0.025,
-              fontWeight: FontWeight.w500,
+              fontSize: isTab ? 10 : rs.sp(10),
+              fontWeight: FontWeight.w600,
               color: const Color(0xFF64748B),
             ),
           ),
@@ -435,8 +496,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
           Text(
             value,
             style: TextStyle(
-              fontSize: width * 0.048,
-              fontWeight: FontWeight.normal,
+              fontSize: isTab ? 20 : rs.sp(20),
+              fontWeight: FontWeight.bold,
               color: textColor,
             ),
           ),
@@ -450,9 +511,13 @@ class _StockReportScreenState extends State<StockReportScreen> {
   // ================================================================
 
   Widget _buildReportCard({
+    required BuildContext context,
     required StockReportRowModel row,
-    required double width,
+    bool asGridTile = false,
   }) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     final String statusStr = row.status.toLowerCase().trim();
     Color statusBg;
     Color statusFg;
@@ -473,16 +538,17 @@ class _StockReportScreenState extends State<StockReportScreen> {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: asGridTile ? 0 : 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE4EAF1)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(width * 0.04),
+        padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // TOP ROW: PRODUCT NAME + CODE + STATUS BADGE
             Row(
@@ -493,17 +559,21 @@ class _StockReportScreenState extends State<StockReportScreen> {
                     children: [
                       Text(
                         row.articleName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: width * 0.038,
-                          fontWeight: FontWeight.normal,
+                          fontSize: isTab ? 15 : rs.sp(15),
+                          fontWeight: FontWeight.bold,
                           color: colorsList.textColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         row.articleNumber,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: width * 0.029,
+                          fontSize: isTab ? 12 : rs.sp(12),
                           color: colorsList.textHintColor,
                         ),
                       ),
@@ -528,8 +598,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       Text(
                         statusLabel,
                         style: TextStyle(
-                          fontSize: width * 0.026,
-                          fontWeight: FontWeight.normal,
+                          fontSize: isTab ? 11 : rs.sp(11),
+                          fontWeight: FontWeight.w600,
                           color: statusFg,
                         ),
                       ),
@@ -539,18 +609,18 @@ class _StockReportScreenState extends State<StockReportScreen> {
               ],
             ),
 
-            SizedBox(height: width * 0.025),
+            const SizedBox(height: 10),
             const Divider(height: 1, color: Color(0xFFF0F4F8)),
-            SizedBox(height: width * 0.025),
+            const SizedBox(height: 10),
 
             // DETAILS ROW: OPENING | IN | OUT | CLOSING
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _statColumn('Opening', '${_formatNum(row.opening)} ${row.unitCode}', width),
-                _statColumn('Stock in', row.qtyIn > 0 ? '+${_formatNum(row.qtyIn)} ${row.unitCode}' : '—', width),
-                _statColumn('Stock out', row.qtyOut > 0 ? '-${_formatNum(row.qtyOut)} ${row.unitCode}' : '—', width),
-                _statColumn('Closing balance', '${_formatNum(row.closing)} ${row.unitCode}', width, isBold: true),
+                _statColumn(context, 'Opening', '${_formatNum(row.opening)} ${row.unitCode}'),
+                _statColumn(context, 'Stock in', row.qtyIn > 0 ? '+${_formatNum(row.qtyIn)} ${row.unitCode}' : '—'),
+                _statColumn(context, 'Stock out', row.qtyOut > 0 ? '-${_formatNum(row.qtyOut)} ${row.unitCode}' : '—'),
+                _statColumn(context, 'Closing balance', '${_formatNum(row.closing)} ${row.unitCode}', isBold: true),
               ],
             ),
           ],
@@ -559,20 +629,26 @@ class _StockReportScreenState extends State<StockReportScreen> {
     );
   }
 
-  Widget _statColumn(String label, String value, double width, {bool isBold = false}) {
+  Widget _statColumn(BuildContext context, String label, String value, {bool isBold = false}) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: width * 0.025, color: colorsList.textHintColor),
+          style: TextStyle(
+            fontSize: isTab ? 10 : rs.sp(10),
+            color: colorsList.textHintColor,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
           style: TextStyle(
-            fontSize: width * 0.029,
-            fontWeight: FontWeight.normal,
+            fontSize: isTab ? 12.5 : rs.sp(12.5),
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             color: isBold ? const Color(0xFF063C70) : colorsList.textColor,
           ),
         ),
