@@ -1,4 +1,5 @@
 import 'package:docelix_mobileapp/controllers/purchase_details_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/purchase_details_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +18,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final rs = context.rs;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -44,19 +44,19 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Purchase Details',
                 style: TextStyle(
                   color: colorsList.textColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 pNum,
-                style: TextStyle(
+                style: const TextStyle(
                   color: colorsList.textHintColor,
-                  fontSize: width * 0.030,
+                  fontSize: 12,
                   fontWeight: FontWeight.normal,
                 ),
               ),
@@ -93,62 +93,65 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
         return SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              width * 0.045,
-              height * 0.018,
-              width * 0.045,
-              height * 0.04,
+            padding: EdgeInsets.symmetric(
+              horizontal: rs.pagePaddingH,
+              vertical: rs.s(16),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ====================================================
-                // 1. TOP HEADER & STATUS BADGES CARD
-                // ====================================================
-                _buildHeaderCard(item, width),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ====================================================
+                    // 1. TOP HEADER & STATUS BADGES CARD
+                    // ====================================================
+                    _buildHeaderCard(context, item),
 
-                SizedBox(height: height * 0.018),
+                    const SizedBox(height: 12),
 
-                // ====================================================
-                // 2. SUPPLIER & DOCUMENT INFO CARD
-                // ====================================================
-                _buildSupplierAndDocCard(item, width),
+                    // ====================================================
+                    // 2. SUPPLIER & DOCUMENT INFO CARD
+                    // ====================================================
+                    _buildSupplierAndDocCard(context, item),
 
-                SizedBox(height: height * 0.018),
+                    const SizedBox(height: 12),
 
-                // ====================================================
-                // 3. TAX & TOTALS CARD
-                // ====================================================
-                _buildTotalsCard(item, width),
+                    // ====================================================
+                    // 3. TAX & TOTALS CARD
+                    // ====================================================
+                    _buildTotalsCard(context, item),
 
-                SizedBox(height: height * 0.018),
+                    const SizedBox(height: 12),
 
-                // ====================================================
-                // 4. HISTORY CARD
-                // ====================================================
-                _buildHistoryCard(item, width),
+                    // ====================================================
+                    // 4. HISTORY CARD
+                    // ====================================================
+                    _buildHistoryCard(context, item),
 
-                SizedBox(height: height * 0.022),
+                    const SizedBox(height: 12),
 
-                // ====================================================
-                // 5. PURCHASED ITEMS / SERVICES CARD
-                // ====================================================
-                _buildLineItemsCard(item, width),
+                    // ====================================================
+                    // 5. PURCHASED ITEMS / SERVICES CARD
+                    // ====================================================
+                    _buildLineItemsCard(context, item),
 
-                SizedBox(height: height * 0.022),
+                    const SizedBox(height: 12),
 
-                // ====================================================
-                // 6. PAYMENTS CARD
-                // ====================================================
-                _buildPaymentsCard(item, width),
+                    // ====================================================
+                    // 6. PAYMENTS CARD
+                    // ====================================================
+                    _buildPaymentsCard(context, item),
 
-                SizedBox(height: height * 0.022),
+                    const SizedBox(height: 12),
 
-                // ====================================================
-                // 7. LEDGER ENTRIES CARD
-                // ====================================================
-                _buildLedgerEntriesCard(item, width),
-              ],
+                    // ====================================================
+                    // 7. LEDGER ENTRIES CARD
+                    // ====================================================
+                    _buildLedgerEntriesCard(context, item),
+                  ],
+                ),
+              ),
             ),
           ),
         );
@@ -160,7 +163,10 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
   // 1. TOP HEADER & STATUS BADGES
   // ================================================================
 
-  Widget _buildHeaderCard(PurchaseDetailsModel item, double width) {
+  Widget _buildHeaderCard(BuildContext context, PurchaseDetailsModel item) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     final String statusStr = item.status.isNotEmpty ? item.status : 'Draft';
     final String payStatusStr = item.paymentStatus?.isNotEmpty == true
         ? item.paymentStatus!
@@ -175,7 +181,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -190,8 +196,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                 child: Text(
                   item.purchaseNumber.isNotEmpty ? item.purchaseNumber : 'PURCHASE',
                   style: TextStyle(
-                    fontSize: width * 0.052,
-                    fontWeight: FontWeight.normal,
+                    fontSize: isTab ? 18 : rs.sp(18),
+                    fontWeight: FontWeight.bold,
                     color: const Color(0xFF063C70),
                   ),
                 ),
@@ -205,7 +211,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             subtitleText,
             style: TextStyle(
-              fontSize: width * 0.032,
+              fontSize: isTab ? 13 : rs.sp(13),
               color: colorsList.secondaryText,
             ),
           ),
@@ -218,7 +224,10 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
   // 2. SUPPLIER & DOCUMENT DETAILS CARD
   // ================================================================
 
-  Widget _buildSupplierAndDocCard(PurchaseDetailsModel item, double width) {
+  Widget _buildSupplierAndDocCard(BuildContext context, PurchaseDetailsModel item) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     final supplierName = item.supplier?.name.isNotEmpty == true
         ? item.supplier!.name
         : (item.supplierName ?? '—');
@@ -237,7 +246,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -248,40 +257,40 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
         children: [
           Row(
             children: [
-              Expanded(child: _gridItem('Supplier', supplierName, width, isPrimary: true)),
-              Expanded(child: _gridItem('Document', docType, width)),
+              Expanded(child: _gridItem(context, 'Supplier', supplierName, isPrimary: true)),
+              Expanded(child: _gridItem(context, 'Document', docType)),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                  child: _gridItem('Supplier invoice number',
-                      item.supplierInvoiceNumber ?? '—', width)),
+                  child: _gridItem(context, 'Supplier invoice number',
+                      item.supplierInvoiceNumber ?? '—')),
               Expanded(
-                  child: _gridItem('Supplier invoice date',
-                      _formatDate(item.supplierInvoiceDate), width)),
+                  child: _gridItem(context, 'Supplier invoice date',
+                      _formatDate(item.supplierInvoiceDate))),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                   child: _gridItem(
-                      'Purchase date', _formatDate(item.purchaseDate), width)),
+                      context, 'Purchase date', _formatDate(item.purchaseDate))),
               Expanded(
-                  child: _gridItem('Due date', _formatDate(item.dueDate), width)),
+                  child: _gridItem(context, 'Due date', _formatDate(item.dueDate))),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _gridItem('Purchase type', purchaseType, width)),
-              Expanded(child: _gridItem('Payment method', payMethod, width)),
+              Expanded(child: _gridItem(context, 'Purchase type', purchaseType)),
+              Expanded(child: _gridItem(context, 'Payment method', payMethod)),
             ],
           ),
-          const SizedBox(height: 14),
-          _gridItem('Reference', item.reference ?? '—', width),
+          const SizedBox(height: 12),
+          _gridItem(context, 'Reference', item.reference ?? '—'),
         ],
       ),
     );
@@ -291,10 +300,13 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
   // 3. TAX & TOTALS CARD
   // ================================================================
 
-  Widget _buildTotalsCard(PurchaseDetailsModel item, double width) {
+  Widget _buildTotalsCard(BuildContext context, PurchaseDetailsModel item) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -306,21 +318,21 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Tax & totals',
             style: TextStyle(
-              fontSize: width * 0.04,
-              fontWeight: FontWeight.normal,
+              fontSize: isTab ? 15 : rs.sp(15),
+              fontWeight: FontWeight.bold,
               color: colorsList.textColor,
             ),
           ),
           const SizedBox(height: 12),
-          _totalRow('Subtotal', controller.formatCurrency(item.subtotal, item.currency), width),
-          _totalRow('Tax', controller.formatCurrency(item.taxTotal, item.currency), width),
+          _totalRow(context, 'Subtotal', controller.formatCurrency(item.subtotal, item.currency)),
+          _totalRow(context, 'Tax', controller.formatCurrency(item.taxTotal, item.currency)),
           const Divider(height: 16, color: Color(0xFFF0F4F8)),
-          _totalRow('Grand total', controller.formatCurrency(item.total, item.currency), width, isBold: true),
-          _totalRow('Amount paid', controller.formatCurrency(item.amountPaid, item.currency), width),
+          _totalRow(context, 'Grand total', controller.formatCurrency(item.total, item.currency), isBold: true),
+          _totalRow(context, 'Amount paid', controller.formatCurrency(item.amountPaid, item.currency)),
           _totalRow(
+            context,
             'Outstanding balance',
             controller.formatCurrency(item.outstanding, item.currency),
-            width,
             valueColor: const Color(0xFF16A34A),
             isBold: true,
           ),
@@ -333,10 +345,13 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
   // 4. HISTORY CARD
   // ================================================================
 
-  Widget _buildHistoryCard(PurchaseDetailsModel item, double width) {
+  Widget _buildHistoryCard(BuildContext context, PurchaseDetailsModel item) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -348,15 +363,15 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'History',
             style: TextStyle(
-              fontSize: width * 0.04,
-              fontWeight: FontWeight.normal,
+              fontSize: isTab ? 15 : rs.sp(15),
+              fontWeight: FontWeight.bold,
               color: colorsList.textColor,
             ),
           ),
-          const SizedBox(height: 12),
-          _historyRow('Created', _formatDate(item.createdAt), width),
-          _historyRow('Approved', _formatDate(item.approvedAt), width),
-          _historyRow('Posted to ledger', _formatDate(item.postedAt), width),
+          const SizedBox(height: 10),
+          _historyRow(context, 'Created', _formatDate(item.createdAt)),
+          _historyRow(context, 'Approved', _formatDate(item.approvedAt)),
+          _historyRow(context, 'Posted to ledger', _formatDate(item.postedAt)),
         ],
       ),
     );
@@ -366,10 +381,13 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
   // 5. PURCHASED ITEMS / SERVICES CARD
   // ================================================================
 
-  Widget _buildLineItemsCard(PurchaseDetailsModel item, double width) {
+  Widget _buildLineItemsCard(BuildContext context, PurchaseDetailsModel item) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -381,12 +399,12 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Purchased items / services',
             style: TextStyle(
-              fontSize: width * 0.04,
-              fontWeight: FontWeight.normal,
+              fontSize: isTab ? 15 : rs.sp(15),
+              fontWeight: FontWeight.bold,
               color: colorsList.textColor,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           if (item.lines.isEmpty)
             const Text(
@@ -416,8 +434,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                           child: Text(
                             line.description.isNotEmpty ? line.description : 'Item',
                             style: TextStyle(
-                              fontSize: width * 0.037,
-                              fontWeight: FontWeight.normal,
+                              fontSize: isTab ? 13 : rs.sp(13),
+                              fontWeight: FontWeight.bold,
                               color: colorsList.textColor,
                             ),
                           ),
@@ -425,18 +443,18 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                         Text(
                           controller.formatCurrency(line.totalAmount, item.currency),
                           style: TextStyle(
-                            fontSize: width * 0.037,
-                            fontWeight: FontWeight.normal,
+                            fontSize: isTab ? 13 : rs.sp(13),
+                            fontWeight: FontWeight.bold,
                             color: colorsList.textColor,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       accountText.isNotEmpty ? accountText : '5000 · Operating Expenses',
                       style: TextStyle(
-                        fontSize: width * 0.028,
+                        fontSize: isTab ? 11 : rs.sp(11),
                         color: colorsList.secondaryText,
                       ),
                     ),
@@ -446,24 +464,24 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _miniItemStat('Qty', '${_formatNum(line.quantity)}', width),
+                        _miniItemStat(context, 'Qty', _formatNum(line.quantity)),
                         _miniItemStat(
+                          context,
                           'Unit price',
                           controller.formatCurrency(line.unitPrice, item.currency),
-                          width,
                         ),
-                        _miniItemStat('Tax %', '${_formatNum(line.taxRate)}%', width),
+                        _miniItemStat(context, 'Tax %', '${_formatNum(line.taxRate)}%'),
                         _miniItemStat(
+                          context,
                           'Net',
                           controller.formatCurrency(line.netAmount, item.currency),
-                          width,
                         ),
                       ],
                     ),
                   ],
                 ),
               );
-            }).toList(),
+            }),
         ],
       ),
     );
@@ -473,10 +491,13 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
   // 6. PAYMENTS CARD
   // ================================================================
 
-  Widget _buildPaymentsCard(PurchaseDetailsModel item, double width) {
+  Widget _buildPaymentsCard(BuildContext context, PurchaseDetailsModel item) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -488,12 +509,12 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Payments',
             style: TextStyle(
-              fontSize: width * 0.04,
-              fontWeight: FontWeight.normal,
+              fontSize: isTab ? 15 : rs.sp(15),
+              fontWeight: FontWeight.bold,
               color: colorsList.textColor,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           if (item.payments.isEmpty)
             const Text(
@@ -517,8 +538,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: width * 0.09,
-                      height: width * 0.09,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: const Color(0xFFDCFCE7),
                         borderRadius: BorderRadius.circular(8),
@@ -537,15 +558,15 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                           Text(
                             _formatDate(payment.paymentDate),
                             style: TextStyle(
-                              fontSize: width * 0.032,
-                              fontWeight: FontWeight.normal,
+                              fontSize: isTab ? 13 : rs.sp(13),
+                              fontWeight: FontWeight.bold,
                               color: colorsList.textColor,
                             ),
                           ),
                           Text(
                             'Paid via $payMethodStr ${payment.reference != null ? '• ${payment.reference}' : ''}',
                             style: TextStyle(
-                              fontSize: width * 0.028,
+                              fontSize: isTab ? 11 : rs.sp(11),
                               color: colorsList.textHintColor,
                             ),
                           ),
@@ -555,15 +576,15 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                     Text(
                       controller.formatCurrency(payment.amount, item.currency),
                       style: TextStyle(
-                        fontSize: width * 0.035,
-                        fontWeight: FontWeight.normal,
+                        fontSize: isTab ? 13 : rs.sp(13),
+                        fontWeight: FontWeight.bold,
                         color: const Color(0xFF16A34A),
                       ),
                     ),
                   ],
                 ),
               );
-            }).toList(),
+            }),
         ],
       ),
     );
@@ -573,10 +594,13 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
   // 7. LEDGER ENTRIES CARD
   // ================================================================
 
-  Widget _buildLedgerEntriesCard(PurchaseDetailsModel item, double width) {
+  Widget _buildLedgerEntriesCard(BuildContext context, PurchaseDetailsModel item) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -588,8 +612,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Ledger entries',
             style: TextStyle(
-              fontSize: width * 0.04,
-              fontWeight: FontWeight.normal,
+              fontSize: isTab ? 15 : rs.sp(15),
+              fontWeight: FontWeight.bold,
               color: colorsList.textColor,
             ),
           ),
@@ -597,11 +621,11 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             'Journal entries created by posting, payments and voids.',
             style: TextStyle(
-              fontSize: width * 0.028,
+              fontSize: isTab ? 11 : rs.sp(11),
               color: colorsList.textHintColor,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           if (item.journal.isEmpty)
             const Text(
@@ -631,15 +655,15 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                         Text(
                           '$entryType · ${_formatDate(entry.entryDate)}',
                           style: TextStyle(
-                            fontSize: width * 0.035,
-                            fontWeight: FontWeight.normal,
+                            fontSize: isTab ? 13 : rs.sp(13),
+                            fontWeight: FontWeight.bold,
                             color: const Color(0xFF063C70),
                           ),
                         ),
                         Text(
                           'Entry #${entry.id}',
                           style: TextStyle(
-                            fontSize: width * 0.028,
+                            fontSize: isTab ? 11 : rs.sp(11),
                             color: colorsList.textHintColor,
                           ),
                         ),
@@ -664,34 +688,34 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: width * 0.029,
+                                  fontSize: isTab ? 12 : rs.sp(12),
                                   fontWeight: FontWeight.w500,
                                   color: colorsList.textColor,
                                 ),
                               ),
                             ),
                             SizedBox(
-                              width: width * 0.22,
+                              width: isTab ? 80 : 65,
                               child: Text(
                                 line.debit > 0
                                     ? controller.formatCurrency(line.debit, item.currency)
                                     : '—',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: width * 0.029,
+                                  fontSize: isTab ? 12 : rs.sp(12),
                                   color: colorsList.textColor,
                                 ),
                               ),
                             ),
                             SizedBox(
-                              width: width * 0.22,
+                              width: isTab ? 80 : 65,
                               child: Text(
                                 line.credit > 0
                                     ? controller.formatCurrency(line.credit, item.currency)
                                     : '—',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: width * 0.029,
+                                  fontSize: isTab ? 12 : rs.sp(12),
                                   color: colorsList.textColor,
                                 ),
                               ),
@@ -699,11 +723,11 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               );
-            }).toList(),
+            }),
         ],
       ),
     );
@@ -717,7 +741,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -733,7 +757,7 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
             text.capitalizeFirst ?? text,
             style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.normal,
+              fontWeight: FontWeight.w600,
               color: color,
             ),
           ),
@@ -742,14 +766,19 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
     );
   }
 
-  Widget _gridItem(String label, String value, double width, {bool isPrimary = false}) {
+  Widget _gridItem(BuildContext context, String label, String value, {bool isPrimary = false}) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: width * 0.027,
-              color: colorsList.textHintColor),
+          style: TextStyle(
+            fontSize: isTab ? 10.5 : rs.sp(10.5),
+            color: colorsList.textHintColor,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
@@ -757,8 +786,8 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: width * 0.035,
-            fontWeight: FontWeight.normal,
+            fontSize: isTab ? 13 : rs.sp(13),
+            fontWeight: FontWeight.bold,
             color: isPrimary ? const Color(0xFF063C70) : colorsList.textColor,
           ),
         ),
@@ -766,7 +795,10 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
     );
   }
 
-  Widget _totalRow(String label, String value, double width, {Color? valueColor, bool isBold = false}) {
+  Widget _totalRow(BuildContext context, String label, String value, {Color? valueColor, bool isBold = false}) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -775,16 +807,16 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
           Text(
             label,
             style: TextStyle(
-              fontSize: width * 0.035,
-              fontWeight: FontWeight.normal,
+              fontSize: isTab ? 13 : rs.sp(13),
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               color: isBold ? colorsList.textColor : colorsList.textHintColor,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              fontSize: width * 0.033,
-              fontWeight: isBold ? FontWeight.normal : FontWeight.normal,
+              fontSize: isTab ? (isBold ? 15 : 13) : rs.sp(isBold ? 15 : 13),
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               color: valueColor ?? colorsList.textColor,
             ),
           ),
@@ -793,7 +825,10 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
     );
   }
 
-  Widget _historyRow(String label, String value, double width) {
+  Widget _historyRow(BuildContext context, String label, String value) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
@@ -801,26 +836,47 @@ class _PurchaseDetailsScreenState extends State<PurchaseDetailsScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: width * 0.030, color: colorsList.textHintColor),
+            style: TextStyle(
+              fontSize: isTab ? 12 : rs.sp(12),
+              color: colorsList.textHintColor,
+            ),
           ),
           Text(
             value,
-            style: TextStyle(fontSize: width * 0.030, color: colorsList.textColor),
+            style: TextStyle(
+              fontSize: isTab ? 12 : rs.sp(12),
+              fontWeight: FontWeight.w500,
+              color: colorsList.textColor,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _miniItemStat(String label, String value, double width) {
+  Widget _miniItemStat(BuildContext context, String label, String value) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: width * 0.025,
-            color: colorsList.textHintColor)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: isTab ? 10.5 : rs.sp(10.5),
+            color: colorsList.textHintColor,
+          ),
+        ),
         const SizedBox(height: 2),
-        Text(value, style: TextStyle(fontSize: width * 0.032,
-            fontWeight: FontWeight.normal, color: colorsList.textColor)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isTab ? 12.5 : rs.sp(12.5),
+            fontWeight: FontWeight.w500,
+            color: colorsList.textColor,
+          ),
+        ),
       ],
     );
   }
