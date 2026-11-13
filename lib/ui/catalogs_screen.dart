@@ -22,18 +22,18 @@ class CatalogsScreen extends StatelessWidget {
         surfaceTintColor: Colors.white,
         leading: IconButton(
           onPressed: Get.back,
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
             color: colorsList.iconColor,
-            size: rs.s(20),
+            size: 20,
           ),
         ),
-        title: Text(
+        title: const Text(
           'Products',
           style: TextStyle(
             color: colorsList.textColor,
-            fontSize: rs.sp(18),
-            fontWeight: FontWeight.normal,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: false,
@@ -50,20 +50,20 @@ class CatalogsScreen extends StatelessWidget {
           return Center(
             child: Text(
               controller.errorMessage.value,
-              style: TextStyle(
+              style: const TextStyle(
                 color: colorsList.red,
-                fontSize: rs.sp(14),
+                fontSize: 14,
               ),
             ),
           );
         }
 
         if (controller.catalogList.isEmpty) {
-          return Center(
+          return const Center(
             child: Text(
               'No catalog items found.',
               style: TextStyle(
-                fontSize: rs.sp(15),
+                fontSize: 15,
                 color: colorsList.textHintColor,
               ),
             ),
@@ -71,17 +71,65 @@ class CatalogsScreen extends StatelessWidget {
         }
 
         final items = controller.catalogList;
+        final cols = rs.listColumns;
+
+        if (cols <= 1) {
+          return ResponsivePage(
+            padding: EdgeInsets.zero,
+            child: RefreshIndicator(
+              onRefresh: controller.refreshCatalog,
+              child: ListView.builder(
+                padding: EdgeInsets.only(
+                  left: rs.pagePaddingH,
+                  right: rs.pagePaddingH,
+                  top: rs.s(12),
+                  bottom: rs.s(96),
+                ),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return InkWell(
+                    onTap: () async {
+                      final result = await Get.toNamed(
+                        '/CatalogsDetailsScreen',
+                        arguments: item,
+                      );
+                      if (result == true) {
+                        controller.refreshCatalog();
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(14),
+                    child: _buildCatalogCard(
+                      context: context,
+                      item: item,
+                      asGridTile: false,
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        }
 
         return ResponsivePage(
           padding: EdgeInsets.zero,
           child: RefreshIndicator(
             onRefresh: controller.refreshCatalog,
-            child: ListView.builder(
+            child: GridView.builder(
               padding: EdgeInsets.only(
                 left: rs.pagePaddingH,
                 right: rs.pagePaddingH,
                 top: rs.s(12),
                 bottom: rs.s(96),
+              ),
+              physics: const AlwaysScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: cols,
+                crossAxisSpacing: rs.s(12),
+                mainAxisSpacing: rs.s(12),
+                childAspectRatio: rs.isTablet
+                    ? (rs.isLandscape ? 1.85 : 1.40)
+                    : (rs.isLandscape ? 2.6 : 1.8),
               ),
               itemCount: items.length,
               itemBuilder: (context, index) {
@@ -100,6 +148,7 @@ class CatalogsScreen extends StatelessWidget {
                   child: _buildCatalogCard(
                     context: context,
                     item: item,
+                    asGridTile: true,
                   ),
                 );
               },
@@ -129,7 +178,7 @@ class CatalogsScreen extends StatelessWidget {
           'Add Item',
           style: TextStyle(
             fontSize: rs.sp(14),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
             color: colorsList.colorWhite,
           ),
         ),
@@ -144,8 +193,10 @@ class CatalogsScreen extends StatelessWidget {
   Widget _buildCatalogCard({
     required BuildContext context,
     required CatalogModel item,
+    bool asGridTile = false,
   }) {
-    final width = context.rs.width;
+    final rs = context.rs;
+    final isTab = rs.isTablet;
 
     final String itemName = item.articleName?.isNotEmpty == true
         ? item.articleName!
@@ -175,7 +226,7 @@ class CatalogsScreen extends StatelessWidget {
     final String dateStr = _formatDate(item.createdAt);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: asGridTile ? 0 : 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -189,9 +240,10 @@ class CatalogsScreen extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(width * 0.04),
+        padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // TOP ROW: ITEM NAME + ARTICLE NO + TYPE BADGE + OUT OF STOCK
             Row(
@@ -206,16 +258,18 @@ class CatalogsScreen extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: width * 0.038,
-                          fontWeight: FontWeight.normal,
+                          fontSize: isTab ? 15 : rs.sp(15),
+                          fontWeight: FontWeight.bold,
                           color: colorsList.textColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         articleNo,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: width * 0.029,
+                          fontSize: isTab ? 12 : rs.sp(12),
                           color: colorsList.textHintColor,
                         ),
                       ),
@@ -223,6 +277,7 @@ class CatalogsScreen extends StatelessWidget {
                   ),
                 ),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // TYPE BADGE
                     Container(
@@ -249,8 +304,8 @@ class CatalogsScreen extends StatelessWidget {
                           Text(
                             typeLabel,
                             style: TextStyle(
-                              fontSize: width * 0.026,
-                              fontWeight: FontWeight.normal,
+                              fontSize: isTab ? 11 : rs.sp(11),
+                              fontWeight: FontWeight.w600,
                               color: typeColor,
                             ),
                           ),
@@ -285,8 +340,8 @@ class CatalogsScreen extends StatelessWidget {
                             Text(
                               'Out of stock',
                               style: TextStyle(
-                                fontSize: width * 0.026,
-                                fontWeight: FontWeight.normal,
+                                fontSize: isTab ? 11 : rs.sp(11),
+                                fontWeight: FontWeight.w600,
                                 color: const Color(0xFFDC2626),
                               ),
                             ),
@@ -299,23 +354,32 @@ class CatalogsScreen extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: width * 0.025),
+            const SizedBox(height: 10),
             const Divider(height: 1, color: Color(0xFFF0F4F8)),
-            SizedBox(height: width * 0.025),
+            const SizedBox(height: 10),
 
             // DETAILS GRID ROW: UNIT | DEFAULT QTY | STOCK | VAT | CREATED | PRICE
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _miniStat('Unit', unitStr, width),
-                _miniStat('Default Qty', qtyStr, width),
-                if (!isService)
-                  _miniStat(
-                      'Stock', '${_formatNum(stockQtyNum.toDouble())}', width),
-                _miniStat('VAT %', vatStr, width),
-                _miniStat('Created', dateStr, width),
-                _miniStat('Price (net)', priceStr, width, isPrimary: true),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _miniStat(context, 'Unit', unitStr),
+                  const SizedBox(width: 12),
+                  _miniStat(context, 'Default Qty', qtyStr),
+                  if (!isService) ...[
+                    const SizedBox(width: 12),
+                    _miniStat(context, 'Stock', _formatNum(stockQtyNum.toDouble())),
+                  ],
+                  const SizedBox(width: 12),
+                  _miniStat(context, 'VAT %', vatStr),
+                  const SizedBox(width: 12),
+                  _miniStat(context, 'Created', dateStr),
+                  const SizedBox(width: 12),
+                  _miniStat(context, 'Price (net)', priceStr, isPrimary: true),
+                ],
+              ),
             ),
           ],
         ),
@@ -323,24 +387,32 @@ class CatalogsScreen extends StatelessWidget {
     );
   }
 
-  Widget _miniStat(String label, String value, double width,
-      {bool isPrimary = false}) {
+  Widget _miniStat(
+    BuildContext context,
+    String label,
+    String value, {
+    bool isPrimary = false,
+  }) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: width * 0.025,
+            fontSize: isTab ? 9.5 : rs.sp(10),
             color: colorsList.textHintColor,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
           style: TextStyle(
-            fontSize: width * 0.029,
-            fontWeight: FontWeight.normal,
+            fontSize: isTab ? 12 : rs.sp(12.5),
+            fontWeight: isPrimary ? FontWeight.bold : FontWeight.normal,
             color: isPrimary ? const Color(0xFF063C70) : colorsList.textColor,
           ),
         ),

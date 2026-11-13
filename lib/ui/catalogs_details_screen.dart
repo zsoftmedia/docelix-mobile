@@ -1,4 +1,6 @@
 import 'package:docelix_mobileapp/controllers/catalogs_details_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
+import 'package:docelix_mobileapp/models/catalog_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,8 +18,8 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final rs = context.rs;
+    final isTab = rs.isTablet;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
@@ -48,14 +50,14 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
                 style: TextStyle(
                   color: colorsList.textColor,
                   fontSize: 18,
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 artNum.isNotEmpty ? '#$artNum' : 'Stock Item',
-                style: TextStyle(
+                style: const TextStyle(
                   color: colorsList.textHintColor,
-                  fontSize: width * 0.030,
+                  fontSize: 12,
                   fontWeight: FontWeight.normal,
                 ),
               ),
@@ -96,168 +98,33 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    width * 0.045,
-                    height * 0.018,
-                    width * 0.045,
-                    height * 0.04,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: rs.pagePaddingH,
+                    vertical: rs.s(16),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ====================================================
-                      // 1. HEADER CARD
-                      // ====================================================
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(width * 0.045),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE4EAF1)),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: width * 0.12,
-                              height: width * 0.12,
-                              decoration: BoxDecoration(
-                                color: typeColor.withOpacity(0.10),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                isService
-                                    ? Icons.design_services_outlined
-                                    : Icons.inventory_2_outlined,
-                                color: typeColor,
-                                size: width * 0.065,
-                              ),
-                            ),
-                            SizedBox(width: width * 0.035),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.articleName ?? 'Unnamed Item',
-                                    style: TextStyle(
-                                      fontSize: width * 0.045,
-                                      fontWeight: FontWeight.normal,
-                                      color: colorsList.textColor,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Code: ${item.articleNumber ?? '—'}',
-                                    style: TextStyle(
-                                      fontSize: width * 0.031,
-                                      color: colorsList.textHintColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: typeColor.withOpacity(0.10),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                typeLabel,
-                                style: TextStyle(
-                                  fontSize: width * 0.028,
-                                  color: typeColor,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ====================================================
+                          // 1. HEADER CARD
+                          // ====================================================
+                          _buildHeaderCard(context, item, isService, typeColor, typeLabel),
+
+                          const SizedBox(height: 14),
+
+                          // ====================================================
+                          // 2. ITEM DETAILS CARD
+                          // ====================================================
+                          _sectionTitle('Stock Details', isTab),
+                          const SizedBox(height: 8),
+
+                          _buildStockDetailsCard(context, item, isService, typeLabel),
+                        ],
                       ),
-
-                      SizedBox(height: height * 0.018),
-
-                      // ====================================================
-                      // 2. ITEM DETAILS CARD
-                      // ====================================================
-                      _sectionTitle('Stock Details', width),
-                      const SizedBox(height: 8),
-
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(width * 0.045),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE4EAF1)),
-                        ),
-                        child: Column(
-                          children: [
-                            _detailRow('Item Name', item.articleName ?? '—', width),
-                            _detailRow('Article Code', item.articleNumber ?? '—', width),
-                            _detailRow('Item Type', typeLabel, width),
-                            _detailRow('Unit', item.unitCode ?? '—', width),
-                            _detailRow(
-                              'Default Qty',
-                              item.defaultQty != null
-                                  ? _formatNum(item.defaultQty!)
-                                  : '1',
-                              width,
-                            ),
-                            _detailRow(
-                              'Net Price',
-                              controller.formatCurrency(item.unitPriceNet),
-                              width,
-                            ),
-                            _detailRow(
-                              'Gross Price',
-                              controller.formatCurrency(item.unitPriceGross),
-                              width,
-                            ),
-                            _detailRow(
-                              'VAT %',
-                              item.vatRate != null ? '${_formatNum(item.vatRate!)}%' : '0%',
-                              width,
-                            ),
-                            if (item.purchasePriceNet != null)
-                              _detailRow(
-                                'Purchase Price',
-                                controller.formatCurrency(item.purchasePriceNet),
-                                width,
-                              ),
-                            if (!isService) ...[
-                              _detailRow(
-                                'Stock Quantity',
-                                item.stockQty != null
-                                    ? _formatNum(item.stockQty!)
-                                    : '0',
-                                width,
-                              ),
-                              _detailRow(
-                                'Min Stock',
-                                item.minStock != null
-                                    ? _formatNum(item.minStock!)
-                                    : '0',
-                                width,
-                              ),
-                            ],
-                            _detailRow(
-                              'Created Date',
-                              _formatDate(item.createdAt),
-                              width,
-                              showBorder: (item.description ?? '').isNotEmpty,
-                            ),
-                            if ((item.description ?? '').isNotEmpty)
-                              _detailRow('Description', item.description!, width, showBorder: false),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -267,11 +134,12 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
               // ==========================================================
 
               Container(
+                width: double.infinity,
                 padding: EdgeInsets.fromLTRB(
-                  width * 0.045,
-                  height * 0.012,
-                  width * 0.045,
-                  height * 0.02,
+                  rs.pagePaddingH,
+                  12,
+                  rs.pagePaddingH,
+                  16,
                 ),
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -279,70 +147,75 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
                     top: BorderSide(color: Color(0xFFE5EAF0)),
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () async {
-                          final result = await Get.toNamed(
-                            '/EditCatalogsScreen',
-                            arguments: item,
-                          );
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              final result = await Get.toNamed(
+                                '/EditCatalogsScreen',
+                                arguments: item,
+                              );
 
-                          if (result == true) {
-                            Get.back(result: true);
-                          }
-                        },
-                        icon: const Icon(Icons.edit_outlined, size: 18),
-                        label: const Text(
-                          'Edit Item',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colorsList.textColor,
-                          side: const BorderSide(color: Color(0xFFD0D5DD)),
-                          minimumSize: Size(0, height * 0.055),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(width: width * 0.03),
-
-                    Expanded(
-                      child: Obx(
-                        () => ElevatedButton.icon(
-                          onPressed: controller.isDeleting.value
-                              ? null
-                              : controller.deleteCatalogItem,
-                          icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                          label: Text(
-                            controller.isDeleting.value
-                                ? 'Deleting...'
-                                : 'Delete Stock',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.normal,
+                              if (result == true) {
+                                Get.back(result: true);
+                              }
+                            },
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            label: const Text(
+                              'Edit Item',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFDC2626),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            minimumSize: Size(0, height * 0.055),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: colorsList.textColor,
+                              side: const BorderSide(color: Color(0xFFD0D5DD)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: Obx(
+                            () => ElevatedButton.icon(
+                              onPressed: controller.isDeleting.value
+                                  ? null
+                                  : controller.deleteCatalogItem,
+                              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                              label: Text(
+                                controller.isDeleting.value
+                                    ? 'Deleting...'
+                                    : 'Delete Stock',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFDC2626),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -353,28 +226,202 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
   }
 
   // ================================================================
+  // 1. HEADER CARD
+  // ================================================================
+
+  Widget _buildHeaderCard(
+    BuildContext context,
+    CatalogModel item,
+    bool isService,
+    Color typeColor,
+    String typeLabel,
+  ) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: typeColor.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isService
+                  ? Icons.design_services_outlined
+                  : Icons.inventory_2_outlined,
+              color: typeColor,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.articleName ?? 'Unnamed Item',
+                  style: TextStyle(
+                    fontSize: isTab ? 18 : rs.sp(18),
+                    fontWeight: FontWeight.bold,
+                    color: colorsList.textColor,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Code: ${item.articleNumber ?? '—'}',
+                  style: TextStyle(
+                    fontSize: isTab ? 13 : rs.sp(13),
+                    color: colorsList.textHintColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 4,
+            ),
+            decoration: BoxDecoration(
+              color: typeColor.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              typeLabel,
+              style: TextStyle(
+                fontSize: isTab ? 11 : rs.sp(11),
+                color: typeColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // 2. STOCK DETAILS CARD
+  // ================================================================
+
+  Widget _buildStockDetailsCard(
+    BuildContext context,
+    CatalogModel item,
+    bool isService,
+    String typeLabel,
+  ) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
+      ),
+      child: Column(
+        children: [
+          _detailRow(context, 'Item Name', item.articleName ?? '—'),
+          _detailRow(context, 'Article Code', item.articleNumber ?? '—'),
+          _detailRow(context, 'Item Type', typeLabel),
+          _detailRow(context, 'Unit', item.unitCode ?? '—'),
+          _detailRow(
+            context,
+            'Default Qty',
+            item.defaultQty != null
+                ? _formatNum(item.defaultQty!)
+                : '1',
+          ),
+          _detailRow(
+            context,
+            'Net Price',
+            controller.formatCurrency(item.unitPriceNet),
+          ),
+          _detailRow(
+            context,
+            'Gross Price',
+            controller.formatCurrency(item.unitPriceGross),
+          ),
+          _detailRow(
+            context,
+            'VAT %',
+            item.vatRate != null ? '${_formatNum(item.vatRate!)}%' : '0%',
+          ),
+          if (item.purchasePriceNet != null)
+            _detailRow(
+              context,
+              'Purchase Price',
+              controller.formatCurrency(item.purchasePriceNet),
+            ),
+          if (!isService) ...[
+            _detailRow(
+              context,
+              'Stock Quantity',
+              item.stockQty != null
+                  ? _formatNum(item.stockQty!)
+                  : '0',
+            ),
+            _detailRow(
+              context,
+              'Min Stock',
+              item.minStock != null
+                  ? _formatNum(item.minStock!)
+                  : '0',
+            ),
+          ],
+          _detailRow(
+            context,
+            'Created Date',
+            _formatDate(item.createdAt),
+            showBorder: (item.description ?? '').isNotEmpty,
+          ),
+          if ((item.description ?? '').isNotEmpty)
+            _detailRow(context, 'Description', item.description!, showBorder: false),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
   // HELPER WIDGETS
   // ================================================================
 
-  Widget _sectionTitle(String title, double width) {
+  Widget _sectionTitle(String title, bool isTab) {
     return Text(
       title,
       style: TextStyle(
         color: colorsList.textColor,
-        fontSize: 16,
-        fontWeight: FontWeight.normal,
+        fontSize: isTab ? 15 : 16,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
 
   Widget _detailRow(
+    BuildContext context,
     String label,
-    String value,
-    double width, {
+    String value, {
     bool showBorder = true,
   }) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: width * 0.028),
+      padding: EdgeInsets.symmetric(vertical: isTab ? 10 : 12),
       decoration: showBorder
           ? const BoxDecoration(
               border: Border(
@@ -388,7 +435,7 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
           Text(
             label,
             style: TextStyle(
-              fontSize: width * 0.031,
+              fontSize: isTab ? 13 : rs.sp(13),
               color: colorsList.textHintColor,
             ),
           ),
@@ -400,8 +447,8 @@ class _CatalogsDetailsScreenState extends State<CatalogsDetailsScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.normal,
+                fontSize: isTab ? 13 : rs.sp(13),
+                fontWeight: FontWeight.bold,
                 color: colorsList.textColor,
               ),
             ),
