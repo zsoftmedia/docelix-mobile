@@ -1,38 +1,449 @@
+import 'package:docelix_mobileapp/controllers/general_ledger_controller.dart';
+import 'package:docelix_mobileapp/core/responsive/responsive.dart';
+import 'package:docelix_mobileapp/models/general_ledger_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class GeneralLedgerScreen extends StatelessWidget {
   const GeneralLedgerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(GeneralLedgerController());
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
+    return Scaffold(
+      backgroundColor: colorsList.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.white,
+        leading: Obx(() {
+          final searching = controller.isSearching.value;
+          return IconButton(
+            onPressed: () {
+              if (searching) {
+                controller.closeSearch();
+              } else {
+                Get.back();
+              }
+            },
+            icon: Icon(
+              searching
+                  ? Icons.close_rounded
+                  : Icons.arrow_back_ios_new_rounded,
+              color: colorsList.iconColor,
+              size: 20,
+            ),
+          );
+        }),
+        title: Obx(() {
+          if (controller.isSearching.value) {
+            return TextField(
+              controller: controller.searchController,
+              autofocus: true,
+              onSubmitted: controller.applySearch,
+              textInputAction: TextInputAction.search,
+              style: TextStyle(
+                color: colorsList.textColor,
+                fontSize: isTab ? 14 : rs.sp(14),
+              ),
+              decoration: const InputDecoration(
+                hintText: 'Search journal entries...',
+                hintStyle: TextStyle(
+                  color: colorsList.textHintColor,
+                ),
+                border: InputBorder.none,
+                isDense: true,
+              ),
+            );
+          }
+
+          return const Text(
+            'General Ledger',
+            style: TextStyle(
+              color: colorsList.textColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        }),
+        centerTitle: false,
+        actions: [
+          Obx(() {
+            if (controller.isSearching.value) {
+              return const SizedBox.shrink();
+            }
+
+            return IconButton(
+              onPressed: controller.openSearch,
+              icon: const Icon(
+                Icons.search_rounded,
+                color: colorsList.iconColor,
+                size: 22,
+              ),
+            );
+          }),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: SafeArea(
+        child: ResponsivePage(
+          padding: EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ======================================================
+              // 1. TITLE & TOTAL COUNT BADGE
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: rs.pagePaddingH,
+                  vertical: rs.s(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'General Ledger',
+                      style: TextStyle(
+                        color: const Color(0xFF0A2342),
+                        fontSize: rs.sp(20),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Obx(
+                      () => Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: rs.s(12),
+                          vertical: rs.s(6),
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: Text(
+                          '${controller.totalJournalEntriesCount.value > 0 ? controller.totalJournalEntriesCount.value : controller.journalEntries.length} entries',
+                          style: TextStyle(
+                            color: const Color(0xFF2563EB),
+                            fontSize: rs.sp(11),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ======================================================
+              // 2. JOURNAL ENTRIES LIST / GRID
+              // ======================================================
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoadingJournalEntries.value &&
+                      controller.filteredJournalEntries.isEmpty) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (controller.filteredJournalEntries.isEmpty) {
+                    return RefreshIndicator(
+                      onRefresh: controller.fetchJournalEntries,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(height: rs.s(120)),
+                          Center(
+                            child: Text(
+                              controller.searchQuery.value.isNotEmpty
+                                  ? 'No matching journal entries found.'
+                                  : 'No journal entries available.',
+                              style: TextStyle(
+                                color: colorsList.textHintColor,
+                                fontSize: rs.sp(15),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final cols = rs.listColumns;
+                  final entries = controller.filteredJournalEntries;
+
+                  if (cols <= 1) {
+                    return RefreshIndicator(
+                      onRefresh: controller.fetchJournalEntries,
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(
+                          left: rs.pagePaddingH,
+                          right: rs.pagePaddingH,
+                          top: rs.s(4),
+                          bottom: rs.s(96),
+                        ),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: entries.length,
+                        itemBuilder: (context, index) {
+                          return _buildJournalEntryCard(
+                            context: context,
+                            entry: entries[index],
+                            controller: controller,
+                            asGridTile: false,
+                          );
+                        },
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: controller.fetchJournalEntries,
+                    child: GridView.builder(
+                      padding: EdgeInsets.only(
+                        left: rs.pagePaddingH,
+                        right: rs.pagePaddingH,
+                        top: rs.s(4),
+                        bottom: rs.s(96),
+                      ),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: cols,
+                        crossAxisSpacing: rs.s(12),
+                        mainAxisSpacing: rs.s(12),
+                        childAspectRatio: rs.isTablet
+                            ? (rs.isLandscape ? 1.65 : 1.25)
+                            : (rs.isLandscape ? 2.6 : 1.8),
+                      ),
+                      itemCount: entries.length,
+                      itemBuilder: (context, index) {
+                        return _buildJournalEntryCard(
+                          context: context,
+                          entry: entries[index],
+                          controller: controller,
+                          asGridTile: true,
+                        );
+                      },
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ================================================================
+  // JOURNAL ENTRY CARD WIDGET (MATCHES WEB TABLE COLUMNS 100%)
+  // ================================================================
+
+  Widget _buildJournalEntryCard({
+    required BuildContext context,
+    required JournalEntryItem entry,
+    required GeneralLedgerController controller,
+    required bool asGridTile,
+  }) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
+    final String paymentStatus = entry.paymentStatusLabel;
+    Color payBg;
+    Color payText;
+
+    if (paymentStatus == 'Paid') {
+      payBg = const Color(0xFFECFDF5);
+      payText = const Color(0xFF059669);
+    } else if (paymentStatus == 'Unpaid') {
+      payBg = const Color(0xFFFEF2F2);
+      payText = const Color(0xFFDC2626);
+    } else if (paymentStatus == 'Settlement') {
+      payBg = const Color(0xFFEFF6FF);
+      payText = const Color(0xFF2563EB);
+    } else {
+      payBg = const Color(0xFFF1F5F9);
+      payText = const Color(0xFF64748B);
+    }
+
+    final reconStatus = entry.reconciliation?.displayStatus ?? '—';
+    final bool isNotReconciled = entry.reconciliation?.status == 'not_reconciled';
+
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      margin: EdgeInsets.only(bottom: asGridTile ? 0 : 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.book_outlined, size: 44, color: Color(0xFF94A3B8)),
-          SizedBox(height: 12),
-          Text(
-            'General Ledger',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0A2342),
-            ),
-          ),
-          SizedBox(height: 6),
-          Text(
-            'General ledger accounts view coming soon.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+        border: Border.all(color: const Color(0xFFE4EAF1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Get.toNamed('/JournalEntryDetailsScreen', arguments: entry);
+          },
+          child: Padding(
+            padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 1. TOP HEADER ROW (DATE + PAYMENT PILL + RECONCILIATION PILL)
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        entry.entryDate.isNotEmpty ? entry.entryDate : '—',
+                        style: TextStyle(
+                          fontSize: isTab ? 13 : rs.sp(13),
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                    if (paymentStatus != '—') ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: payBg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          paymentStatus,
+                          style: TextStyle(
+                            fontSize: isTab ? 11 : rs.sp(11),
+                            fontWeight: FontWeight.w600,
+                            color: payText,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    if (reconStatus != '—') ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: isNotReconciled ? const Color(0xFFFEF2F2) : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isNotReconciled ? const Color(0xFFFECACA) : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        child: Text(
+                          reconStatus,
+                          style: TextStyle(
+                            fontSize: isTab ? 11 : rs.sp(11),
+                            fontWeight: FontWeight.w600,
+                            color: isNotReconciled ? const Color(0xFFDC2626) : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 10),
+                  child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ),
+
+                // 2. DESCRIPTION & LINES SUMMARY
+                Text(
+                  entry.description.isNotEmpty ? entry.description : 'Journal Entry #${entry.id}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: isTab ? 14 : rs.sp(15),
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0A2342),
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  '${entry.lines.length} lines · Source: ${entry.sourceType.replaceAll('_', ' ')}',
+                  style: TextStyle(
+                    fontSize: isTab ? 11.5 : rs.sp(11.5),
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 10),
+                  child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ),
+
+                // 3. BOTTOM AMOUNTS & ACTION ROW (DEBIT | CREDIT | RECONCILE)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'DEBIT / CREDIT',
+                          style: TextStyle(
+                            fontSize: isTab ? 9.5 : rs.sp(10),
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF94A3B8),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          controller.formatMoney(entry.totalDebit),
+                          style: TextStyle(
+                            fontSize: isTab ? 13.5 : rs.sp(14),
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF0A2342),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    if (isNotReconciled)
+                      OutlinedButton(
+                        onPressed: () {
+                          // Action button matching web table
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF2563EB),
+                          side: const BorderSide(color: Color(0xFFBFDBFE)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Reconcile', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      )
+                    else
+                      Text(
+                        'Entry #${entry.id}',
+                        style: TextStyle(
+                          fontSize: isTab ? 11 : rs.sp(11),
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -110,12 +110,69 @@ class GeneralLedgerController extends GetxController {
     };
   }
 
+  // ============================================================
+  // JOURNAL ENTRIES API (GET /api/ledger/journal-entries)
+  // ============================================================
+
+  final RxList<JournalEntryItem> journalEntries = <JournalEntryItem>[].obs;
+  final RxBool isLoadingJournalEntries = false.obs;
+  final RxInt journalPage = 1.obs;
+  final RxInt journalLimit = 20.obs;
+  final RxInt totalJournalEntriesCount = 0.obs;
+
+  List<JournalEntryItem> get filteredJournalEntries {
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return journalEntries;
+    return journalEntries.where((item) {
+      final desc = item.description.toLowerCase();
+      final date = item.entryDate.toLowerCase();
+      final status = item.paymentStatusLabel.toLowerCase();
+      final recon = (item.reconciliation?.documentNumber ?? '').toLowerCase();
+      return desc.contains(query) || date.contains(query) || status.contains(query) || recon.contains(query);
+    }).toList();
+  }
+
+  double get journalTotalDebit => journalEntries.fold<double>(0, (sum, item) => sum + item.totalDebit);
+  double get journalTotalCredit => journalEntries.fold<double>(0, (sum, item) => sum + item.totalCredit);
+
+  Future<void> fetchJournalEntries() async {
+    final accessToken = SessionManager.accessToken;
+    final companyId = SessionManager.accessCompanyid;
+
+    if (accessToken == null || accessToken.isEmpty || companyId == null || companyId == 0) {
+      return;
+    }
+
+    try {
+      isLoadingJournalEntries.value = true;
+      final response = await _dioClient.getJournalEntries(
+        companyId: companyId,
+        accessToken: accessToken,
+        page: journalPage.value,
+        limit: journalLimit.value,
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final parsed = JournalEntriesResponse.fromJson(
+          Map<String, dynamic>.from(response.data as Map),
+        );
+        journalEntries.assignAll(parsed.items);
+        totalJournalEntriesCount.value = parsed.total;
+      }
+    } catch (e) {
+      debugPrint('[GeneralLedgerController] fetchJournalEntries Error: $e');
+    } finally {
+      isLoadingJournalEntries.value = false;
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
     _applyArguments(Get.arguments);
     loadAccounts();
     loadReport();
+    fetchJournalEntries();
   }
 
   void _applyArguments(dynamic args) {

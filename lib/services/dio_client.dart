@@ -1622,6 +1622,33 @@ class DioClient {
   }
 
   // ==============================
+  // GET LEDGER JOURNAL ENTRIES (GET /api/ledger/journal-entries)
+  // ==============================
+
+  Future<Response> getJournalEntries({
+    required int companyId,
+    required String accessToken,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/ledger/journal-entries',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'limit': limit,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // INVENTORY
   // ==============================
 

@@ -331,3 +331,233 @@ double? _asDouble(dynamic value) {
   if (value is num) return value.toDouble();
   return double.tryParse(value.toString());
 }
+
+// ====================================================================
+// NEW JOURNAL ENTRIES API MODELS (GET /api/ledger/journal-entries)
+// ====================================================================
+
+class JournalAccountModel {
+  final int id;
+  final String code;
+  final String name;
+  final String? normalSide;
+  final String? accountType;
+
+  JournalAccountModel({
+    required this.id,
+    required this.code,
+    required this.name,
+    this.normalSide,
+    this.accountType,
+  });
+
+  factory JournalAccountModel.fromJson(Map<String, dynamic> json) {
+    return JournalAccountModel(
+      id: _asInt(json['id']) ?? 0,
+      code: json['code']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      normalSide: json['normal_side']?.toString(),
+      accountType: json['account_type']?.toString(),
+    );
+  }
+
+  String get displayLabel {
+    if (code.isNotEmpty && name.isNotEmpty) return '$code · $name';
+    return name.isNotEmpty ? name : code;
+  }
+}
+
+class JournalLineItem {
+  final int id;
+  final int journalEntryId;
+  final int accountId;
+  final int lineNo;
+  final String description;
+  final double debit;
+  final double credit;
+  final String? createdAt;
+  final JournalAccountModel? account;
+
+  JournalLineItem({
+    required this.id,
+    required this.journalEntryId,
+    required this.accountId,
+    required this.lineNo,
+    required this.description,
+    required this.debit,
+    required this.credit,
+    this.createdAt,
+    this.account,
+  });
+
+  factory JournalLineItem.fromJson(Map<String, dynamic> json) {
+    JournalAccountModel? account;
+    if (json['account'] is Map) {
+      account = JournalAccountModel.fromJson(Map<String, dynamic>.from(json['account'] as Map));
+    }
+
+    return JournalLineItem(
+      id: _asInt(json['id']) ?? 0,
+      journalEntryId: _asInt(json['journal_entry_id']) ?? 0,
+      accountId: _asInt(json['account_id']) ?? 0,
+      lineNo: _asInt(json['line_no']) ?? 1,
+      description: json['description']?.toString() ?? '',
+      debit: _asDouble(json['debit']) ?? 0.0,
+      credit: _asDouble(json['credit']) ?? 0.0,
+      createdAt: json['created_at']?.toString(),
+      account: account,
+    );
+  }
+}
+
+class ReconciliationModel {
+  final String documentType;
+  final int documentId;
+  final String documentNumber;
+  final String currency;
+  final double total;
+  final double bankDue;
+  final double reconciledAmount;
+  final double outstanding;
+  final String status;
+  final String? completedBy;
+  final String? completedAt;
+
+  ReconciliationModel({
+    required this.documentType,
+    required this.documentId,
+    required this.documentNumber,
+    required this.currency,
+    required this.total,
+    required this.bankDue,
+    required this.reconciledAmount,
+    required this.outstanding,
+    required this.status,
+    this.completedBy,
+    this.completedAt,
+  });
+
+  factory ReconciliationModel.fromJson(Map<String, dynamic> json) {
+    return ReconciliationModel(
+      documentType: json['document_type']?.toString() ?? '',
+      documentId: _asInt(json['document_id']) ?? 0,
+      documentNumber: json['document_number']?.toString() ?? '',
+      currency: json['currency']?.toString() ?? 'EUR',
+      total: _asDouble(json['total']) ?? 0.0,
+      bankDue: _asDouble(json['bank_due']) ?? 0.0,
+      reconciledAmount: _asDouble(json['reconciled_amount']) ?? 0.0,
+      outstanding: _asDouble(json['outstanding']) ?? 0.0,
+      status: json['status']?.toString() ?? '',
+      completedBy: json['completed_by']?.toString(),
+      completedAt: json['completed_at']?.toString(),
+    );
+  }
+
+  String get displayStatus {
+    if (status == 'not_reconciled') return '• Not reconciled';
+    if (status.isEmpty) return '—';
+    return status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ');
+  }
+}
+
+class JournalEntryItem {
+  final int id;
+  final int companyId;
+  final String entryDate;
+  final String sourceType;
+  final int? sourceId;
+  final String description;
+  final String status;
+  final String? postedBy;
+  final String? postedAt;
+  final String? createdAt;
+  final String? invoicePaymentStatus;
+  final List<JournalLineItem> lines;
+  final ReconciliationModel? reconciliation;
+
+  JournalEntryItem({
+    required this.id,
+    required this.companyId,
+    required this.entryDate,
+    required this.sourceType,
+    this.sourceId,
+    required this.description,
+    required this.status,
+    this.postedBy,
+    this.postedAt,
+    this.createdAt,
+    this.invoicePaymentStatus,
+    required this.lines,
+    this.reconciliation,
+  });
+
+  factory JournalEntryItem.fromJson(Map<String, dynamic> json) {
+    final rawLines = json['lines'] as List<dynamic>? ?? [];
+    final lines = rawLines
+        .whereType<Map>()
+        .map((l) => JournalLineItem.fromJson(Map<String, dynamic>.from(l)))
+        .toList();
+
+    ReconciliationModel? reconciliation;
+    if (json['reconciliation'] is Map) {
+      reconciliation = ReconciliationModel.fromJson(Map<String, dynamic>.from(json['reconciliation'] as Map));
+    }
+
+    return JournalEntryItem(
+      id: _asInt(json['id']) ?? 0,
+      companyId: _asInt(json['company_id']) ?? 0,
+      entryDate: json['entry_date']?.toString() ?? '',
+      sourceType: json['source_type']?.toString() ?? '',
+      sourceId: _asInt(json['source_id']),
+      description: json['description']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'posted',
+      postedBy: json['posted_by']?.toString(),
+      postedAt: json['posted_at']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      invoicePaymentStatus: json['invoice_payment_status']?.toString(),
+      lines: lines,
+      reconciliation: reconciliation,
+    );
+  }
+
+  double get totalDebit => lines.fold<double>(0, (sum, l) => sum + l.debit);
+  double get totalCredit => lines.fold<double>(0, (sum, l) => sum + l.credit);
+
+  String get paymentStatusLabel {
+    final raw = (invoicePaymentStatus ?? '').toLowerCase().trim();
+    if (raw == 'unpaid') return 'Unpaid';
+    if (raw == 'paid') return 'Paid';
+    if (raw == 'settlement' || raw.contains('settle')) return 'Settlement';
+    if (raw.isNotEmpty) return raw[0].toUpperCase() + raw.substring(1);
+    return '—';
+  }
+}
+
+class JournalEntriesResponse {
+  final List<JournalEntryItem> items;
+  final int total;
+  final int page;
+  final int limit;
+
+  JournalEntriesResponse({
+    required this.items,
+    required this.total,
+    required this.page,
+    required this.limit,
+  });
+
+  factory JournalEntriesResponse.fromJson(Map<String, dynamic> json) {
+    final rawItems = json['items'] as List<dynamic>? ?? [];
+    final items = rawItems
+        .whereType<Map>()
+        .map((i) => JournalEntryItem.fromJson(Map<String, dynamic>.from(i)))
+        .toList();
+
+    return JournalEntriesResponse(
+      items: items,
+      total: _asInt(json['total']) ?? 0,
+      page: _asInt(json['page']) ?? 1,
+      limit: _asInt(json['limit']) ?? 20,
+    );
+  }
+}
