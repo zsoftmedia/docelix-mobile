@@ -12,106 +12,47 @@ class GeneralLedgerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(GeneralLedgerController());
     final rs = context.rs;
-    final isTab = rs.isTablet;
 
     return Scaffold(
       backgroundColor: colorsList.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.white,
-        leading: Obx(() {
-          final searching = controller.isSearching.value;
-          return IconButton(
-            onPressed: () {
-              if (searching) {
-                controller.closeSearch();
-              } else {
-                Get.back();
-              }
-            },
-            icon: Icon(
-              searching
-                  ? Icons.close_rounded
-                  : Icons.arrow_back_ios_new_rounded,
-              color: colorsList.iconColor,
-              size: 20,
-            ),
-          );
-        }),
-        title: Obx(() {
-          if (controller.isSearching.value) {
-            return TextField(
-              controller: controller.searchController,
-              autofocus: true,
-              onSubmitted: controller.applySearch,
-              textInputAction: TextInputAction.search,
-              style: TextStyle(
-                color: colorsList.textColor,
-                fontSize: isTab ? 14 : rs.sp(14),
-              ),
-              decoration: const InputDecoration(
-                hintText: 'Search journal entries...',
-                hintStyle: TextStyle(
-                  color: colorsList.textHintColor,
-                ),
-                border: InputBorder.none,
-                isDense: true,
-              ),
-            );
-          }
-
-          return const Text(
-            'General Ledger',
-            style: TextStyle(
-              color: colorsList.textColor,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          );
-        }),
-        centerTitle: false,
-        actions: [
-          Obx(() {
-            if (controller.isSearching.value) {
-              return const SizedBox.shrink();
-            }
-
-            return IconButton(
-              onPressed: controller.openSearch,
-              icon: const Icon(
-                Icons.search_rounded,
-                color: colorsList.iconColor,
-                size: 22,
-              ),
-            );
-          }),
-          const SizedBox(width: 8),
-        ],
-      ),
       body: SafeArea(
         child: ResponsivePage(
           padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: rs.s(12)),
+
               // ======================================================
-              // 1. TITLE & TOTAL COUNT BADGE
+              // 1. TITLE & SUBTITLE SECTION WITH COUNT BADGE
               // ======================================================
               Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: rs.pagePaddingH,
-                  vertical: rs.s(12),
-                ),
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      'General Ledger',
-                      style: TextStyle(
-                        color: const Color(0xFF0A2342),
-                        fontSize: rs.sp(20),
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'General Ledger',
+                            style: TextStyle(
+                              color: const Color(0xFF0A2342),
+                              fontSize: rs.sp(22),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: rs.s(2)),
+                          Text(
+                            'Track, review, and organize your journal entries.',
+                            style: TextStyle(
+                              color: const Color(0xFF64748B),
+                              fontSize: rs.sp(12),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Obx(
@@ -139,8 +80,83 @@ class GeneralLedgerScreen extends StatelessWidget {
                 ),
               ),
 
+              SizedBox(height: rs.s(14)),
+
               // ======================================================
-              // 2. JOURNAL ENTRIES LIST / GRID
+              // 2. SEARCH BAR (MATCHING REQUESTED UI DESIGN)
+              // ======================================================
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+                child: Container(
+                  height: rs.s(44),
+                  padding: EdgeInsets.symmetric(horizontal: rs.s(14)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: colorsList.borderColor),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.search_rounded,
+                        color: Color(0xFF94A3B8),
+                        size: 20,
+                      ),
+                      SizedBox(width: rs.s(10)),
+                      Expanded(
+                        child: TextField(
+                          controller: controller.searchController,
+                          onChanged: (val) {
+                            controller.searchQuery.value = val;
+                          },
+                          style: TextStyle(
+                            color: const Color(0xFF0A2342),
+                            fontSize: rs.sp(13),
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: 'Search here',
+                            hintStyle: TextStyle(
+                              color: Color(0xFF94A3B8),
+                              fontSize: 13,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                      Obx(() {
+                        if (controller.searchQuery.value.isNotEmpty) {
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () {
+                              controller.searchController.clear();
+                              controller.searchQuery.value = '';
+                            },
+                          );
+                        }
+                        return const Icon(
+                          Icons.tune_rounded,
+                          color: Color(0xFF94A3B8),
+                          size: 18,
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(height: rs.s(14)),
+
+              // ======================================================
+              // 3. JOURNAL ENTRIES LIST / GRID
               // ======================================================
               Expanded(
                 child: Obx(() {
@@ -240,7 +256,7 @@ class GeneralLedgerScreen extends StatelessWidget {
   }
 
   // ================================================================
-  // JOURNAL ENTRY CARD WIDGET (MATCHES WEB TABLE COLUMNS 100%)
+  // JOURNAL ENTRY CARD WIDGET
   // ================================================================
 
   Widget _buildJournalEntryCard({
