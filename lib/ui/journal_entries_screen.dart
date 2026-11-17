@@ -393,9 +393,9 @@ class JournalEntriesScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {
+          /*onTap: () {
             Get.toNamed('/JournalEntryDetailsScreen', arguments: entry);
-          },
+          },*/
           child: Padding(
             padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
             child: Column(
@@ -562,7 +562,7 @@ class JournalEntriesScreen extends StatelessWidget {
                       ],
                     ),
 
-                    if (isNotReconciled)
+                    /*if (isNotReconciled)
                       OutlinedButton(
                         onPressed: () {
                           // Action button matching web table
@@ -584,7 +584,7 @@ class JournalEntriesScreen extends StatelessWidget {
                           fontSize: isTab ? 11 : rs.sp(11),
                           color: const Color(0xFF94A3B8),
                         ),
-                      ),
+                      ),*/
                   ],
                 ),
               ],
