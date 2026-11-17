@@ -1649,6 +1649,92 @@ class DioClient {
   }
 
   // ==============================
+  // GET BANK STATEMENTS (GET /api/ledger/statements)
+  // ==============================
+
+  Future<Response> getBankStatements({
+    required int companyId,
+    required String accessToken,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/ledger/statements',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'limit': limit,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // GET BANK TRANSACTIONS (GET /api/ledger/bank-transactions)
+  // ==============================
+
+  Future<Response> getBankTransactions({
+    required int companyId,
+    required String accessToken,
+    int page = 1,
+    int limit = 20,
+    String sort = 'booking_date',
+    String dir = 'desc',
+  }) async {
+    return await _dio.get(
+      '${ApiConstants.baseUrl}/ledger/bank-transactions',
+      queryParameters: {
+        'company_id': companyId,
+        'page': page,
+        'limit': limit,
+        'sort': sort,
+        'dir': dir,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // POST & MATCH BANK TRANSACTION (POST /api/ledger/bank-transactions/{id}/match)
+  // ==============================
+
+  Future<Response> matchBankTransaction({
+    required int transactionId,
+    required int companyId,
+    required int counterAccountId,
+    String? note,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/ledger/bank-transactions/$transactionId/match',
+      data: {
+        'company_id': companyId,
+        'counter_account_id': counterAccountId,
+        if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // INVENTORY
   // ==============================
 

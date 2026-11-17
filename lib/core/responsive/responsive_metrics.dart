@@ -69,11 +69,11 @@ class ResponsiveMetrics {
       case AppDeviceType.phone:
         return width * 0.045;
       case AppDeviceType.compactTablet:
-        return isLandscape ? 32 : 24;
+        return isLandscape ? 32.0 : 24.0;
       case AppDeviceType.tablet:
-        return isLandscape ? 40 : 28;
+        return isLandscape ? 40.0 : 28.0;
       case AppDeviceType.largeTablet:
-        return isLandscape ? 48 : 36;
+        return isLandscape ? 48.0 : 36.0;
     }
   }
 
@@ -83,11 +83,11 @@ class ResponsiveMetrics {
       case AppDeviceType.phone:
         return width * 0.035;
       case AppDeviceType.compactTablet:
-        return 20;
+        return 20.0;
       case AppDeviceType.tablet:
-        return 24;
+        return 24.0;
       case AppDeviceType.largeTablet:
-        return 28;
+        return 28.0;
     }
   }
 
@@ -130,9 +130,9 @@ class ResponsiveMetrics {
   /// Dialog / bottom-sheet max width.
   double get sheetMaxWidth {
     if (isPhone) return width;
-    if (isCompactTablet) return 480;
-    if (isTablet) return 520;
-    return 560;
+    if (isCompactTablet) return 480.0;
+    if (isTablet) return 520.0;
+    return 560.0;
   }
 
   // ── Scaling helpers ──────────────────────────────────────────────

@@ -12,25 +12,25 @@ class ResponsiveBreakpoints {
   ResponsiveBreakpoints._();
 
   /// Compact / phone.
-  static const double phoneMaxShortest = 599;
+  static const double phoneMaxShortest = 599.0;
 
   /// Compact tablet (~7") upper bound on shortest side.
-  static const double compactTabletMaxShortest = 719;
+  static const double compactTabletMaxShortest = 719.0;
 
   /// Regular tablet / 10" iPad upper bound on shortest side.
-  static const double regularTabletMaxShortest = 899;
+  static const double regularTabletMaxShortest = 899.0;
 
   /// Above this shortest side → large tablet / iPad Pro class.
-  static const double largeTabletMinShortest = 900;
+  static const double largeTabletMinShortest = 900.0;
 
   /// Landscape expanded width threshold.
-  static const double expandedWidth = 1024;
+  static const double expandedWidth = 1024.0;
 
   /// Design reference width used for proportional scaling (iPhone class).
-  static const double designWidth = 390;
+  static const double designWidth = 390.0;
 
   /// Design reference height.
-  static const double designHeight = 844;
+  static const double designHeight = 844.0;
 
   /// Soft cap so tablet text/spacing does not become huge.
   static const double maxScale = 1.25;
@@ -39,14 +39,14 @@ class ResponsiveBreakpoints {
   static const double minScale = 0.85;
 
   // Content max widths (centered column)
-  static const double compactTabletContentMaxWidth = 560;
-  static const double regularTabletContentMaxWidth = 720;
-  static const double largeTabletContentMaxWidth = 900;
-  static const double largeTabletLandscapeContentMaxWidth = 1100;
+  static const double compactTabletContentMaxWidth = 560.0;
+  static const double regularTabletContentMaxWidth = 720.0;
+  static const double largeTabletContentMaxWidth = 900.0;
+  static const double largeTabletLandscapeContentMaxWidth = 1100.0;
 
   // Auth / narrow form column
-  static const double authFormMaxWidth = 440;
-  static const double authFormMaxWidthLarge = 480;
+  static const double authFormMaxWidth = 440.0;
+  static const double authFormMaxWidthLarge = 480.0;
 }
 
 /// Coarse device bucket used by layouts.
