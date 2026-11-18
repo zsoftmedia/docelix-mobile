@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 
 class PurchaseLineItem {
   final String id;
+  int? catalogId;
   TextEditingController itemController;
   TextEditingController descriptionController;
   TextEditingController qtyController;
@@ -21,6 +22,7 @@ class PurchaseLineItem {
 
   PurchaseLineItem({
     required this.id,
+    this.catalogId,
     required String item,
     required String description,
     required double qty,
@@ -527,6 +529,7 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     if (lineIndex < 0 || lineIndex >= purchaseLineItems.length) return;
 
     final item = purchaseLineItems[lineIndex];
+    item.catalogId = catalog.id;
     item.itemController.text = catalog.articleName ?? '';
     item.descriptionController.text = catalog.articleName ?? '';
 
@@ -761,11 +764,189 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     currencySearchQuery.value = '';
   }
 
+  String _formatIsoDate(String raw) {
+    if (raw.trim().isEmpty) return DateFormat('yyyy-MM-dd').format(DateTime.now());
+    try {
+      if (raw.contains('.')) {
+        final parts = raw.split('.');
+        if (parts.length == 3) {
+          final day = parts[0].padLeft(2, '0');
+          final month = parts[1].padLeft(2, '0');
+          final year = parts[2];
+          return '$year-$month-$day';
+        }
+      }
+      final parsed = DateTime.parse(raw);
+      return DateFormat('yyyy-MM-dd').format(parsed);
+    } catch (_) {
+      return DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
+  }
+
   Future<void> submitPurchaseInvoice() async {
-    AppSnackbar.info(
-      title: 'Saving Invoice',
-      message: 'Purchase invoice processing...',
-    );
+    final token = SessionManager.accessToken;
+    final companyId = SessionManager.accessCompanyid;
+
+    if (token == null || token.isEmpty || companyId == null || companyId == 0) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'Access token or company ID is not available.',
+      );
+      return;
+    }
+
+    if (selectedSupplier.value == null) {
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Please select a supplier.',
+      );
+      return;
+    }
+
+    if (!hasNoDocumentNumber.value && supplierInvoiceNumberController.text.trim().isEmpty) {
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Please enter a document / invoice number or select "No invoice number".',
+      );
+      return;
+    }
+
+    if (purchaseLineItems.isEmpty) {
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Please add at least one line item.',
+      );
+      return;
+    }
+
+    try {
+      isSubmittingInvoice.value = true;
+
+      final String docType = selectedTabIndex.value == 0
+          ? 'invoice'
+          : (selectedTabIndex.value == 1 ? 'receipt' : 'credit_note');
+
+      final linesPayload = purchaseLineItems.map((item) {
+        final qty = double.tryParse(item.qtyController.text) ?? 1.0;
+        final unitPrice = double.tryParse(item.unitPriceController.text) ?? 0.0;
+        final taxRate = double.tryParse(item.taxRateController.text) ?? 20.0;
+        final desc = item.descriptionController.text.trim().isNotEmpty
+            ? item.descriptionController.text.trim()
+            : item.itemController.text.trim();
+
+        return {
+          if (item.catalogId != null && item.catalogId! > 0) 'item_id': item.catalogId,
+          'description': desc.isNotEmpty ? desc : 'Item',
+          'quantity': qty,
+          'unit_price': unitPrice,
+          'tax_rate': taxRate,
+          'account_id': 1380,
+        };
+      }).toList();
+
+      final Map<String, dynamic> payload = {
+        'supplier_id': selectedSupplier.value!.id,
+        'document_type': docType,
+        'credited_purchase_id': selectedTabIndex.value == 2 ? selectedCorrectsInvoice.value?.id : null,
+        'currency': selectedCurrency.value.toUpperCase(),
+        'delivery_reference': deliveryNoteController.text.trim(),
+        'due_date': _formatIsoDate(dueDateController.text),
+        'fx_rate': '',
+        'lines': linesPayload,
+        'no_invoice_number': hasNoDocumentNumber.value,
+        'notes': internalNotesController.text.trim(),
+        'order_reference': orderReferenceController.text.trim(),
+        'payee_iban': ibanController.text.trim().isNotEmpty
+            ? ibanController.text.trim()
+            : (selectedSupplier.value?.iban ?? ''),
+        'payment_method': paidFrom.value.toLowerCase() == 'bank' ? 'bank' : 'cash',
+        'price_mode': priceMode.value.toLowerCase(),
+        'purchase_date': _formatIsoDate(purchaseDateController.text),
+        'purchase_type': 'expense',
+        'reference': referenceController.text.trim(),
+        'service_period_start': _formatIsoDate(serviceFromDateController.text),
+        'service_period_end': _formatIsoDate(serviceToDateController.text),
+        'settle_amount': paymentStatus.value == 'Paid in full'
+            ? calculatedGrandTotal.toStringAsFixed(2)
+            : (amountPaidController.text.trim().isNotEmpty ? amountPaidController.text.trim() : ''),
+        'settle_date': _formatIsoDate(paymentDateController.text),
+        'settle_on_post': paymentStatus.value == 'Paid in full' || selectedTabIndex.value == 1,
+        'settle_reference': paymentReferenceController.text.trim(),
+        'supplier_invoice_date': _formatIsoDate(supplierInvoiceDateController.text),
+        'supplier_invoice_number': supplierInvoiceNumberController.text.trim(),
+      };
+
+      final response = await _dioClient.createPurchase(
+        body: payload,
+        companyId: companyId,
+        accessToken: token,
+      );
+
+      final String docTitle = selectedTabIndex.value == 0
+          ? 'Purchase Invoice'
+          : (selectedTabIndex.value == 1 ? 'Receipt' : 'Credit Note');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        int purchaseId = 0;
+        final resData = response.data;
+        if (resData is Map) {
+          final rawId = resData['id'];
+          if (rawId is int) {
+            purchaseId = rawId;
+          } else if (rawId != null) {
+            purchaseId = int.tryParse(rawId.toString()) ?? 0;
+          }
+        }
+
+        // UPLOAD ATTACHMENT FILE IF ATTACHED
+        if (purchaseId > 0 &&
+            attachedDocumentPath.value != null &&
+            attachedDocumentPath.value!.trim().isNotEmpty) {
+          try {
+            await _dioClient.uploadPurchaseAttachment(
+              purchaseId: purchaseId,
+              filePath: attachedDocumentPath.value!.trim(),
+              fileName: attachedDocumentName.value,
+              companyId: companyId,
+              accessToken: token,
+            );
+          } catch (e) {
+            debugPrint('[CreatePurchaseInvoiceManualController] uploadAttachment Error: $e');
+          }
+        }
+
+        AppSnackbar.success(
+          title: 'Success',
+          message: '$docTitle created successfully.',
+        );
+        Get.back(result: true);
+      } else {
+        AppSnackbar.error(
+          title: 'Error',
+          message: 'Failed to save $docTitle.',
+        );
+      }
+    } on DioException catch (e) {
+      String errText = 'Failed to save purchase document.';
+      final resData = e.response?.data;
+      if (resData is Map) {
+        final msg = resData['message'] ?? resData['error'] ?? resData['detail'];
+        if (msg != null && msg.toString().trim().isNotEmpty) {
+          errText = msg.toString();
+        }
+      }
+      AppSnackbar.error(
+        title: 'Error',
+        message: errText,
+      );
+    } catch (e) {
+      AppSnackbar.error(
+        title: 'Error',
+        message: 'An unexpected error occurred while saving.',
+      );
+    } finally {
+      isSubmittingInvoice.value = false;
+    }
   }
 
   @override

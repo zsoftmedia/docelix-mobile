@@ -1,5 +1,6 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/create_purchase_invoice_controller.dart';
+import 'package:docelix_mobileapp/controllers/profile_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
@@ -267,6 +268,15 @@ class _LandScreenState extends State<LandScreen> {
     _assetsExpanded = false;
     _inventoryExpanded = false;
 
+    ProfileController? profileController;
+    if (Get.isRegistered<ProfileController>()) {
+      profileController = Get.find<ProfileController>();
+    } else {
+      try {
+        profileController = Get.put(ProfileController());
+      } catch (_) {}
+    }
+
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -283,130 +293,270 @@ class _LandScreenState extends State<LandScreen> {
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: rs.sheetMaxWidth,
-                  maxHeight: rs.height * 0.85,
+                  maxHeight: rs.height * 0.90,
                 ),
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.fromLTRB(
-                    rs.s(20),
-                    rs.s(12),
-                    rs.s(20),
-                    rs.s(18) + bottomInset,
-                  ),
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    color: Color(0xFFF8FAFC),
                     borderRadius:
                         BorderRadius.vertical(top: Radius.circular(24)),
                   ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFD7DDE5),
-                            borderRadius: BorderRadius.circular(10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 12),
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD7DDE5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.fromLTRB(
+                            rs.s(16),
+                            rs.s(4),
+                            rs.s(16),
+                            rs.s(20) + bottomInset,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 1. User Profile Header Card
+                              Obx(() {
+                                final name = profileController
+                                                ?.profileName.value.isNotEmpty ==
+                                            true
+                                    ? profileController!.profileName.value
+                                    : (SessionManager.username?.isNotEmpty ==
+                                            true
+                                        ? SessionManager.username!
+                                        : 'Anees Irshad');
+
+                                final email = profileController
+                                                ?.profileEmail.value.isNotEmpty ==
+                                            true
+                                    ? profileController!.profileEmail.value
+                                    : (SessionManager.email?.isNotEmpty == true
+                                        ? SessionManager.email!
+                                        : 'anees.irshad@berrinex.com');
+
+                                final plan =
+                                    profileController?.profilePlan.value ??
+                                        'Standard Plan';
+                                final imageUrl =
+                                    profileController?.profileImageUrl.value ??
+                                        '';
+
+                                return _UserProfileCard(
+                                  name: name,
+                                  email: email,
+                                  plan: plan,
+                                  imageUrl: imageUrl,
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Get.toNamed('/ProfileScreen');
+                                  },
+                                );
+                              }),
+
+                              SizedBox(height: rs.s(16)),
+
+                              // 2. Section: BUSINESS OPERATIONS
+                              const _MoreSectionHeader(
+                                  title: 'BUSINESS OPERATIONS'),
+                              _MoreGroupCard(
+                                children: [
+                                  // Inventory
+                                  _MoreMenuItem(
+                                    icon: Icons.grid_view_rounded,
+                                    title: 'Inventory',
+                                    subtitle:
+                                        'Stock addition, adjustments & reports',
+                                    iconBgColor: const Color(0xFFE0F2FE),
+                                    iconColor: const Color(0xFF0284C7),
+                                    isTop: true,
+                                    trailing: AnimatedRotation(
+                                      turns: _inventoryExpanded ? 0.5 : 0,
+                                      duration:
+                                          const Duration(milliseconds: 220),
+                                      child: const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: Color(0xFF94A3B8),
+                                        size: 24,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      setSheetState(() {
+                                        _inventoryExpanded =
+                                            !_inventoryExpanded;
+                                      });
+                                    },
+                                  ),
+                                  _ExpandableSubMenu(
+                                    expanded: _inventoryExpanded,
+                                    items: [
+                                      _SubMenuItem(
+                                        icon: Icons.add_box_outlined,
+                                        title: 'Products',
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          Get.toNamed('/CatalogsScreen');
+                                        },
+                                      ),
+                                      _SubMenuItem(
+                                        icon: Icons.tune_rounded,
+                                        title: 'Stock Adjustment',
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          Get.toNamed('/StockAdjustmentScreen');
+                                        },
+                                      ),
+                                      _SubMenuItem(
+                                        icon: Icons.assessment_outlined,
+                                        title: 'Stock Reports',
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          Get.toNamed('/StockReportScreen');
+                                        },
+                                      ),
+                                    ],
+                                  ),
+
+                                  const Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: Color(0xFFF1F5F9)),
+
+                                  // Customers
+                                  _MoreMenuItem(
+                                    icon: Icons.people_rounded,
+                                    title: 'Customers',
+                                    subtitle: 'Manage your customers',
+                                    iconBgColor: const Color(0xFFDCFCE7),
+                                    iconColor: const Color(0xFF16A34A),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      Get.toNamed('/CustomersScreen');
+                                    },
+                                  ),
+
+                                  const Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: Color(0xFFF1F5F9)),
+
+                                  // Assets
+                                  _MoreMenuItem(
+                                    icon: Icons.verified_outlined,
+                                    title: 'Assets',
+                                    subtitle:
+                                        'Fixed assets, inventory & vehicles',
+                                    iconBgColor: const Color(0xFFF3E8FF),
+                                    iconColor: const Color(0xFF7C3AED),
+                                    isBottom: !_assetsExpanded,
+                                    trailing: AnimatedRotation(
+                                      turns: _assetsExpanded ? 0.5 : 0,
+                                      duration:
+                                          const Duration(milliseconds: 220),
+                                      child: const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: Color(0xFF94A3B8),
+                                        size: 24,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      setSheetState(() {
+                                        _assetsExpanded = !_assetsExpanded;
+                                      });
+                                    },
+                                  ),
+                                  _ExpandableSubMenu(
+                                    expanded: _assetsExpanded,
+                                    items: [
+                                      _SubMenuItem(
+                                        icon: Icons.computer_rounded,
+                                        title: 'Fixed Assets',
+                                        onTap: () => _openAssetRoute(
+                                            '/FixedAssetsScreen'),
+                                      ),
+                                      _SubMenuItem(
+                                        icon: Icons.directions_car_outlined,
+                                        title: 'Vehicles & Logbook',
+                                        onTap: () => _openAssetRoute(
+                                            '/VehiclesLogbookScreen'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: rs.s(16)),
+
+                              // 3. Section: ACCOUNT & PREFERENCES
+                              const _MoreSectionHeader(
+                                  title: 'ACCOUNT & PREFERENCES'),
+                              _MoreGroupCard(
+                                children: [
+                                  // Profile
+                                  _MoreMenuItem(
+                                    icon: Icons.person_outline_rounded,
+                                    title: 'Profile',
+                                    subtitle: 'Manage your profile',
+                                    iconBgColor: const Color(0xFFE0F2FE),
+                                    iconColor: const Color(0xFF0284C7),
+                                    isTop: true,
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      Get.toNamed('/ProfileScreen');
+                                    },
+                                  ),
+
+                                  const Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: Color(0xFFF1F5F9)),
+
+                                  // Settings & Security
+                                  _MoreMenuItem(
+                                    icon: Icons.settings_outlined,
+                                    title: 'Settings & Security',
+                                    subtitle:
+                                        'App preferences, currency & security',
+                                    iconBgColor: const Color(0xFFF1F5F9),
+                                    iconColor: const Color(0xFF475569),
+                                    isBottom: true,
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      Get.toNamed('/ProfileScreen');
+                                    },
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: rs.s(14)),
+
+                              // 4. Logout Card
+                              _LogoutCard(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _logout();
+                                },
+                              ),
+
+                              SizedBox(height: rs.s(20)),
+
+                              // 5. Footer Info
+                              const _MoreFooter(),
+                            ],
                           ),
                         ),
-                        SizedBox(height: rs.s(14)),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'More',
-                                style: TextStyle(
-                                  color: colorsList.primaryText,
-                                  fontSize: rs.sp(19),
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () => Navigator.pop(context),
-                              icon: Icon(
-                                Icons.close_rounded,
-                                color: colorsList.secondaryText,
-                                size: rs.s(22),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: rs.s(4)),
-                        _InventoryExpandableSection(
-                          expanded: _inventoryExpanded,
-                          onToggle: () {
-                            setSheetState(() {
-                              _inventoryExpanded = !_inventoryExpanded;
-                            });
-                          },
-                          onStockAddition: () {
-                            Navigator.pop(context);
-                            Get.toNamed('/CatalogsScreen');
-                          },
-                          onStockAdjustment: () {
-                            Navigator.pop(context);
-                            Get.toNamed('/StockAdjustmentScreen');
-                          },
-                          onStockReports: () {
-                            Navigator.pop(context);
-                            Get.toNamed('/StockReportScreen');
-                          },
-                        ),
-                        _MoreMenuItem(
-                          icon: Icons.people_outline_rounded,
-                          title: 'Customers',
-                          subtitle: 'Manage your customers',
-                          iconColor: colorsList.green,
-                          onTap: () {
-                            Navigator.pop(context);
-                            Get.toNamed('/CustomersScreen');
-                          },
-                        ),
-                        _AssetsExpandableSection(
-                          expanded: _assetsExpanded,
-                          onToggle: () {
-                            setSheetState(() {
-                              _assetsExpanded = !_assetsExpanded;
-                            });
-                          },
-                          onFixedAssets: () =>
-                              _openAssetRoute('/FixedAssetsScreen'),
-                          onInventory: () =>
-                              _openAssetRoute('/InventoryScreen'),
-                          onVehicles: () =>
-                              _openAssetRoute('/VehiclesLogbookScreen'),
-                        ),
-                        _MoreMenuItem(
-                          icon: Icons.person_outline_rounded,
-                          title: 'Profile',
-                          subtitle: 'Manage your profile',
-                          iconColor: colorsList.cyan,
-                          onTap: () {
-                            Navigator.pop(context);
-                            Get.toNamed('/ProfileScreen');
-                          },
-                        ),
-                        SizedBox(height: rs.s(8)),
-                        const Divider(
-                          color: colorsList.borderColor,
-                          height: 1,
-                        ),
-                        SizedBox(height: rs.s(4)),
-                        _MoreMenuItem(
-                          icon: Icons.logout_rounded,
-                          title: 'Logout',
-                          subtitle: 'Sign out from your account',
-                          iconColor: colorsList.red,
-                          textColor: colorsList.red,
-                          onTap: () {
-                            Navigator.pop(context);
-                            _logout();
-                          },
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -561,47 +711,309 @@ class _LandScreenState extends State<LandScreen> {
   }
 }
 
-class _MoreMenuItem extends StatelessWidget {
-  const _MoreMenuItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.iconColor,
+class _UserProfileCard extends StatelessWidget {
+  const _UserProfileCard({
+    required this.name,
+    required this.email,
+    required this.plan,
+    required this.imageUrl,
     required this.onTap,
-    this.textColor,
   });
 
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color iconColor;
+  final String name;
+  final String email;
+  final String plan;
+  final String imageUrl;
   final VoidCallback onTap;
-  final Color? textColor;
+
+  String _getInitials(String input) {
+    if (input.trim().isEmpty) return 'AI';
+    final parts = input.trim().split(RegExp(r'\s+'));
+    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+    }
+    return 'AI';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final rs = context.rs;
+    final displayName = name.trim().isNotEmpty ? name.trim() : 'Anees Irshad';
+    final displayEmail =
+        email.trim().isNotEmpty ? email.trim() : 'anees.irshad@berrinex.com';
+    final displayPlan = plan.trim().isNotEmpty && plan.trim() != 'Free'
+        ? plan.trim()
+        : 'Standard Plan';
+    final initials = _getInitials(displayName);
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: rs.s(11)),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Avatar Stack
+              Stack(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1B365D),
+                      borderRadius: BorderRadius.circular(14),
+                      image: imageUrl.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(imageUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    alignment: Alignment.center,
+                    child: imageUrl.isEmpty
+                        ? Text(
+                            initials,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 13,
+                      height: 13,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 14),
+              // User Details Column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF1E293B),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        const Icon(
+                          Icons.verified,
+                          color: Color(0xFFF97316),
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      displayEmail,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 12.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0F2FE),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'Client Portal',
+                            style: TextStyle(
+                              color: Color(0xFF0284C7),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDCFCE7),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            displayPlan,
+                            style: const TextStyle(
+                              color: Color(0xFF16A34A),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8),
+                size: 22,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MoreSectionHeader extends StatelessWidget {
+  const _MoreSectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8, top: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: Color(0xFF8A94A6),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+}
+
+class _MoreGroupCard extends StatelessWidget {
+  const _MoreGroupCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+}
+
+class _MoreMenuItem extends StatelessWidget {
+  const _MoreMenuItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.iconColor,
+    this.iconBgColor,
+    this.textColor,
+    this.trailing,
+    this.isTop = false,
+    this.isBottom = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color? iconColor;
+  final Color? iconBgColor;
+  final VoidCallback onTap;
+  final Color? textColor;
+  final Widget? trailing;
+  final bool isTop;
+  final bool isBottom;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveIconColor = iconColor ?? colorsList.blue;
+    final effectiveIconBgColor =
+        iconBgColor ?? effectiveIconColor.withValues(alpha: 0.12);
+
+    BorderRadius borderRadius = BorderRadius.zero;
+    if (isTop && isBottom) {
+      borderRadius = BorderRadius.circular(16);
+    } else if (isTop) {
+      borderRadius = const BorderRadius.vertical(top: Radius.circular(16));
+    } else if (isBottom) {
+      borderRadius = const BorderRadius.vertical(bottom: Radius.circular(16));
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: borderRadius,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          child: Row(
             children: [
               Container(
-                width: rs.s(44),
-                height: rs.s(44),
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.12),
+                  color: effectiveIconBgColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: iconColor, size: rs.s(20)),
+                child: Icon(icon, color: effectiveIconColor, size: 22),
               ),
-              SizedBox(width: rs.s(14)),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -609,32 +1021,31 @@ class _MoreMenuItem extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        color: textColor ?? colorsList.primaryText,
-                        fontSize: rs.sp(15),
-                        fontWeight: FontWeight.normal,
-                        height: 1.2,
+                        color: textColor ?? const Color(0xFF1E293B),
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: rs.s(3)),
+                    const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colorsList.secondaryText,
-                        fontSize: rs.sp(12),
-                        height: 1.3,
+                      style: const TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 12.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(width: rs.s(8)),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: colorsList.secondaryText,
-                size: rs.s(22),
-              ),
+              const SizedBox(width: 8),
+              trailing ??
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: Color(0xFF94A3B8),
+                    size: 22,
+                  ),
             ],
           ),
         ),
@@ -643,160 +1054,53 @@ class _MoreMenuItem extends StatelessWidget {
   }
 }
 
-class _AssetsExpandableSection extends StatelessWidget {
-  const _AssetsExpandableSection({
+class _ExpandableSubMenu extends StatelessWidget {
+  const _ExpandableSubMenu({
     required this.expanded,
-    required this.onToggle,
-    required this.onFixedAssets,
-    required this.onInventory,
-    required this.onVehicles,
+    required this.items,
   });
 
   final bool expanded;
-  final VoidCallback onToggle;
-  final VoidCallback onFixedAssets;
-  final VoidCallback onInventory;
-  final VoidCallback onVehicles;
+  final List<_SubMenuItem> items;
 
   @override
   Widget build(BuildContext context) {
-    final rs = context.rs;
-
-    return Column(
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onToggle,
-            borderRadius: BorderRadius.circular(14),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              //curve: Curves.easeOut,
-              padding: EdgeInsets.symmetric(vertical: rs.s(11)),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: expanded ? rs.s(8) : 0,
-                  right: expanded ? rs.s(8) : 0,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: rs.s(44),
-                      height: rs.s(44),
-                      decoration: BoxDecoration(
-                        color: expanded
-                            ? colorsList.primaryBlue
-                            : colorsList.blue.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.inventory_outlined,
-                        color: expanded ? Colors.white : colorsList.blue,
-                        size: rs.s(20),
-                      ),
-                    ),
-                    SizedBox(width: rs.s(14)),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Assets',
-                            style: TextStyle(
-                              color: colorsList.primaryText,
-                              fontSize: rs.sp(15),
-                              fontWeight: FontWeight.normal,
-                              height: 1.2,
-                            ),
-                          ),
-                          SizedBox(height: rs.s(3)),
-                          Text(
-                            'Fixed assets, inventory & vehicles',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: colorsList.secondaryText,
-                              fontSize: rs.sp(12),
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: rs.s(8)),
-                    AnimatedRotation(
-                      turns: expanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 220),
-                      child: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: colorsList.secondaryText,
-                        size: rs.s(22),
-                      ),
-                    ),
-                  ],
+    return AnimatedCrossFade(
+      firstChild: const SizedBox(width: double.infinity),
+      secondChild: Container(
+        color: const Color(0xFFFAFAFA),
+        padding: const EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 8),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 2.5,
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCBD5E1),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-          ),
-        ),
-        AnimatedCrossFade(
-          firstChild: const SizedBox(width: double.infinity),
-          secondChild: Padding(
-            padding: EdgeInsets.only(
-              left: rs.s(22),
-              top: rs.s(4),
-              bottom: rs.s(4),
-            ),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    width: 2,
-                    margin: EdgeInsets.symmetric(vertical: rs.s(4)),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD7DEE8),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  SizedBox(width: rs.s(14)),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _AssetSubItem(
-                          icon: Icons.computer_rounded,
-                          title: 'Fixed Assets',
-                          onTap: onFixedAssets,
-                        ),
-                        /*_AssetSubItem(
-                          icon: Icons.inventory_2_outlined,
-                          title: 'Inventory',
-                          onTap: onInventory,
-                        ),*/
-                        _AssetSubItem(
-                          icon: Icons.directions_car_outlined,
-                          title: 'Vehicles & Logbook',
-                          onTap: onVehicles,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  children: items,
+                ),
               ),
-            ),
+            ],
           ),
-          crossFadeState: expanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 220),
         ),
-      ],
+      ),
+      crossFadeState:
+          expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      duration: const Duration(milliseconds: 220),
     );
   }
 }
 
-class _AssetSubItem extends StatelessWidget {
-  const _AssetSubItem({
+class _SubMenuItem extends StatelessWidget {
+  const _SubMenuItem({
     required this.icon,
     required this.title,
     required this.onTap,
@@ -808,37 +1112,35 @@ class _AssetSubItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rs = context.rs;
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: rs.s(11),
-            horizontal: rs.s(4),
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
           child: Row(
             children: [
-              Icon(icon, size: rs.s(19),
-                  color: colorsList.secondaryText),
-              SizedBox(width: rs.s(12)),
+              Icon(
+                icon,
+                size: 19,
+                color: const Color(0xFF64748B),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    color: colorsList.primaryText,
-                    fontSize: rs.sp(14),
-                    fontWeight: FontWeight.normal,
+                  style: const TextStyle(
+                    color: Color(0xFF334155),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.chevron_right_rounded,
-                color: colorsList.secondaryText,
-                size: rs.s(20),
+                color: Color(0xFF94A3B8),
+                size: 20,
               ),
             ],
           ),
@@ -848,145 +1150,124 @@ class _AssetSubItem extends StatelessWidget {
   }
 }
 
-class _InventoryExpandableSection extends StatelessWidget {
-  const _InventoryExpandableSection({
-    required this.expanded,
-    required this.onToggle,
-    required this.onStockAddition,
-    required this.onStockAdjustment,
-    required this.onStockReports,
-  });
+class _LogoutCard extends StatelessWidget {
+  const _LogoutCard({required this.onTap});
 
-  final bool expanded;
-  final VoidCallback onToggle;
-  final VoidCallback onStockAddition;
-  final VoidCallback onStockAdjustment;
-  final VoidCallback onStockReports;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final rs = context.rs;
-
-    return Column(
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onToggle,
-            borderRadius: BorderRadius.circular(14),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: rs.s(11)),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: rs.s(44),
-                    height: rs.s(44),
-                    decoration: BoxDecoration(
-                      color: expanded
-                          ? colorsList.primaryBlue
-                          : colorsList.blue.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.grid_view_rounded,
-                      color: expanded ? Colors.white : colorsList.blue,
-                      size: rs.s(20),
-                    ),
-                  ),
-                  SizedBox(width: rs.s(14)),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Inventory',
-                          style: TextStyle(
-                            color: colorsList.primaryText,
-                            fontSize: rs.sp(15),
-                            fontWeight: FontWeight.normal,
-                            height: 1.2,
-                          ),
-                        ),
-                        SizedBox(height: rs.s(3)),
-                        Text(
-                          'Stock addition, adjustments & reports',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: colorsList.secondaryText,
-                            fontSize: rs.sp(12),
-                            height: 1.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: rs.s(8)),
-                  AnimatedRotation(
-                    turns: expanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 220),
-                    child: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: colorsList.secondaryText,
-                      size: rs.s(22),
-                    ),
-                  ),
-                ],
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFFEE2E2),
+              width: 1.2,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEE2E2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.logout_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Logout',
+                      style: TextStyle(
+                        color: Color(0xFFEF4444),
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Sign out from your account',
+                      style: TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFFFCA5A5),
+                size: 22,
+              ),
+            ],
           ),
         ),
-        AnimatedCrossFade(
-          firstChild: const SizedBox(width: double.infinity),
-          secondChild: Padding(
-            padding: EdgeInsets.only(
-              left: rs.s(22),
-              top: rs.s(4),
-              bottom: rs.s(4),
-            ),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    width: 2,
-                    margin: EdgeInsets.symmetric(vertical: rs.s(4)),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD7DEE8),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  SizedBox(width: rs.s(14)),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _AssetSubItem(
-                          icon: Icons.add_box_outlined,
-                          title: 'Products',
-                          onTap: onStockAddition,
-                        ),
-                        _AssetSubItem(
-                          icon: Icons.tune_rounded,
-                          title: 'Stock Adjustment',
-                          onTap: onStockAdjustment,
-                        ),
-                        _AssetSubItem(
-                          icon: Icons.assessment_outlined,
-                          title: 'Stock Reports',
-                          onTap: onStockReports,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+      ),
+    );
+  }
+}
+
+class _MoreFooter extends StatelessWidget {
+  const _MoreFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: Color(0xFF10B981),
+                shape: BoxShape.circle,
               ),
             ),
+            const SizedBox(width: 6),
+            const Text(
+              'DocElix Cloud Sync Active',
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'DocElix Mobile Suite - v2.4.1 (Build 890)',
+          style: TextStyle(
+            color: Color(0xFF94A3B8),
+            fontSize: 11,
           ),
-          crossFadeState: expanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 220),
         ),
       ],
     );

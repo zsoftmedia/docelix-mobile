@@ -1735,6 +1735,59 @@ class DioClient {
   }
 
   // ==============================
+  // CREATE PURCHASE INVOICE / RECEIPT / CREDIT NOTE (POST /api/purchases)
+  // ==============================
+
+  Future<Response> createPurchase({
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/purchases',
+      data: body,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
+  // UPLOAD PURCHASE ATTACHMENT (POST /api/purchases/{id}/attachment)
+  // ==============================
+
+  Future<Response> uploadPurchaseAttachment({
+    required int purchaseId,
+    required String filePath,
+    String? fileName,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        filePath,
+        filename: fileName ?? filePath.split('/').last.split('\\').last,
+      ),
+    });
+
+    return await _dio.post(
+      '${ApiConstants.baseUrl}/purchases/$purchaseId/attachment',
+      data: formData,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'x-company-id': companyId.toString(),
+        },
+        contentType: 'multipart/form-data',
+      ),
+    );
+  }
+
+  // ==============================
   // INVENTORY
   // ==============================
 
