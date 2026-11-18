@@ -39,15 +39,25 @@ class ResponsivePage extends StatelessWidget {
 
     return ColoredBox(
       color: backgroundColor ?? Colors.transparent,
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: capped),
-          child: Padding(
-            padding: padding ?? rs.pagePadding,
-            child: child,
-          ),
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final hasBoundedHeight = constraints.hasBoundedHeight;
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: capped,
+                minHeight: hasBoundedHeight ? constraints.maxHeight : 0,
+                maxHeight: hasBoundedHeight ? constraints.maxHeight : double.infinity,
+              ),
+              child: Padding(
+                padding: padding ?? rs.pagePadding,
+                child: child,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

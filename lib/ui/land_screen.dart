@@ -3,6 +3,8 @@ import 'package:docelix_mobileapp/controllers/create_purchase_invoice_controller
 import 'package:docelix_mobileapp/controllers/profile_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/ui/dashboard_screen.dart';
+import 'package:docelix_mobileapp/ui/invoices_screen.dart';
+import 'package:docelix_mobileapp/ui/purchase_invoices_screen.dart';
 import 'package:docelix_mobileapp/ui/scan_qr_screen.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
@@ -27,23 +29,16 @@ class _LandScreenState extends State<LandScreen> {
 
   final List<Widget> _pages = const [
     DashboardScreen(),
+    InvoicesScreen(isEmbedded: true),
     SizedBox.shrink(),
-    SizedBox.shrink(),
-    SizedBox.shrink(),
+    PurchaseInvoicesScreen(isEmbedded: true),
     SizedBox.shrink(),
   ];
 
   void _onItemTapped(int index) {
     switch (index) {
-      case 1:
-        _showSalesMenu();
-        return;
       case 2:
         _openScan();
-        return;
-      case 3:
-        _showPurchaseMenu();
-
         return;
       case 4:
         _showMoreMenu();
@@ -51,201 +46,6 @@ class _LandScreenState extends State<LandScreen> {
       default:
         setState(() => _selectedIndex = index);
     }
-  }
-
-  void _showSalesMenu() {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      useSafeArea: false,
-      builder: (sheetContext) {
-        final width = MediaQuery.of(sheetContext).size.width;
-        final bottomInset = MediaQuery.of(sheetContext).padding.bottom;
-
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.fromLTRB(
-            width * 0.05,
-            width * 0.03,
-            width * 0.05,
-            width * 0.045 + bottomInset,
-          ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD7DDE5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              SizedBox(height: width * 0.035),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Sales',
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width * 0.048,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(sheetContext),
-                    icon: Icon(
-                      Icons.close_rounded,
-                      color: colorsList.secondaryText,
-                      size: width * 0.055,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: width * 0.01),
-              _MoreMenuItem(
-                icon: Icons.receipt_long_rounded,
-                title: 'Invoices',
-                subtitle: 'View and manage all sales invoices',
-                iconColor: colorsList.blue,
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Get.toNamed('/InvoicesScreen');
-                },
-              ),
-              _MoreMenuItem(
-                icon: Icons.request_quote_outlined,
-                title: 'Quotation',
-                subtitle: 'Create and manage sales quotes & offers',
-                iconColor: colorsList.orange,
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Get.toNamed('/QuotationScreen');
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _showPurchaseMenu() {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      useSafeArea: false,
-      builder: (sheetContext) {
-        final width = MediaQuery.of(sheetContext).size.width;
-        final bottomInset = MediaQuery.of(sheetContext).padding.bottom;
-
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.fromLTRB(
-            width * 0.05,
-            width * 0.03,
-            width * 0.05,
-            width * 0.045 + bottomInset,
-          ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD7DDE5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              SizedBox(height: width * 0.035),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Purchases',
-                      style: TextStyle(
-                        color: colorsList.primaryText,
-                        fontSize: width * 0.048,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(sheetContext),
-                    icon: Icon(
-                      Icons.close_rounded,
-                      color: colorsList.secondaryText,
-                      size: width * 0.055,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: width * 0.01),
-              _MoreMenuItem(
-                icon: Icons.request_quote_outlined,
-                title: 'Purchase Invoices',
-                subtitle: 'Upload and manage supplier invoices, receipts, and credit notes.',
-                iconColor: colorsList.orange,
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Get.toNamed('/IncomingInvoicesScreen');
-
-                },
-              ),
-              _MoreMenuItem(
-                icon: Icons.request_quote_outlined,
-                title: 'Suppliers',
-                subtitle: 'Who you buy from, what you have purchased and what is still open.',
-                iconColor: colorsList.orange,
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Get.toNamed('/SuppliersScreen');
-                },
-              ),
-
-              /*_MoreMenuItem(
-                icon: Icons.inventory_2_rounded,
-                title: 'Invoice Archive',
-                subtitle: 'View and manage all incoming invoices',
-                iconColor: colorsList.blue,
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Get.toNamed('/InvoiceArchiveScreen');
-                },
-              ),
-
-              _MoreMenuItem(
-                icon: Icons.request_quote_outlined,
-                title: 'Quotation',
-                subtitle: 'Create and manage sales quotes & offers',
-                iconColor: colorsList.orange,
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  AppSnackbar.info(
-                    title: 'Coming Soon',
-                    message: 'Quotation feature is coming soon.',
-                  );
-                },
-              ),*/
-
-            ],
-          ),
-        );
-      },
-    );
   }
 
   Future<void> _openScan() async {
@@ -522,7 +322,7 @@ class _LandScreenState extends State<LandScreen> {
                                       color: Color(0xFFF1F5F9)),
 
                                   // Settings & Security
-                                  _MoreMenuItem(
+                                  /*_MoreMenuItem(
                                     icon: Icons.settings_outlined,
                                     title: 'Settings & Security',
                                     subtitle:
@@ -534,7 +334,7 @@ class _LandScreenState extends State<LandScreen> {
                                       Navigator.pop(context);
                                       Get.toNamed('/ProfileScreen');
                                     },
-                                  ),
+                                  ),*/
                                 ],
                               ),
 
@@ -652,58 +452,64 @@ class _LandScreenState extends State<LandScreen> {
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            rs.s(6),
-            rs.s(8),
-            rs.s(6),
-            rs.s(4),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: _BottomNavItem(
-                  index: 0,
-                  selectedIndex: _selectedIndex,
-                  icon: Icons.home_rounded,
-                  activeIcon: Icons.home_rounded,
-                  label: 'Home',
-                  onTap: _onItemTapped,
-                ),
+        child: Center(
+          heightFactor: 1.0,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: rs.contentMaxWidth),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                rs.s(6),
+                rs.s(8),
+                rs.s(6),
+                rs.s(4),
               ),
-              Expanded(
-                child: _BottomNavItem(
-                  index: 1,
-                  selectedIndex: _selectedIndex,
-                  icon: Icons.show_chart_rounded,
-                  activeIcon: Icons.show_chart_rounded,
-                  label: 'Sales',
-                  onTap: _onItemTapped,
-                ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: _BottomNavItem(
+                      index: 0,
+                      selectedIndex: _selectedIndex,
+                      icon: Icons.home_rounded,
+                      activeIcon: Icons.home_rounded,
+                      label: 'Home',
+                      onTap: _onItemTapped,
+                    ),
+                  ),
+                  Expanded(
+                    child: _BottomNavItem(
+                      index: 1,
+                      selectedIndex: _selectedIndex,
+                      icon: Icons.show_chart_rounded,
+                      activeIcon: Icons.show_chart_rounded,
+                      label: 'Sales',
+                      onTap: _onItemTapped,
+                    ),
+                  ),
+                  Expanded(child: _ScanBottomButton()),
+                  Expanded(
+                    child: _BottomNavItem(
+                      index: 3,
+                      selectedIndex: _selectedIndex,
+                      icon: Icons.shopping_bag_outlined,
+                      activeIcon: Icons.shopping_bag_rounded,
+                      label: 'Purchases',
+                      onTap: _onItemTapped,
+                    ),
+                  ),
+                  Expanded(
+                    child: _BottomNavItem(
+                      index: 4,
+                      selectedIndex: _selectedIndex,
+                      icon: Icons.grid_view_rounded,
+                      activeIcon: Icons.grid_view_rounded,
+                      label: 'More',
+                      onTap: _onItemTapped,
+                    ),
+                  ),
+                ],
               ),
-              Expanded(child: _ScanBottomButton()),
-              Expanded(
-                child: _BottomNavItem(
-                  index: 3,
-                  selectedIndex: _selectedIndex,
-                  icon: Icons.shopping_bag_outlined,
-                  activeIcon: Icons.shopping_bag_rounded,
-                  label: 'Purchases',
-                  onTap: _onItemTapped,
-                ),
-              ),
-              Expanded(
-                child: _BottomNavItem(
-                  index: 4,
-                  selectedIndex: _selectedIndex,
-                  icon: Icons.grid_view_rounded,
-                  activeIcon: Icons.grid_view_rounded,
-                  label: 'More',
-                  onTap: _onItemTapped,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -739,6 +545,7 @@ class _UserProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
     final displayName = name.trim().isNotEmpty ? name.trim() : 'Anees Irshad';
     final displayEmail =
         email.trim().isNotEmpty ? email.trim() : 'anees.irshad@berrinex.com';
@@ -746,6 +553,8 @@ class _UserProfileCard extends StatelessWidget {
         ? plan.trim()
         : 'Standard Plan';
     final initials = _getInitials(displayName);
+    final avatarSize = rs.isTabletOrLarger ? rs.s(54) : 50.0;
+    final paddingValue = rs.isTabletOrLarger ? rs.s(16) : 14.0;
 
     return Material(
       color: Colors.transparent,
@@ -753,7 +562,7 @@ class _UserProfileCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: EdgeInsets.all(paddingValue),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -771,8 +580,8 @@ class _UserProfileCard extends StatelessWidget {
               Stack(
                 children: [
                   Container(
-                    width: 50,
-                    height: 50,
+                    width: avatarSize,
+                    height: avatarSize,
                     decoration: BoxDecoration(
                       color: const Color(0xFF1B365D),
                       borderRadius: BorderRadius.circular(14),
@@ -787,9 +596,9 @@ class _UserProfileCard extends StatelessWidget {
                     child: imageUrl.isEmpty
                         ? Text(
                             initials,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: rs.sp(18),
                               fontWeight: FontWeight.bold,
                             ),
                           )
@@ -799,8 +608,8 @@ class _UserProfileCard extends StatelessWidget {
                     right: 0,
                     bottom: 0,
                     child: Container(
-                      width: 13,
-                      height: 13,
+                      width: rs.s(13),
+                      height: rs.s(13),
                       decoration: BoxDecoration(
                         color: const Color(0xFF10B981),
                         shape: BoxShape.circle,
@@ -810,7 +619,7 @@ class _UserProfileCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: rs.s(14)),
               // User Details Column
               Expanded(
                 child: Column(
@@ -823,18 +632,18 @@ class _UserProfileCard extends StatelessWidget {
                             displayName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Color(0xFF1E293B),
-                              fontSize: 16,
+                            style: TextStyle(
+                              color: const Color(0xFF1E293B),
+                              fontSize: rs.sp(16),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         const SizedBox(width: 5),
-                        const Icon(
+                        Icon(
                           Icons.verified,
-                          color: Color(0xFFF97316),
-                          size: 18,
+                          color: const Color(0xFFF97316),
+                          size: rs.s(18),
                         ),
                       ],
                     ),
@@ -843,37 +652,37 @@ class _UserProfileCard extends StatelessWidget {
                       displayEmail,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
-                        fontSize: 12.5,
+                      style: TextStyle(
+                        color: const Color(0xFF64748B),
+                        fontSize: rs.sp(12.5),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: rs.s(8)),
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 3,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: rs.s(9),
+                            vertical: rs.s(3),
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFE0F2FE),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Client Portal',
                             style: TextStyle(
-                              color: Color(0xFF0284C7),
-                              fontSize: 11,
+                              color: const Color(0xFF0284C7),
+                              fontSize: rs.sp(11),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: rs.s(8)),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 3,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: rs.s(9),
+                            vertical: rs.s(3),
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFDCFCE7),
@@ -881,9 +690,9 @@ class _UserProfileCard extends StatelessWidget {
                           ),
                           child: Text(
                             displayPlan,
-                            style: const TextStyle(
-                              color: Color(0xFF16A34A),
-                              fontSize: 11,
+                            style: TextStyle(
+                              color: const Color(0xFF16A34A),
+                              fontSize: rs.sp(11),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -893,11 +702,11 @@ class _UserProfileCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              const Icon(
+              SizedBox(width: rs.s(8)),
+              Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF94A3B8),
-                size: 22,
+                color: const Color(0xFF94A3B8),
+                size: rs.s(22),
               ),
             ],
           ),
@@ -914,13 +723,18 @@ class _MoreSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8, top: 4),
+      padding: EdgeInsets.only(
+        left: rs.s(4),
+        bottom: rs.s(8),
+        top: rs.s(4),
+      ),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Color(0xFF8A94A6),
-          fontSize: 12,
+        style: TextStyle(
+          color: const Color(0xFF8A94A6),
+          fontSize: rs.sp(12),
           fontWeight: FontWeight.w700,
           letterSpacing: 0.6,
         ),
@@ -982,9 +796,14 @@ class _MoreMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
     final effectiveIconColor = iconColor ?? colorsList.blue;
     final effectiveIconBgColor =
         iconBgColor ?? effectiveIconColor.withValues(alpha: 0.12);
+
+    final tileIconSize = rs.isTabletOrLarger ? rs.s(48) : 44.0;
+    final paddingH = rs.isTabletOrLarger ? rs.s(20) : 16.0;
+    final paddingV = rs.isTabletOrLarger ? rs.s(14) : 13.0;
 
     BorderRadius borderRadius = BorderRadius.zero;
     if (isTop && isBottom) {
@@ -1001,19 +820,26 @@ class _MoreMenuItem extends StatelessWidget {
         onTap: onTap,
         borderRadius: borderRadius,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          padding: EdgeInsets.symmetric(
+            horizontal: paddingH,
+            vertical: paddingV,
+          ),
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: tileIconSize,
+                height: tileIconSize,
                 decoration: BoxDecoration(
                   color: effectiveIconBgColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: effectiveIconColor, size: 22),
+                child: Icon(
+                  icon,
+                  color: effectiveIconColor,
+                  size: rs.s(22),
+                ),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: rs.s(14)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1022,7 +848,7 @@ class _MoreMenuItem extends StatelessWidget {
                       title,
                       style: TextStyle(
                         color: textColor ?? const Color(0xFF1E293B),
-                        fontSize: 15,
+                        fontSize: rs.sp(15),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1031,20 +857,20 @@ class _MoreMenuItem extends StatelessWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
-                        fontSize: 12.5,
+                      style: TextStyle(
+                        color: const Color(0xFF64748B),
+                        fontSize: rs.sp(12.5),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: rs.s(8)),
               trailing ??
-                  const Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
-                    color: Color(0xFF94A3B8),
-                    size: 22,
+                    color: const Color(0xFF94A3B8),
+                    size: rs.s(22),
                   ),
             ],
           ),
@@ -1065,24 +891,30 @@ class _ExpandableSubMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
     return AnimatedCrossFade(
       firstChild: const SizedBox(width: double.infinity),
       secondChild: Container(
         color: const Color(0xFFFAFAFA),
-        padding: const EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 8),
+        padding: EdgeInsets.only(
+          left: rs.s(20),
+          right: rs.s(12),
+          top: rs.s(4),
+          bottom: rs.s(8),
+        ),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
                 width: 2.5,
-                margin: const EdgeInsets.symmetric(vertical: 6),
+                margin: EdgeInsets.symmetric(vertical: rs.s(6)),
                 decoration: BoxDecoration(
                   color: const Color(0xFFCBD5E1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: rs.s(14)),
               Expanded(
                 child: Column(
                   children: items,
@@ -1112,35 +944,39 @@ class _SubMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+          padding: EdgeInsets.symmetric(
+            vertical: rs.s(10),
+            horizontal: rs.s(6),
+          ),
           child: Row(
             children: [
               Icon(
                 icon,
-                size: 19,
+                size: rs.s(19),
                 color: const Color(0xFF64748B),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: rs.s(12)),
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    color: Color(0xFF334155),
-                    fontSize: 14,
+                  style: TextStyle(
+                    color: const Color(0xFF334155),
+                    fontSize: rs.sp(14),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF94A3B8),
-                size: 20,
+                color: const Color(0xFF94A3B8),
+                size: rs.s(20),
               ),
             ],
           ),
@@ -1157,13 +993,21 @@ class _LogoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
+    final tileIconSize = rs.isTabletOrLarger ? rs.s(48) : 44.0;
+    final paddingH = rs.isTabletOrLarger ? rs.s(20) : 16.0;
+    final paddingV = rs.isTabletOrLarger ? rs.s(14) : 14.0;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(
+            horizontal: paddingH,
+            vertical: paddingV,
+          ),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -1182,47 +1026,47 @@ class _LogoutCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: tileIconSize,
+                height: tileIconSize,
                 decoration: BoxDecoration(
                   color: const Color(0xFFFEE2E2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.logout_rounded,
-                  color: Color(0xFFEF4444),
-                  size: 22,
+                  color: const Color(0xFFEF4444),
+                  size: rs.s(22),
                 ),
               ),
-              const SizedBox(width: 14),
-              const Expanded(
+              SizedBox(width: rs.s(14)),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Logout',
                       style: TextStyle(
-                        color: Color(0xFFEF4444),
-                        fontSize: 15,
+                        color: const Color(0xFFEF4444),
+                        fontSize: rs.sp(15),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'Sign out from your account',
                       style: TextStyle(
-                        color: Color(0xFF64748B),
-                        fontSize: 12.5,
+                        color: const Color(0xFF64748B),
+                        fontSize: rs.sp(12.5),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              const Icon(
+              SizedBox(width: rs.s(8)),
+              Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFFFCA5A5),
-                size: 22,
+                color: const Color(0xFFFCA5A5),
+                size: rs.s(22),
               ),
             ],
           ),
@@ -1237,36 +1081,37 @@ class _MoreFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rs = context.rs;
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 8,
-              height: 8,
+              width: rs.s(8),
+              height: rs.s(8),
               decoration: const BoxDecoration(
                 color: Color(0xFF10B981),
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 6),
-            const Text(
+            SizedBox(width: rs.s(6)),
+            Text(
               'DocElix Cloud Sync Active',
               style: TextStyle(
-                color: Color(0xFF64748B),
-                fontSize: 12,
+                color: const Color(0xFF64748B),
+                fontSize: rs.sp(12),
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'DocElix Mobile Suite - v2.4.1 (Build 890)',
           style: TextStyle(
-            color: Color(0xFF94A3B8),
-            fontSize: 11,
+            color: const Color(0xFF94A3B8),
+            fontSize: rs.sp(11),
           ),
         ),
       ],

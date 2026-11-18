@@ -1,12 +1,21 @@
 import 'package:docelix_mobileapp/controllers/purchase_invoices_controller.dart';
+import 'package:docelix_mobileapp/controllers/supplier_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
+import 'package:docelix_mobileapp/models/supplier_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class PurchaseInvoicesScreen extends StatefulWidget {
-  const PurchaseInvoicesScreen({super.key});
+  const PurchaseInvoicesScreen({
+    super.key,
+    this.initialTab = 0,
+    this.isEmbedded = false,
+  });
+
+  final int initialTab;
+  final bool isEmbedded;
 
   @override
   State<PurchaseInvoicesScreen> createState() => _PurchaseInvoicesScreenState();
@@ -15,6 +24,39 @@ class PurchaseInvoicesScreen extends StatefulWidget {
 class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
   final PurchaseInvoicesController incomingInvoicesController =
       Get.put(PurchaseInvoicesController());
+
+  late final SupplierController supplierController;
+  late final ScrollController _supplierScrollController;
+
+  late int _mainTab; // 0 = Purchase Invoices, 1 = Suppliers
+
+  @override
+  void initState() {
+    super.initState();
+    _mainTab = widget.initialTab;
+
+    supplierController = Get.isRegistered<SupplierController>()
+        ? Get.find<SupplierController>()
+        : Get.put(SupplierController());
+
+    _supplierScrollController = ScrollController()..addListener(_onSupplierScroll);
+  }
+
+  void _onSupplierScroll() {
+    if (!_supplierScrollController.hasClients) return;
+    if (_supplierScrollController.position.pixels >=
+        _supplierScrollController.position.maxScrollExtent - 200) {
+      supplierController.loadMore();
+    }
+  }
+
+  @override
+  void dispose() {
+    _supplierScrollController
+      ..removeListener(_onSupplierScroll)
+      ..dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +71,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ======================================================
-              // 1. TOP BAR (BACK BUTTON & TITLE)
+              // 1. TOP HEADER BAR
               // ======================================================
               Padding(
                 padding: EdgeInsets.symmetric(
@@ -38,191 +80,118 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE2ECF8),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        onPressed: () => Get.back(),
-                        icon: const Icon(
-                          Icons.arrow_back_rounded,
-                          color: Color(0xFF063C70),
-                          size: 20,
+                    if (!widget.isEmbedded) ...[
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE2ECF8),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () => Get.back(),
+                          icon: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: Color(0xFF063C70),
+                            size: 20,
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                    ],
                     Expanded(
                       child: Text(
-                        'Purchase Invoices',
-                        textAlign: TextAlign.center,
+                        'Purchases',
+                        textAlign: widget.isEmbedded ? TextAlign.start : TextAlign.center,
                         style: TextStyle(
                           color: const Color(0xFF0A2342),
-                          fontSize: rs.sp(18),
+                          fontSize: rs.sp(20),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 40), // Balance back button
+                    if (!widget.isEmbedded) const SizedBox(width: 40),
                   ],
                 ),
               ),
 
               // ======================================================
-              // 2. STATUS TABS SEGMENT
-              // ======================================================
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
-                child: Container(
-                  height: rs.s(42),
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
-                  child: Obx(() {
-                    final selectedIndex = incomingInvoicesController.selectedStatusTabIndex.value;
-
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      child: Row(
-                        children: List.generate(
-                          PurchaseInvoicesController.statusTabs.length,
-                          (index) {
-                            final isSelected = selectedIndex == index;
-                            final tabLabel = PurchaseInvoicesController.statusTabs[index];
-
-                            return GestureDetector(
-                              onTap: () => incomingInvoicesController.selectStatusTab(index),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: rs.s(16),
-                                  vertical: rs.s(6),
-                                ),
-                                margin: EdgeInsets.only(right: rs.s(4)),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? colorsList.colorButton
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  tabLabel,
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : const Color(0xFF64748B),
-                                    fontSize: rs.sp(12),
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-
-              SizedBox(height: rs.s(16)),
-
-              // ======================================================
-              // 3. TITLE & SUBTITLE SECTION
-              // ======================================================
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Purchase Invoices',
-                      style: TextStyle(
-                        color: const Color(0xFF0A2342),
-                        fontSize: rs.sp(22),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: rs.s(2)),
-                    Text(
-                      'Upload, track, and organize your supplier & incoming invoices.',
-                      style: TextStyle(
-                        color: const Color(0xFF64748B),
-                        fontSize: rs.sp(12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: rs.s(14)),
-
-              // ======================================================
-              // 4. SEARCH BAR
+              // 2. MAIN 2-TAB SEGMENT (PURCHASE INVOICES | SUPPLIERS)
               // ======================================================
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
                 child: Container(
                   height: rs.s(44),
-                  padding: EdgeInsets.symmetric(horizontal: rs.s(14)),
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: colorsList.borderColor),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.search_rounded,
-                        color: Color(0xFF94A3B8),
-                        size: 20,
-                      ),
-                      SizedBox(width: rs.s(10)),
+                      // Tab 0: Purchase Invoices
                       Expanded(
-                        child: TextField(
-                          onChanged: incomingInvoicesController.searchIncomingInvoices,
-                          style: TextStyle(
-                            color: const Color(0xFF0A2342),
-                            fontSize: rs.sp(13),
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'Search here',
-                            hintStyle: TextStyle(
-                              color: Color(0xFF94A3B8),
-                              fontSize: 13,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _mainTab = 0;
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: _mainTab == 0
+                                  ? colorsList.colorButton
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
+                            child: Text(
+                              'Purchase Invoices',
+                              style: TextStyle(
+                                color: _mainTab == 0
+                                    ? Colors.white
+                                    : const Color(0xFF64748B),
+                                fontSize: rs.sp(13),
+                                fontWeight: _mainTab == 0
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                      Obx(() {
-                        if (incomingInvoicesController.searchQuery.value.isNotEmpty) {
-                          return IconButton(
-                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
-                            onPressed: () => incomingInvoicesController.closeSearch(),
-                          );
-                        }
-                        return const Icon(
-                          Icons.tune_rounded,
-                          color: Color(0xFF94A3B8),
-                          size: 18,
-                        );
-                      }),
+                      // Tab 1: Suppliers
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _mainTab = 1;
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: _mainTab == 1
+                                  ? colorsList.colorButton
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'Suppliers',
+                              style: TextStyle(
+                                color: _mainTab == 1
+                                    ? Colors.white
+                                    : const Color(0xFF64748B),
+                                fontSize: rs.sp(13),
+                                fontWeight: _mainTab == 1
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -231,91 +200,15 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
               SizedBox(height: rs.s(14)),
 
               // ======================================================
-              // 5. INVOICES LIST
+              // 3. TAB BODY (PURCHASE INVOICES OR SUPPLIERS)
               // ======================================================
               Expanded(
-                child: Obx(() {
-                  if (incomingInvoicesController.isLoading.value) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  if (incomingInvoicesController.filteredInvoices.isEmpty) {
-                    return RefreshIndicator(
-                      onRefresh: incomingInvoicesController.refreshInvoices,
-                      child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(height: rs.s(120)),
-                          Center(
-                            child: Text(
-                              'No purchase invoices found.',
-                              style: TextStyle(
-                                color: colorsList.textHintColor,
-                                fontSize: rs.sp(15),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  final cols = rs.listColumns;
-                  final invoices = incomingInvoicesController.filteredInvoices;
-
-                  if (cols <= 1) {
-                    return RefreshIndicator(
-                      onRefresh: incomingInvoicesController.refreshInvoices,
-                      child: ListView.builder(
-                        padding: EdgeInsets.only(
-                          top: rs.s(4),
-                          left: rs.pagePaddingH,
-                          right: rs.pagePaddingH,
-                          bottom: rs.s(96),
-                        ),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: invoices.length,
-                        itemBuilder: (context, index) {
-                          return _invoiceTile(
-                            context: context,
-                            invoice: invoices[index],
-                            asGridTile: false,
-                          );
-                        },
-                      ),
-                    );
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: incomingInvoicesController.refreshInvoices,
-                    child: GridView.builder(
-                      padding: EdgeInsets.only(
-                        left: rs.pagePaddingH,
-                        right: rs.pagePaddingH,
-                        bottom: rs.s(96),
-                      ),
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: cols,
-                        crossAxisSpacing: rs.s(12),
-                        mainAxisSpacing: rs.s(12),
-                        childAspectRatio: rs.isTablet
-                            ? (rs.isLandscape ? 1.45 : 1.02)
-                            : (rs.isLandscape ? 2.6 : 1.8),
-                      ),
-                      itemCount: invoices.length,
-                      itemBuilder: (context, index) {
-                        return _invoiceTile(
-                          context: context,
-                          invoice: invoices[index],
-                          asGridTile: true,
-                        );
-                      },
-                    ),
-                  );
-                }),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  child: _mainTab == 0
+                      ? _buildPurchaseInvoicesBody(rs)
+                      : _buildSuppliersBody(rs),
+                ),
               ),
             ],
           ),
@@ -323,15 +216,22 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddInvoiceBottomSheet(context),
+        onPressed: () async {
+          if (_mainTab == 0) {
+            _showAddInvoiceBottomSheet(context);
+          } else {
+            final result = await Get.toNamed('/AddSupplierScreen');
+            if (result == true) {
+              supplierController.refreshSuppliers();
+            }
+          }
+        },
         backgroundColor: colorsList.colorButton,
         foregroundColor: colorsList.colorWhite,
         elevation: 4,
-        icon: const Icon(
-          Icons.add_rounded,
-        ),
+        icon: const Icon(Icons.add_rounded),
         label: Text(
-          'Add Invoice',
+          _mainTab == 0 ? 'Add Invoice' : 'Add Supplier',
           style: TextStyle(
             fontSize: rs.sp(15),
             fontWeight: FontWeight.w700,
@@ -342,6 +242,418 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
     );
   }
 
+  // ================================================================
+  // PURCHASE INVOICES TAB BODY
+  // ================================================================
+  Widget _buildPurchaseInvoicesBody(ResponsiveMetrics rs) {
+    return Column(
+      key: const ValueKey('PurchaseInvoicesTab'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Status Filter Tabs Segment
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+          child: Container(
+            height: rs.s(40),
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Obx(() {
+              final selectedIndex = incomingInvoicesController.selectedStatusTabIndex.value;
+
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: List.generate(
+                    PurchaseInvoicesController.statusTabs.length,
+                    (index) {
+                      final isSelected = selectedIndex == index;
+                      final tabLabel = PurchaseInvoicesController.statusTabs[index];
+
+                      return GestureDetector(
+                        onTap: () => incomingInvoicesController.selectStatusTab(index),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: rs.s(14),
+                            vertical: rs.s(4),
+                          ),
+                          margin: EdgeInsets.only(right: rs.s(4)),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? colorsList.colorButton
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            tabLabel,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF64748B),
+                              fontSize: rs.sp(12),
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+
+        SizedBox(height: rs.s(12)),
+
+        // Title & Subtitle Section
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Purchase Invoices',
+                style: TextStyle(
+                  color: const Color(0xFF0A2342),
+                  fontSize: rs.sp(20),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: rs.s(2)),
+              Text(
+                'Upload supplier invoices, receipts and credit notes review the draft, then post it to the ledger.',
+                style: TextStyle(
+                  color: const Color(0xFF64748B),
+                  fontSize: rs.sp(12),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: rs.s(12)),
+
+        // Search Bar
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+          child: Container(
+            height: rs.s(44),
+            padding: EdgeInsets.symmetric(horizontal: rs.s(14)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: colorsList.borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.search_rounded,
+                  color: Color(0xFF94A3B8),
+                  size: 20,
+                ),
+                SizedBox(width: rs.s(10)),
+                Expanded(
+                  child: TextField(
+                    onChanged: incomingInvoicesController.searchIncomingInvoices,
+                    style: TextStyle(
+                      color: const Color(0xFF0A2342),
+                      fontSize: rs.sp(13),
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'Search here',
+                      hintStyle: TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 13,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+                Obx(() {
+                  if (incomingInvoicesController.searchQuery.value.isNotEmpty) {
+                    return IconButton(
+                      icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                      onPressed: () => incomingInvoicesController.closeSearch(),
+                    );
+                  }
+                  return const Icon(
+                    Icons.tune_rounded,
+                    color: Color(0xFF94A3B8),
+                    size: 18,
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+
+        SizedBox(height: rs.s(14)),
+
+        // Purchase Invoices List
+        Expanded(
+          child: Obx(() {
+            if (incomingInvoicesController.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (incomingInvoicesController.filteredInvoices.isEmpty) {
+              return RefreshIndicator(
+                onRefresh: incomingInvoicesController.refreshInvoices,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: rs.s(100)),
+                    Center(
+                      child: Text(
+                        'No purchase invoices found.',
+                        style: TextStyle(
+                          color: colorsList.textHintColor,
+                          fontSize: rs.sp(15),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final cols = rs.listColumns;
+            final invoices = incomingInvoicesController.filteredInvoices;
+
+            if (cols <= 1) {
+              return RefreshIndicator(
+                onRefresh: incomingInvoicesController.refreshInvoices,
+                child: ListView.builder(
+                  padding: EdgeInsets.only(
+                    top: rs.s(4),
+                    left: rs.pagePaddingH,
+                    right: rs.pagePaddingH,
+                    bottom: rs.s(96),
+                  ),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: invoices.length,
+                  itemBuilder: (context, index) {
+                    return _invoiceTile(
+                      context: context,
+                      invoice: invoices[index],
+                      asGridTile: false,
+                    );
+                  },
+                ),
+              );
+            }
+
+            return RefreshIndicator(
+              onRefresh: incomingInvoicesController.refreshInvoices,
+              child: GridView.builder(
+                padding: EdgeInsets.only(
+                  left: rs.pagePaddingH,
+                  right: rs.pagePaddingH,
+                  bottom: rs.s(96),
+                ),
+                physics: const AlwaysScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: cols,
+                  crossAxisSpacing: rs.s(12),
+                  mainAxisSpacing: rs.s(12),
+                  childAspectRatio: rs.isTablet
+                      ? (rs.isLandscape ? 1.45 : 1.02)
+                      : (rs.isLandscape ? 2.6 : 1.8),
+                ),
+                itemCount: invoices.length,
+                itemBuilder: (context, index) {
+                  return _invoiceTile(
+                    context: context,
+                    invoice: invoices[index],
+                    asGridTile: true,
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  // ================================================================
+  // SUPPLIERS TAB BODY
+  // ================================================================
+  Widget _buildSuppliersBody(ResponsiveMetrics rs) {
+    const primaryColor = colorsList.colorButton;
+
+    return Column(
+      key: const ValueKey('SuppliersTab'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title & Subtitle Section
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Suppliers',
+                style: TextStyle(
+                  color: const Color(0xFF0A2342),
+                  fontSize: rs.sp(20),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: rs.s(2)),
+              Text(
+                'Who you buy from, what you have purchased and what is still open.',
+                style: TextStyle(
+                  color: const Color(0xFF64748B),
+                  fontSize: rs.sp(12),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: rs.s(12)),
+
+        // Search Bar
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: rs.pagePaddingH),
+          child: Container(
+            height: rs.s(44),
+            padding: EdgeInsets.symmetric(horizontal: rs.s(14)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: colorsList.borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.search_rounded,
+                  color: Color(0xFF94A3B8),
+                  size: 20,
+                ),
+                SizedBox(width: rs.s(10)),
+                Expanded(
+                  child: TextField(
+                    onChanged: supplierController.onSearchChanged,
+                    style: TextStyle(
+                      color: const Color(0xFF0A2342),
+                      fontSize: rs.sp(13),
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'Search here',
+                      hintStyle: TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 13,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+                Obx(() {
+                  if (supplierController.searchQuery.value.isNotEmpty) {
+                    return IconButton(
+                      icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                      onPressed: () => supplierController.clearSearch(),
+                    );
+                  }
+                  return const Icon(
+                    Icons.tune_rounded,
+                    color: Color(0xFF94A3B8),
+                    size: 18,
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+
+        SizedBox(height: rs.s(14)),
+
+        // Suppliers List
+        Expanded(
+          child: Obx(() {
+            if (supplierController.isLoading.value && supplierController.suppliers.isEmpty) {
+              return const Center(
+                child: CircularProgressIndicator(color: primaryColor),
+              );
+            }
+
+            if (supplierController.errorMessage.value.isNotEmpty &&
+                supplierController.suppliers.isEmpty) {
+              return _buildSupplierErrorState();
+            }
+
+            if (supplierController.filteredSuppliers.isEmpty) {
+              return _buildSupplierEmptyState();
+            }
+
+            return RefreshIndicator(
+              onRefresh: supplierController.refreshSuppliers,
+              color: primaryColor,
+              child: ListView.builder(
+                controller: _supplierScrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.only(
+                  left: rs.pagePaddingH,
+                  right: rs.pagePaddingH,
+                  bottom: rs.s(96),
+                ),
+                itemCount: supplierController.filteredSuppliers.length +
+                    (supplierController.isLoadingMore.value ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index >= supplierController.filteredSuppliers.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: primaryColor,
+                        ),
+                      ),
+                    );
+                  }
+
+                  final supplier = supplierController.filteredSuppliers[index];
+                  return _buildSupplierCard(supplier, context);
+                },
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  // ================================================================
+  // PURCHASE INVOICE HELPER METHODS & WIDGETS
+  // ================================================================
   void _showAddInvoiceBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -574,7 +886,6 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 1. TOP HEADER ROW (PURCHASE NUMBER + INVOICE TYPE PILL + MORE MENU)
           Row(
             children: [
               Expanded(
@@ -647,11 +958,9 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
             child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
-          // 2. MIDDLE DETAILS 2X3 GRID
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // LEFT COLUMN (SUPPLIER, DATE, ACCOUNT)
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -665,7 +974,6 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                 ),
               ),
 
-              // RIGHT COLUMN (SUPPLIER INV NO, DUE DATE)
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -684,7 +992,6 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
             child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
-          // 3. BOTTOM AMOUNTS ROW (PAID | TOTAL)
           Row(
             children: [
               Column(
@@ -782,5 +1089,327 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
     } catch (_) {
       return dateStr;
     }
+  }
+
+  // ================================================================
+  // SUPPLIER HELPER METHODS & WIDGETS
+  // ================================================================
+  void _showSupplierActions(BuildContext context, SupplierModel supplier) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ResponsiveSheetBody(
+        padding: EdgeInsets.zero,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.visibility_outlined, color: Color(0xFF2563EB)),
+                  title: const Text('View Supplier Details'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    Get.toNamed('/SupplierDetailsScreen', arguments: supplier);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSupplierCard(SupplierModel supplier, BuildContext context) {
+    final rs = context.rs;
+    final initials = _getSupplierInitials(supplier.name);
+    final contactStr = _getSupplierContactString(supplier);
+
+    return Container(
+      margin: EdgeInsets.only(bottom: rs.s(14)),
+      decoration: BoxDecoration(
+        color: colorsList.colorWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE8EAED)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: colorsList.colorWhite,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+            Get.toNamed('/SupplierDetailsScreen', arguments: supplier);
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: EdgeInsets.all(rs.s(16)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: rs.s(38),
+                      height: rs.s(38),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF0D9488),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        initials,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: rs.sp(13),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: rs.s(12)),
+                    Expanded(
+                      child: Text(
+                        supplier.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: rs.sp(16),
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0A2342),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: rs.s(10),
+                        vertical: rs.s(4),
+                      ),
+                      decoration: BoxDecoration(
+                        color: supplier.isActive ? const Color(0xFFECFDF5) : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: supplier.isActive ? const Color(0xFFA7F3D0) : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: supplier.isActive ? const Color(0xFF059669) : const Color(0xFF64748B),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          SizedBox(width: rs.s(5)),
+                          Text(
+                            supplier.isActive ? 'Active' : 'Inactive',
+                            style: TextStyle(
+                              fontSize: rs.sp(11),
+                              fontWeight: FontWeight.w600,
+                              color: supplier.isActive ? const Color(0xFF059669) : const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: rs.s(4)),
+                    IconButton(
+                      onPressed: () => _showSupplierActions(context, supplier),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(
+                        Icons.more_horiz_rounded,
+                        color: Color(0xFF94A3B8),
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ),
+
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _statSupplierField(context, 'CONTACT', contactStr),
+                          SizedBox(height: rs.s(10)),
+                          _statSupplierField(context, 'CITY', supplier.city?.trim().isNotEmpty == true ? supplier.city! : '—'),
+                          SizedBox(height: rs.s(10)),
+                          _statSupplierField(context, 'TOTAL PURCHASES', '€${supplier.purchasesTotal.toStringAsFixed(2)}'),
+                        ],
+                      ),
+                    ),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _statSupplierField(context, 'TOTAL PAID', '€${supplier.paidTotal.toStringAsFixed(2)}'),
+                          SizedBox(height: rs.s(10)),
+                          _statSupplierField(context, 'OUTSTANDING', '€${supplier.outstanding.toStringAsFixed(2)}'),
+                          SizedBox(height: rs.s(10)),
+                          _statSupplierField(context, 'LAST PURCHASE', _formatSupplierDate(supplier.lastPurchaseDate)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _statSupplierField(BuildContext context, String label, String value) {
+    final rs = context.rs;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: rs.sp(10),
+            fontWeight: FontWeight.normal,
+            color: const Color(0xFF94A3B8),
+            letterSpacing: 0.5,
+          ),
+        ),
+        SizedBox(height: rs.s(2)),
+        Text(
+          value,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: rs.sp(13),
+            fontWeight: FontWeight.normal,
+            color: const Color(0xFF0A2342),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getSupplierInitials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return 'S';
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  String _getSupplierContactString(SupplierModel supplier) {
+    final email = supplier.email?.trim() ?? '';
+    final phone = supplier.phone?.trim() ?? '';
+
+    if (email.isNotEmpty && phone.isNotEmpty) {
+      return '$email · $phone';
+    }
+    if (email.isNotEmpty) return email;
+    if (phone.isNotEmpty) return phone;
+    return '—';
+  }
+
+  String _formatSupplierDate(DateTime? date) {
+    if (date == null) return '—';
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  Widget _buildSupplierErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.cloud_off_outlined,
+              size: 44,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              supplierController.errorMessage.value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF616161),
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () => supplierController.fetchSuppliers(refresh: true),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSupplierEmptyState() {
+    final isSearching = supplierController.searchQuery.value.trim().isNotEmpty;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.people_outline,
+              size: 48,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              isSearching ? 'No suppliers found' : 'No suppliers available',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Color(0xFF424242),
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              isSearching
+                  ? 'Try a different name, email, or phone number.'
+                  : 'Pull down to refresh the supplier list.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF757575),
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
