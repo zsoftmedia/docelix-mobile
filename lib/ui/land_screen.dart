@@ -470,7 +470,7 @@ class _LandScreenState extends State<LandScreen> {
                     child: _BottomNavItem(
                       index: 0,
                       selectedIndex: _selectedIndex,
-                      icon: Icons.home_rounded,
+                      icon: Icons.home_outlined,
                       activeIcon: Icons.home_rounded,
                       label: 'Home',
                       onTap: _onItemTapped,
@@ -501,7 +501,7 @@ class _LandScreenState extends State<LandScreen> {
                     child: _BottomNavItem(
                       index: 4,
                       selectedIndex: _selectedIndex,
-                      icon: Icons.grid_view_rounded,
+                      icon: Icons.grid_view,
                       activeIcon: Icons.grid_view_rounded,
                       label: 'More',
                       onTap: _onItemTapped,
