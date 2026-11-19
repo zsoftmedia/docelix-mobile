@@ -281,7 +281,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
                       onPressed: () {
-                        Get.toNamed('/CreateIncomingInvoicesScreen');
+                        Get.toNamed('/CreatePurchaseInvoiceManualScreen');
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF334155),

@@ -20,6 +20,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final DashboardController dashboardController = Get.put(DashboardController());
   final CreatePurchaseInvoiceController incomingInvoiceController = Get.put(CreatePurchaseInvoiceController());
 
+  final RxSet<int> _expandedTransactionIds = <int>{}.obs;
+
   int selectedTab = 0;
 
   final List<String> tabs = [
@@ -1441,91 +1443,287 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required RecentTransactionModel transaction,
     required double width,
     required double height,
-  })
-  {
+  }) {
     final bool isIncome = _isIncomeTransaction(transaction.type);
     final Color transactionColor = isIncome ? colorsList.green : colorsList.red;
     final IconData transactionIcon = _getTransactionIcon(transaction.type);
+    final int itemId = transaction.id ?? transaction.hashCode;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: height * 0.018),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: width * 0.105,
-            height: width * 0.105,
-            decoration: BoxDecoration(
-              color: transactionColor.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              transactionIcon,
-              color: transactionColor,
-              size: width * 0.050,
-            ),
-          ),
-          SizedBox(width: width * 0.030),
-          Expanded(
+    return Obx(() {
+      final bool isExpanded = _expandedTransactionIds.contains(itemId);
+
+      final String statusStr = (transaction.status ?? '').trim().toLowerCase();
+      Color statusBg = const Color(0xFFF1F5F9);
+      Color statusText = const Color(0xFF64748B);
+      Color statusBorder = const Color(0xFFE2E8F0);
+
+      if (statusStr == 'completed' || statusStr == 'paid' || statusStr == 'posted' || statusStr == 'success') {
+        statusBg = const Color(0xFFECFDF5);
+        statusText = const Color(0xFF059669);
+        statusBorder = const Color(0xFFA7F3D0);
+      } else if (statusStr == 'pending' || statusStr == 'unpaid' || statusStr == 'draft') {
+        statusBg = const Color(0xFFFFFBEB);
+        statusText = const Color(0xFFD97706);
+        statusBorder = const Color(0xFFFDE68A);
+      } else if (statusStr == 'failed' || statusStr == 'cancelled' || statusStr == 'rejected') {
+        statusBg = const Color(0xFFFEF2F2);
+        statusText = const Color(0xFFDC2626);
+        statusBorder = const Color(0xFFFECACA);
+      }
+
+      final String displayStatus = statusStr.isNotEmpty
+          ? statusStr[0].toUpperCase() + statusStr.substring(1)
+          : 'Completed';
+
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            if (isExpanded) {
+              _expandedTransactionIds.remove(itemId);
+            } else {
+              _expandedTransactionIds.add(itemId);
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: height * 0.014),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  transaction.description ?? "Transaction",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorsList.primaryText,
-                    fontSize: width.fontSizeW(0.032),
-                  ),
-                ),
-                SizedBox(height: height * 0.004),
+                // HEADER ROW (COLLAPSED STATE)
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      _formatTransactionType(transaction.type),
-                      style: TextStyle(
+                    Container(
+                      width: width * 0.105,
+                      height: width * 0.105,
+                      decoration: BoxDecoration(
+                        color: transactionColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        transactionIcon,
                         color: transactionColor,
-                        fontSize: width.fontSizeW(0.024),
+                        size: width * 0.050,
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: width * 0.015,
-                      ),
-                      child: Text(
-                        "•",
-                        style: TextStyle(
-                          color: colorsList.secondaryText,
-                          fontSize: width.fontSizeW(0.022),
-                        ),
+                    SizedBox(width: width * 0.030),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            transaction.description ?? "Transaction",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: colorsList.primaryText,
+                              fontSize: width.fontSizeW(0.032),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: height * 0.004),
+                          Row(
+                            children: [
+                              Text(
+                                _formatTransactionType(transaction.type),
+                                style: TextStyle(
+                                  color: transactionColor,
+                                  fontSize: width.fontSizeW(0.024),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: width * 0.015,
+                                ),
+                                child: Text(
+                                  "•",
+                                  style: TextStyle(
+                                    color: colorsList.secondaryText,
+                                    fontSize: width.fontSizeW(0.022),
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  _formatTransactionDate(transaction.date),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: colorsList.secondaryText,
+                                    fontSize: width.fontSizeW(0.024),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    Flexible(
-                      child: Text(
-                        _formatTransactionDate(transaction.date),
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: colorsList.secondaryText,
-                          fontSize: width.fontSizeW(0.024),
+                    SizedBox(width: width * 0.02),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "${isIncome ? '+' : '-'} ${_formatAmount(transaction.amount)}",
+                          style: TextStyle(
+                            color: transactionColor,
+                            fontSize: width.fontSizeW(0.032),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
+                        SizedBox(height: height * 0.003),
+                        AnimatedRotation(
+                          turns: isExpanded ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 200),
+                          child: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: colorsList.secondaryText,
+                            size: width * 0.045,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
+                ),
+
+                // EXPANDABLE DETAILS CONTENT
+                AnimatedCrossFade(
+                  firstChild: const SizedBox(width: double.infinity),
+                  secondChild: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: height * 0.012),
+                        child: const Divider(
+                          height: 1,
+                          color: Color(0xFFF1F5F9),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(width * 0.03),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _detailField(
+                                    label: 'TRANSACTION ID',
+                                    value: transaction.id != null ? '#${transaction.id}' : '—',
+                                    width: width,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'STATUS',
+                                        style: TextStyle(
+                                          fontSize: width.fontSizeW(0.022),
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF94A3B8),
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: statusBg,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: statusBorder),
+                                        ),
+                                        child: Text(
+                                          displayStatus,
+                                          style: TextStyle(
+                                            fontSize: width.fontSizeW(0.022),
+                                            fontWeight: FontWeight.bold,
+                                            color: statusText,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: height * 0.012),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _detailField(
+                                    label: 'ACCOUNT',
+                                    value: (transaction.account != null && transaction.account!.trim().isNotEmpty)
+                                        ? transaction.account!
+                                        : 'General Ledger',
+                                    width: width,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: _detailField(
+                                    label: 'SOURCE',
+                                    value: (transaction.sourceType != null && transaction.sourceType!.trim().isNotEmpty)
+                                        ? _formatTransactionType(transaction.sourceType)
+                                        : _formatTransactionType(transaction.type),
+                                    width: width,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  crossFadeState: isExpanded
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  duration: const Duration(milliseconds: 220),
                 ),
               ],
             ),
           ),
-          SizedBox(width: width * 0.02),
-          Text(
-            "${isIncome ? '+' : '-'} ${_formatAmount(transaction.amount)}",
-            style: TextStyle(
-              color: transactionColor,
-              fontSize: width.fontSizeW(0.031),
-            ),
+        ),
+      );
+    });
+  }
+
+  Widget _detailField({
+    required String label,
+    required String value,
+    required double width,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: width.fontSizeW(0.022),
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF94A3B8),
+            letterSpacing: 0.5,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: width.fontSizeW(0.027),
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF0A2342),
+          ),
+        ),
+      ],
     );
   }
 
