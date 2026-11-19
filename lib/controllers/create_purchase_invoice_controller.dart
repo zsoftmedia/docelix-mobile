@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/purchase_invoices_controller.dart';
+import 'package:docelix_mobileapp/controllers/review_purchase_invoice_controller.dart';
 import 'package:docelix_mobileapp/services/dio_client.dart';
 import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:file_picker/file_picker.dart';
@@ -154,6 +155,10 @@ class CreatePurchaseInvoiceController extends GetxController {
       if (response.statusCode == 200 ||
           response.statusCode == 201 ||
           response.data != null) {
+        final Map<String, dynamic> responseData =
+            response.data is Map ? Map<String, dynamic>.from(response.data as Map) : {};
+        uploadedInvoice.value = responseData;
+
         clearFile();
 
         if (Get.currentRoute == '/CreateIncomingInvoicesScreen') {
@@ -168,6 +173,15 @@ class CreatePurchaseInvoiceController extends GetxController {
         if (Get.isRegistered<PurchaseInvoicesController>()) {
           Get.find<PurchaseInvoicesController>().refreshInvoices();
         }
+
+        if (Get.isRegistered<ReviewPurchaseInvoiceController>()) {
+          Get.delete<ReviewPurchaseInvoiceController>();
+        }
+
+        Get.toNamed(
+          '/ReviewPurchaseInvoiceScreen',
+          arguments: responseData,
+        );
       } else {
         AppSnackbar.error(
           title: 'Error',
