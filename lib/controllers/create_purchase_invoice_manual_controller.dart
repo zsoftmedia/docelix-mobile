@@ -108,7 +108,7 @@ class CreatePurchaseInvoiceManualController extends GetxController {
   }
 
   // ============================================================
-  // INVOICE TAB STEPPER
+  // STEPPER MANAGEMENT & NAVIGATION
   // ============================================================
 
   final RxInt currentInvoiceStep = 0.obs;
@@ -121,30 +121,6 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     'Internal notes',
   ];
 
-  void goToInvoiceStep(int step) {
-    if (step <= currentInvoiceStep.value) {
-      currentInvoiceStep.value = step;
-    }
-  }
-
-  void nextInvoiceStep() {
-    if (currentInvoiceStep.value < totalInvoiceSteps - 1) {
-      currentInvoiceStep.value++;
-    } else {
-      submitPurchaseInvoice();
-    }
-  }
-
-  void previousInvoiceStep() {
-    if (currentInvoiceStep.value > 0) {
-      currentInvoiceStep.value--;
-    }
-  }
-
-  // ============================================================
-  // RECEIPT TAB STEPPER
-  // ============================================================
-
   final RxInt currentReceiptStep = 0.obs;
   final int totalReceiptSteps = 4;
 
@@ -154,30 +130,6 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     'Payment details',
     'Internal notes',
   ];
-
-  void goToReceiptStep(int step) {
-    if (step <= currentReceiptStep.value) {
-      currentReceiptStep.value = step;
-    }
-  }
-
-  void nextReceiptStep() {
-    if (currentReceiptStep.value < totalReceiptSteps - 1) {
-      currentReceiptStep.value++;
-    } else {
-      submitPurchaseInvoice();
-    }
-  }
-
-  void previousReceiptStep() {
-    if (currentReceiptStep.value > 0) {
-      currentReceiptStep.value--;
-    }
-  }
-
-  // ============================================================
-  // CREDIT NOTE TAB STEPPER
-  // ============================================================
 
   final RxInt currentCreditNoteStep = 0.obs;
   final int totalCreditNoteSteps = 4;
@@ -189,79 +141,134 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     'Internal notes',
   ];
 
-  void goToCreditNoteStep(int step) {
-    if (step <= currentCreditNoteStep.value) {
+  int getCurrentStep() {
+    if (selectedTabIndex.value == 0) return currentInvoiceStep.value;
+    if (selectedTabIndex.value == 1) return currentReceiptStep.value;
+    return currentCreditNoteStep.value;
+  }
+
+  void setCurrentStep(int step) {
+    if (selectedTabIndex.value == 0) {
+      currentInvoiceStep.value = step;
+    } else if (selectedTabIndex.value == 1) {
+      currentReceiptStep.value = step;
+    } else {
       currentCreditNoteStep.value = step;
     }
   }
 
-  void nextCreditNoteStep() {
-    if (currentCreditNoteStep.value < totalCreditNoteSteps - 1) {
-      currentCreditNoteStep.value++;
+  // ============================================================
+  // FORM STEP VALIDATIONS
+  // ============================================================
+
+  bool validateCurrentStep() {
+    final step = getCurrentStep();
+
+    if (step == 0) {
+      // 1. Supplier Validation
+      if (selectedSupplier.value == null) {
+        AppSnackbar.error(
+          title: 'Validation Error',
+          message: 'Please select a supplier.',
+        );
+        return false;
+      }
+
+      // Supplier Invoice / Document Number Validation
+      final docNum = selectedTabIndex.value == 2
+          ? creditNoteNumberController.text.trim()
+          : supplierInvoiceNumberController.text.trim();
+
+      if (!hasNoDocumentNumber.value && docNum.isEmpty) {
+        final docLabel = selectedTabIndex.value == 2
+            ? 'credit note number'
+            : 'supplier invoice number';
+        AppSnackbar.error(
+          title: 'Validation Error',
+          message: 'Please enter a $docLabel or check "The document has no number".',
+        );
+        return false;
+      }
+      return true;
+    }
+
+    if (step == 1) {
+      // 2. Purchased Items / Services Validation
+      if (purchaseLineItems.isEmpty) {
+        AppSnackbar.error(
+          title: 'Validation Error',
+          message: 'Please add at least one item or service.',
+        );
+        return false;
+      }
+      return true;
+    }
+
+    if (step == 2) {
+      // 3. Payment Details / Status Validation
+      if (paymentStatus.value.trim().isEmpty) {
+        AppSnackbar.error(
+          title: 'Validation Error',
+          message: 'Please select a payment status.',
+        );
+        return false;
+      }
+
+      if (paymentStatus.value == 'Paid in full' || paymentStatus.value == 'Partially paid') {
+        if (paidFrom.value == 'Choose bank or cash' || paidFrom.value.trim().isEmpty) {
+          AppSnackbar.error(
+            title: 'Validation Error',
+            message: 'Please select payment method (Bank or Cash).',
+          );
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return true;
+  }
+
+  void nextStep() {
+    if (!validateCurrentStep()) return;
+
+    final current = getCurrentStep();
+    if (current < 3) {
+      setCurrentStep(current + 1);
     } else {
       submitPurchaseInvoice();
     }
   }
 
-  void previousCreditNoteStep() {
-    if (currentCreditNoteStep.value > 0) {
-      currentCreditNoteStep.value--;
-    }
-  }
-
-  void nextStep() {
-    if (selectedTabIndex.value == 0) {
-      if (currentInvoiceStep.value < totalInvoiceSteps - 1) {
-        currentInvoiceStep.value++;
-      } else {
-        submitPurchaseInvoice();
-      }
-    } else if (selectedTabIndex.value == 1) {
-      if (currentReceiptStep.value < totalReceiptSteps - 1) {
-        currentReceiptStep.value++;
-      } else {
-        submitPurchaseInvoice();
-      }
-    } else if (selectedTabIndex.value == 2) {
-      if (currentCreditNoteStep.value < totalCreditNoteSteps - 1) {
-        currentCreditNoteStep.value++;
-      } else {
-        submitPurchaseInvoice();
-      }
-    }
-  }
-
   void previousStep() {
-    if (selectedTabIndex.value == 0) {
-      if (currentInvoiceStep.value > 0) {
-        currentInvoiceStep.value--;
-      }
-    } else if (selectedTabIndex.value == 1) {
-      if (currentReceiptStep.value > 0) {
-        currentReceiptStep.value--;
-      }
-    } else if (selectedTabIndex.value == 2) {
-      if (currentCreditNoteStep.value > 0) {
-        currentCreditNoteStep.value--;
-      }
+    final current = getCurrentStep();
+    if (current > 0) {
+      setCurrentStep(current - 1);
     }
   }
 
   void goToStep(int step) {
-    if (selectedTabIndex.value == 0) {
-      if (step <= currentInvoiceStep.value) {
-        currentInvoiceStep.value = step;
-      }
-    } else if (selectedTabIndex.value == 1) {
-      if (step <= currentReceiptStep.value) {
-        currentReceiptStep.value = step;
-      }
-    } else if (selectedTabIndex.value == 2) {
-      if (step <= currentCreditNoteStep.value) {
-        currentCreditNoteStep.value = step;
+    final current = getCurrentStep();
+    if (step <= current) {
+      setCurrentStep(step);
+    } else {
+      if (validateCurrentStep()) {
+        setCurrentStep(step);
       }
     }
   }
+
+  void goToInvoiceStep(int step) => goToStep(step);
+  void nextInvoiceStep() => nextStep();
+  void previousInvoiceStep() => previousStep();
+
+  void goToReceiptStep(int step) => goToStep(step);
+  void nextReceiptStep() => nextStep();
+  void previousReceiptStep() => previousStep();
+
+  void goToCreditNoteStep(int step) => goToStep(step);
+  void nextCreditNoteStep() => nextStep();
+  void previousCreditNoteStep() => previousStep();
 
   // ============================================================
   // STEP 1: SUPPLIER DETAILS FIELDS & CONTROLLERS
@@ -351,7 +358,6 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     final oldMode = priceMode.value;
     priceMode.value = mode;
 
-    // Recalculate prices for existing items when switching Net <-> Gross
     for (final item in purchaseLineItems) {
       final currentPrice = double.tryParse(item.unitPriceController.text) ?? 0;
       final taxRate = double.tryParse(item.taxRateController.text) ?? 20;
@@ -622,7 +628,7 @@ class CreatePurchaseInvoiceManualController extends GetxController {
   }
 
   // ============================================================
-  // STEP 4: INTERNAL NOTES
+  // STEP 4: INTERNAL NOTES & RESET FORM
   // ============================================================
 
   final internalNotesController = TextEditingController();
@@ -634,6 +640,50 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     loadSuppliers();
     loadCatalogItems();
     purchaseLineItems.clear();
+  }
+
+  void resetForm() {
+    selectedSupplier.value = null;
+    supplierSearchQuery.value = '';
+    supplierInvoiceNumberController.clear();
+    creditNoteNumberController.clear();
+    hasNoDocumentNumber.value = false;
+    referenceController.clear();
+
+    supplierInvoiceDateController.text = DateFormat('dd.MM.yyyy').format(DateTime.now());
+    purchaseDateController.text = DateFormat('dd.MM.yyyy').format(DateTime.now());
+    dueDateController.text = DateFormat('dd.MM.yyyy').format(DateTime.now().add(const Duration(days: 30)));
+
+    selectedCurrency.value = 'EUR';
+    currencySearchQuery.value = '';
+    ibanController.clear();
+    deliveryNoteController.clear();
+    orderReferenceController.clear();
+    serviceFromDateController.clear();
+    serviceToDateController.clear();
+
+    priceMode.value = 'Net';
+    showAccountCodes.value = false;
+
+    purchaseLineItems.clear();
+
+    selectedCorrectsInvoice.value = null;
+    correctsInvoiceSearchQuery.value = '';
+
+    paymentStatus.value = 'Paid in full';
+    paidFrom.value = 'Choose bank or cash';
+    amountPaidController.clear();
+    paymentDateController.text = DateFormat('dd.MM.yyyy').format(DateTime.now());
+    paymentReferenceController.clear();
+
+    attachedDocumentName.value = null;
+    attachedDocumentPath.value = null;
+
+    internalNotesController.clear();
+
+    currentInvoiceStep.value = 0;
+    currentReceiptStep.value = 0;
+    currentCreditNoteStep.value = 0;
   }
 
   Future<void> loadSuppliers() async {
@@ -669,14 +719,12 @@ class CreatePurchaseInvoiceManualController extends GetxController {
   void selectSupplier(SupplierModel supplier) {
     selectedSupplier.value = supplier;
 
-    // 1. Auto-fill IBAN if available
     if ((supplier.iban ?? '').isNotEmpty) {
       ibanController.text = supplier.iban!;
     } else {
       ibanController.clear();
     }
 
-    // 2. Auto-recalculate Due Date based on supplier payment terms
     final days = supplier.paymentTermsDays ?? 30;
     try {
       final parts = purchaseDateController.text.trim().split('.');
@@ -691,7 +739,6 @@ class CreatePurchaseInvoiceManualController extends GetxController {
       }
     } catch (_) {}
 
-    // 3. Fetch supplier invoices for Credit Note tab
     fetchSupplierInvoices(supplier.id);
   }
 
@@ -727,9 +774,6 @@ class CreatePurchaseInvoiceManualController extends GetxController {
         accessToken: token,
         companyId: companyId,
       );
-
-      debugPrint('[CreatePurchaseInvoiceManualController] fetchSupplierInvoices status: ${response.statusCode}');
-      debugPrint('[CreatePurchaseInvoiceManualController] fetchSupplierInvoices data: ${response.data}');
 
       if (response.statusCode == 200 && response.data != null) {
         List<dynamic> rawItems = [];
@@ -783,6 +827,10 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     }
   }
 
+  // ============================================================
+  // SUBMIT PURCHASE INVOICE / RECEIPT / CREDIT NOTE
+  // ============================================================
+
   Future<void> submitPurchaseInvoice() async {
     final token = SessionManager.accessToken;
     final companyId = SessionManager.accessCompanyid;
@@ -795,7 +843,9 @@ class CreatePurchaseInvoiceManualController extends GetxController {
       return;
     }
 
+    // 1. Supplier Validation
     if (selectedSupplier.value == null) {
+      setCurrentStep(0);
       AppSnackbar.error(
         title: 'Validation Error',
         message: 'Please select a supplier.',
@@ -803,20 +853,51 @@ class CreatePurchaseInvoiceManualController extends GetxController {
       return;
     }
 
-    if (!hasNoDocumentNumber.value && supplierInvoiceNumberController.text.trim().isEmpty) {
+    final docNum = selectedTabIndex.value == 2
+        ? creditNoteNumberController.text.trim()
+        : supplierInvoiceNumberController.text.trim();
+
+    if (!hasNoDocumentNumber.value && docNum.isEmpty) {
+      setCurrentStep(0);
+      final docLabel = selectedTabIndex.value == 2
+          ? 'credit note number'
+          : 'supplier invoice number';
       AppSnackbar.error(
         title: 'Validation Error',
-        message: 'Please enter a document / invoice number or select "No invoice number".',
+        message: 'Please enter a $docLabel or check "The document has no number".',
       );
       return;
     }
 
+    // 2. Purchased Items Validation
     if (purchaseLineItems.isEmpty) {
+      setCurrentStep(1);
       AppSnackbar.error(
         title: 'Validation Error',
-        message: 'Please add at least one line item.',
+        message: 'Please add at least one item or service.',
       );
       return;
+    }
+
+    // 3. Payment Status Validation
+    if (paymentStatus.value.trim().isEmpty) {
+      setCurrentStep(2);
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Please select a payment status.',
+      );
+      return;
+    }
+
+    if (paymentStatus.value == 'Paid in full' || paymentStatus.value == 'Partially paid') {
+      if (paidFrom.value == 'Choose bank or cash' || paidFrom.value.trim().isEmpty) {
+        setCurrentStep(2);
+        AppSnackbar.error(
+          title: 'Validation Error',
+          message: 'Please select payment method (Bank or Cash).',
+        );
+        return;
+      }
     }
 
     try {
@@ -915,10 +996,13 @@ class CreatePurchaseInvoiceManualController extends GetxController {
           }
         }
 
+        // SHOW SUCCESS MESSAGE & RESET FORM
         AppSnackbar.success(
           title: 'Success',
           message: '$docTitle created successfully.',
         );
+
+        resetForm();
         Get.back(result: true);
       } else {
         AppSnackbar.error(
@@ -952,6 +1036,7 @@ class CreatePurchaseInvoiceManualController extends GetxController {
   @override
   void onClose() {
     supplierInvoiceNumberController.dispose();
+    creditNoteNumberController.dispose();
     referenceController.dispose();
     supplierInvoiceDateController.dispose();
     purchaseDateController.dispose();
@@ -961,6 +1046,10 @@ class CreatePurchaseInvoiceManualController extends GetxController {
     orderReferenceController.dispose();
     serviceFromDateController.dispose();
     serviceToDateController.dispose();
+    amountPaidController.dispose();
+    paymentDateController.dispose();
+    paymentReferenceController.dispose();
+    internalNotesController.dispose();
 
     for (final item in purchaseLineItems) {
       item.itemController.dispose();

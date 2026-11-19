@@ -1108,7 +1108,7 @@ class _MoreFooter extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'DocElix Mobile Suite - v2.4.1 (Build 890)',
+          'DocElix Mobile Suite - v1.1.6 (Build 8)',
           style: TextStyle(
             color: const Color(0xFF94A3B8),
             fontSize: rs.sp(11),

@@ -2130,7 +2130,7 @@ class _CreatePurchaseInvoiceManualScreenState
             final statusDropdown = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _FieldLabel(text: 'Payment status'),
+                const _FieldLabel(text: 'Payment status', required: true),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),

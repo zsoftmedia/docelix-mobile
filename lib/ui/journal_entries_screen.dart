@@ -228,8 +228,8 @@ class JournalEntriesScreen extends StatelessWidget {
                         crossAxisSpacing: rs.s(12),
                         mainAxisSpacing: rs.s(12),
                         childAspectRatio: rs.isTablet
-                            ? (rs.isLandscape ? 1.60 : 1.20)
-                            : (rs.isLandscape ? 2.6 : 1.8),
+                            ? (rs.isLandscape ? 1.40 : 1.02)
+                            : (rs.isLandscape ? 2.40 : 1.50),
                       ),
                       itemCount: entries.length,
                       itemBuilder: (context, index) {
@@ -476,58 +476,79 @@ class JournalEntriesScreen extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 // 3. ACCOUNT LINES BREAKDOWN (MATCHING WEB SCREENSHOT COLUMNS)
-                ...entry.lines.map((line) {
-                  final bool isDebit = line.debit > 0;
-                  final accountLabel = line.account?.displayLabel ?? 'Account';
-                  final amountText = isDebit
-                      ? controller.formatMoney(line.debit)
-                      : controller.formatMoney(line.credit);
+                ...() {
+                  final linesToDisplay = asGridTile && entry.lines.length > 2
+                      ? entry.lines.take(2).toList()
+                      : entry.lines;
+                  final remainingCount = entry.lines.length - linesToDisplay.length;
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                isDebit ? accountLabel : 'to $accountLabel',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: isTab ? 12.5 : rs.sp(12.5),
-                                  fontWeight: isDebit ? FontWeight.bold : FontWeight.normal,
-                                  color: const Color(0xFF1E293B),
-                                ),
-                              ),
-                              if (line.description.isNotEmpty)
-                                Text(
-                                  line.description,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: isTab ? 11 : rs.sp(11),
-                                    color: const Color(0xFF94A3B8),
+                  return [
+                    ...linesToDisplay.map((line) {
+                      final bool isDebit = line.debit > 0;
+                      final accountLabel = line.account?.displayLabel ?? 'Account';
+                      final amountText = isDebit
+                          ? controller.formatMoney(line.debit)
+                          : controller.formatMoney(line.credit);
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    isDebit ? accountLabel : 'to $accountLabel',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: isTab ? 12 : rs.sp(12),
+                                      fontWeight: isDebit ? FontWeight.bold : FontWeight.normal,
+                                      color: const Color(0xFF1E293B),
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
+                                  if (line.description.isNotEmpty)
+                                    Text(
+                                      line.description,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: isTab ? 10.5 : rs.sp(10.5),
+                                        color: const Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              amountText,
+                              style: TextStyle(
+                                fontSize: isTab ? 12 : rs.sp(12),
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF0A2342),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          amountText,
+                      );
+                    }),
+                    if (remainingCount > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2, bottom: 4),
+                        child: Text(
+                          '+ $remainingCount more lines',
                           style: TextStyle(
-                            fontSize: isTab ? 12.5 : rs.sp(12.5),
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0A2342),
+                            fontSize: isTab ? 11 : rs.sp(11),
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF2563EB),
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }),
+                      ),
+                  ];
+                }(),
 
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 10),

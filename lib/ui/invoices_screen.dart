@@ -1,4 +1,3 @@
-import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/invoices_controller.dart';
 import 'package:docelix_mobileapp/controllers/quotation_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
