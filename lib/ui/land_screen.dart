@@ -305,8 +305,8 @@ class _LandScreenState extends State<LandScreen> {
                                   // Profile
                                   _MoreMenuItem(
                                     icon: Icons.person_outline_rounded,
-                                    title: 'Profile',
-                                    subtitle: 'Manage your profile',
+                                    title: 'Company Profile',
+                                    subtitle: 'Manage your company profile',
                                     iconBgColor: const Color(0xFFE0F2FE),
                                     iconColor: const Color(0xFF0284C7),
                                     isTop: true,

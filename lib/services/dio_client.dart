@@ -1757,6 +1757,29 @@ class DioClient {
   }
 
   // ==============================
+  // UPDATE PURCHASE INVOICE / DRAFT (PUT /api/purchases/{purchaseId})
+  // ==============================
+
+  Future<Response> updatePurchase({
+    required int purchaseId,
+    required Map<String, dynamic> body,
+    required int companyId,
+    required String accessToken,
+  }) async {
+    return await _dio.put(
+      '${ApiConstants.baseUrl}/purchases/$purchaseId',
+      data: body,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+          'x-company-id': companyId.toString(),
+        },
+      ),
+    );
+  }
+
+  // ==============================
   // UPLOAD PURCHASE ATTACHMENT (POST /api/purchases/{id}/attachment)
   // ==============================
 

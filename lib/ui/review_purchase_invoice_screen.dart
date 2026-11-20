@@ -17,6 +17,406 @@ class _ReviewPurchaseInvoiceScreenState
   final ReviewPurchaseInvoiceController controller =
       Get.put(ReviewPurchaseInvoiceController());
 
+  // ================================================================
+  // SUPPLIER SEARCH BOTTOM SHEET
+  // ================================================================
+  void _showSupplierSearchSheet(BuildContext context) {
+    controller.supplierSearchQuery.value = '';
+    final searchInputController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final height = MediaQuery.of(ctx).size.height;
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: height * 0.70,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Select Supplier',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A2342),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: searchInputController,
+                    autofocus: true,
+                    onChanged: (val) => controller.supplierSearchQuery.value = val,
+                    decoration: InputDecoration(
+                      hintText: 'Search supplier name, email, phone...',
+                      hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: searchInputController,
+                        builder: (context, value, _) {
+                          if (value.text.isEmpty) return const SizedBox.shrink();
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () {
+                              searchInputController.clear();
+                              controller.supplierSearchQuery.value = '';
+                            },
+                          );
+                        },
+                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoadingSuppliers.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final list = controller.filteredSuppliers;
+
+                    if (list.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No suppliers found.',
+                          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
+                      itemCount: list.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      itemBuilder: (context, index) {
+                        final supplier = list[index];
+                        final isSelected = controller.selectedSupplier.value?.id == supplier.id;
+
+                        final subtitleStr = [supplier.email, supplier.phone, supplier.city]
+                            .where((e) => (e ?? '').trim().isNotEmpty)
+                            .join(' · ');
+
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          title: Text(
+                            supplier.name,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0A2342),
+                            ),
+                          ),
+                          subtitle: subtitleStr.isNotEmpty
+                              ? Text(subtitleStr, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)))
+                              : null,
+                          trailing: isSelected
+                              ? const Icon(Icons.check_rounded, color: Color(0xFF2563EB), size: 20)
+                              : null,
+                          onTap: () {
+                            controller.selectSupplier(supplier);
+                            Navigator.of(ctx).pop();
+                          },
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ================================================================
+  // CURRENCY SEARCH BOTTOM SHEET
+  // ================================================================
+  void _showCurrencySearchSheet(BuildContext context) {
+    controller.currencySearchQuery.value = '';
+    final searchInputController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final height = MediaQuery.of(ctx).size.height;
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: height * 0.65,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Select Currency',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A2342),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: searchInputController,
+                    autofocus: true,
+                    onChanged: (val) => controller.currencySearchQuery.value = val,
+                    decoration: InputDecoration(
+                      hintText: 'Search currency code...',
+                      hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: searchInputController,
+                        builder: (context, value, _) {
+                          if (value.text.isEmpty) return const SizedBox.shrink();
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () {
+                              searchInputController.clear();
+                              controller.currencySearchQuery.value = '';
+                            },
+                          );
+                        },
+                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Expanded(
+                  child: Obx(() {
+                    final list = controller.filteredCurrencies;
+                    final selected = controller.selectedCurrency.value;
+
+                    return ListView.separated(
+                      padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
+                      itemCount: list.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      itemBuilder: (context, index) {
+                        final currency = list[index];
+                        final isSelected = selected == currency;
+
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          title: Text(
+                            currency,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0A2342),
+                            ),
+                          ),
+                          trailing: isSelected
+                              ? const Icon(Icons.check_rounded, color: Color(0xFF2563EB), size: 20)
+                              : null,
+                          onTap: () {
+                            controller.selectCurrency(currency);
+                            Navigator.of(ctx).pop();
+                          },
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ================================================================
+  // CATALOG ITEM SEARCH BOTTOM SHEET
+  // ================================================================
+  void _showCatalogItemSearchSheet(BuildContext context, int lineIndex) {
+    controller.catalogSearchQuery.value = '';
+    final searchInputController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final height = MediaQuery.of(ctx).size.height;
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+
+        return ResponsiveSheetBody(
+          padding: EdgeInsets.zero,
+          child: Container(
+            height: height * 0.70,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Select Article / Item',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A2342),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: searchInputController,
+                    autofocus: true,
+                    onChanged: (val) => controller.catalogSearchQuery.value = val,
+                    decoration: InputDecoration(
+                      hintText: 'Search article name or code...',
+                      hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF94A3B8)),
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: searchInputController,
+                        builder: (context, value, _) {
+                          if (value.text.isEmpty) return const SizedBox.shrink();
+                          return IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF94A3B8)),
+                            onPressed: () {
+                              searchInputController.clear();
+                              controller.catalogSearchQuery.value = '';
+                            },
+                          );
+                        },
+                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoadingCatalog.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final list = controller.filteredCatalogItems;
+
+                    if (list.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No catalog items found.',
+                          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
+                      itemCount: list.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      itemBuilder: (context, index) {
+                        final catalog = list[index];
+                        final name = catalog.articleName ?? 'Item';
+                        final code = catalog.articleNumber ?? '';
+                        final price = catalog.unitPriceNet ?? catalog.purchasePriceNet ?? 0.0;
+
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          title: Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF0A2342),
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Code: $code · Net: €${price.toStringAsFixed(2)}',
+                            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                          ),
+                          onTap: () {
+                            controller.selectCatalogItemForLine(lineIndex, catalog);
+                            Navigator.of(ctx).pop();
+                          },
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final rs = context.rs;
@@ -74,7 +474,7 @@ class _ReviewPurchaseInvoiceScreenState
               ),
 
               // ======================================================
-              // 2. STEPPER HEADER (PROGRESS INDICATOR)
+              // 2. STEPPER HEADER PROGRESS INDICATOR
               // ======================================================
               _buildStepperHeader(context),
 
@@ -198,7 +598,7 @@ class _ReviewPurchaseInvoiceScreenState
   }
 
   // ================================================================
-  // STEP BOTTOM NAVIGATION CONTROLS (BACK & CONTINUE)
+  // STEP BOTTOM NAVIGATION CONTROLS (BACK, SAVE DRAFT & CONTINUE)
   // ================================================================
   Widget _buildStepBottomControls({
     required bool isFirst,
@@ -217,47 +617,84 @@ class _ReviewPurchaseInvoiceScreenState
                 foregroundColor: const Color(0xFF334155),
                 side: const BorderSide(color: Color(0xFFCBD5E1)),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
               ),
               child: const Text('Back'),
             ),
-          Obx(() {
-            final isSubmitting = controller.isApproving.value;
+          Row(
+            children: [
+              // SAVE DRAFT BUTTON (ONLY SHOWN ON LAST STEP)
+              if (isLast) ...[
+                Obx(() {
+                  final isDrafting = controller.isSavingDraft.value;
 
-            return ElevatedButton(
-              onPressed: isSubmitting ? null : controller.nextStep,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF063C70),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-              child: isSubmitting
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(
-                      isLast ? 'Approve & Save' : 'Continue',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14),
+                  return OutlinedButton.icon(
+                    onPressed: isDrafting ? null : controller.saveDraft,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF0284C7),
+                      side: const BorderSide(color: Color(0xFF0284C7)),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
-            );
-          }),
+                    icon: isDrafting
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Color(0xFF0284C7)),
+                          )
+                        : const Icon(Icons.bookmark_outline_rounded, size: 16),
+                    label: const Text(
+                      'Save draft',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                  );
+                }),
+                const SizedBox(width: 8),
+              ],
+
+              // CONTINUE / APPROVE & SAVE BUTTON
+              Obx(() {
+                final isSubmitting = controller.isApproving.value;
+
+                return ElevatedButton(
+                  onPressed: isSubmitting ? null : controller.nextStep,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF063C70),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : Text(
+                          isLast ? 'Approve & Save' : 'Continue',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                );
+              }),
+            ],
+          ),
         ],
       ),
     );
   }
 
   // ================================================================
-  // STEP 1: REVIEW OVERVIEW
+  // STEP 1: REVIEW OVERVIEW (SCREENSHOTS 1, 2, 3 MATCHED 100%)
   // ================================================================
   Widget _buildReviewOverviewTab(BuildContext context) {
     final rs = context.rs;
@@ -299,15 +736,19 @@ class _ReviewPurchaseInvoiceScreenState
                       color: Color(0xFF0284C7),
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Read from the uploaded document',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0A2342),
+                    const Expanded(
+                      child: Text(
+                        'Read from the uploaded document',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A2342),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
@@ -853,47 +1294,54 @@ class _ReviewPurchaseInvoiceScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.help_outline_rounded,
-                          size: 18,
-                          color: Color(0xFF64748B),
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          'Invoice verification',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0A2342),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.help_outline_rounded,
+                            size: 18,
+                            color: Color(0xFF64748B),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
-                          ),
-                          child: const Text(
-                            'Verification incomplete',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF64748B),
+                          const SizedBox(width: 6),
+                          const Flexible(
+                            child: Text(
+                              'Invoice verification',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0A2342),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: const Text(
+                              'Verification incomplete',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 6),
                     OutlinedButton.icon(
                       onPressed: () {},
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                            horizontal: 8, vertical: 4),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -944,7 +1392,7 @@ class _ReviewPurchaseInvoiceScreenState
   }
 
   // ================================================================
-  // STEP 2: SUPPLIER DETAILS
+  // STEP 2: SUPPLIER DETAILS (FULLY EDITABLE WITH SUPPLIER LIST API)
   // ================================================================
   Widget _buildSupplierDetailsTab(BuildContext context) {
     final rs = context.rs;
@@ -979,6 +1427,7 @@ class _ReviewPurchaseInvoiceScreenState
                 ),
                 const SizedBox(height: 14),
 
+                // Supplier Picker Dropdown Button
                 const Text(
                   'Supplier *',
                   style: TextStyle(
@@ -990,31 +1439,39 @@ class _ReviewPurchaseInvoiceScreenState
                 Obx(() {
                   final sel = controller.selectedSupplier.value;
 
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: colorsList.borderColor),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          sel != null ? sel.name : 'Select supplier',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: sel != null
-                                ? const Color(0xFF0A2342)
-                                : const Color(0xFF94A3B8),
+                  return InkWell(
+                    onTap: () => _showSupplierSearchSheet(context),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: colorsList.borderColor),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              sel != null ? sel.name : 'Select supplier',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: sel != null
+                                    ? const Color(0xFF0A2342)
+                                    : const Color(0xFF94A3B8),
+                              ),
+                            ),
                           ),
-                        ),
-                        const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: Color(0xFF64748B),
-                        ),
-                      ],
+                          const Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: Color(0xFF64748B),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }),
@@ -1046,10 +1503,51 @@ class _ReviewPurchaseInvoiceScreenState
                               style: TextStyle(
                                   fontSize: 12, color: Color(0xFF475569))),
                           const SizedBox(height: 6),
-                          TextFormField(
-                            controller:
-                                controller.supplierInvoiceDateController,
-                            decoration: _inputDecoration(''),
+                          InkWell(
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                controller.supplierInvoiceDateController.text =
+                                    '${picked.day.toString().padLeft(2, '0')}.'
+                                    '${picked.month.toString().padLeft(2, '0')}.'
+                                    '${picked.year}';
+                                setState(() {});
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 11),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: colorsList.borderColor),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      controller.supplierInvoiceDateController
+                                              .text.isNotEmpty
+                                          ? controller
+                                              .supplierInvoiceDateController.text
+                                          : 'Select date',
+                                      style: const TextStyle(
+                                          fontSize: 13, color: Color(0xFF0A2342)),
+                                    ),
+                                  ),
+                                  const Icon(Icons.calendar_month_outlined,
+                                      size: 16, color: Color(0xFF94A3B8)),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -1063,14 +1561,92 @@ class _ReviewPurchaseInvoiceScreenState
                               style: TextStyle(
                                   fontSize: 12, color: Color(0xFF475569))),
                           const SizedBox(height: 6),
-                          TextFormField(
-                            controller: controller.purchaseDateController,
-                            decoration: _inputDecoration(''),
+                          InkWell(
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                controller.purchaseDateController.text =
+                                    '${picked.day.toString().padLeft(2, '0')}.'
+                                    '${picked.month.toString().padLeft(2, '0')}.'
+                                    '${picked.year}';
+                                setState(() {});
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 11),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: colorsList.borderColor),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      controller.purchaseDateController.text
+                                              .isNotEmpty
+                                          ? controller
+                                              .purchaseDateController.text
+                                          : 'Select date',
+                                      style: const TextStyle(
+                                          fontSize: 13, color: Color(0xFF0A2342)),
+                                    ),
+                                  ),
+                                  const Icon(Icons.calendar_month_outlined,
+                                      size: 16, color: Color(0xFF94A3B8)),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ],
+                ),
+
+                const SizedBox(height: 14),
+
+                // Currency selector
+                const Text('Currency',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+                const SizedBox(height: 6),
+                Obx(
+                  () => InkWell(
+                    onTap: () => _showCurrencySearchSheet(context),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 11),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: colorsList.borderColor),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            controller.selectedCurrency.value,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0A2342)),
+                          ),
+                          const Icon(Icons.keyboard_arrow_down_rounded,
+                              color: Color(0xFF64748B)),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1084,7 +1660,7 @@ class _ReviewPurchaseInvoiceScreenState
   }
 
   // ================================================================
-  // STEP 3: PURCHASED ITEMS / SERVICES
+  // STEP 3: PURCHASED ITEMS / SERVICES (FULLY EDITABLE WITH CATALOG API)
   // ================================================================
   Widget _buildPurchasedItemsTab(BuildContext context) {
     final rs = context.rs;
@@ -1167,6 +1743,48 @@ class _ReviewPurchaseInvoiceScreenState
                               ],
                             ),
                             const SizedBox(height: 6),
+                            InkWell(
+                              onTap: () =>
+                                  _showCatalogItemSearchSheet(context, index),
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: colorsList.borderColor),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.itemController.text.isNotEmpty
+                                            ? item.itemController.text
+                                            : 'Select article from catalog',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: item
+                                                  .itemController.text.isNotEmpty
+                                              ? const Color(0xFF0A2342)
+                                              : const Color(0xFF94A3B8),
+                                        ),
+                                      ),
+                                    ),
+                                    const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        size: 18,
+                                        color: Color(0xFF64748B)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
                             TextFormField(
                               controller: item.descriptionController,
                               decoration: _inputDecoration('Description'),
@@ -1178,6 +1796,8 @@ class _ReviewPurchaseInvoiceScreenState
                                   child: TextFormField(
                                     controller: item.qtyController,
                                     decoration: _inputDecoration('Qty'),
+                                    onChanged: (_) =>
+                                        controller.purchaseLineItems.refresh(),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -1185,6 +1805,8 @@ class _ReviewPurchaseInvoiceScreenState
                                   child: TextFormField(
                                     controller: item.unitPriceController,
                                     decoration: _inputDecoration('Price'),
+                                    onChanged: (_) =>
+                                        controller.purchaseLineItems.refresh(),
                                   ),
                                 ),
                               ],
@@ -1308,7 +1930,7 @@ class _ReviewPurchaseInvoiceScreenState
   }
 
   // ================================================================
-  // STEP 5: PAYMENT DETAILS
+  // STEP 5: PAYMENT DETAILS (EDITABLE)
   // ================================================================
   Widget _buildPaymentDetailsTab(BuildContext context) {
     final rs = context.rs;
@@ -1343,27 +1965,81 @@ class _ReviewPurchaseInvoiceScreenState
                 ),
                 const SizedBox(height: 14),
 
-                Obx(
-                  () => Text(
-                    'Payment status: ${controller.paymentStatus.value}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF0A2342),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
+                const Text('Payment status *',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+                const SizedBox(height: 6),
+                Obx(() {
+                  final status = controller.paymentStatus.value;
 
-                Obx(
-                  () => Text(
-                    'Payment method: ${controller.paymentMethodOption.value}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF64748B),
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colorsList.borderColor),
                     ),
-                  ),
-                ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: status,
+                        isExpanded: true,
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                        items: ReviewPurchaseInvoiceController
+                            .paymentStatusOptions
+                            .map((opt) {
+                          return DropdownMenuItem<String>(
+                            value: opt,
+                            child: Text(opt,
+                                style: const TextStyle(
+                                    fontSize: 13, color: Color(0xFF0A2342))),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) controller.setPaymentStatus(val);
+                        },
+                      ),
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 14),
+
+                const Text('Paid from (bank or cash)',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+                const SizedBox(height: 6),
+                Obx(() {
+                  final paid = controller.paidFrom.value;
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colorsList.borderColor),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: paid.contains('Choose') ? null : paid,
+                        hint: Text(paid,
+                            style: const TextStyle(
+                                fontSize: 13, color: Color(0xFF94A3B8))),
+                        isExpanded: true,
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                        items: ReviewPurchaseInvoiceController.paidFromOptions
+                            .map((opt) {
+                          return DropdownMenuItem<String>(
+                            value: opt,
+                            child: Text(opt,
+                                style: const TextStyle(
+                                    fontSize: 13, color: Color(0xFF0A2342))),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) controller.setPaidFrom(val);
+                        },
+                      ),
+                    ),
+                  );
+                }),
               ],
             ),
           ),
@@ -1376,7 +2052,7 @@ class _ReviewPurchaseInvoiceScreenState
   }
 
   // ================================================================
-  // STEP 6: INTERNAL NOTES
+  // STEP 6: INTERNAL NOTES (EDITABLE)
   // ================================================================
   Widget _buildInternalNotesTab(BuildContext context) {
     final rs = context.rs;
@@ -1450,6 +2126,8 @@ class _ReviewPurchaseInvoiceScreenState
                 flex: 4,
                 child: Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style:
                       const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                 ),
@@ -1458,6 +2136,8 @@ class _ReviewPurchaseInvoiceScreenState
                 flex: 4,
                 child: Text(
                   val,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.bold,
@@ -1469,6 +2149,8 @@ class _ReviewPurchaseInvoiceScreenState
                 flex: 3,
                 child: Text(
                   src ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 11,
                     fontStyle: FontStyle.italic,
