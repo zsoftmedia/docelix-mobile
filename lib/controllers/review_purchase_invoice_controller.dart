@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/create_purchase_invoice_manual_controller.dart';
 import 'package:docelix_mobileapp/controllers/purchase_invoices_controller.dart';
@@ -34,7 +35,7 @@ class ReviewPurchaseInvoiceController extends GetxController {
     if (currentStep.value < steps.length - 1) {
       currentStep.value++;
     } else {
-      approveAndSavePurchase();
+      approveAndPostPurchase();
     }
   }
 
@@ -325,7 +326,7 @@ class ReviewPurchaseInvoiceController extends GetxController {
     'Paid in full',
   ];
 
-  final RxString paidFrom = 'Choose bank or cash'.obs;
+  final RxString paidFrom = 'Bank'.obs;
   static const paidFromOptions = <String>[
     'Bank',
     'Cash',
@@ -375,7 +376,7 @@ class ReviewPurchaseInvoiceController extends GetxController {
   }
 
   // ============================================================
-  // STEP 6: INTERNAL NOTES
+  // STEP 6: INTERNAL NOTES & SUBMISSION CONTROLLERS
   // ============================================================
 
   final internalNotesController = TextEditingController();
@@ -392,6 +393,51 @@ class ReviewPurchaseInvoiceController extends GetxController {
     }
     loadSuppliers();
     loadCatalogItems();
+  }
+
+  void resetForm() {
+    purchaseId.value = 0;
+    purchaseNumber.value = '';
+    supplierInvoiceNumber.value = '';
+    supplierInvoiceDate.value = '';
+    purchaseDate.value = '';
+    dueDate.value = '';
+    selectedCurrency.value = 'EUR';
+    netTotal.value = 0.0;
+    taxTotal.value = 0.0;
+    grandTotal.value = 0.0;
+    attachmentName.value = '';
+    attachmentPath.value = '';
+    documentType.value = 'invoice';
+    classificationReason.value = 'Goods for resale';
+
+    selectedSupplier.value = null;
+    supplierSearchQuery.value = '';
+
+    supplierInvoiceNumberController.clear();
+    hasNoDocumentNumber.value = false;
+    referenceController.clear();
+    supplierInvoiceDateController.clear();
+    purchaseDateController.clear();
+    dueDateController.clear();
+    ibanController.clear();
+    deliveryNoteController.clear();
+    orderReferenceController.clear();
+    serviceFromDateController.clear();
+    serviceToDateController.clear();
+
+    priceMode.value = 'Net';
+    showAccountCodes.value = false;
+    purchaseLineItems.clear();
+
+    paymentStatus.value = 'Paid in full';
+    paidFrom.value = 'Bank';
+    amountPaidController.clear();
+    paymentDateController.clear();
+    paymentReferenceController.clear();
+
+    internalNotesController.clear();
+    currentStep.value = 0;
   }
 
   void _parseScanData() {
@@ -412,7 +458,6 @@ class ReviewPurchaseInvoiceController extends GetxController {
     attachmentPath.value = data['attachment_path']?.toString() ?? '';
     documentType.value = data['document_type']?.toString() ?? 'invoice';
 
-    // Populate controllers for Supplier Details (Editable)
     supplierInvoiceNumberController.text = supplierInvoiceNumber.value;
     referenceController.text = data['reference']?.toString() ?? '';
     supplierInvoiceDateController.text = _formatDisplayDate(supplierInvoiceDate.value);
@@ -515,11 +560,12 @@ class ReviewPurchaseInvoiceController extends GetxController {
     }
   }
 
-  String _formatIsoDate(String raw) {
-    if (raw.trim().isEmpty) return DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String? _formatNullableIsoDate(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
     try {
-      if (raw.contains('.')) {
-        final parts = raw.split('.');
+      if (trimmed.contains('.')) {
+        final parts = trimmed.split('.');
         if (parts.length == 3) {
           final day = parts[0].padLeft(2, '0');
           final month = parts[1].padLeft(2, '0');
@@ -527,10 +573,10 @@ class ReviewPurchaseInvoiceController extends GetxController {
           return '$year-$month-$day';
         }
       }
-      final parsed = DateTime.parse(raw);
+      final parsed = DateTime.parse(trimmed);
       return DateFormat('yyyy-MM-dd').format(parsed);
     } catch (_) {
-      return DateFormat('yyyy-MM-dd').format(DateTime.now());
+      return null;
     }
   }
 
@@ -557,7 +603,6 @@ class ReviewPurchaseInvoiceController extends GetxController {
         );
         suppliers.assignAll(supplierRes.data);
 
-        // Auto match supplier if scan contains supplier info
         final supJson = (scanData['supplier'] ?? scanData['ai_extraction']?['supplier']) as Map<String, dynamic>?;
         if (supJson != null && supJson['name'] != null) {
           final matchedName = supJson['name'].toString().toLowerCase();
@@ -597,6 +642,9 @@ class ReviewPurchaseInvoiceController extends GetxController {
     return '$symbol$formattedInt.${parts[1]}';
   }
 
+  // ============================================================
+  // SAVE DRAFT METHOD (PUT /api/purchases/{id})
+  // ============================================================
   Future<void> saveDraft() async {
     final token = SessionManager.accessToken;
     final companyId = SessionManager.accessCompanyid;
@@ -622,22 +670,25 @@ class ReviewPurchaseInvoiceController extends GetxController {
       isSavingDraft.value = true;
 
       final linesPayload = purchaseLineItems.map((item) {
-        final qty = item.qtyController.text.trim().isNotEmpty
-            ? item.qtyController.text.trim()
-            : '1';
-        final price = item.unitPriceController.text.trim().isNotEmpty
-            ? item.unitPriceController.text.trim()
-            : '0';
+        final qtyStr = item.qtyController.text.trim();
+        final priceStr = item.unitPriceController.text.trim();
+        final taxStr = item.taxRateController.text.trim();
         final desc = item.descriptionController.text.trim().isNotEmpty
             ? item.descriptionController.text.trim()
             : (item.itemController.text.trim().isNotEmpty
                 ? item.itemController.text.trim()
                 : 'Describe product or service');
 
+        final double qtyNum = double.tryParse(qtyStr) ?? 1.0;
+        final double priceNum = double.tryParse(priceStr) ?? 0.0;
+        final double taxNum = double.tryParse(taxStr) ?? 0.0;
+
         final map = <String, dynamic>{
           'description': desc,
-          'quantity': qty,
-          'unit_price': price,
+          'quantity': qtyNum == qtyNum.toInt() ? qtyNum.toInt() : qtyNum,
+          'unit_price': priceNum == priceNum.toInt() ? priceNum.toInt() : priceNum,
+          'tax_rate': taxNum == taxNum.toInt() ? taxNum.toInt() : taxNum,
+          'account_id': 1380,
         };
         if (item.catalogId != null && item.catalogId! > 0) {
           map['item_id'] = item.catalogId;
@@ -647,11 +698,13 @@ class ReviewPurchaseInvoiceController extends GetxController {
 
       final Map<String, dynamic> payload = {
         'credited_purchase_id': null,
-        'currency': selectedCurrency.value.toUpperCase(),
+        'currency': selectedCurrency.value.toUpperCase().isNotEmpty
+            ? selectedCurrency.value.toUpperCase()
+            : 'EUR',
         'delivery_reference': deliveryNoteController.text.trim(),
-        'document_type': documentType.value,
-        'due_date': _formatIsoDate(dueDateController.text),
-        'fx_rate': '',
+        'document_type': documentType.value.isNotEmpty ? documentType.value : 'invoice',
+        'due_date': _formatNullableIsoDate(dueDateController.text),
+        'fx_rate': null,
         'lines': linesPayload,
         'no_invoice_number': hasNoDocumentNumber.value,
         'notes': internalNotesController.text.trim(),
@@ -661,19 +714,19 @@ class ReviewPurchaseInvoiceController extends GetxController {
             : (selectedSupplier.value?.iban ?? ''),
         'payment_method': paidFrom.value.toLowerCase() == 'cash'
             ? 'cash'
-            : (paidFrom.value.toLowerCase() == 'bank' ? 'bank' : ''),
+            : (paidFrom.value.toLowerCase() == 'bank' ? 'bank' : null),
         'price_mode': priceMode.value.toLowerCase(),
-        'purchase_date': _formatIsoDate(purchaseDateController.text),
+        'purchase_date': _formatNullableIsoDate(purchaseDateController.text),
         'purchase_type': 'expense',
         'reference': referenceController.text.trim(),
-        'service_period_end': _formatIsoDate(serviceToDateController.text),
-        'service_period_start': _formatIsoDate(serviceFromDateController.text),
-        'settle_amount': '',
-        'settle_date': '',
+        'service_period_end': _formatNullableIsoDate(serviceToDateController.text),
+        'service_period_start': _formatNullableIsoDate(serviceFromDateController.text),
+        'settle_amount': null,
+        'settle_date': null,
         'settle_on_post': false,
         'settle_reference': '',
         'supplier_id': selectedSupplier.value?.id,
-        'supplier_invoice_date': _formatIsoDate(supplierInvoiceDateController.text),
+        'supplier_invoice_date': _formatNullableIsoDate(supplierInvoiceDateController.text),
         'supplier_invoice_number': supplierInvoiceNumberController.text.trim(),
       };
 
@@ -694,6 +747,7 @@ class ReviewPurchaseInvoiceController extends GetxController {
           Get.find<PurchaseInvoicesController>().refreshInvoices();
         }
 
+        resetForm();
         Get.back(result: true);
       } else {
         AppSnackbar.error(
@@ -701,6 +755,23 @@ class ReviewPurchaseInvoiceController extends GetxController {
           message: 'Failed to save draft.',
         );
       }
+    } on DioException catch (e) {
+      debugPrint('[ReviewPurchaseInvoiceController] saveDraft DioError: ${e.response?.statusCode} - ${e.response?.data}');
+      String errorMessage = 'Failed to save draft.';
+      if (e.response?.data is Map) {
+        final resMap = e.response!.data as Map;
+        errorMessage = resMap['message']?.toString() ??
+            resMap['error']?.toString() ??
+            resMap['detail']?.toString() ??
+            errorMessage;
+      } else if (e.response?.data is String) {
+        errorMessage = e.response!.data.toString();
+      }
+
+      AppSnackbar.error(
+        title: e.response?.statusCode == 409 ? 'Duplicate / Conflict' : 'Error',
+        message: errorMessage,
+      );
     } catch (e) {
       debugPrint('[ReviewPurchaseInvoiceController] saveDraft Error: $e');
       AppSnackbar.error(
@@ -712,7 +783,10 @@ class ReviewPurchaseInvoiceController extends GetxController {
     }
   }
 
-  Future<void> approveAndSavePurchase() async {
+  // ============================================================
+  // APPROVE & POST METHOD
+  // ============================================================
+  Future<void> approveAndPostPurchase() async {
     final token = SessionManager.accessToken;
     final companyId = SessionManager.accessCompanyid;
 
@@ -746,29 +820,41 @@ class ReviewPurchaseInvoiceController extends GetxController {
       isApproving.value = true;
 
       final linesPayload = purchaseLineItems.map((item) {
-        final qty = double.tryParse(item.qtyController.text) ?? 1.0;
-        final unitPrice = double.tryParse(item.unitPriceController.text) ?? 0.0;
-        final taxRate = double.tryParse(item.taxRateController.text) ?? 20.0;
+        final qtyStr = item.qtyController.text.trim();
+        final priceStr = item.unitPriceController.text.trim();
+        final taxStr = item.taxRateController.text.trim();
         final desc = item.descriptionController.text.trim().isNotEmpty
             ? item.descriptionController.text.trim()
-            : item.itemController.text.trim();
+            : (item.itemController.text.trim().isNotEmpty
+                ? item.itemController.text.trim()
+                : 'Describe product or service');
 
-        return {
-          if (item.catalogId != null && item.catalogId! > 0) 'item_id': item.catalogId,
-          'description': desc.isNotEmpty ? desc : 'Item',
-          'quantity': qty,
-          'unit_price': unitPrice,
-          'tax_rate': taxRate,
+        final double qtyNum = double.tryParse(qtyStr) ?? 1.0;
+        final double priceNum = double.tryParse(priceStr) ?? 0.0;
+        final double taxNum = double.tryParse(taxStr) ?? 0.0;
+
+        final map = <String, dynamic>{
+          'description': desc,
+          'quantity': qtyNum == qtyNum.toInt() ? qtyNum.toInt() : qtyNum,
+          'unit_price': priceNum == priceNum.toInt() ? priceNum.toInt() : priceNum,
+          'tax_rate': taxNum == taxNum.toInt() ? taxNum.toInt() : taxNum,
           'account_id': 1380,
         };
+        if (item.catalogId != null && item.catalogId! > 0) {
+          map['item_id'] = item.catalogId;
+        }
+        return map;
       }).toList();
 
       final Map<String, dynamic> payload = {
-        'supplier_id': selectedSupplier.value!.id,
-        'document_type': documentType.value,
-        'currency': selectedCurrency.value.toUpperCase(),
+        'credited_purchase_id': null,
+        'currency': selectedCurrency.value.toUpperCase().isNotEmpty
+            ? selectedCurrency.value.toUpperCase()
+            : 'EUR',
         'delivery_reference': deliveryNoteController.text.trim(),
-        'due_date': _formatIsoDate(dueDateController.text),
+        'document_type': documentType.value.isNotEmpty ? documentType.value : 'invoice',
+        'due_date': _formatNullableIsoDate(dueDateController.text),
+        'fx_rate': null,
         'lines': linesPayload,
         'no_invoice_number': hasNoDocumentNumber.value,
         'notes': internalNotesController.text.trim(),
@@ -776,46 +862,81 @@ class ReviewPurchaseInvoiceController extends GetxController {
         'payee_iban': ibanController.text.trim().isNotEmpty
             ? ibanController.text.trim()
             : (selectedSupplier.value?.iban ?? ''),
-        'payment_method': paidFrom.value.toLowerCase() == 'bank' ? 'bank' : 'cash',
+        'payment_method': paidFrom.value.toLowerCase() == 'cash'
+            ? 'cash'
+            : (paidFrom.value.toLowerCase() == 'bank' ? 'bank' : null),
         'price_mode': priceMode.value.toLowerCase(),
-        'purchase_date': _formatIsoDate(purchaseDateController.text),
+        'purchase_date': _formatNullableIsoDate(purchaseDateController.text),
         'purchase_type': 'expense',
         'reference': referenceController.text.trim(),
-        'service_period_start': _formatIsoDate(serviceFromDateController.text),
-        'service_period_end': _formatIsoDate(serviceToDateController.text),
+        'service_period_end': _formatNullableIsoDate(serviceToDateController.text),
+        'service_period_start': _formatNullableIsoDate(serviceFromDateController.text),
         'settle_amount': paymentStatus.value == 'Paid in full'
-            ? calculatedGrandTotal.toStringAsFixed(2)
-            : (amountPaidController.text.trim().isNotEmpty ? amountPaidController.text.trim() : ''),
-        'settle_date': _formatIsoDate(paymentDateController.text),
+            ? calculatedGrandTotal
+            : double.tryParse(amountPaidController.text.trim()),
+        'settle_date': paymentDateController.text.trim().isNotEmpty
+            ? _formatNullableIsoDate(paymentDateController.text)
+            : null,
         'settle_on_post': paymentStatus.value == 'Paid in full',
         'settle_reference': paymentReferenceController.text.trim(),
-        'supplier_invoice_date': _formatIsoDate(supplierInvoiceDateController.text),
+        'status': 'posted',
+        'supplier_id': selectedSupplier.value?.id,
+        'supplier_invoice_date': _formatNullableIsoDate(supplierInvoiceDateController.text),
         'supplier_invoice_number': supplierInvoiceNumberController.text.trim(),
       };
 
-      final response = await _dioClient.createPurchase(
-        body: payload,
-        companyId: companyId,
-        accessToken: token,
-      );
+      final id = purchaseId.value;
+      dynamic response;
+      if (id > 0) {
+        response = await _dioClient.updatePurchase(
+          purchaseId: id,
+          body: payload,
+          companyId: companyId,
+          accessToken: token,
+        );
+      } else {
+        response = await _dioClient.createPurchase(
+          body: payload,
+          companyId: companyId,
+          accessToken: token,
+        );
+      }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         AppSnackbar.success(
           title: 'Success',
-          message: 'Purchase document approved and saved successfully.',
+          message: 'Purchase document approved and posted successfully.',
         );
 
         if (Get.isRegistered<PurchaseInvoicesController>()) {
           Get.find<PurchaseInvoicesController>().refreshInvoices();
         }
 
+        resetForm();
         Get.back(result: true);
       } else {
         AppSnackbar.error(
           title: 'Error',
-          message: 'Failed to approve purchase document.',
+          message: 'Failed to approve and post purchase document.',
         );
       }
+    } on DioException catch (e) {
+      debugPrint('[ReviewPurchaseInvoiceController] approve DioError: ${e.response?.statusCode} - ${e.response?.data}');
+      String errorMessage = 'Failed to approve purchase document.';
+      if (e.response?.data is Map) {
+        final resMap = e.response!.data as Map;
+        errorMessage = resMap['message']?.toString() ??
+            resMap['error']?.toString() ??
+            resMap['detail']?.toString() ??
+            errorMessage;
+      } else if (e.response?.data is String) {
+        errorMessage = e.response!.data.toString();
+      }
+
+      AppSnackbar.error(
+        title: e.response?.statusCode == 409 ? 'Duplicate / Conflict' : 'Error',
+        message: errorMessage,
+      );
     } catch (e) {
       debugPrint('[ReviewPurchaseInvoiceController] approve Error: $e');
       AppSnackbar.error(

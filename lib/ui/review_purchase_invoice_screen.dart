@@ -680,7 +680,7 @@ class _ReviewPurchaseInvoiceScreenState
                               strokeWidth: 2, color: Colors.white),
                         )
                       : Text(
-                          isLast ? 'Approve & Save' : 'Continue',
+                          isLast ? 'Approve & post' : 'Continue',
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 13),
                         ),
