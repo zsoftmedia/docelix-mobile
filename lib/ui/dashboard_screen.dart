@@ -51,9 +51,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
 
           return ResponsivePage(
+            maxWidth: rs.isPhone ? null : double.infinity,
             padding: EdgeInsets.symmetric(
-              horizontal: rs.isPhone ? width * 0.045 : rs.pagePaddingH,
-              vertical: rs.isPhone ? height * 0.012 : rs.s(12),
+              horizontal: rs.isPhone ? width * 0.045 : 16.0,
+              vertical: rs.isPhone ? height * 0.012 : 12.0,
             ),
             child: RefreshIndicator(
               onRefresh: dashboardController.getDashboard,
@@ -119,20 +120,262 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required double width,
     required double height,
   }) {
+    final rs = context.rs;
+
+    if (rs.isPhone) {
+      // MOBILE HEADER (UNDISTURBED)
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. LOGO + NOTIFICATION BELL BUTTON
+          Row(
+            children: [
+              Expanded(
+                child: Image.asset(
+                  'assets/main_logo.png',
+                  height: width * 0.08,
+                  alignment: Alignment.centerLeft,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE2ECF8),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    AppSnackbar.info(title: 'Inprogress', message: 'Coming Soon');
+                  },
+                  icon: const Icon(
+                    Icons.notifications_none_rounded,
+                    color: colorsList.iconColor,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: height * 0.02),
+
+          // 2. DATE + DYNAMIC GREETING + SUBTITLE
+          Text(
+            dashboardController.dateHeaderText,
+            style: TextStyle(
+              fontSize: width.fontSizeW(0.025),
+              fontWeight: FontWeight.normal,
+              color: colorsList.secondaryText,
+              letterSpacing: 0.8,
+            ),
+          ),
+          SizedBox(height: height * 0.004),
+          Text(
+            dashboardController.greetingText,
+            style: TextStyle(
+              fontSize: width.fontSizeW(0.047),
+              fontWeight: FontWeight.bold,
+              color: colorsList.primaryText,
+            ),
+          ),
+          SizedBox(height: height * 0.003),
+          Text(
+            "Here's what needs your attention today.",
+            style: TextStyle(
+              fontSize: width.fontSizeW(0.030),
+              color: colorsList.secondaryText,
+            ),
+          ),
+
+          SizedBox(height: height * 0.02),
+
+          // 3. SEARCH BAR
+          Container(
+            height: width * 0.12,
+            padding: EdgeInsets.symmetric(horizontal: width * 0.035),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: colorsList.borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.search_rounded,
+                  color: colorsList.dashboardhintColor,
+                  size: 20,
+                ),
+                SizedBox(width: width * 0.025),
+                Expanded(
+                  child: TextField(
+                    controller: dashboardController.searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search here',
+                      hintStyle: TextStyle(
+                        color: colorsList.dashboardhintColor,
+                        fontSize: 13,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onSubmitted: (query) {
+                      if (query.trim().isNotEmpty) {
+                        Get.toNamed('/SearchScreen', arguments: query.trim());
+                      }
+                    },
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Get.toNamed('/SearchScreen');
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(
+                    Icons.tune_rounded,
+                    color: colorsList.dashboardhintColor,
+                    size: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: height * 0.015),
+
+          // 4. COMPANY & PERIOD DROPDOWNS
+          Row(
+            children: [
+              Expanded(
+                child: _companyDropdown(width: width),
+              ),
+              SizedBox(width: width * 0.025),
+              Expanded(
+                child: _periodDropdown(width: width),
+              ),
+            ],
+          ),
+
+          Obx(() {
+            if (dashboardController.selectedPeriod.value != 'custom') {
+              return const SizedBox.shrink();
+            }
+
+            return Column(
+              children: [
+                SizedBox(height: height * 0.007),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _headerDropdown(
+                        width: width,
+                        icon: Icons.calendar_today_outlined,
+                        text: "From: ${dashboardController.fromDateText}",
+                        onTap: dashboardController.selectFromDate,
+                      ),
+                    ),
+                    SizedBox(width: width * 0.025),
+                    Expanded(
+                      child: _headerDropdown(
+                        width: width,
+                        icon: Icons.calendar_today_outlined,
+                        text: "To: ${dashboardController.toDateText}",
+                        onTap: dashboardController.selectToDate,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          }),
+        ],
+      );
+    }
+
+    // TABLET HEADER (MATCHING TABLET SCREENSHOT)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. LOGO + NOTIFICATION BELL BUTTON
+        // 1. TABLET TOP BAR: LOGO (Left), SEARCH BAR (Center), NOTIFICATIONS (Right)
         Row(
           children: [
+            Image.asset(
+              'assets/main_logo.png',
+              height: 38,
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 24),
             Expanded(
-              child: Image.asset(
-                'assets/main_logo.png',
-                height: width * 0.08,
-                alignment: Alignment.centerLeft,
-                fit: BoxFit.contain,
+              child: Container(
+                height: 44,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: colorsList.borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.search_rounded,
+                      color: colorsList.dashboardhintColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: dashboardController.searchController,
+                        style: const TextStyle(fontSize: 14),
+                        decoration: const InputDecoration(
+                          hintText: 'Search here',
+                          hintStyle: TextStyle(
+                            color: colorsList.dashboardhintColor,
+                            fontSize: 13,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        onSubmitted: (query) {
+                          if (query.trim().isNotEmpty) {
+                            Get.toNamed('/SearchScreen', arguments: query.trim());
+                          }
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Get.toNamed('/SearchScreen');
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(
+                        Icons.tune_rounded,
+                        color: colorsList.dashboardhintColor,
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+            const SizedBox(width: 20),
             Container(
               decoration: const BoxDecoration(
                 color: Color(0xFFE2ECF8),
@@ -140,9 +383,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               child: IconButton(
                 onPressed: () {
-                 // Get.toNamed('/SearchScreen');
-                  AppSnackbar.info(title: 'Inprogress',
-                      message: 'Coming Soon');
+                  AppSnackbar.info(title: 'Inprogress', message: 'Coming Soon');
                 },
                 icon: const Icon(
                   Icons.notifications_none_rounded,
@@ -154,151 +395,266 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
 
-        SizedBox(height: height * 0.02),
+        const SizedBox(height: 16),
 
-        // 2. DATE + DYNAMIC GREETING + SUBTITLE
-        Text(
-          dashboardController.dateHeaderText,
-          style: TextStyle(
-            fontSize: width.fontSizeW(0.025),
-            fontWeight: FontWeight.normal,
-            color: colorsList.secondaryText,
-            letterSpacing: 0.8,
-          ),
-        ),
-        SizedBox(height: height * 0.004),
-        Text(
-          dashboardController.greetingText,
-          style: TextStyle(
-            fontSize: width.fontSizeW(0.047),
-            fontWeight: FontWeight.bold,
-            color: colorsList.primaryText,
-          ),
-        ),
-        SizedBox(height: height * 0.003),
-        Text(
-          "Here's what needs your attention today.",
-          style: TextStyle(
-            fontSize: width.fontSizeW(0.030),
-            color: colorsList.secondaryText,
-          ),
-        ),
-
-        SizedBox(height: height * 0.02),
-
-        // 3. SEARCH BAR
-        Container(
-          height: width * 0.12,
-          padding: EdgeInsets.symmetric(horizontal: width * 0.035),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: colorsList.borderColor),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.search_rounded,
-                color: colorsList.dashboardhintColor,
-                size: 20,
-              ),
-              SizedBox(width: width * 0.025),
-              Expanded(
-                child: TextField(
-                  controller: dashboardController.searchController,
-                  decoration: const InputDecoration(
-                    hintText: 'Search here',
-                    hintStyle: TextStyle(
-                      color: colorsList.dashboardhintColor,
-                      fontSize: 13,
-                    ),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  onSubmitted: (query) {
-                    if (query.trim().isNotEmpty) {
-                      Get.toNamed('/SearchScreen', arguments: query.trim());
-                    }
-                  },
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  Get.toNamed('/SearchScreen');
-                },
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(
-                  Icons.tune_rounded,
-                  color: colorsList.dashboardhintColor,
-                  size: 18,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        SizedBox(height: height * 0.015),
-
-        // 4. COMPANY & PERIOD DROPDOWNS (PRESERVED)
+        // 2. DROPDOWNS ROW (COMPANY, PERIOD, FROM DATE, TO DATE)
         Row(
           children: [
             Expanded(
-              child: _companyDropdown(width: width),
+              child: _companyDropdownTablet(),
             ),
-            SizedBox(width: width * 0.025),
+            const SizedBox(width: 12),
             Expanded(
-              child: _periodDropdown(width: width),
+              child: _periodDropdownTablet(),
             ),
-          ],
-        ),
+            Obx(() {
+              if (dashboardController.selectedPeriod.value != 'custom') {
+                return const SizedBox.shrink();
+              }
 
-        Obx(() {
-          if (dashboardController.selectedPeriod.value != 'custom') {
-            return const SizedBox.shrink();
-          }
-
-          return Column(
-            children: [
-              SizedBox(height: height * 0.007),
-              Row(
+              return Row(
                 children: [
-                  Expanded(
-                    child: _headerDropdown(
-                      width: width,
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 160,
+                    child: _headerDropdownTablet(
                       icon: Icons.calendar_today_outlined,
                       text: "From: ${dashboardController.fromDateText}",
                       onTap: dashboardController.selectFromDate,
                     ),
                   ),
-                  SizedBox(width: width * 0.025),
-                  Expanded(
-                    child: _headerDropdown(
-                      width: width,
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 160,
+                    child: _headerDropdownTablet(
                       icon: Icons.calendar_today_outlined,
                       text: "To: ${dashboardController.toDateText}",
                       onTap: dashboardController.selectToDate,
                     ),
                   ),
                 ],
-              ),
-            ],
-          );
-        }),
+              );
+            }),
+          ],
+        ),
       ],
     );
   }
 
   // ================================================================
-  // HEADER DROPDOWNS
+  // TABLET HEADER DROPDOWNS
+  // ================================================================
+
+  Widget _headerDropdownTablet({
+    required IconData icon,
+    required String text,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(13),
+      child: Container(
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: colorsList.cardColor,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: colorsList.borderColor),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: colorsList.primaryText),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: colorsList.primaryText,
+                  fontSize: 13,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 18,
+              color: colorsList.secondaryText,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _periodDropdownTablet() {
+    return Obx(() {
+      final controller = dashboardController;
+
+      return Container(
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: colorsList.cardColor,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: colorsList.borderColor),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: controller.selectedPeriod.value,
+            isExpanded: true,
+            icon: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 18,
+              color: colorsList.secondaryText,
+            ),
+            dropdownColor: colorsList.cardColor,
+            selectedItemBuilder: (context) {
+              return DashboardController.periodOptions.map((entry) {
+                return Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_month_outlined,
+                      size: 18,
+                      color: colorsList.primaryText,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        entry.value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: colorsList.primaryText,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList();
+            },
+            items: DashboardController.periodOptions.map((entry) {
+              return DropdownMenuItem<String>(
+                value: entry.key,
+                child: Text(
+                  entry.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: colorsList.primaryText,
+                    fontSize: 13,
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: (String? val) {
+              if (val != null) {
+                controller.selectPeriod(val);
+              }
+            },
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _companyDropdownTablet() {
+    return Obx(() {
+      final controller = dashboardController;
+      final selectedCompany = controller.selectedCompany.value;
+
+      return Container(
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: colorsList.cardColor,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: colorsList.borderColor),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<CompanyModel>(
+            value: selectedCompany,
+            isExpanded: true,
+            icon: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 18,
+              color: colorsList.secondaryText,
+            ),
+            dropdownColor: colorsList.cardColor,
+            hint: const Row(
+              children: [
+                Icon(
+                  Icons.business_outlined,
+                  size: 18,
+                  color: colorsList.primaryText,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  "Select company",
+                  style: TextStyle(
+                    color: colorsList.secondaryText,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            selectedItemBuilder: (context) {
+              return controller.companies.map((company) {
+                return Row(
+                  children: [
+                    const Icon(
+                      Icons.business_outlined,
+                      size: 18,
+                      color: colorsList.primaryText,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        company.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: colorsList.primaryText,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList();
+            },
+            items: controller.companies.map((company) {
+              return DropdownMenuItem<CompanyModel>(
+                value: company,
+                child: Text(
+                  company.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: colorsList.primaryText,
+                    fontSize: 13,
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: controller.isCompaniesLoading.value
+                ? null
+                : (CompanyModel? company) {
+                    if (company == null) return;
+                    controller.selectCompany(company);
+                  },
+          ),
+        ),
+      );
+    });
+  }
+
+  // ================================================================
+  // MOBILE HEADER DROPDOWNS
   // ================================================================
 
   Widget _headerDropdown({
@@ -546,86 +902,201 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required double width,
     required double height,
   }) {
+    final rs = context.rs;
     final netProfit =
         dashboardController.dashboardData.value?.kpis?.netResult?.value ?? 0;
     final profitPercent =
         dashboardController.dashboardData.value?.kpis?.netResult?.changePercent ?? 0;
 
-    return InkWell(
-      onTap: () {
-        AppSnackbar.info(
-          title: 'Coming Soon',
-          message: 'Financial Overview feature is coming soon.',
-        );
-      },
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(width * 0.045),
-        decoration: BoxDecoration(
-          color: colorsList.financialCardBg,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colorsList.dashboardBorderColor),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Financial Overview",
-              style: TextStyle(
-                fontSize: width.fontSizeW(0.028),
-                color: const Color(0xFF64748B),
-                fontWeight: FontWeight.normal,
+    if (rs.isPhone) {
+      // MOBILE CARD (UNDISTURBED)
+      return InkWell(
+        onTap: () {
+          AppSnackbar.info(
+            title: 'Coming Soon',
+            message: 'Financial Overview feature is coming soon.',
+          );
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(width * 0.045),
+          decoration: BoxDecoration(
+            color: colorsList.financialCardBg,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: colorsList.dashboardBorderColor),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Financial Overview",
+                style: TextStyle(
+                  fontSize: width.fontSizeW(0.028),
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.normal,
+                ),
               ),
-            ),
-            SizedBox(height: height * 0.006),
-            Text(
-              "Net Profit",
-              style: TextStyle(
-                fontSize: width.fontSizeW(0.036),
-                fontWeight: FontWeight.normal,
-                color: colorsList.primaryText,
+              SizedBox(height: height * 0.006),
+              Text(
+                "Net Profit",
+                style: TextStyle(
+                  fontSize: width.fontSizeW(0.036),
+                  fontWeight: FontWeight.normal,
+                  color: colorsList.primaryText,
+                ),
               ),
-            ),
-            SizedBox(height: height * 0.008),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Text(
-                    _formatCurrency(netProfit),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: width.fontSizeW(0.06),
-                      fontWeight: FontWeight.normal,
-                      color: colorsList.primaryText,
+              SizedBox(height: height * 0.008),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _formatCurrency(netProfit),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: width.fontSizeW(0.06),
+                        fontWeight: FontWeight.normal,
+                        color: colorsList.primaryText,
+                      ),
                     ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: width * 0.028,
+                      vertical: height * 0.006,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorsList.lightGreenPillBg,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      "$profitPercent% of profit margin",
+                      style: TextStyle(
+                        fontSize: width.fontSizeW(0.026),
+                        fontWeight: FontWeight.normal,
+                        color: colorsList.lightGreenPillText,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // TABLET CARD (MATCHING TABLET SCREENSHOT)
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: BoxDecoration(
+        color: colorsList.financialCardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colorsList.dashboardBorderColor),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // LEFT GREETING & OVERVIEW INFO
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${dashboardController.dateHeaderText} • FINANCIAL OVERVIEW",
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF64748B),
+                    letterSpacing: 1.0,
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: width * 0.028,
-                    vertical: height * 0.006,
+                const SizedBox(height: 8),
+                Text(
+                  dashboardController.greetingText,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0A2342),
                   ),
-                  decoration: BoxDecoration(
-                    color: colorsList.lightGreenPillBg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    "$profitPercent% of profit margin",
-                    style: TextStyle(
-                      fontSize: width.fontSizeW(0.026),
-                      fontWeight: FontWeight.normal,
-                      color: colorsList.lightGreenPillText,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  "Here's what needs your attention today.",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 24),
+          // RIGHT NET PROFIT WHITE CARD
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "NET PROFIT",
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF94A3B8),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDCFCE7),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        "$profitPercent% of profit margin",
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF16A34A),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _formatCurrency(netProfit),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0A2342),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -637,56 +1108,134 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildTabs({
     required double width,
     required double height,
-  })
-  {
-    return Container(
-      height: width * 0.11,
-      padding: EdgeInsets.all(width * 0.010),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorsList.borderColor),
-      ),
-      child: Row(
-        children: List.generate(
-          tabs.length,
-          (index) {
-            final bool isSelected = selectedTab == index;
+  }) {
+    final rs = context.rs;
 
-            return Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    selectedTab = index;
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? colorsList.colorButton
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    tabs[index],
-                    style: TextStyle(
+    if (rs.isPhone) {
+      // MOBILE TABS (UNDISTURBED)
+      return Container(
+        height: width * 0.11,
+        padding: EdgeInsets.all(width * 0.010),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colorsList.borderColor),
+        ),
+        child: Row(
+          children: List.generate(
+            tabs.length,
+            (index) {
+              final bool isSelected = selectedTab == index;
+
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedTab = index;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
                       color: isSelected
-                          ? Colors.white
-                          : colorsList.secondaryText,
-                      fontSize: width.fontSizeW(0.030),
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
+                          ? colorsList.colorButton
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      tabs[index],
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : colorsList.secondaryText,
+                        fontSize: width.fontSizeW(0.030),
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
-      ),
+      );
+    }
+
+    // TABLET TABS (WITH SYNC STATUS ON RIGHT)
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Container(
+          width: 280,
+          height: 42,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: colorsList.borderColor),
+          ),
+          child: Row(
+            children: List.generate(
+              tabs.length,
+              (index) {
+                final bool isSelected = selectedTab == index;
+
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedTab = index;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? colorsList.colorButton
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        tabs[index],
+                        style: TextStyle(
+                          color: isSelected
+                              ? Colors.white
+                              : colorsList.secondaryText,
+                          fontSize: 13,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            const Icon(
+              Icons.sync_rounded,
+              color: Color(0xFF16A34A),
+              size: 16,
+            ),
+            const SizedBox(width: 6),
+            const Text(
+              "Synced 2m ago",
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -697,8 +1246,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildSelectedTab({
     required double width,
     required double height,
-  })
-  {
+  }) {
     switch (selectedTab) {
       case 0:
         return _buildOverviewTab(
@@ -727,8 +1275,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildOverviewTab({
     required double width,
     required double height,
-  })
-  {
+  }) {
+    final rs = context.rs;
+
     final revenue =
         dashboardController.dashboardData.value?.kpis?.revenue?.value ?? 0;
     final revenuePercent =
@@ -749,15 +1298,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final netProfitPercent =
         dashboardController.dashboardData.value?.kpis?.netResult?.changePercent ?? 0;
 
+    final outstandingAmountTotal =
+        (dashboardController.dashboardData.value?.outstanding?.receivables?.amount ?? 0) +
+        (dashboardController.dashboardData.value?.outstanding?.payables?.amount ?? 0);
+
     return Column(
       key: const ValueKey("overview_tab"),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 2x2 KPI GRID CARDS
+        // KPI CARDS
         LayoutBuilder(
           builder: (context, constraints) {
-            final cols = context.rs.kpiColumns;
-            final gap = width * 0.025;
+            final cols = rs.isPhone ? 2 : 4;
+            final gap = rs.isPhone ? width * 0.025 : 16.0;
             final itemW =
                 (constraints.maxWidth - gap * (cols - 1)) / cols;
 
@@ -768,17 +1321,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 title: "Revenue",
                 value: _formatCurrency(revenue),
                 percentage: "$revenuePercent%",
-                subtitle: "vs last month",
+                subtitle: "vs last mo",
                 icon: Icons.trending_up_rounded,
                 iconColor: const Color(0xFF16A34A),
                 iconBgColor: const Color(0xFFDCFCE7),
                 onTap: () {
-
                   Get.toNamed(
                     '/ProfitLossScreen',
                     arguments: 'Profit Loss Screen',
                   );
-
                 },
               ),
               _financialCard(
@@ -787,17 +1338,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 title: "Expenses",
                 value: _formatCurrency(expenses),
                 percentage: "$expensesPercent%",
-                subtitle: "vs last month",
+                subtitle: "vs last mo",
                 icon: Icons.credit_card_outlined,
                 iconColor: const Color(0xFFDC2626),
                 iconBgColor: const Color(0xFFFEE2E2),
                 onTap: () {
-
                   Get.toNamed(
                     '/ProfitLossScreen',
                     arguments: 'Profit Loss Screen',
                   );
-
                 },
               ),
               _financialCard(
@@ -806,43 +1355,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 title: "Cash balance",
                 value: _formatCurrency(cashBalance),
                 percentage: "$cashBalancePercent%",
-                subtitle: "vs last month",
+                subtitle: "vs last mo",
                 icon: Icons.account_balance_wallet_outlined,
                 iconColor: const Color(0xFFD97706),
                 iconBgColor: const Color(0xFFFEF3C7),
                 onTap: () {
-
                   Get.toNamed(
                     '/LedgerScreen',
                     arguments: 'Ledger Screen',
                   );
-                  
                 },
               ),
               _financialCard(
                 width: width,
                 height: height,
-                title: "Net Profit",
-                value: _formatCurrency(netProfit),
+                title: rs.isPhone ? "Net Profit" : "Outstanding",
+                value: _formatCurrency(rs.isPhone ? netProfit : outstandingAmountTotal),
                 percentage: "$netProfitPercent%",
-                subtitle: "vs last month",
-                icon: Icons.receipt_long_outlined,
+                subtitle: "vs last mo",
+                icon: rs.isPhone
+                    ? Icons.receipt_long_outlined
+                    : Icons.description_outlined,
                 iconColor: const Color(0xFF2563EB),
                 iconBgColor: const Color(0xFFEFF6FF),
                 onTap: () {
-
-                  Get.toNamed(
-                    '/ProfitLossScreen',
-                    arguments: 'Profit Loss Screen',
-                  );
-
+                  if (rs.isPhone) {
+                    Get.toNamed(
+                      '/ProfitLossScreen',
+                      arguments: 'Profit Loss Screen',
+                    );
+                  } else {
+                    Get.toNamed(
+                      '/AccountReceivableScreen',
+                      arguments: 'Receivable Screen',
+                    );
+                  }
                 },
               ),
             ];
 
             return Wrap(
               spacing: gap,
-              runSpacing: height * 0.014,
+              runSpacing: rs.isPhone ? height * 0.014 : 16.0,
               children: cards
                   .map((card) => SizedBox(width: itemW, child: card))
                   .toList(),
@@ -850,7 +1404,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         ),
 
-        SizedBox(height: height * 0.018),
+        SizedBox(height: rs.isPhone ? height * 0.018 : 18.0),
 
         // QUICK ACTIONS
         _buildQuickActions(
@@ -858,7 +1412,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           height: height,
         ),
 
-        SizedBox(height: height * 0.018),
+        SizedBox(height: rs.isPhone ? height * 0.018 : 18.0),
 
         // OUTSTANDING AMOUNT
         Obx(
@@ -868,7 +1422,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
 
-        SizedBox(height: height * 0.018),
+        SizedBox(height: rs.isPhone ? height * 0.018 : 18.0),
       ],
     );
   }
@@ -889,6 +1443,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required Color iconBgColor,
     VoidCallback? onTap,
   }) {
+    final rs = context.rs;
     final bool isNegative = percentage.startsWith("-");
 
     return InkWell(
@@ -901,7 +1456,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: EdgeInsets.all(width * 0.038),
+        padding: EdgeInsets.all(rs.isPhone ? width * 0.038 : 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -915,77 +1470,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: width * 0.08,
-                height: width * 0.08,
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: width * 0.042,
-                ),
-              ),
-              SizedBox(width: width * 0.020),
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colorsList.primaryText,
-                    fontSize: width.fontSizeW(0.032),
-                    fontWeight: FontWeight.normal,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: rs.isPhone ? width * 0.08 : 36,
+                  height: rs.isPhone ? width * 0.08 : 36,
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: rs.isPhone ? width * 0.042 : 18,
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: height * 0.012),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: colorsList.primaryText,
-              fontSize: width.fontSizeW(0.042),
-              fontWeight: FontWeight.normal,
+                SizedBox(width: rs.isPhone ? width * 0.020 : 10),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colorsList.primaryText,
+                      fontSize: rs.isPhone ? width.fontSizeW(0.032) : 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          SizedBox(height: height * 0.006),
-          Row(
-            children: [
-              Text(
-                isNegative ? "⇣ $percentage" : "⇡ $percentage",
-                style: TextStyle(
-                  color: isNegative ? colorsList.lightRedPillText : colorsList.lightGreenPillText,
-                  fontSize: width.fontSizeW(0.026),
-                  fontWeight: FontWeight.normal,
-                ),
+            SizedBox(height: rs.isPhone ? height * 0.012 : 10),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: colorsList.primaryText,
+                fontSize: rs.isPhone ? width.fontSizeW(0.042) : 17,
+                fontWeight: FontWeight.bold,
               ),
-              SizedBox(width: width * 0.012),
-              Expanded(
-                child: Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: rs.isPhone ? height * 0.006 : 6),
+            Row(
+              children: [
+                Text(
+                  isNegative ? "⇣ $percentage" : "⇡ $percentage",
                   style: TextStyle(
-                    color: colorsList.secondaryText,
-                    fontSize: width.fontSizeW(0.025),
+                    color: isNegative ? colorsList.lightRedPillText : colorsList.lightGreenPillText,
+                    fontSize: rs.isPhone ? width.fontSizeW(0.026) : 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                SizedBox(width: rs.isPhone ? width * 0.012 : 6),
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colorsList.secondaryText,
+                      fontSize: rs.isPhone ? width.fontSizeW(0.025) : 11,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -996,11 +1551,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildQuickActions({
     required double width,
     required double height,
-  })
-  {
+  }) {
+    final rs = context.rs;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.040),
+      padding: EdgeInsets.all(rs.isPhone ? width * 0.040 : 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -1013,56 +1569,95 @@ class _DashboardScreenState extends State<DashboardScreen> {
             "Quick Actions",
             style: TextStyle(
               color: colorsList.primaryText,
-              fontSize: width.fontSizeW(0.038),
-              fontWeight: FontWeight.normal,
+              fontSize: rs.isPhone ? width.fontSizeW(0.038) : 16,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: height * 0.014),
-          InkWell(
-            onTap: () {
-              Get.toNamed(
-                '/CreateInvoiceScreen',
-                arguments: 'Create Invoices Screen',
-              );
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: double.infinity,
-              height: width * 0.13,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0FDF4),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFBBF7D0)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFDCFCE7),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.add_rounded,
-                      color: Color(0xFF16A34A),
-                      size: 18,
-                    ),
+          SizedBox(height: rs.isPhone ? height * 0.014 : 14),
+          if (rs.isPhone)
+            _quickActionButton(
+              title: "Create invoice",
+              onTap: () {
+                Get.toNamed(
+                  '/CreateInvoiceScreen',
+                  arguments: 'Create Invoices Screen',
+                );
+              },
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: _quickActionButton(
+                    title: "Create invoice",
+                    onTap: () {
+                      Get.toNamed(
+                        '/CreateInvoiceScreen',
+                        arguments: 'Create Invoices Screen',
+                      );
+                    },
                   ),
-                  SizedBox(width: width * 0.025),
-                  Text(
-                    "Create invoice",
-                    style: TextStyle(
-                      color: const Color(0xFF16A34A),
-                      fontSize: width.fontSizeW(0.033),
-                      fontWeight: FontWeight.normal,
-                    ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _quickActionButton(
+                    title: "Create invoice",
+                    onTap: () {
+                      Get.toNamed(
+                        '/CreateIncomingInvoicesScreen',
+                        arguments: 'Create Incoming Invoices Screen',
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _quickActionButton({
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        height: 48,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0FDF4),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFBBF7D0)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Color(0xFFDCFCE7),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                color: Color(0xFF16A34A),
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Color(0xFF16A34A),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1074,8 +1669,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildOutStandingAmount({
     required double width,
     required double height,
-  })
-  {
+  }) {
+    final rs = context.rs;
     final dashboard = dashboardController.dashboardData.value;
 
     final overdueInvoices = dashboard?.outstanding?.overdueInvoices;
@@ -1101,10 +1696,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(
-              width * 0.040,
-              width * 0.035,
-              width * 0.040,
-              width * 0.020,
+              rs.isPhone ? width * 0.040 : 20,
+              rs.isPhone ? width * 0.035 : 16,
+              rs.isPhone ? width * 0.040 : 20,
+              rs.isPhone ? width * 0.020 : 12,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1113,16 +1708,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   "Outstanding Amount",
                   style: TextStyle(
                     color: colorsList.primaryText,
-                    fontSize: width.fontSizeW(0.038),
-                    fontWeight: FontWeight.normal,
+                    fontSize: rs.isPhone ? width.fontSizeW(0.038) : 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   "3 Categories",
                   style: TextStyle(
                     color: const Color(0xFF16A34A),
-                    fontSize: width.fontSizeW(0.028),
-                    fontWeight: FontWeight.normal,
+                    fontSize: rs.isPhone ? width.fontSizeW(0.028) : 13,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -1197,8 +1792,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String subtitle,
     required bool showDivider,
     VoidCallback? onTap,
-  })
-  {
+  }) {
+    final rs = context.rs;
+
     return Column(
       children: [
         Material(
@@ -1207,14 +1803,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             onTap: onTap,
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: width * 0.040,
-                vertical: width * 0.030,
+                horizontal: rs.isPhone ? width * 0.040 : 20,
+                vertical: rs.isPhone ? width * 0.030 : 14,
               ),
               child: Row(
                 children: [
                   Container(
-                    width: width * 0.085,
-                    height: width * 0.085,
+                    width: rs.isPhone ? width * 0.085 : 36,
+                    height: rs.isPhone ? width * 0.085 : 36,
                     decoration: BoxDecoration(
                       color: iconBgColor,
                       shape: BoxShape.circle,
@@ -1222,10 +1818,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Icon(
                       icon,
                       color: iconColor,
-                      size: width * 0.045,
+                      size: rs.isPhone ? width * 0.045 : 18,
                     ),
                   ),
-                  SizedBox(width: width * 0.030),
+                  SizedBox(width: rs.isPhone ? width * 0.030 : 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1234,16 +1830,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           title,
                           style: TextStyle(
                             color: colorsList.primaryText,
-                            fontSize: width.fontSizeW(0.034),
+                            fontSize: rs.isPhone ? width.fontSizeW(0.034) : 14,
                             fontWeight: FontWeight.normal,
                           ),
                         ),
-                        SizedBox(height: width * 0.006),
+                        SizedBox(height: rs.isPhone ? width * 0.006 : 4),
                         Text(
                           subtitle,
                           style: TextStyle(
                             color: colorsList.secondaryText,
-                            fontSize: width.fontSizeW(0.027),
+                            fontSize: rs.isPhone ? width.fontSizeW(0.027) : 12,
                           ),
                         ),
                       ],
@@ -1252,7 +1848,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Icon(
                     Icons.chevron_right_rounded,
                     color: colorsList.secondaryText,
-                    size: width * 0.045,
+                    size: rs.isPhone ? width * 0.045 : 20,
                   ),
                 ],
               ),
@@ -1263,7 +1859,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Divider(
             height: 1,
             color: colorsList.borderColor,
-            indent: width * 0.14,
+            indent: rs.isPhone ? width * 0.14 : 68,
           ),
       ],
     );
@@ -1276,8 +1872,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildTransactionsTab({
     required double width,
     required double height,
-  })
-  {
+  }) {
+    final rs = context.rs;
     final transactions =
         dashboardController.dashboardData.value?.recentTransactions ?? [];
 
@@ -1292,7 +1888,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               "RECENT TRANSACTIONS",
               style: TextStyle(
                 color: colorsList.secondaryText,
-                fontSize: width.fontSizeW(0.027),
+                fontSize: rs.isPhone ? width.fontSizeW(0.027) : 12,
                 fontWeight: FontWeight.normal,
                 letterSpacing: 1.1,
               ),
@@ -1310,21 +1906,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     "See all",
                     style: TextStyle(
                       color: colorsList.secondaryTextColor,
-                      fontSize: width.fontSizeW(0.023),
+                      fontSize: rs.isPhone ? width.fontSizeW(0.023) : 12,
                       fontWeight: FontWeight.normal,
                     ),
                   ),
                   Icon(
                     Icons.chevron_right_rounded,
                     color: colorsList.secondaryTextColor,
-                    size: width * 0.045,
+                    size: rs.isPhone ? width * 0.045 : 18,
                   ),
                 ],
               ),
             ),
           ],
         ),
-        SizedBox(height: height * 0.012),
+        SizedBox(height: rs.isPhone ? height * 0.012 : 12),
         if (transactions.isEmpty)
           _buildEmptyTransactions(
             width: width,
@@ -1334,8 +1930,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(
-              horizontal: width * 0.04,
-              vertical: height * 0.008,
+              horizontal: rs.isPhone ? width * 0.04 : 20,
+              vertical: rs.isPhone ? height * 0.008 : 10,
             ),
             decoration: BoxDecoration(
               color: colorsList.cardColor,
@@ -1382,8 +1978,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildEmptyTransactions({
     required double width,
     required double height,
-  })
-  {
+  }) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
@@ -1444,6 +2039,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required double width,
     required double height,
   }) {
+    final rs = context.rs;
     final bool isIncome = _isIncomeTransaction(transaction.type);
     final Color transactionColor = isIncome ? colorsList.green : colorsList.red;
     final IconData transactionIcon = _getTransactionIcon(transaction.type);
@@ -1487,7 +2083,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: height * 0.014),
+            padding: EdgeInsets.symmetric(
+              vertical: rs.isPhone ? height * 0.014 : 12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1496,8 +2094,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      width: width * 0.105,
-                      height: width * 0.105,
+                      width: rs.isPhone ? width * 0.105 : 40,
+                      height: rs.isPhone ? width * 0.105 : 40,
                       decoration: BoxDecoration(
                         color: transactionColor.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(12),
@@ -1505,10 +2103,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Icon(
                         transactionIcon,
                         color: transactionColor,
-                        size: width * 0.050,
+                        size: rs.isPhone ? width * 0.050 : 20,
                       ),
                     ),
-                    SizedBox(width: width * 0.030),
+                    SizedBox(width: rs.isPhone ? width * 0.030 : 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1519,30 +2117,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: colorsList.primaryText,
-                              fontSize: width.fontSizeW(0.032),
+                              fontSize: rs.isPhone ? width.fontSizeW(0.032) : 14,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          SizedBox(height: height * 0.004),
+                          SizedBox(height: rs.isPhone ? height * 0.004 : 4),
                           Row(
                             children: [
                               Text(
                                 _formatTransactionType(transaction.type),
                                 style: TextStyle(
                                   color: transactionColor,
-                                  fontSize: width.fontSizeW(0.024),
+                                  fontSize: rs.isPhone ? width.fontSizeW(0.024) : 12,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: width * 0.015,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
                                 ),
                                 child: Text(
                                   "•",
                                   style: TextStyle(
                                     color: colorsList.secondaryText,
-                                    fontSize: width.fontSizeW(0.022),
+                                    fontSize: rs.isPhone ? width.fontSizeW(0.022) : 11,
                                   ),
                                 ),
                               ),
@@ -1552,7 +2150,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: colorsList.secondaryText,
-                                    fontSize: width.fontSizeW(0.024),
+                                    fontSize: rs.isPhone ? width.fontSizeW(0.024) : 12,
                                   ),
                                 ),
                               ),
@@ -1561,7 +2159,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(width: width * 0.02),
+                    const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -1569,18 +2167,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           "${isIncome ? '+' : '-'} ${_formatAmount(transaction.amount)}",
                           style: TextStyle(
                             color: transactionColor,
-                            fontSize: width.fontSizeW(0.032),
+                            fontSize: rs.isPhone ? width.fontSizeW(0.032) : 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: height * 0.003),
+                        const SizedBox(height: 3),
                         AnimatedRotation(
                           turns: isExpanded ? 0.5 : 0,
                           duration: const Duration(milliseconds: 200),
                           child: Icon(
                             Icons.keyboard_arrow_down_rounded,
                             color: colorsList.secondaryText,
-                            size: width * 0.045,
+                            size: rs.isPhone ? width * 0.045 : 18,
                           ),
                         ),
                       ],
@@ -1594,15 +2192,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   secondChild: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: height * 0.012),
-                        child: const Divider(
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Divider(
                           height: 1,
                           color: Color(0xFFF1F5F9),
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.all(width * 0.03),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(10),
@@ -1623,12 +2221,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
+                                      const Text(
                                         'STATUS',
                                         style: TextStyle(
-                                          fontSize: width.fontSizeW(0.022),
+                                          fontSize: 11,
                                           fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF94A3B8),
+                                          color: Color(0xFF94A3B8),
                                           letterSpacing: 0.5,
                                         ),
                                       ),
@@ -1643,7 +2241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         child: Text(
                                           displayStatus,
                                           style: TextStyle(
-                                            fontSize: width.fontSizeW(0.022),
+                                            fontSize: 11,
                                             fontWeight: FontWeight.bold,
                                             color: statusText,
                                           ),
@@ -1654,7 +2252,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: height * 0.012),
+                            const SizedBox(height: 10),
                             Row(
                               children: [
                                 Expanded(
@@ -1705,10 +2303,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: width.fontSizeW(0.022),
+          style: const TextStyle(
+            fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF94A3B8),
+            color: Color(0xFF94A3B8),
             letterSpacing: 0.5,
           ),
         ),
@@ -1717,10 +2315,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: width.fontSizeW(0.027),
+          style: const TextStyle(
+            fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF0A2342),
+            color: Color(0xFF0A2342),
           ),
         ),
       ],
