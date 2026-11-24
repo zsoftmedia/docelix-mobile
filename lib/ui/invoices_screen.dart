@@ -41,6 +41,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       backgroundColor: colorsList.backgroundColor,
       body: SafeArea(
         child: ResponsivePage(
+          maxWidth: rs.isPhone ? null : double.infinity,
           padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +452,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   crossAxisSpacing: rs.s(12),
                   mainAxisSpacing: rs.s(12),
                   childAspectRatio: rs.isTablet
-                      ? (rs.isLandscape ? 1.6 : 1.25)
+                      ? (rs.isLandscape ? 1.85 : 1.65)
                       : (rs.isLandscape ? 2.6 : 1.8),
                 ),
                 itemCount: invoices.length,
@@ -641,7 +642,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   crossAxisSpacing: rs.s(12),
                   mainAxisSpacing: rs.s(12),
                   childAspectRatio: rs.isTablet
-                      ? (rs.isLandscape ? 1.45 : 1.05)
+                      ? (rs.isLandscape ? 1.85 : 1.52)
                       : (rs.isLandscape ? 2.6 : 1.8),
                 ),
                 itemCount: quotations.length,
@@ -1159,7 +1160,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
+            padding: EdgeInsets.all(isTab ? 10 : rs.s(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -1172,8 +1173,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: isTab ? 15 : rs.sp(16),
-                          fontWeight: FontWeight.normal,
+                          fontSize: isTab ? 14 : rs.sp(16),
+                          fontWeight: FontWeight.bold,
                           color: const Color(0xFF0A2342),
                         ),
                       ),
@@ -1181,7 +1182,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                     Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: isTab ? 8 : rs.s(12),
-                        vertical: isTab ? 3 : rs.s(4),
+                        vertical: isTab ? 2 : rs.s(4),
                       ),
                       decoration: BoxDecoration(
                         color: pillBg,
@@ -1191,8 +1192,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       child: Text(
                         displayStatus,
                         style: TextStyle(
-                          fontSize: isTab ? 11 : rs.sp(12),
-                          fontWeight: FontWeight.normal,
+                          fontSize: isTab ? 10.5 : rs.sp(12),
+                          fontWeight: FontWeight.w600,
                           color: pillText,
                         ),
                       ),
@@ -1214,7 +1215,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 ),
 
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+                  padding: EdgeInsets.symmetric(vertical: isTab ? 4 : 12),
                   child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
                 ),
 
@@ -1226,9 +1227,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _statField(context, 'CUSTOMER', item.clientName ?? '—', isTab: isTab),
-                          SizedBox(height: isTab ? 6 : rs.s(10)),
+                          SizedBox(height: isTab ? 4 : rs.s(10)),
                           _statField(context, 'VALID UNTIL', validUntilStr, isTab: isTab),
-                          SizedBox(height: isTab ? 6 : rs.s(10)),
+                          SizedBox(height: isTab ? 4 : rs.s(10)),
                           _statField(context, 'SIGNATURE', '—', isTab: isTab),
                         ],
                       ),
@@ -1239,7 +1240,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _statField(context, 'DATE', dateStr, isTab: isTab),
-                          SizedBox(height: isTab ? 6 : rs.s(10)),
+                          SizedBox(height: isTab ? 4 : rs.s(10)),
                           _statField(context, 'ACCEPTED', acceptedStr, isTab: isTab),
                         ],
                       ),
@@ -1248,7 +1249,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 ),
 
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+                  padding: EdgeInsets.symmetric(vertical: isTab ? 4 : 12),
                   child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
                 ),
 

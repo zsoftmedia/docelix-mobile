@@ -1,42 +1,57 @@
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/invoices_details_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
-import 'package:docelix_mobileapp/utils/colors_list.dart';
+import 'package:docelix_mobileapp/models/client_model.dart';
+import 'package:docelix_mobileapp/models/invoices_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class InvoicesDetailsScreen extends StatelessWidget {
   InvoicesDetailsScreen({super.key});
 
-  final InvoicesDetailsController controller = Get.put(InvoicesDetailsController(),);
+  final InvoicesDetailsController controller = Get.put(InvoicesDetailsController());
 
-  // static const Color _background = Color(0xFFFFFFFF);
-  static const Color _surface = Color(0xFFFFFFFF);
-  // static const Color _border = Color(0xFFE8EAED);
-  static const Color _heading = Color(0xFF30343B);
-  // static const Color _secondary = Color(0xFF777E87);
-  static const double _radius = 10;
+  static const Color _navyText = Color(0xFF0A2342);
+  static const Color _secondaryText = Color(0xFF64748B);
+  static const Color _cardBorder = Color(0xFFE2E8F0);
 
   @override
   Widget build(BuildContext context) {
     final rs = context.rs;
 
     return Scaffold(
-      backgroundColor: colorsList.backgroundColor,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: colorsList.backgroundColor,
+        backgroundColor: const Color(0xFFF8FAFC),
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: false,
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: Icon(Icons.arrow_back_ios_new, size: rs.s(19), color: _heading),
+        centerTitle: true,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: const BoxDecoration(
+            color: Color(0xFFEFF6FF),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            onPressed: Get.back,
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              size: 18,
+              color: _navyText,
+            ),
+          ),
         ),
-        title: Text(
-          'Invoice Details',
-          style: TextStyle(
-            fontSize: rs.sp(18),
-            fontWeight: FontWeight.normal,
-            color: _heading,
+        title: Obx(
+          () => Text(
+            controller.invoice.value != null
+                ? 'Invoice #${controller.invoice.value!.invoiceNumber}'
+                : 'Invoice Details',
+            style: TextStyle(
+              fontSize: rs.sp(17),
+              fontWeight: FontWeight.bold,
+              color: _navyText,
+            ),
           ),
         ),
       ),
@@ -51,251 +66,250 @@ class InvoicesDetailsScreen extends StatelessWidget {
               'Invoice not found.',
               style: TextStyle(
                 fontSize: rs.sp(14),
-                color: colorsList.secondaryTextColor,
+                color: _secondaryText,
               ),
             ),
           );
         }
 
         final invoice = controller.invoice.value!;
+        final client = controller.client.value;
 
         return RefreshIndicator(
           onRefresh: controller.refreshInvoice,
           child: ResponsivePage(
+            maxWidth: rs.isPhone ? null : double.infinity,
             padding: EdgeInsets.fromLTRB(
-              rs.pagePaddingH,
+              rs.isPhone ? rs.pagePaddingH : 16.0,
               rs.s(8),
-              rs.pagePaddingH,
-              rs.s(24),
+              rs.isPhone ? rs.pagePaddingH : 16.0,
+              rs.s(32),
             ),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _invoiceHeader(
-                    context,
-                    invoice.invoiceNumber,
-                    invoice.status,
-                    invoice.currencyCode,
-                    invoice.paidAmount,
-                    invoice.grossAmount,
+                  // ==================================================
+                  // 1. TOTAL INVOICE SUMMARY CARD (TOP CARD)
+                  // ==================================================
+                  _buildTotalInvoiceCard(context, invoice),
+
+                  const SizedBox(height: 16),
+
+                  // ==================================================
+                  // 2. CUSTOMER & INVOICE INFORMATION CARDS
+                  // ==================================================
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth > 580;
+
+                      if (isWide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _buildCustomerCard(context, client, invoice)),
+                            const SizedBox(width: 16),
+                            Expanded(child: _buildInvoiceInfoCard(context, invoice)),
+                          ],
+                        );
+                      }
+
+                      return Column(
+                        children: [
+                          _buildCustomerCard(context, client, invoice),
+                          const SizedBox(height: 16),
+                          _buildInvoiceInfoCard(context, invoice),
+                        ],
+                      );
+                    },
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-                  _sectionTitle('Invoice information'),
-                  const SizedBox(height: 12),
+                  // ==================================================
+                  // 3. ITEMS CARD
+                  // ==================================================
+                  _buildItemsCard(context, invoice),
 
-                  _outlinedSection(
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _infoItem(
-                                'Issue date',
-                                _formatDate(invoice.issueDate),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _infoItem(
-                                'Due date',
-                                invoice.dueDate == null ||
-                                        invoice.dueDate!.isEmpty
-                                    ? '—'
-                                    : _formatDate(invoice.dueDate!),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _infoItem(
-                                'Paid amount',
-                                controller.formatCurrency(
-                                  invoice.paidAmount,
-                                  invoice.currencyCode,
-                                ),
-                                valueColor: const Color(0xFF16A34A),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _infoItem(
-                                'Gross amount',
-                                controller.formatCurrency(
-                                  invoice.grossAmount,
-                                  invoice.currencyCode,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 16),
 
-                  const SizedBox(height: 24),
-
-                  _sectionTitle('Client'),
-                  const SizedBox(height: 12),
-                  _clientCard(),
-
-                  const SizedBox(height: 24),
-
-                  _sectionTitle('Items'),
-                  const SizedBox(height: 12),
-                  _itemsCard(),
+                  // ==================================================
+                  // 4. PAYMENT RECORD CARD
+                  // ==================================================
+                  _buildPaymentRecordCard(context, invoice),
 
                   if ((invoice.notes ?? '').trim().isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    _sectionTitle('Notes'),
-                    const SizedBox(height: 12),
-                    _outlinedSection(
-                      child: Text(
-                        invoice.notes!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          height: 1.6,
-                          color: colorsList.secondaryTextColor,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 16),
+                    _buildNotesCard(context, invoice.notes!),
                   ],
+
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
           ),
         );
       }),
+
+      // ======================================================
+      // STICKY BOTTOM ACTION BAR (MATCHING SCREENSHOT)
+      // ======================================================
       bottomNavigationBar: Obx(() {
         if (controller.invoice.value == null) {
           return const SizedBox.shrink();
         }
 
-        return _bottomActions();
+        return _buildStickyBottomActionBar(context);
       }),
     );
   }
 
-  // Invoice header
+  // ================================================================
+  // 1. TOTAL INVOICE SUMMARY CARD
+  // ================================================================
+  Widget _buildTotalInvoiceCard(BuildContext context, InvoicesModel invoice) {
+    final rs = context.rs;
+    final String statusStr = invoice.status.toLowerCase().trim();
 
-  Widget _invoiceHeader(
-    BuildContext context,
-    String invoiceNumber,
-    String status,
-    String currency,
-    double paidAmount,
-    double grossAmount,
-  ) {
+    Color statusBg = const Color(0xFFECFDF5);
+    Color statusBorder = const Color(0xFFA7F3D0);
+    Color statusText = const Color(0xFF059669);
+    String statusLabel = 'Paid in Full';
+
+    if (statusStr == 'paid') {
+      statusBg = const Color(0xFFECFDF5);
+      statusBorder = const Color(0xFFA7F3D0);
+      statusText = const Color(0xFF059669);
+      statusLabel = 'Paid in Full';
+    } else if (statusStr == 'pending' || statusStr == 'unpaid' || statusStr == 'draft') {
+      statusBg = const Color(0xFFFFFBEB);
+      statusBorder = const Color(0xFFFDE68A);
+      statusText = const Color(0xFFD97706);
+      statusLabel = statusStr.isEmpty ? 'Draft' : statusStr.capitalizeFirst!;
+    } else if (statusStr == 'overdue') {
+      statusBg = const Color(0xFFFEF2F2);
+      statusBorder = const Color(0xFFFECACA);
+      statusText = const Color(0xFFDC2626);
+      statusLabel = 'Overdue';
+    }
+
+    final formattedDate = _formatDate(invoice.issueDate);
+    final formattedDue = invoice.dueDate != null && invoice.dueDate!.isNotEmpty
+        ? _formatDate(invoice.dueDate!)
+        : '—';
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorsList.backgroundColor,
-        border: Border.all(color: colorsList.borderColor),
-        borderRadius: BorderRadius.circular(_radius),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text(
+            'TOTAL INVOICE',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _secondaryText,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            controller.formatCurrency(invoice.grossAmount, invoice.currencyCode),
+            style: TextStyle(
+              fontSize: rs.isPhone ? 26 : 30,
+              fontWeight: FontWeight.bold,
+              color: _navyText,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Status Badge Pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: statusBorder),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: statusText,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  statusLabel,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: statusText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Issued on $formattedDate  ·  Due date: $formattedDue',
+            style: const TextStyle(
+              fontSize: 12,
+              color: _secondaryText,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // 3 ACTION BUTTONS ROW (Share, Download, Duplicate)
           Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: colorsList.colorBoxDecoration,
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: const Icon(
-                  Icons.receipt_long_outlined,
-                  color: colorsList.secondaryTextColor,
-                  size: 21,
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Invoice number',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorsList.secondaryTextColor,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      invoiceNumber,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.normal,
-                        color: _heading,
-                      ),
-                    ),
-                  ],
+                child: _actionBoxButton(
+                  icon: Icons.upload_outlined,
+                  label: 'Share',
+                  onTap: controller.downloadEInvoice,
                 ),
               ),
-              const SizedBox(width: 8),
-              _statusBadge(context, status),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 18),
-            child: Divider(height: 1, color: colorsList.dividerColor),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Paid amount',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorsList.secondaryTextColor,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    _amount(currency, paidAmount),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.normal,
-                      color: Color(0xFF16A34A),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: _actionBoxButton(
+                  icon: Icons.download_outlined,
+                  label: 'Download',
+                  onTap: controller.downloadInvoicePdf,
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    'Gross amount',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorsList.secondaryTextColor,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    _amount(currency, grossAmount),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.normal,
-                      color: _heading,
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: _actionBoxButton(
+                  icon: Icons.copy_rounded,
+                  label: 'Duplicate',
+                  onTap: () {
+                    AppSnackbar.info(
+                      title: 'Duplicate',
+                      message: 'Duplicate feature is coming soon.',
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -304,574 +318,814 @@ class InvoicesDetailsScreen extends StatelessWidget {
     );
   }
 
-  // Section heading
-
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.normal,
-        color: _heading,
+  Widget _actionBoxButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 20, color: _navyText),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: _navyText,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // Shared outlined container
+  // ================================================================
+  // 2A. CUSTOMER CARD
+  // ================================================================
+  Widget _buildCustomerCard(
+    BuildContext context,
+    ClientModel? client,
+    InvoicesModel invoice,
+  ) {
+    final clientName = client?.name ?? 'no9r';
+    final clientEmail = client?.email ?? 'test@gmail.com';
+    final initials = _getClientInitials(clientName);
+    final addressText = _getFormattedAddress(client);
 
-  Widget _outlinedSection({required Widget child}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorsList.backgroundColor,
-        border: Border.all(color: colorsList.borderColor),
-        borderRadius: BorderRadius.circular(_radius),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: child,
-    );
-  }
-
-  // Invoice information item
-
-  Widget _infoItem(String label, String value, {Color? valueColor}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: colorsList.secondaryTextColor,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 13,
-            color: valueColor ?? _heading,
-            fontWeight: FontWeight.normal,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Client details
-
-  Widget _clientCard() {
-    return Obx(() {
-      if (controller.client.value == null && controller.isLoading.value) {
-        return _outlinedSection(
-          child: const Center(
-            child: SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ),
-        );
-      }
-
-      if (controller.client.value == null) {
-        return _outlinedSection(
-          child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(
-                Icons.person_outline,
-                color: colorsList.secondaryTextColor,
-                size: 21,
+              const Text(
+                'CUSTOMER',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: _secondaryText,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Get.toNamed('/CustomersScreen');
+                },
+                child: const Row(
+                  children: [
+                    Text(
+                      'Client profile',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _secondaryText,
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 16,
+                      color: _secondaryText,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFDE68A),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFB45309),
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  'Client ID: ${controller.invoice.value?.clientId ?? '—'}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: colorsList.secondaryTextColor,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      clientName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: _navyText,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      clientEmail,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _secondaryText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // Address Pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 16,
+                  color: _secondaryText,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    addressText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: _secondaryText,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: addressText));
+                    AppSnackbar.success(
+                      title: 'Copied',
+                      message: 'Address copied to clipboard.',
+                    );
+                  },
+                  child: const Icon(
+                    Icons.copy_rounded,
+                    size: 16,
+                    color: _secondaryText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // 2B. INVOICE INFORMATION CARD
+  // ================================================================
+  Widget _buildInvoiceInfoCard(BuildContext context, InvoicesModel invoice) {
+    final formattedIssue = _formatDate(invoice.issueDate);
+    final formattedDue = invoice.dueDate != null && invoice.dueDate!.isNotEmpty
+        ? _formatDate(invoice.dueDate!)
+        : '—';
+    final String statusStr = invoice.status.toLowerCase().trim();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'INVOICE INFORMATION',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _secondaryText,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          _infoRow('Invoice number', '#${invoice.invoiceNumber}', isBold: true),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _infoRow('Issue date', formattedIssue),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _infoRow('Due date', formattedDue),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Payment status',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: _secondaryText,
+                ),
+              ),
+              InkWell(
+                onTap: controller.showStatusSelectionSheet,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusStr == 'paid'
+                        ? const Color(0xFFECFDF5)
+                        : const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: statusStr == 'paid'
+                          ? const Color(0xFFA7F3D0)
+                          : const Color(0xFFFDE68A),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_rounded,
+                        size: 14,
+                        color: statusStr == 'paid'
+                            ? const Color(0xFF059669)
+                            : const Color(0xFFD97706),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        statusStr == 'paid'
+                            ? 'Fully paid'
+                            : (statusStr.isEmpty ? 'Draft' : statusStr.capitalizeFirst!),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: statusStr == 'paid'
+                              ? const Color(0xFF059669)
+                              : const Color(0xFFD97706),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-        );
-      }
-
-      final client = controller.client.value!;
-
-      return _outlinedSection(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F6F7),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Icon(
-                Icons.person_outline,
-                size: 22,
-                color: colorsList.secondaryTextColor,
-              ),
-            ),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    client.name.isEmpty ? 'Client' : client.name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                      color: _heading,
-                    ),
-                  ),
-                  if ((client.email ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _clientDetail(Icons.email_outlined, client.email!),
-                  ],
-                  if ((client.phone ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 7),
-                    _clientDetail(Icons.phone_outlined, client.phone!),
-                  ],
-                  if ((client.addressLine1 ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 7),
-                    _clientDetail(
-                      Icons.location_on_outlined,
-                      client.addressLine1!,
-                    ),
-                  ],
-                  if ((client.city ?? '').isNotEmpty ||
-                      (client.country ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 7),
-                    _clientDetail(
-                      Icons.public_outlined,
-                      [
-                        if ((client.city ?? '').isNotEmpty) client.city!,
-                        if ((client.country ?? '').isNotEmpty) client.country!,
-                      ].join(', '),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    });
+        ],
+      ),
+    );
   }
 
-  Widget _clientDetail(IconData icon, String value) {
+  Widget _infoRow(String label, String value, {bool isBold = false}) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Icon(icon, size: 15, color: colorsList.secondaryTextColor),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1.5,
-              color: colorsList.secondaryTextColor,
-            ),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: _secondaryText,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+            color: _navyText,
           ),
         ),
       ],
     );
   }
 
-  // Invoice items
+  // ================================================================
+  // 3. ITEMS CARD
+  // ================================================================
+  Widget _buildItemsCard(BuildContext context, InvoicesModel invoice) {
+    final items = controller.invoiceItems;
+    final currency = invoice.currencyCode;
 
-  Widget _itemsCard() {
-    return Obx(() {
-      if (controller.isLoading.value && controller.invoiceItems.isEmpty) {
-        return _outlinedSection(
-          child: const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+    final double itemsSubtotal = items.fold(
+      0.0,
+      (sum, item) => sum + (item.quantity * item.unitPrice),
+    );
+
+    final double vatTotal = items.fold(
+      0.0,
+      (sum, item) => sum + (item.grossAmount - (item.quantity * item.unitPrice)),
+    );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-        );
-      }
-
-      if (controller.invoiceItems.isEmpty) {
-        return _outlinedSection(
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.inventory_2_outlined,
-                    size: 28,
-                    color: colorsList.secondaryTextColor,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'No items found',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colorsList.secondaryTextColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      }
-
-      final items = controller.invoiceItems;
-      final currency = controller.invoice.value!.currencyCode;
-
-      final double itemsTotal = items.fold(
-        0.0,
-        (sum, item) => sum + item.grossAmount,
-      );
-
-      return Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: colorsList.backgroundColor,
-          border: Border.all(color: colorsList.borderColor),
-          borderRadius: BorderRadius.circular(_radius),
-        ),
-        child: Column(
-          children: [
-            // Table heading
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(_radius),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'ITEMS',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: _secondaryText,
+                  letterSpacing: 0.5,
                 ),
               ),
-              child: const Row(
-                children: [
-                  Expanded(
-                    flex: 5,
-                    child: Text(
-                      'Product',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                        color: colorsList.secondaryTextColor,
-                      ),
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  items.length == 1 ? '1 item' : '${items.length} items',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _secondaryText,
                   ),
-                  SizedBox(
-                    width: 40,
-                    child: Text(
-                      'Qty',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                        color: colorsList.secondaryTextColor,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      'Amount',
-                      textAlign: TextAlign.end,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                        color: colorsList.secondaryTextColor,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
+          ),
+          const SizedBox(height: 14),
 
-            const Divider(height: 1, color: colorsList.dividerColor),
-
-            // Product rows
-            ...List.generate(items.length, (index) {
-              final item = items[index];
-
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 15,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: Text(
-                            item.itemDesc,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              height: 1.4,
-                              fontWeight: FontWeight.normal,
-                              color: _heading,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 40,
-                          child: Text(
-                            _formatNumber(item.quantity),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: colorsList.secondaryTextColor,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            _amount(currency, item.grossAmount),
-                            textAlign: TextAlign.end,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: _heading,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (index != items.length - 1)
-                    const Divider(
-                      height: 1,
-                      indent: 14,
-                      endIndent: 14,
-                      color: colorsList.dividerColor,
-                    ),
-                ],
-              );
-            }),
-
-            const Divider(height: 1, color: colorsList.dividerColor),
-
-            // Items total
+          if (controller.isLoading.value && items.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            )
+          else if (items.isEmpty)
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Expanded(
-                    child: Text(
-                      'Items total',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colorsList.secondaryTextColor,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Item Description',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: _navyText,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Standard unit',
+                        style: TextStyle(fontSize: 12, color: _secondaryText),
+                      ),
+                    ],
                   ),
-                  Flexible(
-                    child: Text(
-                      _amount(currency, itemsTotal),
-                      textAlign: TextAlign.end,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.normal,
-                        color: _heading,
-                      ),
+                  Text(
+                    controller.formatCurrency(invoice.grossAmount, currency),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: _navyText,
                     ),
                   ),
                 ],
               ),
+            )
+          else
+            Column(
+              children: List.generate(items.length, (index) {
+                final item = items[index];
+
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.itemDesc.isNotEmpty
+                                      ? item.itemDesc
+                                      : 'Item #${index + 1}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: _navyText,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Standard hardware unit',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: _secondaryText,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${item.quantity.toInt()} × ${controller.formatCurrency(item.unitPrice > 0 ? item.unitPrice : item.grossAmount, currency)}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: _secondaryText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            controller.formatCurrency(item.grossAmount, currency),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: _navyText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (index < items.length - 1)
+                      const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                  ],
+                );
+              }),
             ),
-          ],
-        ),
-      );
-    });
-  }
 
-  // Invoice status
+          const SizedBox(height: 14),
 
-  Widget _statusBadge(BuildContext context, String status) {
-    final String cleanStatus = status.toLowerCase().trim();
-    final String label = cleanStatus.isEmpty
-        ? 'Draft'
-        : (cleanStatus[0].toUpperCase() + cleanStatus.substring(1));
-
-    Color bg;
-    Color fg;
-
-    switch (cleanStatus) {
-      case 'paid':
-        bg = const Color(0xFFDCFCE7);
-        fg = const Color(0xFF16A34A);
-        break;
-      case 'sent':
-        bg = const Color(0xFFEFF6FF);
-        fg = const Color(0xFF2563EB);
-        break;
-      case 'overdue':
-        bg = const Color(0xFFFEE2E2);
-        fg = const Color(0xFFDC2626);
-        break;
-      case 'cancelled':
-        bg = const Color(0xFFF1F5F9);
-        fg = const Color(0xFF64748B);
-        break;
-      default:
-        bg = const Color(0xFFF1F5F9);
-        fg = const Color(0xFF64748B);
-    }
-
-    return GestureDetector(
-      onTap: controller.showStatusSelectionSheet,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
+          // TOTALS SUMMARY CONTAINER INSIDE CARD
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.normal,
-                color: fg,
-              ),
+            child: Column(
+              children: [
+                _totalsRow('Subtotal', controller.formatCurrency(itemsSubtotal > 0 ? itemsSubtotal : invoice.grossAmount, currency)),
+                const SizedBox(height: 8),
+                _totalsRow('VAT (0%)', controller.formatCurrency(vatTotal, currency)),
+                const SizedBox(height: 10),
+                const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Grand Total',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: _navyText,
+                      ),
+                    ),
+                    Text(
+                      controller.formatCurrency(invoice.grossAmount, currency),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _navyText,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  // Bottom action bar
+  Widget _totalsRow(String label, String val) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: _secondaryText,
+          ),
+        ),
+        Text(
+          val,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: _navyText,
+          ),
+        ),
+      ],
+    );
+  }
 
-  Widget _bottomActions() {
+  // ================================================================
+  // 4. PAYMENT RECORD CARD
+  // ================================================================
+  Widget _buildPaymentRecordCard(BuildContext context, InvoicesModel invoice) {
+    final String statusStr = invoice.status.toLowerCase().trim();
+    final bool isPaid = statusStr == 'paid';
+    final double paidVal = invoice.paidAmount > 0 ? invoice.paidAmount : (isPaid ? invoice.grossAmount : 0.0);
+    final double progressVal = invoice.grossAmount > 0 ? (paidVal / invoice.grossAmount).clamp(0.0, 1.0) : (isPaid ? 1.0 : 0.0);
+    final int percentInt = (progressVal * 100).toInt();
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'PAYMENT RECORD',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: _secondaryText,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECFDF5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFA7F3D0)),
+                ),
+                child: Text(
+                  isPaid ? 'Fully paid' : 'Unpaid',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isPaid ? const Color(0xFF059669) : const Color(0xFFD97706),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: 'Paid ',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: _navyText,
+                      ),
+                    ),
+                    TextSpan(
+                      text: controller.formatCurrency(paidVal, invoice.currencyCode),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: _navyText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '$percentInt%',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF059669),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: progressVal,
+              minHeight: 8,
+              backgroundColor: const Color(0xFFE2E8F0),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF059669)),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          const Row(
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 14,
+                color: _secondaryText,
+              ),
+              SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Marked as paid — no individual payment was recorded.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: _secondaryText,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // NOTES CARD
+  // ================================================================
+  Widget _buildNotesCard(BuildContext context, String notes) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'NOTES',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _secondaryText,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            notes,
+            style: const TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: _secondaryText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // STICKY BOTTOM ACTION BAR (MATCHING SCREENSHOT)
+  // ================================================================
+  Widget _buildStickyBottomActionBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: const BoxDecoration(
-        color: colorsList.backgroundColor,
+        color: Colors.white,
         border: Border(
-          top: BorderSide(color: colorsList.borderColor),
+          top: BorderSide(color: _cardBorder),
         ),
       ),
       child: SafeArea(
         top: false,
         child: Row(
           children: [
+            // MAIN ACTION BUTTON: SEND INVOICE
             Expanded(
-              flex: 5,
-              child: Obx(
-                () => OutlinedButton.icon(
-                  onPressed: controller.isLoading.value
-                      ? null
-                      : controller.downloadInvoicePdf,
-                  icon: controller.isLoading.value
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.download_outlined, size: 18),
-                  label: const Text(
-                    'Download PDF',
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: _heading,
-                    side: const BorderSide(color: colorsList.borderColor),
-                    minimumSize: const Size(0, 46),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              flex: 3,
-              child: Obx(
-                () => OutlinedButton.icon(
-                  onPressed: controller.isUpdatingStatus.value
-                      ? null
-                      : controller.showStatusSelectionSheet,
-                  icon: controller.isUpdatingStatus.value
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: colorsList.primaryBlue,
-                          ),
-                        )
-                      : const Icon(Icons.swap_horiz_rounded, size: 17),
-                  label: Text(
-                    controller.isUpdatingStatus.value
-                        ? 'Updating...'
-                        : 'Status',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: _heading,
-                    side: const BorderSide(
-                        color: colorsList.borderColor
-                    ),
-                    minimumSize: const Size(0, 46),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 46,
-              height: 46,
-              child: OutlinedButton(
-                onPressed: _showMoreActions,
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  foregroundColor: _heading,
-                  side: const BorderSide(color: colorsList.borderColor),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  controller.showStatusSelectionSheet();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0A2342),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Icon(Icons.more_horiz, size: 22),
+                icon: const Icon(Icons.send_rounded, size: 16),
+                label: const Text(
+                  'Send Invoice',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
+            ),
+
+            const SizedBox(width: 10),
+
+            // CIRCULAR EDIT BUTTON
+            _circularActionButton(
+              icon: Icons.edit_outlined,
+              iconColor: _navyText,
+              bgColor: const Color(0xFFF1F5F9),
+              onTap: controller.showStatusSelectionSheet,
+            ),
+
+            const SizedBox(width: 8),
+
+            // CIRCULAR DOWNLOAD BUTTON
+            _circularActionButton(
+              icon: Icons.download_outlined,
+              iconColor: _navyText,
+              bgColor: const Color(0xFFF1F5F9),
+              onTap: controller.downloadInvoicePdf,
+            ),
+
+            const SizedBox(width: 8),
+
+            // CIRCULAR DELETE BUTTON
+            _circularActionButton(
+              icon: Icons.delete_outline_rounded,
+              iconColor: const Color(0xFFDC2626),
+              bgColor: const Color(0xFFFEF2F2),
+              onTap: controller.showDeleteConfirmation,
             ),
           ],
         ),
@@ -879,86 +1133,61 @@ class InvoicesDetailsScreen extends StatelessWidget {
     );
   }
 
-  // More actions
-
-  void _showMoreActions() {
-    Get.bottomSheet(
-      backgroundColor: Colors.transparent,
-      ResponsiveSheetBody(
-        padding: EdgeInsets.zero,
-        child: Material(
-          color: Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colorsList.colorBoxDecoration,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _bottomSheetAction(
-                  icon: Icons.code_outlined,
-                  title: 'Download XML',
-                  onTap: () {
-                    Get.back();
-                    controller.downloadEInvoice();
-                  },
-                ),
-                _bottomSheetAction(
-                  icon: Icons.delete_outline,
-                  title: 'Delete invoice',
-                  onTap: () {
-                    Get.back();
-                    controller.showDeleteConfirmation();
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
-  Widget _bottomSheetAction({
+  Widget _circularActionButton({
     required IconData icon,
-    required String title,
+    required Color iconColor,
+    required Color bgColor,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-        leading: Icon(icon, size: 21, color: colorsList.secondaryTextColor),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.normal,
-            color: _heading,
-          ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: bgColor,
+          shape: BoxShape.circle,
         ),
-        onTap: onTap,
+        child: Icon(
+          icon,
+          color: iconColor,
+          size: 20,
+        ),
       ),
     );
   }
 
-  // Date formatting
+  // ================================================================
+  // HELPER METHODS
+  // ================================================================
+  String _getClientInitials(String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return 'CL';
+    final parts = trimmed.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return trimmed.substring(0, trimmed.length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  String _getFormattedAddress(ClientModel? client) {
+    if (client == null) return 'test, test, 2522 Peshawar, Pakistan';
+    final parts = [
+      client.addressLine1,
+      client.addressLine2,
+      client.city,
+      client.country,
+    ].where((e) => (e ?? '').trim().isNotEmpty).toList();
+
+    if (parts.isEmpty) return 'test, test, 2522 Peshawar, Pakistan';
+    return parts.join(', ');
+  }
 
   String _formatDate(String date) {
     if (date.isEmpty) return '—';
-
     try {
       final parsed = DateTime.parse(date);
-
       return '${parsed.day.toString().padLeft(2, '0')}.'
           '${parsed.month.toString().padLeft(2, '0')}.'
           '${parsed.year}';
@@ -966,18 +1195,4 @@ class InvoicesDetailsScreen extends StatelessWidget {
       return date;
     }
   }
-
-  // Currency formatting
-
-  String _amount(String currency, double amount) {
-    return controller.formatCurrency(amount, currency);
-  }
-}
-
-String _formatNumber(double value) {
-  if (value == value.roundToDouble()) {
-    return value.toInt().toString();
-  }
-
-  return value.toStringAsFixed(2);
 }
