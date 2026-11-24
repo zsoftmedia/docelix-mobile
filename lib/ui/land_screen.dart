@@ -438,77 +438,81 @@ class _LandScreenState extends State<LandScreen> {
 
   Widget _buildBottomNavigation(BuildContext context) {
     final rs = context.rs;
-    return Container(
-      decoration: BoxDecoration(
-        color: colorsList.bottomsheetColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return SafeArea(
+      top: false,
+      child: Center(
+        heightFactor: 1.0,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: rs.isPhone ? double.infinity : rs.sheetMaxWidth,
           ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Center(
-          heightFactor: 1.0,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: rs.contentMaxWidth),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                rs.s(6),
-                rs.s(8),
-                rs.s(6),
-                rs.s(4),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: _BottomNavItem(
-                      index: 0,
-                      selectedIndex: _selectedIndex,
-                      icon: Icons.home_outlined,
-                      activeIcon: Icons.home_rounded,
-                      label: 'Home',
-                      onTap: _onItemTapped,
-                    ),
+          child: Container(
+            margin: EdgeInsets.fromLTRB(
+              rs.isPhone ? 14 : 0,
+              4,
+              rs.isPhone ? 14 : 0,
+              bottomInset > 0 ? 4 : 10,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE4EDF7),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0xFFD6E4F4), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: _BottomNavItem(
+                    index: 0,
+                    selectedIndex: _selectedIndex,
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home_rounded,
+                    label: 'Home',
+                    onTap: _onItemTapped,
                   ),
-                  Expanded(
-                    child: _BottomNavItem(
-                      index: 1,
-                      selectedIndex: _selectedIndex,
-                      icon: Icons.show_chart_rounded,
-                      activeIcon: Icons.show_chart_rounded,
-                      label: 'Sales',
-                      onTap: _onItemTapped,
-                    ),
+                ),
+                Expanded(
+                  child: _BottomNavItem(
+                    index: 1,
+                    selectedIndex: _selectedIndex,
+                    icon: Icons.show_chart_rounded,
+                    activeIcon: Icons.show_chart_rounded,
+                    label: 'Sales',
+                    onTap: _onItemTapped,
                   ),
-                  Expanded(child: _ScanBottomButton()),
-                  Expanded(
-                    child: _BottomNavItem(
-                      index: 3,
-                      selectedIndex: _selectedIndex,
-                      icon: Icons.shopping_bag_outlined,
-                      activeIcon: Icons.shopping_bag_rounded,
-                      label: 'Purchases',
-                      onTap: _onItemTapped,
-                    ),
+                ),
+                Expanded(child: _ScanBottomButton()),
+                Expanded(
+                  child: _BottomNavItem(
+                    index: 3,
+                    selectedIndex: _selectedIndex,
+                    icon: Icons.shopping_bag_outlined,
+                    activeIcon: Icons.shopping_bag_rounded,
+                    label: 'Purchases',
+                    onTap: _onItemTapped,
                   ),
-                  Expanded(
-                    child: _BottomNavItem(
-                      index: 4,
-                      selectedIndex: _selectedIndex,
-                      icon: Icons.grid_view,
-                      activeIcon: Icons.grid_view_rounded,
-                      label: 'More',
-                      onTap: _onItemTapped,
-                    ),
+                ),
+                Expanded(
+                  child: _BottomNavItem(
+                    index: 4,
+                    selectedIndex: _selectedIndex,
+                    icon: Icons.grid_view_rounded,
+                    activeIcon: Icons.grid_view_rounded,
+                    label: 'More',
+                    onTap: _onItemTapped,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1203,18 +1207,18 @@ class _ScanBottomButton extends StatelessWidget {
             Transform.translate(
               offset: Offset(0, -rs.s(16)),
               child: Container(
-                width: rs.s(54),
-                height: rs.s(54),
+                width: rs.s(52),
+                height: rs.s(52),
                 decoration: BoxDecoration(
-                  color: isLoading ? Colors.grey : colorsList.colorButton,
+                  color: isLoading ? Colors.grey : const Color(0xFF063C70),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: const Color(0xFFE5EDF6),
-                    width: 4,
+                    color: Colors.white,
+                    width: 3.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: colorsList.colorButton.withValues(alpha: 0.35),
+                      color: const Color(0xFF063C70).withValues(alpha: 0.30),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -1231,12 +1235,12 @@ class _ScanBottomButton extends StatelessWidget {
                     : Icon(
                         Icons.camera_alt_outlined,
                         color: Colors.white,
-                        size: rs.s(24),
+                        size: rs.s(22),
                       ),
               ),
             ),
             Transform.translate(
-              offset: Offset(0, -rs.s(12)),
+              offset: Offset(0, -rs.s(10)),
               child: Text(
                 isLoading ? 'Uploading...' : 'Scan',
                 maxLines: 1,
@@ -1244,7 +1248,7 @@ class _ScanBottomButton extends StatelessWidget {
                 style: TextStyle(
                   color: const Color(0xFF556578),
                   fontSize: rs.sp(11),
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
