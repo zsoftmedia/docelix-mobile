@@ -201,7 +201,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(rs.isPhone ? 16 : 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -226,12 +226,15 @@ class InvoicesDetailsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            controller.formatCurrency(invoice.grossAmount, invoice.currencyCode),
-            style: TextStyle(
-              fontSize: rs.isPhone ? 26 : 30,
-              fontWeight: FontWeight.bold,
-              color: _navyText,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              controller.formatCurrency(invoice.grossAmount, invoice.currencyCode),
+              style: TextStyle(
+                fontSize: rs.isPhone ? 24 : 30,
+                fontWeight: FontWeight.bold,
+                color: _navyText,
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -272,41 +275,45 @@ class InvoicesDetailsScreen extends StatelessWidget {
 
           Text(
             'Issued on $formattedDate  ·  Due date: $formattedDue',
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: rs.isPhone ? 11.5 : 12,
               color: _secondaryText,
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
           // 3 ACTION BUTTONS ROW (Share, Download, Duplicate)
           Row(
             children: [
               Expanded(
                 child: _actionBoxButton(
-                  icon: Icons.upload_outlined,
-                  label: 'Share',
+                  context: context,
+                  icon: Icons.download_outlined,
+                  label: 'Download XML',
                   onTap: controller.downloadEInvoice,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: rs.isPhone ? 8 : 10),
               Expanded(
                 child: _actionBoxButton(
+                  context: context,
                   icon: Icons.download_outlined,
                   label: 'Download',
                   onTap: controller.downloadInvoicePdf,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: rs.isPhone ? 8 : 10),
               Expanded(
                 child: _actionBoxButton(
+                  context: context,
                   icon: Icons.copy_rounded,
-                  label: 'Duplicate',
+                  label: 'Copy Invoice No.',
                   onTap: () {
-                    AppSnackbar.info(
-                      title: 'Duplicate',
-                      message: 'Duplicate feature is coming soon.',
+                    Clipboard.setData(ClipboardData(text: '#${invoice.invoiceNumber}'));
+                    AppSnackbar.success(
+                      title: 'Copied',
+                      message: 'Invoice number copied to clipboard.',
                     );
                   },
                 ),
@@ -319,27 +326,30 @@ class InvoicesDetailsScreen extends StatelessWidget {
   }
 
   Widget _actionBoxButton({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
   }) {
+    final rs = context.rs;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: rs.isPhone ? 10 : 12),
         decoration: BoxDecoration(
           color: const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 20, color: _navyText),
+            Icon(icon, size: rs.isPhone ? 18 : 20, color: _navyText),
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
+              style: TextStyle(
+                fontSize: rs.isPhone ? 11.5 : 12,
                 fontWeight: FontWeight.w600,
                 color: _navyText,
               ),
@@ -1060,8 +1070,15 @@ class InvoicesDetailsScreen extends StatelessWidget {
   // STICKY BOTTOM ACTION BAR (MATCHING SCREENSHOT)
   // ================================================================
   Widget _buildStickyBottomActionBar(BuildContext context) {
+    final rs = context.rs;
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: EdgeInsets.fromLTRB(
+        rs.isPhone ? 12 : 16,
+        12,
+        rs.isPhone ? 12 : 16,
+        16,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -1082,46 +1099,53 @@ class InvoicesDetailsScreen extends StatelessWidget {
                   backgroundColor: const Color(0xFF0A2342),
                   foregroundColor: Colors.white,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: EdgeInsets.symmetric(
+                    vertical: rs.isPhone ? 12 : 14,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                icon: const Icon(Icons.send_rounded, size: 16),
-                label: const Text(
-                  'Send Invoice',
+                icon: Icon(Icons.more_horiz_rounded, size: rs.isPhone ? 15 : 16),
+                label: Text(
+                  'More',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: rs.isPhone ? 13 : 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(width: 10),
+            SizedBox(width: rs.isPhone ? 6 : 10),
 
             // CIRCULAR EDIT BUTTON
-            _circularActionButton(
-              icon: Icons.edit_outlined,
+            /*_circularActionButton(
+              context: context,
+              icon: Icons.more_horiz_rounded,
               iconColor: _navyText,
               bgColor: const Color(0xFFF1F5F9),
               onTap: controller.showStatusSelectionSheet,
-            ),
+            ),*/
 
-            const SizedBox(width: 8),
+            SizedBox(width: rs.isPhone ? 6 : 8),
 
             // CIRCULAR DOWNLOAD BUTTON
             _circularActionButton(
+              context: context,
               icon: Icons.download_outlined,
               iconColor: _navyText,
               bgColor: const Color(0xFFF1F5F9),
               onTap: controller.downloadInvoicePdf,
             ),
 
-            const SizedBox(width: 8),
+            SizedBox(width: rs.isPhone ? 6 : 8),
 
             // CIRCULAR DELETE BUTTON
             _circularActionButton(
+              context: context,
               icon: Icons.delete_outline_rounded,
               iconColor: const Color(0xFFDC2626),
               bgColor: const Color(0xFFFEF2F2),
@@ -1134,17 +1158,21 @@ class InvoicesDetailsScreen extends StatelessWidget {
   }
 
   Widget _circularActionButton({
+    required BuildContext context,
     required IconData icon,
     required Color iconColor,
     required Color bgColor,
     required VoidCallback onTap,
   }) {
+    final rs = context.rs;
+    final size = rs.isPhone ? 40.0 : 44.0;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        width: 44,
-        height: 44,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: bgColor,
           shape: BoxShape.circle,
@@ -1152,7 +1180,7 @@ class InvoicesDetailsScreen extends StatelessWidget {
         child: Icon(
           icon,
           color: iconColor,
-          size: 20,
+          size: rs.isPhone ? 18 : 20,
         ),
       ),
     );
