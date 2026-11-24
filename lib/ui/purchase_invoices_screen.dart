@@ -66,6 +66,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
       backgroundColor: colorsList.backgroundColor,
       body: SafeArea(
         child: ResponsivePage(
+          maxWidth: rs.isPhone ? null : double.infinity,
           padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,7 +475,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   crossAxisSpacing: rs.s(12),
                   mainAxisSpacing: rs.s(12),
                   childAspectRatio: rs.isTablet
-                      ? (rs.isLandscape ? 1.45 : 1.02)
+                      ? (rs.isLandscape ? 1.62 : 1.30)
                       : (rs.isLandscape ? 2.6 : 1.8),
                 ),
                 itemCount: invoices.length,
@@ -614,6 +615,50 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
               return _buildSupplierEmptyState();
             }
 
+            final cols = rs.listColumns;
+
+            if (cols > 1) {
+              return RefreshIndicator(
+                onRefresh: supplierController.refreshSuppliers,
+                color: primaryColor,
+                child: GridView.builder(
+                  controller: _supplierScrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.only(
+                    left: rs.pagePaddingH,
+                    right: rs.pagePaddingH,
+                    bottom: rs.s(96),
+                  ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: cols,
+                    crossAxisSpacing: rs.s(12),
+                    mainAxisSpacing: rs.s(12),
+                    childAspectRatio: rs.isTablet
+                        ? (rs.isLandscape ? 1.72 : 1.38)
+                        : (rs.isLandscape ? 2.6 : 1.8),
+                  ),
+                  itemCount: supplierController.filteredSuppliers.length +
+                      (supplierController.isLoadingMore.value ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= supplierController.filteredSuppliers.length) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: primaryColor,
+                          ),
+                        ),
+                      );
+                    }
+
+                    final supplier = supplierController.filteredSuppliers[index];
+                    return _buildSupplierCard(supplier, context, asGridTile: true);
+                  },
+                ),
+              );
+            }
+
             return RefreshIndicator(
               onRefresh: supplierController.refreshSuppliers,
               color: primaryColor,
@@ -641,7 +686,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   }
 
                   final supplier = supplierController.filteredSuppliers[index];
-                  return _buildSupplierCard(supplier, context);
+                  return _buildSupplierCard(supplier, context, asGridTile: false);
                 },
               ),
             );
@@ -869,7 +914,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
 
     return Container(
       margin: EdgeInsets.only(bottom: asGridTile ? 0 : rs.s(14)),
-      padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
+      padding: EdgeInsets.all(isTab ? 10 : rs.s(16)),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -899,7 +944,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: const Color(0xFF0A2342),
-                    fontSize: isTab ? 15 : rs.sp(16),
+                    fontSize: isTab ? 14 : rs.sp(16),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -907,7 +952,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
               Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: isTab ? 8 : rs.s(10),
-                  vertical: isTab ? 3 : rs.s(4),
+                  vertical: isTab ? 2 : rs.s(4),
                 ),
                 decoration: BoxDecoration(
                   color: pillBg,
@@ -930,7 +975,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                       displayStatus,
                       style: TextStyle(
                         color: pillText,
-                        fontSize: isTab ? 11 : rs.sp(11),
+                        fontSize: isTab ? 10.5 : rs.sp(11),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -954,7 +999,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
           ),
 
           Padding(
-            padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+            padding: EdgeInsets.symmetric(vertical: isTab ? 4 : 12),
             child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
@@ -966,9 +1011,9 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _statField('SUPPLIER', invoice.supplierName ?? '—', isItalic: true, isTab: isTab),
-                    SizedBox(height: isTab ? 6 : rs.s(10)),
+                    SizedBox(height: isTab ? 4 : rs.s(10)),
                     _statField('DATE', formattedDate, isTab: isTab),
-                    SizedBox(height: isTab ? 6 : rs.s(10)),
+                    SizedBox(height: isTab ? 4 : rs.s(10)),
                     _statField('ACCOUNT', invoice.expenseAccountCode ?? invoice.expenseCategory ?? '—', isTab: isTab),
                   ],
                 ),
@@ -979,7 +1024,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _statField('SUPPLIER INV NO.', invoice.supplierInvoiceNumber ?? '—', isTab: isTab),
-                    SizedBox(height: isTab ? 6 : rs.s(10)),
+                    SizedBox(height: isTab ? 4 : rs.s(10)),
                     _statField('DUE DATE', formattedDueDate, isTab: isTab),
                   ],
                 ),
@@ -988,7 +1033,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
           ),
 
           Padding(
-            padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 12),
+            padding: EdgeInsets.symmetric(vertical: isTab ? 4 : 12),
             child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
@@ -1125,13 +1170,18 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
     );
   }
 
-  Widget _buildSupplierCard(SupplierModel supplier, BuildContext context) {
+  Widget _buildSupplierCard(
+    SupplierModel supplier,
+    BuildContext context, {
+    bool asGridTile = false,
+  }) {
     final rs = context.rs;
+    final isTab = rs.isTablet;
     final initials = _getSupplierInitials(supplier.name);
     final contactStr = _getSupplierContactString(supplier);
 
     return Container(
-      margin: EdgeInsets.only(bottom: rs.s(14)),
+      margin: EdgeInsets.only(bottom: asGridTile ? 0 : rs.s(14)),
       decoration: BoxDecoration(
         color: colorsList.colorWhite,
         borderRadius: BorderRadius.circular(16),
@@ -1153,17 +1203,18 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: EdgeInsets.all(rs.s(16)),
+            padding: EdgeInsets.all(isTab ? 10 : rs.s(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
                     Container(
-                      width: rs.s(38),
-                      height: rs.s(38),
+                      width: isTab ? 36 : rs.s(38),
+                      height: isTab ? 36 : rs.s(38),
                       decoration: const BoxDecoration(
-                        color: Color(0xFF0D9488),
+                        color: Color(0xFF007A55),
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
@@ -1171,19 +1222,19 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                         initials,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: rs.sp(13),
+                          fontSize: isTab ? 13 : rs.sp(13),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    SizedBox(width: rs.s(12)),
+                    SizedBox(width: isTab ? 8 : rs.s(12)),
                     Expanded(
                       child: Text(
                         supplier.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: rs.sp(16),
+                          fontSize: isTab ? 14.5 : rs.sp(16),
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF0A2342),
                         ),
@@ -1191,8 +1242,8 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                     ),
                     Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: rs.s(10),
-                        vertical: rs.s(4),
+                        horizontal: isTab ? 8 : rs.s(10),
+                        vertical: isTab ? 2 : rs.s(4),
                       ),
                       decoration: BoxDecoration(
                         color: supplier.isActive ? const Color(0xFFECFDF5) : const Color(0xFFF1F5F9),
@@ -1212,11 +1263,11 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          SizedBox(width: rs.s(5)),
+                          SizedBox(width: isTab ? 3 : rs.s(5)),
                           Text(
                             supplier.isActive ? 'Active' : 'Inactive',
                             style: TextStyle(
-                              fontSize: rs.sp(11),
+                              fontSize: isTab ? 10.5 : rs.sp(11),
                               fontWeight: FontWeight.w600,
                               color: supplier.isActive ? const Color(0xFF059669) : const Color(0xFF64748B),
                             ),
@@ -1224,7 +1275,7 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(width: rs.s(4)),
+                    SizedBox(width: isTab ? 2 : rs.s(4)),
                     IconButton(
                       onPressed: () => _showSupplierActions(context, supplier),
                       padding: EdgeInsets.zero,
@@ -1238,9 +1289,9 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                   ],
                 ),
 
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: isTab ? 4 : 12),
+                  child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
                 ),
 
                 Row(
@@ -1250,11 +1301,11 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _statSupplierField(context, 'CONTACT', contactStr),
-                          SizedBox(height: rs.s(10)),
-                          _statSupplierField(context, 'CITY', supplier.city?.trim().isNotEmpty == true ? supplier.city! : '—'),
-                          SizedBox(height: rs.s(10)),
-                          _statSupplierField(context, 'TOTAL PURCHASES', '€${supplier.purchasesTotal.toStringAsFixed(2)}'),
+                          _statSupplierField(context, 'CONTACT', contactStr, isTab: isTab, maxLines: 2),
+                          SizedBox(height: isTab ? 4 : rs.s(10)),
+                          _statSupplierField(context, 'CITY', supplier.city?.trim().isNotEmpty == true ? supplier.city! : '—', isTab: isTab),
+                          SizedBox(height: isTab ? 4 : rs.s(10)),
+                          _statSupplierField(context, 'TOTAL PURCHASES', '€${supplier.purchasesTotal.toStringAsFixed(2)}', isTab: isTab),
                         ],
                       ),
                     ),
@@ -1263,11 +1314,11 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _statSupplierField(context, 'TOTAL PAID', '€${supplier.paidTotal.toStringAsFixed(2)}'),
-                          SizedBox(height: rs.s(10)),
-                          _statSupplierField(context, 'OUTSTANDING', '€${supplier.outstanding.toStringAsFixed(2)}'),
-                          SizedBox(height: rs.s(10)),
-                          _statSupplierField(context, 'LAST PURCHASE', _formatSupplierDate(supplier.lastPurchaseDate)),
+                          _statSupplierField(context, 'TOTAL PAID', '€${supplier.paidTotal.toStringAsFixed(2)}', isTab: isTab),
+                          SizedBox(height: isTab ? 4 : rs.s(10)),
+                          _statSupplierField(context, 'OUTSTANDING', '€${supplier.outstanding.toStringAsFixed(2)}', isTab: isTab),
+                          SizedBox(height: isTab ? 4 : rs.s(10)),
+                          _statSupplierField(context, 'LAST PURCHASE', _formatSupplierDate(supplier.lastPurchaseDate), isTab: isTab),
                         ],
                       ),
                     ),
@@ -1281,7 +1332,13 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
     );
   }
 
-  Widget _statSupplierField(BuildContext context, String label, String value) {
+  Widget _statSupplierField(
+    BuildContext context,
+    String label,
+    String value, {
+    bool isTab = false,
+    int maxLines = 1,
+  }) {
     final rs = context.rs;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1289,21 +1346,22 @@ class _PurchaseInvoicesScreenState extends State<PurchaseInvoicesScreen> {
         Text(
           label,
           style: TextStyle(
-            fontSize: rs.sp(10),
-            fontWeight: FontWeight.normal,
+            fontSize: isTab ? 9.5 : rs.sp(10),
+            fontWeight: FontWeight.w600,
             color: const Color(0xFF94A3B8),
             letterSpacing: 0.5,
           ),
         ),
-        SizedBox(height: rs.s(2)),
+        SizedBox(height: isTab ? 1 : rs.s(2)),
         Text(
           value,
-          maxLines: 2,
+          maxLines: maxLines,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: rs.sp(13),
-            fontWeight: FontWeight.normal,
+            fontSize: isTab ? 11.5 : rs.sp(13),
+            fontWeight: FontWeight.w600,
             color: const Color(0xFF0A2342),
+            height: 1.25,
           ),
         ),
       ],
