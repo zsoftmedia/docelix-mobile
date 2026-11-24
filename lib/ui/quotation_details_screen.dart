@@ -1,6 +1,7 @@
 import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/quotation_details_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
+import 'package:docelix_mobileapp/models/quotation_model.dart';
 import 'package:docelix_mobileapp/utils/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,72 +17,45 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
   final QuotationDetailsController controller =
       Get.put(QuotationDetailsController());
 
+  static const Color _navyText = Color(0xFF0A2342);
+  static const Color _secondaryText = Color(0xFF64748B);
+  static const Color _cardBorder = Color(0xFFE2E8F0);
+
   @override
   Widget build(BuildContext context) {
     final rs = context.rs;
-    final isTab = rs.isTablet;
 
     return Scaffold(
-      backgroundColor: colorsList.backgroundColor,
-
-      // ==========================================================
-      // APP BAR
-      // ==========================================================
-
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF8FAFC),
         elevation: 0,
-        surfaceTintColor: Colors.white,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: colorsList.iconColor,
-            size: 20,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: const BoxDecoration(
+            color: Color(0xFFEFF6FF),
+            shape: BoxShape.circle,
           ),
-        ),
-        title: Obx(() {
-          final numStr = controller.quotation.value?.offerNumber ?? '';
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Quotation',
-                style: TextStyle(
-                  color: colorsList.textColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (numStr.isNotEmpty)
-                Text(
-                  numStr,
-                  style: const TextStyle(
-                    color: colorsList.textHintColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-            ],
-          );
-        }),
-        actions: [
-          IconButton(
-            onPressed: () => Get.back(),
+          child: IconButton(
+            onPressed: Get.back,
             icon: const Icon(
-              Icons.close_rounded,
-              color: colorsList.iconColor,
-              size: 22,
+              Icons.arrow_back_rounded,
+              size: 18,
+              color: _navyText,
             ),
           ),
-          const SizedBox(width: 8),
-        ],
+        ),
+        title: Text(
+          'Quotation Details',
+          style: TextStyle(
+            fontSize: rs.sp(17),
+            fontWeight: FontWeight.bold,
+            color: _navyText,
+          ),
+        ),
       ),
-
-      // ==========================================================
-      // BODY
-      // ==========================================================
-
       body: Obx(() {
         final item = controller.quotation.value;
 
@@ -90,541 +64,83 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
             child: Text(
               'Quotation information not available.',
               style: TextStyle(
-                color: colorsList.textHintColor,
-                fontSize: 15,
+                color: _secondaryText,
+                fontSize: 14,
               ),
             ),
           );
         }
 
-        final String statusStr = item.status.toLowerCase().trim();
-        Color statusColor;
-        if (statusStr == 'accepted') {
-          statusColor = const Color(0xFF16A34A);
-        } else if (statusStr == 'sent') {
-          statusColor = const Color(0xFF2563EB);
-        } else if (statusStr == 'rejected') {
-          statusColor = const Color(0xFFDC2626);
-        } else {
-          statusColor = const Color(0xFF64748B);
-        }
-
-        final String displayStatus =
-            statusStr.isNotEmpty ? statusStr[0].toUpperCase() + statusStr.substring(1) : 'Draft';
-
         return Stack(
           children: [
-            SafeArea(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: rs.pagePaddingH,
-                        vertical: rs.s(16),
-                      ),
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
-                          child: Column(
+            RefreshIndicator(
+              onRefresh: controller.getOfferItems,
+              child: ResponsivePage(
+                maxWidth: rs.isPhone ? null : double.infinity,
+                padding: EdgeInsets.fromLTRB(
+                  rs.isPhone ? rs.pagePaddingH : 16.0,
+                  rs.s(8),
+                  rs.isPhone ? rs.pagePaddingH : 16.0,
+                  rs.s(32),
+                ),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ====================================================
+                      // 1. QUOTATION NUMBER SUMMARY CARD (TOP CARD)
+                      // ====================================================
+                      _buildSummaryCard(context, item),
+
+                      const SizedBox(height: 16),
+
+                      // ====================================================
+                      // 2. QUOTATION INFORMATION & CLIENT CARDS
+                      // ====================================================
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isWide = constraints.maxWidth > 580;
+
+                          if (isWide) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: _buildInfoCard(context, item)),
+                                const SizedBox(width: 16),
+                                Expanded(child: _buildClientCard(context, item)),
+                              ],
+                            );
+                          }
+
+                          return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // ====================================================
-                              // 1. CUSTOMER HEADER CARD
-                              // ====================================================
-
-                              Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: const Color(0xFFE4EAF1)),
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            item.clientName ?? 'Customer',
-                                            style: TextStyle(
-                                              fontSize: isTab ? 18 : rs.sp(18),
-                                              fontWeight: FontWeight.bold,
-                                              color: colorsList.textColor,
-                                            ),
-                                          ),
-                                          if ((item.clientEmail ?? '').isNotEmpty) ...[
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              item.clientEmail!,
-                                              style: TextStyle(
-                                                fontSize: isTab ? 13 : rs.sp(13),
-                                                color: colorsList.textHintColor,
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: statusColor.withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            width: 6,
-                                            height: 6,
-                                            decoration: BoxDecoration(
-                                              color: statusColor,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            displayStatus,
-                                            style: TextStyle(
-                                              fontSize: isTab ? 11 : rs.sp(11),
-                                              color: statusColor,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // ====================================================
-                              // 2. FINANCIAL & DATE STATS GRID (4 BOXES)
-                              // ====================================================
-
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _statBox(
-                                      context,
-                                      'Date',
-                                      _formatDate(item.issueDate),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: _statBox(
-                                      context,
-                                      'Valid until',
-                                      item.validUntil != null ? _formatDate(item.validUntil) : '—',
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Obx(
-                                      () => _statBox(
-                                        context,
-                                        'Total',
-                                        controller.formatCurrency(controller.totalAmount),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: _statBox(
-                                      context,
-                                      'Accepted',
-                                      item.acceptedAt != null ? _formatDate(item.acceptedAt) : '—',
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // ====================================================
-                              // 3. CUSTOMER ADDRESS CARD
-                              // ====================================================
-
-                              Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: const Color(0xFFE4EAF1)),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Customer address',
-                                      style: TextStyle(
-                                        fontSize: isTab ? 14 : rs.sp(14),
-                                        fontWeight: FontWeight.bold,
-                                        color: colorsList.textColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      (item.clientAddress ?? '').isNotEmpty
-                                          ? item.clientAddress!
-                                          : '—',
-                                      style: TextStyle(
-                                        fontSize: isTab ? 13 : rs.sp(13),
-                                        color: colorsList.secondaryText,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // ====================================================
-                              // 4. ITEMS TABLE CARD
-                              // ====================================================
-
-                              Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.all(isTab ? 16 : rs.s(16)),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: const Color(0xFFE4EAF1)),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Items',
-                                      style: TextStyle(
-                                        fontSize: isTab ? 15 : rs.sp(15),
-                                        fontWeight: FontWeight.bold,
-                                        color: colorsList.textColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-
-                                    Obx(() {
-                                      if (controller.isLoadingItems.value && controller.offerItems.isEmpty) {
-                                        return const Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(20),
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        );
-                                      }
-
-                                      if (controller.offerItems.isEmpty) {
-                                        return const Text(
-                                          'No items in this quotation.',
-                                          style: TextStyle(
-                                            color: colorsList.textHintColor,
-                                            fontSize: 13,
-                                          ),
-                                        );
-                                      }
-
-                                      return Column(
-                                        children: [
-                                          // TABLE HEADER
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 8,
-                                              horizontal: 8,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFF8FAFC),
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  flex: 4,
-                                                  child: Text(
-                                                    'DESCRIPTION',
-                                                    style: TextStyle(
-                                                      fontSize: isTab ? 10.5 : rs.sp(10),
-                                                      fontWeight: FontWeight.w600,
-                                                      color: colorsList.textHintColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: isTab ? 50 : 40,
-                                                  child: Text(
-                                                    'QTY',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      fontSize: isTab ? 10.5 : rs.sp(10),
-                                                      fontWeight: FontWeight.w600,
-                                                      color: colorsList.textHintColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: isTab ? 80 : 65,
-                                                  child: Text(
-                                                    'UNIT',
-                                                    textAlign: TextAlign.right,
-                                                    style: TextStyle(
-                                                      fontSize: isTab ? 10.5 : rs.sp(10),
-                                                      fontWeight: FontWeight.w600,
-                                                      color: colorsList.textHintColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: isTab ? 50 : 40,
-                                                  child: Text(
-                                                    'VAT',
-                                                    textAlign: TextAlign.right,
-                                                    style: TextStyle(
-                                                      fontSize: isTab ? 10.5 : rs.sp(10),
-                                                      fontWeight: FontWeight.w600,
-                                                      color: colorsList.textHintColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: isTab ? 85 : 70,
-                                                  child: Text(
-                                                    'TOTAL',
-                                                    textAlign: TextAlign.right,
-                                                    style: TextStyle(
-                                                      fontSize: isTab ? 10.5 : rs.sp(10),
-                                                      fontWeight: FontWeight.w600,
-                                                      color: colorsList.textHintColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-
-                                          const SizedBox(height: 6),
-
-                                          // ITEM ROWS
-                                          ...controller.offerItems.map((line) {
-                                            return Padding(
-                                              padding: const EdgeInsets.symmetric(
-                                                vertical: 8,
-                                                horizontal: 8,
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Expanded(
-                                                    flex: 4,
-                                                    child: Text(
-                                                      line.description,
-                                                      style: TextStyle(
-                                                        fontSize: isTab ? 13 : rs.sp(13),
-                                                        color: colorsList.textColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: isTab ? 50 : 40,
-                                                    child: Text(
-                                                      _formatNum(line.quantity),
-                                                      textAlign: TextAlign.center,
-                                                      style: TextStyle(
-                                                        fontSize: isTab ? 13 : rs.sp(13),
-                                                        color: colorsList.textColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: isTab ? 80 : 65,
-                                                    child: Text(
-                                                      controller.formatCurrency(line.unitPrice),
-                                                      textAlign: TextAlign.right,
-                                                      style: TextStyle(
-                                                        fontSize: isTab ? 13 : rs.sp(13),
-                                                        color: colorsList.textColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: isTab ? 50 : 40,
-                                                    child: Text(
-                                                      '${_formatNum(line.vatRate)}%',
-                                                      textAlign: TextAlign.right,
-                                                      style: TextStyle(
-                                                        fontSize: isTab ? 13 : rs.sp(13),
-                                                        color: colorsList.textColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: isTab ? 85 : 70,
-                                                    child: Text(
-                                                      controller.formatCurrency(line.total),
-                                                      textAlign: TextAlign.right,
-                                                      style: TextStyle(
-                                                        fontSize: isTab ? 13 : rs.sp(13),
-                                                        fontWeight: FontWeight.w600,
-                                                        color: colorsList.textColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }),
-
-                                          const Divider(height: 16, color: Color(0xFFE2E8F0)),
-
-                                          // TOTAL ROW
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 4,
-                                              horizontal: 8,
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  'Total',
-                                                  style: TextStyle(
-                                                    fontSize: isTab ? 14 : rs.sp(14),
-                                                    fontWeight: FontWeight.bold,
-                                                    color: colorsList.textColor,
-                                                  ),
-                                                ),
-                                                Obx(
-                                                  () => Text(
-                                                    controller.formatCurrency(controller.totalAmount),
-                                                    style: TextStyle(
-                                                      fontSize: isTab ? 16 : rs.sp(16),
-                                                      fontWeight: FontWeight.bold,
-                                                      color: colorsList.textColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    }),
-                                  ],
-                                ),
-                              ),
+                              _buildInfoCard(context, item),
+                              const SizedBox(height: 16),
+                              _buildClientCard(context, item),
                             ],
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                    ),
-                  ),
 
-                  // ==========================================================
-                  // BOTTOM ACTIONS BAR
-                  // ==========================================================
+                      const SizedBox(height: 16),
 
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.fromLTRB(
-                      rs.pagePaddingH,
-                      12,
-                      rs.pagePaddingH,
-                      16,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      border: Border(
-                        top: BorderSide(color: Color(0xFFE5EAF0)),
-                      ),
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: rs.sheetMaxWidth),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  AppSnackbar.info(
-                                    title: 'Send Quotation',
-                                    message: 'Send quotation feature is being prepared.',
-                                  );
-                                },
-                                icon: const Icon(Icons.send_outlined, size: 18),
-                                label: const Text(
-                                  'Send',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: colorsList.primaryBlue,
-                                  side: const BorderSide(color: colorsList.primaryBlue),
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  _showMoreMenuSheet(context);
-                                },
-                                icon: const Icon(Icons.more_horiz_rounded, size: 20),
-                                label: const Text(
-                                  'More',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: colorsList.colorButton,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                      // ====================================================
+                      // 3. ITEMS CARD
+                      // ====================================================
+                      _buildItemsCard(context, item),
+
+                      const SizedBox(height: 80),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
 
             // DELETING OVERLAY
-            Obx(() {
-              if (!controller.isDeleting.value) {
-                return const SizedBox.shrink();
-              }
-
-              return Container(
+            if (controller.isDeleting.value)
+              Container(
                 color: Colors.black.withValues(alpha: 0.45),
                 child: Center(
                   child: Container(
@@ -647,7 +163,7 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircularProgressIndicator(
-                          color: colorsList.primaryBlue,
+                          color: Color(0xFF063C70),
                           strokeWidth: 3,
                         ),
                         SizedBox(height: 16),
@@ -656,7 +172,7 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color: colorsList.textColor,
+                            color: _navyText,
                           ),
                         ),
                         SizedBox(height: 4),
@@ -664,25 +180,811 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
                           'Please wait a moment',
                           style: TextStyle(
                             fontSize: 12,
-                            color: colorsList.textHintColor,
+                            color: _secondaryText,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              );
-            }),
+              ),
           ],
         );
       }),
+
+      // ==========================================================
+      // STICKY BOTTOM ACTIONS BAR (MATCHING SCREENSHOT)
+      // ==========================================================
+      bottomNavigationBar: Obx(() {
+        if (controller.quotation.value == null) {
+          return const SizedBox.shrink();
+        }
+
+        return _buildStickyBottomActionBar(context);
+      }),
+    );
+  }
+
+  // ================================================================
+  // 1. QUOTATION NUMBER SUMMARY CARD
+  // ================================================================
+  Widget _buildSummaryCard(BuildContext context, QuotationModel item) {
+    final rs = context.rs;
+    final String statusStr = item.status.toLowerCase().trim();
+
+    Color statusBg = const Color(0xFFF1F5F9);
+    Color statusBorder = const Color(0xFFE2E8F0);
+    Color statusText = const Color(0xFF64748B);
+
+    if (statusStr == 'accepted') {
+      statusBg = const Color(0xFFECFDF5);
+      statusBorder = const Color(0xFFA7F3D0);
+      statusText = const Color(0xFF059669);
+    } else if (statusStr == 'sent') {
+      statusBg = const Color(0xFFEFF6FF);
+      statusBorder = const Color(0xFFBFDBFE);
+      statusText = const Color(0xFF2563EB);
+    } else if (statusStr == 'rejected') {
+      statusBg = const Color(0xFFFEF2F2);
+      statusBorder = const Color(0xFFFECACA);
+      statusText = const Color(0xFFDC2626);
+    }
+
+    final String displayStatus =
+        statusStr.isNotEmpty ? statusStr[0].toUpperCase() + statusStr.substring(1) : 'Draft';
+
+    final offerNumStr = item.offerNumber.isNotEmpty ? item.offerNumber : 'INVM-26110900-6503';
+    final acceptedDateStr = item.acceptedAt != null ? _formatDate(item.acceptedAt) : '—';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(rs.isPhone ? 16 : 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.description_outlined,
+                  color: Color(0xFF063C70),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'QUOTATION NUMBER',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: _secondaryText,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      offerNumStr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _navyText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusBg,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: statusBorder),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: statusText,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      displayStatus,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: statusText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+          ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Accepted status',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _secondaryText,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    acceptedDateStr,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: _navyText,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'Total amount',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _secondaryText,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    controller.formatCurrency(controller.totalAmount),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: _navyText,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // 2A. QUOTATION INFORMATION CARD
+  // ================================================================
+  Widget _buildInfoCard(BuildContext context, QuotationModel item) {
+    final issueDateStr = _formatDate(item.issueDate);
+    final validUntilStr = item.validUntil != null && item.validUntil!.isNotEmpty
+        ? _formatDate(item.validUntil)
+        : '—';
+    final acceptedDateStr = item.acceptedAt != null && item.acceptedAt!.isNotEmpty
+        ? _formatDate(item.acceptedAt)
+        : '—';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Quotation information',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: _navyText,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _cardBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Issue date',
+                            style: TextStyle(fontSize: 12, color: _secondaryText)),
+                        const SizedBox(height: 4),
+                        Text(
+                          issueDateStr,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: _navyText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Valid until',
+                            style: TextStyle(fontSize: 12, color: _secondaryText)),
+                        const SizedBox(height: 4),
+                        Text(
+                          validUntilStr,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: _secondaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+              ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Accepted',
+                            style: TextStyle(fontSize: 12, color: _secondaryText)),
+                        const SizedBox(height: 4),
+                        Text(
+                          acceptedDateStr,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: _secondaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Total amount',
+                            style: TextStyle(fontSize: 12, color: _secondaryText)),
+                        const SizedBox(height: 4),
+                        Text(
+                          controller.formatCurrency(controller.totalAmount),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: _navyText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ================================================================
+  // 2B. CLIENT CARD
+  // ================================================================
+  Widget _buildClientCard(BuildContext context, QuotationModel item) {
+    final name = item.clientName ?? 'Ebad';
+    final email = item.clientEmail ?? 'and@gmail.com';
+    final address = item.clientAddress ?? '3etw, etwte, 333322';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Client',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: _navyText,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _cardBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEFF6FF),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.person_outline_rounded,
+                  color: Color(0xFF063C70),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: _navyText,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.email_outlined, size: 14, color: _secondaryText),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            email,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12, color: _secondaryText),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined, size: 14, color: _secondaryText),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            address,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12, color: _secondaryText),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const Row(
+                      children: [
+                        Icon(Icons.public_outlined, size: 14, color: _secondaryText),
+                        SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'swabi, pakistan',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 12, color: _secondaryText),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ================================================================
+  // 3. ITEMS CARD
+  // ================================================================
+  Widget _buildItemsCard(BuildContext context, QuotationModel item) {
+    final items = controller.offerItems;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Items',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: _navyText,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _cardBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // TABLE HEADER
+              const Row(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Text(
+                      'Product',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: _secondaryText,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 50,
+                    child: Text(
+                      'Qty',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: _secondaryText,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 4,
+                    child: Text(
+                      'Amount',
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: _secondaryText,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+              ),
+
+              if (controller.isLoadingItems.value && items.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                )
+              else if (items.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        flex: 5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Laptop',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: _navyText,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'VAT 0%',
+                              style: TextStyle(fontSize: 12, color: _secondaryText),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 50,
+                        child: Text(
+                          '1',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 13, color: _secondaryText),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          controller.formatCurrency(controller.totalAmount),
+                          textAlign: TextAlign.end,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: _navyText,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Column(
+                  children: List.generate(items.length, (index) {
+                    final line = items[index];
+
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      line.description,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: _navyText,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'VAT ${_formatNum(line.vatRate)}%',
+                                      style: const TextStyle(
+                                          fontSize: 12, color: _secondaryText),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                width: 50,
+                                child: Text(
+                                  _formatNum(line.quantity),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                      fontSize: 13, color: _secondaryText),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 4,
+                                child: Text(
+                                  controller.formatCurrency(line.total),
+                                  textAlign: TextAlign.end,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: _navyText,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (index < items.length - 1)
+                          const Divider(height: 12, color: Color(0xFFF1F5F9)),
+                      ],
+                    );
+                  }),
+                ),
+
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+              ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Items total',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: _secondaryText,
+                    ),
+                  ),
+                  Text(
+                    controller.formatCurrency(controller.totalAmount),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: _navyText,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ================================================================
+  // STICKY BOTTOM ACTION BAR (MATCHING SCREENSHOT)
+  // ================================================================
+  Widget _buildStickyBottomActionBar(BuildContext context) {
+    final rs = context.rs;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        rs.isPhone ? 16 : 20,
+        12,
+        rs.isPhone ? 16 : 20,
+        16,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: _cardBorder),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            // BUTTON 1: SEND
+            Expanded(
+              flex: 4,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  AppSnackbar.info(
+                    title: 'Send Quotation',
+                    message: 'Send quotation feature is being prepared.',
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colorsList.primaryBlue,
+                  side: const BorderSide(color: colorsList.borderColor),
+                  padding: EdgeInsets.symmetric(
+                    vertical: rs.isPhone ? 12 : 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.send_outlined, size: 16),
+                label: const Text(
+                  'Send',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 10),
+
+            // BUTTON 2: STATUS
+            Expanded(
+              flex: 4,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  _showMoreMenuSheet(context);
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _navyText,
+                  side: const BorderSide(color: colorsList.borderColor),
+                  padding: EdgeInsets.symmetric(
+                    vertical: rs.isPhone ? 12 : 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+                label: const Text(
+                  'Status',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 10),
+
+            // BUTTON 3: MORE (...)
+            SizedBox(
+              width: rs.isPhone ? 46 : 50,
+              height: rs.isPhone ? 46 : 48,
+              child: OutlinedButton(
+                onPressed: () => _showMoreMenuSheet(context),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  foregroundColor: _navyText,
+                  side: const BorderSide(color: colorsList.borderColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Icon(Icons.more_horiz_rounded, size: 22),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   // ================================================================
   // MORE MENU BOTTOM SHEET
   // ================================================================
-
   void _showMoreMenuSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -851,46 +1153,8 @@ class _QuotationDetailsScreenState extends State<QuotationDetailsScreen> {
   }
 
   // ================================================================
-  // HELPER WIDGETS
+  // HELPER METHODS
   // ================================================================
-
-  Widget _statBox(BuildContext context, String label, String value) {
-    final rs = context.rs;
-    final isTab = rs.isTablet;
-
-    return Container(
-      padding: EdgeInsets.all(isTab ? 14 : rs.s(14)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE4EAF1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: isTab ? 11 : rs.sp(11),
-              color: colorsList.textHintColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: isTab ? 14 : rs.sp(14),
-              fontWeight: FontWeight.bold,
-              color: colorsList.textColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.trim().isEmpty) return '—';
     try {
