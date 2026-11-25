@@ -26,6 +26,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
       backgroundColor: colorsList.backgroundColor,
       body: SafeArea(
         child: ResponsivePage(
+          maxWidth: rs.isPhone ? null : double.infinity,
           padding: EdgeInsets.zero,
           child: Obx(() {
             if (controller.isLoading.value && controller.reportData.value == null) {

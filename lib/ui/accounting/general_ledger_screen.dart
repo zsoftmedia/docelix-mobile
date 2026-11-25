@@ -232,7 +232,7 @@ class GeneralLedgerScreen extends StatelessWidget {
                         crossAxisSpacing: rs.s(12),
                         mainAxisSpacing: rs.s(12),
                         childAspectRatio: rs.isTablet
-                            ? (rs.isLandscape ? 1.65 : 1.25)
+                            ? (rs.isLandscape ? 1.75 : 1.35)
                             : (rs.isLandscape ? 2.6 : 1.8),
                       ),
                       itemCount: entries.length,

@@ -2,7 +2,6 @@ import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/ledger_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/ledger_account_model.dart';
-import 'package:docelix_mobileapp/ui/add_ledger_account_screen.dart';
 import 'package:docelix_mobileapp/ui/bank_transactions_screen.dart';
 import 'package:docelix_mobileapp/ui/edit_ledger_account_screen.dart';
 import 'package:docelix_mobileapp/ui/general_ledger_screen.dart';
@@ -30,6 +29,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
       backgroundColor: colorsList.backgroundColor,
       body: SafeArea(
         child: ResponsivePage(
+          maxWidth: rs.isPhone ? null : double.infinity,
           padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,11 +481,32 @@ class _LedgerScreenState extends State<LedgerScreen> {
               );
             }
 
+            final cols = rs.listColumns;
+
+            if (cols > 1) {
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: cols,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: rs.isTablet
+                      ? (rs.isLandscape ? 3.40 : 2.75)
+                      : (rs.isLandscape ? 2.6 : 1.8),
+                ),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  return _buildAccountCard(context, list[index]);
+                },
+              );
+            }
+
             return ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: list.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (context, index) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final account = list[index];
                 return _buildAccountCard(context, account);
@@ -502,8 +523,11 @@ class _LedgerScreenState extends State<LedgerScreen> {
   // ================================================================
 
   Widget _buildAccountCard(BuildContext context, LedgerAccountModel account) {
+    final rs = context.rs;
+    final isTab = rs.isTablet;
+
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(isTab ? 10 : 14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -518,6 +542,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // TOP ROW: CODE + NAME + SYSTEM BADGE + STATUS + ACTIONS MENU (SCREENSHOT 4)
           Row(
@@ -542,7 +567,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                         account.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A2342)),
+                        style: TextStyle(fontSize: isTab ? 13 : 14, fontWeight: FontWeight.bold, color: const Color(0xFF0A2342)),
                       ),
                     ),
                     if (account.isSystem) ...[
@@ -582,7 +607,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
                     Text(
                       account.isActive ? 'Active' : 'Inactive',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: isTab ? 9.5 : 10,
                         fontWeight: FontWeight.w600,
                         color: account.isActive ? const Color(0xFF059669) : const Color(0xFF64748B),
                       ),
@@ -600,18 +625,18 @@ class _LedgerScreenState extends State<LedgerScreen> {
           ),
 
           if (account.subhead?.isNotEmpty == true || account.mainHead?.isNotEmpty == true) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: isTab ? 4 : 8),
             Text(
               '${account.mainHead?.toUpperCase() ?? ''} · ${account.subhead ?? ''}',
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+              style: TextStyle(fontSize: isTab ? 10.5 : 11, color: const Color(0xFF64748B)),
             ),
           ],
 
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: isTab ? 4 : 8),
+            child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
 
           // BOTTOM ROW: TYPE & NORMAL SIDE

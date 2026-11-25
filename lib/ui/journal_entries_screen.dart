@@ -228,7 +228,7 @@ class JournalEntriesScreen extends StatelessWidget {
                         crossAxisSpacing: rs.s(12),
                         mainAxisSpacing: rs.s(12),
                         childAspectRatio: rs.isTablet
-                            ? (rs.isLandscape ? 1.40 : 1.02)
+                            ? (rs.isLandscape ? 1.75 : 1.35)
                             : (rs.isLandscape ? 2.40 : 1.50),
                       ),
                       itemCount: entries.length,
@@ -397,7 +397,7 @@ class JournalEntriesScreen extends StatelessWidget {
             Get.toNamed('/JournalEntryDetailsScreen', arguments: entry);
           },*/
           child: Padding(
-            padding: EdgeInsets.all(isTab ? 14 : rs.s(16)),
+            padding: EdgeInsets.all(isTab ? 10 : rs.s(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -409,7 +409,7 @@ class JournalEntriesScreen extends StatelessWidget {
                       child: Text(
                         entry.entryDate.isNotEmpty ? entry.entryDate : '—',
                         style: TextStyle(
-                          fontSize: isTab ? 13 : rs.sp(13),
+                          fontSize: isTab ? 12.5 : rs.sp(13),
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF64748B),
                         ),
@@ -425,7 +425,7 @@ class JournalEntriesScreen extends StatelessWidget {
                         child: Text(
                           paymentStatus,
                           style: TextStyle(
-                            fontSize: isTab ? 11 : rs.sp(11),
+                            fontSize: isTab ? 10.5 : rs.sp(11),
                             fontWeight: FontWeight.w600,
                             color: payText,
                           ),
@@ -446,7 +446,7 @@ class JournalEntriesScreen extends StatelessWidget {
                         child: Text(
                           reconStatus,
                           style: TextStyle(
-                            fontSize: isTab ? 11 : rs.sp(11),
+                            fontSize: isTab ? 10.5 : rs.sp(11),
                             fontWeight: FontWeight.w600,
                             color: isNotReconciled ? const Color(0xFFDC2626) : const Color(0xFF64748B),
                           ),
@@ -457,7 +457,7 @@ class JournalEntriesScreen extends StatelessWidget {
                 ),
 
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: isTab ? 8 : 10),
+                  padding: EdgeInsets.symmetric(vertical: isTab ? 4 : 10),
                   child: const Divider(height: 1, color: Color(0xFFF1F5F9)),
                 ),
 
@@ -467,7 +467,7 @@ class JournalEntriesScreen extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: isTab ? 14 : rs.sp(15),
+                    fontSize: isTab ? 13.5 : rs.sp(15),
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF0A2342),
                   ),
