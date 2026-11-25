@@ -66,7 +66,12 @@ class ForgotPasswordController extends GetxController {
 
   @override
   void onClose() {
-    emailController.dispose();
+    final c = emailController;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        c.dispose();
+      } catch (_) {}
+    });
     super.onClose();
   }
 }

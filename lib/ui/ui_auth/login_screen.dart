@@ -14,7 +14,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginScreen> {
-  final LoginController loginController = Get.put(LoginController());
+  late final LoginController loginController;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Get.isRegistered<LoginController>()) {
+      Get.delete<LoginController>(force: true);
+    }
+    loginController = Get.put(LoginController());
+  }
 
   /// Split brand | form on wide tablets / iPads.
   bool _useSplitLayout(ResponsiveMetrics rs) =>

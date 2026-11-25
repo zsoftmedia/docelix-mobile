@@ -80,8 +80,14 @@ class SignupController extends GetxController {
 
   @override
   void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
+    final controllers = [emailController, passwordController];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final c in controllers) {
+        try {
+          c.dispose();
+        } catch (_) {}
+      }
+    });
     super.onClose();
   }
 }
