@@ -1,10 +1,9 @@
-import 'package:docelix_mobileapp/components/app_button.dart';
+import 'package:docelix_mobileapp/components/app_snackbar.dart';
 import 'package:docelix_mobileapp/controllers/purchase_invoices_details_controller.dart';
 import 'package:docelix_mobileapp/core/responsive/responsive.dart';
 import 'package:docelix_mobileapp/models/purchase_invoices_model.dart';
-import 'package:docelix_mobileapp/utils/colors_list.dart';
-import 'package:docelix_mobileapp/utils/session_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
@@ -24,6 +23,10 @@ class PurchaseInvoicesDetailsScreen extends StatefulWidget {
 class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
   late PurchaseInvoicesDetailsController controller;
 
+  static const Color _navyText = Color(0xFF0A2342);
+  static const Color _secondaryText = Color(0xFF64748B);
+  static const Color _cardBorder = Color(0xFFE2E8F0);
+
   @override
   void initState() {
     super.initState();
@@ -38,186 +41,247 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final rs = context.rs;
-    final width = rs.isPhone
-        ? rs.width
-        : ResponsiveBreakpoints.designWidth * rs.scale;
-    final height = rs.isPhone
-        ? rs.height
-        : ResponsiveBreakpoints.designHeight * rs.scale;
-
     final item = widget.invoice;
 
+    final String purNumberStr = item.purchaseNumber ??
+        item.supplierInvoiceNumber ??
+        item.invoiceNumber ??
+        '${item.id}';
+
     return Scaffold(
-      backgroundColor: colorsList.backgroundColor,
-
-      // ==========================================================
-      // APP BAR
-      // ==========================================================
-
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF8FAFC),
         elevation: 0,
-        surfaceTintColor: Colors.white,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: colorsList.iconColor,
-            size: rs.s(20),
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: const BoxDecoration(
+            color: Color(0xFFEFF6FF),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              size: 18,
+              color: _navyText,
+            ),
           ),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Purchase Invoice Details',
-              style: TextStyle(
-                color: colorsList.textColor,
-                fontSize: rs.sp(18),
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            Text(
-              '#${item.supplierInvoiceNumber ?? item.invoiceNumber ?? item.id}',
-              style: TextStyle(
-                color: colorsList.textHintColor,
-                fontSize: rs.sp(12),
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ],
+        title: Text(
+          'Purchase #$purNumberStr',
+          style: TextStyle(
+            fontSize: rs.sp(17),
+            fontWeight: FontWeight.bold,
+            color: _navyText,
+          ),
         ),
       ),
-
-      // ==========================================================
-      // BODY
-      // ==========================================================
-
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: ResponsivePage(
+                maxWidth: rs.isPhone ? null : double.infinity,
                 padding: EdgeInsets.fromLTRB(
-                  rs.pagePaddingH,
-                  rs.s(16),
-                  rs.pagePaddingH,
-                  rs.s(96),
+                  rs.isPhone ? rs.pagePaddingH : 16.0,
+                  rs.s(8),
+                  rs.isPhone ? rs.pagePaddingH : 16.0,
+                  rs.s(32),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ------------------------------------------------
-                      // 1. TOP HEADER & STATUS BADGE CARD
-                      // ------------------------------------------------
-                      _buildHeaderCard(item, width),
+                      // ====================================================
+                      // 1. TOP HEADER & STATUS SUMMARY CARD
+                      // ====================================================
+                      _buildHeaderCard(context, item),
 
-                      SizedBox(height: height * 0.018),
+                      const SizedBox(height: 16),
 
-                      // ------------------------------------------------
-                      // 2. SUPPLIER & DOCUMENT INFO CARD
-                      // ------------------------------------------------
-                      _buildSupplierAndDocCard(item, width),
+                      // ====================================================
+                      // 2. SUPPLIER & PURCHASE INFORMATION CARDS
+                      // ====================================================
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isWide = constraints.maxWidth > 580;
 
-                      SizedBox(height: height * 0.018),
+                          if (isWide) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: _buildSupplierCard(context, item)),
+                                const SizedBox(width: 16),
+                                Expanded(child: _buildInvoiceInfoCard(context, item)),
+                              ],
+                            );
+                          }
 
-                      // ------------------------------------------------
-                      // 3. TAX & TOTALS CARD
-                      // ------------------------------------------------
-                      _buildTotalsCard(item, width),
+                          return Column(
+                            children: [
+                              _buildSupplierCard(context, item),
+                              const SizedBox(height: 16),
+                              _buildInvoiceInfoCard(context, item),
+                            ],
+                          );
+                        },
+                      ),
 
-                      SizedBox(height: height * 0.018),
+                      const SizedBox(height: 16),
 
-                      // ------------------------------------------------
-                      // 4. HISTORY CARD
-                      // ------------------------------------------------
-                      _buildHistoryCard(item, width),
+                      // ====================================================
+                      // 3. PURCHASED ITEMS / SERVICES CARD
+                      // ====================================================
+                      _buildLineItemsCard(context, item),
 
-                      SizedBox(height: height * 0.022),
+                      const SizedBox(height: 16),
 
-                      // ------------------------------------------------
-                      // 5. INVOICE DOCUMENT PREVIEW CARD
-                      // ------------------------------------------------
-                      _buildDocumentCard(item, width, height, context),
+                      // ====================================================
+                      // 4. TAX & TOTALS CARD
+                      // ====================================================
+                      _buildTotalsCard(context, item),
 
-                      SizedBox(height: height * 0.025),
+                      const SizedBox(height: 16),
+
+                      // ====================================================
+                      // 5. PAYMENT RECORD CARD
+                      // ====================================================
+                      _buildPaymentRecordCard(context, item),
+
+                      const SizedBox(height: 16),
+
+                      // ====================================================
+                      // 6. HISTORY CARD
+                      // ====================================================
+                      _buildHistoryCard(context, item),
+
+                      const SizedBox(height: 16),
+
+                      // ====================================================
+                      // 7. INVOICE DOCUMENT PREVIEW CARD
+                      // ====================================================
+                      _buildDocumentCard(context, item),
+
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
               ),
             ),
 
-            // --------------------------------------------------------
-            // BOTTOM ACTIONS BAR
-            // --------------------------------------------------------
-
+            // ========================================================
+            // STICKY BOTTOM ACTIONS BAR (DELETE & VIEW DOCUMENT)
+            // ========================================================
             Obx(() {
               final String currentStatus =
                   controller.status.value.toLowerCase().trim();
               final bool isDraft = currentStatus == 'draft';
 
-              return Align(
-                alignment: Alignment.bottomCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: rs.contentMaxWidth),
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(
-                      rs.s(16),
-                      rs.s(12),
-                      rs.s(16),
-                      rs.s(16),
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 15,
-                          offset: const Offset(0, -4),
+              return Container(
+                padding: EdgeInsets.fromLTRB(
+                  rs.isPhone ? 16 : 20,
+                  12,
+                  rs.isPhone ? 16 : 20,
+                  16,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(color: _cardBorder),
+                  ),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Row(
+                    children: [
+                      // VIEW DOCUMENT BUTTON
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            final previewUrl = item.previewUrl;
+                            if (previewUrl == null || previewUrl.isEmpty) {
+                              AppSnackbar.info(
+                                title: 'Document',
+                                message: 'Document preview is not available.',
+                              );
+                              return;
+                            }
+
+                            showInvoiceDocumentDialog(
+                              context: context,
+                              fileUrl: previewUrl,
+                              fileType: item.fileType,
+                              mimeType: item.mimeType,
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: _navyText,
+                            side: const BorderSide(color: Color(0xFFCBD5E1)),
+                            padding: EdgeInsets.symmetric(
+                                vertical: rs.isPhone ? 12 : 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(Icons.remove_red_eye_outlined, size: 18),
+                          label: const Text(
+                            'View Document',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        if (isDraft) ...[
-                          Expanded(
-                            child: Obx(
-                              () => AppButton(
-                                text: controller.isDeleting.value
+                      ),
+
+                      if (isDraft) ...[
+                        const SizedBox(width: 12),
+                        // DELETE BUTTON
+                        Expanded(
+                          child: Obx(
+                            () => ElevatedButton.icon(
+                              onPressed: controller.isDeleting.value
+                                  ? null
+                                  : controller.deleteInvoice,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFDC2626),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: rs.isPhone ? 12 : 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: controller.isDeleting.value
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.delete_outline_rounded,
+                                      size: 18),
+                              label: Text(
+                                controller.isDeleting.value
                                     ? 'Deleting...'
-                                    : 'Delete',
-                                icon: Icons.delete_outline_rounded,
-                                height: rs.s(48),
-                                backgroundColor: Colors.white,
-                                disabledBackgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFFD64545),
-                                borderColor: const Color(0xFFD64545),
-                                loadingColor: const Color(0xFFD64545),
-                                borderRadius: 12,
-                                isLoading: controller.isDeleting.value,
-                                onPressed: controller.deleteInvoice,
+                                    : 'Delete Invoice',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                          SizedBox(width: rs.s(12)),
-                        ],
-                        /*Expanded(
-                          child: AppButton(
-                            text: 'More',
-                            icon: Icons.more_horiz_rounded,
-                            height: rs.s(48),
-                            backgroundColor: colorsList.colorButton,
-                            foregroundColor: Colors.white,
-                            borderRadius: 12,
-                            onPressed: () {
-                              _showMoreMenuSheet(context);
-                            },
-                          ),
-                        ),*/
+                        ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
               );
@@ -229,215 +293,417 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
   }
 
   // ================================================================
-  // MORE MENU SHEET
+  // 1. TOP HEADER & STATUS SUMMARY CARD
   // ================================================================
+  Widget _buildHeaderCard(BuildContext context, PurchaseInvoicesModel item) {
+    final rs = context.rs;
+    final currency = item.currency ?? 'EUR';
+    final amount = item.totalAmount ?? 0;
+    final formattedAmt = '$currency ${amount.toStringAsFixed(2)}';
 
-  void _showMoreMenuSheet(BuildContext context) {
-    Get.bottomSheet(
-      backgroundColor: Colors.transparent,
-      ResponsiveSheetBody(
-        padding: EdgeInsets.zero,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 38,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'More Options',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.normal,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(
-                      Icons.close_rounded,
-                      color: Color(0xFF64748B),
-                      size: 20,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _moreOptionTile(
-                title: 'Download document',
-                subtitle: 'View or print attachment document',
-                icon: Icons.file_download_outlined,
-                iconColor: const Color(0xFF0284C7),
-                onTap: () {
-                  Get.back();
-                  final previewUrl = widget.invoice.previewUrl;
-                  if (previewUrl == null || previewUrl.isEmpty) {
-                    Get.snackbar(
-                      'Document',
-                      'Document preview/download is not available.',
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                    return;
-                  }
-
-                  showInvoiceDocumentDialog(
-                    context: context,
-                    fileUrl: previewUrl,
-                    fileType: widget.invoice.fileType,
-                    mimeType: widget.invoice.mimeType,
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              _moreOptionTile(
-                title: 'Review',
-                subtitle: 'Review and update invoice status',
-                icon: Icons.rate_review_outlined,
-                iconColor: const Color(0xFF16A34A),
-                onTap: () {
-                  Get.back();
-                  controller.showStatusSelectionSheet();
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _moreOptionTile({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color iconColor,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: iconColor, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.normal,
-                          color: Color(0xFF1E293B),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF64748B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFF94A3B8),
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ================================================================
-  // 1. TOP HEADER & STATUS CARD
-  // ================================================================
-
-  Widget _buildHeaderCard(PurchaseInvoicesModel item, double width) {
-    final String invNo =
-        item.supplierInvoiceNumber ?? item.invoiceNumber ?? 'PURCHASE';
-    final String suppName = item.supplierName ?? 'Supplier';
+    final formattedIssue = _formatDate(item.invoiceDate);
+    final formattedDue = _formatDate(item.dueDate);
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: EdgeInsets.all(rs.isPhone ? 16 : 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE4EAF1)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'TOTAL PURCHASE',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _secondaryText,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              formattedAmt,
+              style: TextStyle(
+                fontSize: rs.isPhone ? 24 : 30,
+                fontWeight: FontWeight.bold,
+                color: _navyText,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Status Badge Pill
+          Obx(
+            () => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: controller.statusColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: controller.statusColor.withValues(alpha: 0.30),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: controller.statusColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    controller.displayStatus,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: controller.statusColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Issued on $formattedIssue  ·  Due date: $formattedDue',
+            style: TextStyle(
+              fontSize: rs.isPhone ? 11.5 : 12,
+              color: _secondaryText,
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // 2 ACTION BUTTONS ROW (View Document, Delete)
+          Row(
+            children: [
+              Expanded(
+                child: _actionBoxButton(
+                  context: context,
+                  icon: Icons.remove_red_eye_outlined,
+                  label: 'View Document',
+                  onTap: () {
+                    final docUrl = item.previewUrl;
+                    if (docUrl == null || docUrl.isEmpty) {
+                      AppSnackbar.info(
+                        title: 'Document',
+                        message: 'Document preview is not available.',
+                      );
+                      return;
+                    }
+
+                    showInvoiceDocumentDialog(
+                      context: context,
+                      fileUrl: docUrl,
+                      fileType: item.fileType,
+                      mimeType: item.mimeType,
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _actionBoxButton(
+                  context: context,
+                  icon: Icons.delete_outline_rounded,
+                  iconColor: const Color(0xFFDC2626),
+                  label: 'Delete Invoice',
+                  onTap: controller.deleteInvoice,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionBoxButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
+    final rs = context.rs;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: rs.isPhone ? 10 : 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: rs.isPhone ? 18 : 20, color: iconColor ?? _navyText),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: rs.isPhone ? 11.5 : 12,
+                fontWeight: FontWeight.w600,
+                color: iconColor ?? _navyText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ================================================================
+  // 2A. SUPPLIER CARD
+  // ================================================================
+  Widget _buildSupplierCard(BuildContext context, PurchaseInvoicesModel item) {
+    final suppName = item.supplierName ?? 'Supplier';
+    final initials = _getSupplierInitials(suppName);
+    final email = item.supplierEmail ?? 'anees@gmail.com';
+    final addressText = _getSupplierAddress(item);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
+              const Text(
+                'SUPPLIER',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: _secondaryText,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Get.toNamed('/SuppliersScreen');
+                },
+                child: const Row(
+                  children: [
+                    Text(
+                      'Supplier profile',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _secondaryText,
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 16,
+                      color: _secondaryText,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF007A55),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
                 child: Text(
-                  invNo,
-                  style: TextStyle(
-                    fontSize: width * 0.050,
-                    fontWeight: FontWeight.normal,
-                    color: const Color(0xFF063C70),
+                  initials,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      suppName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: _navyText,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      email,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _secondaryText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // Address Pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 16,
+                  color: _secondaryText,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    addressText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: _secondaryText,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: addressText));
+                    AppSnackbar.success(
+                      title: 'Copied',
+                      message: 'Address copied to clipboard.',
+                    );
+                  },
+                  child: const Icon(
+                    Icons.copy_rounded,
+                    size: 16,
+                    color: _secondaryText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // 2B. INVOICE INFORMATION CARD
+  // ================================================================
+  Widget _buildInvoiceInfoCard(BuildContext context, PurchaseInvoicesModel item) {
+    final invNo = item.supplierInvoiceNumber ?? item.invoiceNumber ?? '—';
+    final purNo = item.purchaseNumber ?? '—';
+    final invDate = _formatDate(item.invoiceDate);
+    final dueDate = _formatDate(item.dueDate);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'PURCHASE INFORMATION',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _secondaryText,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          _infoRow('Purchase number', purNo, isBold: true),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _infoRow('Supplier inv number', invNo),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _infoRow('Issue date', invDate),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _infoRow('Due date', dueDate),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Payment status',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: _secondaryText,
                 ),
               ),
               Obx(
                 () => Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: controller.statusColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
+                    color: controller.statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: controller.statusColor.withValues(alpha: 0.30),
+                    ),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
                         width: 6,
@@ -447,13 +713,13 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 4),
                       Text(
                         controller.displayStatus,
                         style: TextStyle(
-                          fontSize: width * 0.028,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                           color: controller.statusColor,
-                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ],
@@ -462,193 +728,386 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            suppName,
-            style: TextStyle(
-              fontSize: width * 0.032,
-              color: colorsList.secondaryText,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
         ],
       ),
     );
   }
 
-  // ================================================================
-  // 2. SUPPLIER & DOCUMENT INFORMATION CARD
-  // ================================================================
+  Widget _infoRow(String label, String value, {bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: _secondaryText,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+            color: _navyText,
+          ),
+        ),
+      ],
+    );
+  }
 
-  Widget _buildSupplierAndDocCard(PurchaseInvoicesModel item, double width) {
-    final suppName = item.supplierName ?? '—';
-    final invNo = item.supplierInvoiceNumber ?? item.invoiceNumber ?? '—';
-    final invDate = _formatDate(item.invoiceDate);
-    final dueDate = _formatDate(item.dueDate);
-    final docType = item.fileType.isNotEmpty
-        ? (item.fileType == 'pdf' ? 'PDF Invoice' : 'Image Invoice')
-        : 'Invoice';
+  // ================================================================
+  // 3. PURCHASED ITEMS / SERVICES CARD
+  // ================================================================
+  Widget _buildLineItemsCard(BuildContext context, PurchaseInvoicesModel item) {
+    final currency = item.currency ?? 'EUR';
+    final amount = item.totalAmount ?? 0;
+    final formattedAmt = '$currency ${amount.toStringAsFixed(2)}';
+    final suppName = item.supplierName ?? 'Peshawar Electric Supply Company';
+    final categoryStr = item.expenseAccountCode ?? item.expenseCategory ?? '5000 · Operating expenses';
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE4EAF1)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                  child: _gridItem('Supplier', suppName, width, isItalic: true)),
-              Expanded(child: _gridItem('Document', docType, width)),
+              const Text(
+                'PURCHASED ITEMS / SERVICES',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: _secondaryText,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  '1 item',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _secondaryText,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
+
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                  child: _gridItem('Supplier invoice number', invNo, width)),
-              Expanded(
-                  child: _gridItem('Supplier invoice date', invDate, width)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Purchase - $suppName',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: _navyText,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      categoryStr,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _secondaryText,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '1 × $formattedAmt',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _secondaryText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                formattedAmt,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: _navyText,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(child: _gridItem('Purchase date', invDate, width)),
-              Expanded(child: _gridItem('Due date', dueDate, width)),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                  child: _gridItem(
-                      'Purchase type', controller.displayCategory, width)),
-              Expanded(child: _gridItem('Payment method', '—', width)),
-            ],
-          ),
-          const SizedBox(height: 14),
-          _gridItem('Reference', '—', width),
         ],
       ),
     );
   }
 
   // ================================================================
-  // 3. TAX & TOTALS CARD
+  // 4. TAX & TOTALS CARD
   // ================================================================
-
-  Widget _buildTotalsCard(PurchaseInvoicesModel item, double width) {
+  Widget _buildTotalsCard(BuildContext context, PurchaseInvoicesModel item) {
     final currency = item.currency ?? 'EUR';
     final amount = item.totalAmount ?? 0;
     final formattedAmt = '$currency ${amount.toStringAsFixed(2)}';
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE4EAF1)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Tax & totals',
+          const Text(
+            'TAX & TOTALS',
             style: TextStyle(
-              fontSize: width * 0.040,
-              fontWeight: FontWeight.normal,
-              color: colorsList.textColor,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _secondaryText,
+              letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 12),
-          _totalRow('Subtotal', formattedAmt, width),
-          _totalRow('Tax', '$currency 0.00', width),
-          const Divider(height: 16, color: Color(0xFFF0F4F8)),
-          _totalRow('Grand total', formattedAmt, width),
+          const SizedBox(height: 14),
+
+          _totalRow('Subtotal', formattedAmt),
+          const SizedBox(height: 8),
+          _totalRow('Tax', '$currency 0.00'),
+          const SizedBox(height: 10),
+          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const SizedBox(height: 10),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Grand Total',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: _navyText,
+                ),
+              ),
+              Text(
+                formattedAmt,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: _navyText,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  // ================================================================
-  // 4. HISTORY CARD
-  // ================================================================
+  Widget _totalRow(String label, String val) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: _secondaryText,
+          ),
+        ),
+        Text(
+          val,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: _navyText,
+          ),
+        ),
+      ],
+    );
+  }
 
-  Widget _buildHistoryCard(PurchaseInvoicesModel item, double width) {
+  // ================================================================
+  // 5. PAYMENT RECORD CARD
+  // ================================================================
+  Widget _buildPaymentRecordCard(BuildContext context, PurchaseInvoicesModel item) {
+    final statusStr = item.status.toLowerCase().trim();
+    final bool isPaid = statusStr == 'posted' || statusStr == 'paid';
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE4EAF1)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'History',
-            style: TextStyle(
-              fontSize: width * 0.040,
-              fontWeight: FontWeight.normal,
-              color: colorsList.textColor,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'PAYMENT RECORD',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: _secondaryText,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isPaid ? const Color(0xFFECFDF5) : const Color(0xFFFFFBEB),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isPaid ? const Color(0xFFA7F3D0) : const Color(0xFFFDE68A),
+                  ),
+                ),
+                child: Text(
+                  isPaid ? 'Fully paid' : 'Unpaid',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isPaid ? const Color(0xFF059669) : const Color(0xFFD97706),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
-          _historyRow('Created', _formatDate(item.uploadedAt), width),
+
+          const Text(
+            'No individual payment recorded.',
+            style: TextStyle(
+              fontSize: 12.5,
+              color: _secondaryText,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
         ],
       ),
     );
   }
 
   // ================================================================
-  // 5. INVOICE DOCUMENT PREVIEW CARD
+  // 6. HISTORY CARD
   // ================================================================
+  Widget _buildHistoryCard(BuildContext context, PurchaseInvoicesModel item) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'HISTORY',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _secondaryText,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _historyRow('Created', _formatDate(item.uploadedAt)),
+          _historyRow('Approved', '—'),
+          _historyRow('Posted to ledger', '—'),
+        ],
+      ),
+    );
+  }
 
+  // ================================================================
+  // 7. INVOICE DOCUMENT PREVIEW CARD
+  // ================================================================
   Widget _buildDocumentCard(
-    PurchaseInvoicesModel item,
-    double width,
-    double height,
     BuildContext context,
+    PurchaseInvoicesModel item,
   ) {
+    final rs = context.rs;
     final docUrl = item.previewUrl ?? '';
 
-    print('document URL Anees: $docUrl');
-
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(width * 0.045),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE4EAF1)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Invoice Document',
+          const Text(
+            'INVOICE DOCUMENT',
             style: TextStyle(
-              fontSize: width * 0.040,
-              fontWeight: FontWeight.normal,
-              color: colorsList.textColor,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _secondaryText,
+              letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+
           GestureDetector(
             onTap: () {
-              if (docUrl == null || docUrl.isEmpty) {
-                Get.snackbar(
-                  'Document',
-                  'Document not available for this invoice.',
-                  snackPosition: SnackPosition.BOTTOM,
+              if (docUrl.isEmpty) {
+                AppSnackbar.info(
+                  title: 'Document',
+                  message: 'Document not available for this invoice.',
                 );
                 return;
               }
@@ -662,11 +1121,11 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
             },
             child: Container(
               width: double.infinity,
-              height: height * 0.22,
+              height: rs.isPhone ? 160 : 200,
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF3F7),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE0E6ED)),
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Stack(
                 children: [
@@ -676,9 +1135,9 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                           ? Icons.picture_as_pdf_rounded
                           : Icons.image_outlined,
                       color: item.fileType == 'pdf'
-                          ? const Color(0xFFD64545)
-                          : colorsList.iconColor,
-                      size: width * 0.15,
+                          ? const Color(0xFFDC2626)
+                          : const Color(0xFF063C70),
+                      size: 48,
                     ),
                   ),
                   Positioned(
@@ -695,10 +1154,10 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                                 : 'Attachment Document',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: const Color(0xFF0A2342),
-                              fontSize: width * 0.031,
-                              fontWeight: FontWeight.normal,
+                            style: const TextStyle(
+                              color: _navyText,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -709,13 +1168,14 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
-                          child: Text(
+                          child: const Text(
                             'View',
                             style: TextStyle(
-                              color: const Color(0xFF063C70),
-                              fontSize: width * 0.028,
-                              fontWeight: FontWeight.normal,
+                              color: Color(0xFF063C70),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -731,118 +1191,56 @@ class _InvoicesDetailsScreenState extends State<PurchaseInvoicesDetailsScreen> {
     );
   }
 
-  // ================================================================
-  // HELPER WIDGETS
-  // ================================================================
-
-  Widget _gridItem(String label, String value, double width,
-      {bool isItalic = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: width * 0.027,
-            color: colorsList.textHintColor,
-            fontWeight: FontWeight.normal,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: width * 0.034,
-            fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
-            fontWeight: FontWeight.normal,
-            color: colorsList.textColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _totalRow(String label, String value, double width) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: width * 0.033,
-              fontWeight: FontWeight.normal,
-              color: colorsList.textHintColor,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: width * 0.033,
-              fontWeight: FontWeight.normal,
-              color: colorsList.textColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _historyRow(String label, String value, double width) {
+  Widget _historyRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: width * 0.030,
-              color: colorsList.textHintColor,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: width * 0.030,
-              color: colorsList.textColor,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
+          Text(label, style: const TextStyle(fontSize: 12, color: _secondaryText)),
+          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: _navyText)),
         ],
       ),
     );
+  }
+
+  // ================================================================
+  // HELPER METHODS
+  // ================================================================
+  String _getSupplierInitials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return 'S';
+    if (parts.length == 1) return parts.first.substring(0, parts.first.length >= 2 ? 2 : 1).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  String _getSupplierAddress(PurchaseInvoicesModel item) {
+    final parts = [
+      item.supplierAddressLine1,
+      item.supplierAddressLine2,
+      item.supplierCity,
+      item.supplierPostal,
+      item.supplierCountry,
+    ].where((e) => (e ?? '').trim().isNotEmpty).toList();
+
+    if (parts.isEmpty) return 'Peshawar Saddar, Islamabad, Pakistan';
+    return parts.join(', ');
   }
 
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.trim().isEmpty) return '—';
     try {
       final parsed = DateTime.parse(dateStr);
-      final months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec'
-      ];
-      return '${parsed.day} ${months[parsed.month - 1]} ${parsed.year}';
+      return '${parsed.day.toString().padLeft(2, '0')}.${parsed.month.toString().padLeft(2, '0')}.${parsed.year}';
     } catch (_) {
       return dateStr;
     }
   }
 }
 
+// ================================================================
+// DOCUMENT PREVIEW DIALOG
+// ================================================================
 void showInvoiceDocumentDialog({
   required BuildContext context,
   required String fileUrl,
@@ -850,23 +1248,11 @@ void showInvoiceDocumentDialog({
   required String mimeType,
 }) {
   final rs = context.rs;
-  final double width = rs.isPhone
-      ? rs.width
-      : ResponsiveBreakpoints.designWidth * rs.scale;
-  final double height = rs.isPhone
-      ? rs.height
-      : ResponsiveBreakpoints.designHeight * rs.scale;
-
   final bool isPdf = fileType.toLowerCase() == 'pdf' ||
       mimeType.toLowerCase() == 'application/pdf';
 
   final bool isImage = mimeType.toLowerCase().startsWith('image/') ||
-      [
-        'jpg',
-        'jpeg',
-        'png',
-        'webp',
-      ].contains(fileType.toLowerCase());
+      ['jpg', 'jpeg', 'png', 'webp'].contains(fileType.toLowerCase());
 
   showDialog(
     context: context,
@@ -878,8 +1264,8 @@ void showInvoiceDocumentDialog({
         child: Dialog(
           backgroundColor: Colors.white,
           insetPadding: EdgeInsets.symmetric(
-            horizontal: rs.isPhone ? rs.wp(0.04) : rs.s(48),
-            vertical: rs.isPhone ? rs.hp(0.06) : rs.s(40),
+            horizontal: rs.isPhone ? 16 : 48,
+            vertical: rs.isPhone ? 24 : 40,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -889,23 +1275,21 @@ void showInvoiceDocumentDialog({
             child: Column(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: width * 0.04,
-                    vertical: height * 0.018,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
                   ),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     border: Border(
-                      bottom: BorderSide(
-                        color: colorsList.borderColor,
-                      ),
+                      bottom: BorderSide(color: Color(0xFFE2E8F0)),
                     ),
                   ),
                   child: Row(
                     children: [
                       Container(
-                        width: width * 0.10,
-                        height: width * 0.10,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
                           color: const Color(0xFFEFF4F9),
                           borderRadius: BorderRadius.circular(12),
@@ -915,31 +1299,30 @@ void showInvoiceDocumentDialog({
                               ? Icons.picture_as_pdf_rounded
                               : Icons.image_outlined,
                           color: isPdf
-                              ? colorsList.colorRed
-                              : colorsList.textColor,
-                          size: width * 0.055,
+                              ? const Color(0xFFDC2626)
+                              : const Color(0xFF063C70),
+                          size: 20,
                         ),
                       ),
-                      SizedBox(width: width * 0.03),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Invoice Document',
                               style: TextStyle(
-                                color: colorsList.textColor,
-                                fontSize: width.fontSizeW(0.040),
-                                fontWeight: FontWeight.normal,
+                                color: Color(0xFF0A2342),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: height * 0.004),
+                            const SizedBox(height: 2),
                             Text(
                               isPdf ? 'PDF Document' : 'Image Document',
-                              style: TextStyle(
-                                color: colorsList.textColor,
-                                fontSize: width.fontSizeW(0.028),
-                                fontWeight: FontWeight.normal,
+                              style: const TextStyle(
+                                color: Color(0xFF64748B),
+                                fontSize: 12,
                               ),
                             ),
                           ],
@@ -951,12 +1334,12 @@ void showInvoiceDocumentDialog({
                         child: InkWell(
                           customBorder: const CircleBorder(),
                           onTap: () => Navigator.of(context).pop(),
-                          child: Padding(
-                            padding: EdgeInsets.all(width * 0.022),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8),
                             child: Icon(
                               Icons.close_rounded,
-                              color: colorsList.iconColor,
-                              size: width * 0.055,
+                              color: Color(0xFF64748B),
+                              size: 20,
                             ),
                           ),
                         ),
@@ -967,7 +1350,7 @@ void showInvoiceDocumentDialog({
                 Expanded(
                   child: Container(
                     width: double.infinity,
-                    color: colorsList.colorBoxDecoration,
+                    color: const Color(0xFFF8FAFC),
                     child: _buildDocumentPreview(
                       fileUrl: fileUrl,
                       isPdf: isPdf,
@@ -1004,7 +1387,7 @@ Widget _buildDocumentPreview({
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return const Center(
-              child: CircularProgressIndicator(color: colorsList.textColor),
+              child: CircularProgressIndicator(),
             );
           },
           errorBuilder: (context, error, stackTrace) {
@@ -1014,12 +1397,12 @@ Widget _buildDocumentPreview({
                 Icon(
                   Icons.broken_image_outlined,
                   size: 50,
-                  color: colorsList.iconColor,
+                  color: Color(0xFF64748B),
                 ),
                 SizedBox(height: 12),
                 Text(
                   'Unable to load document.',
-                  style: TextStyle(color: colorsList.textHintColor),
+                  style: TextStyle(color: Color(0xFF64748B)),
                 ),
               ],
             );
@@ -1032,7 +1415,7 @@ Widget _buildDocumentPreview({
   return const Center(
     child: Text(
       'Unsupported document format.',
-      style: TextStyle(color: colorsList.textHintColor),
+      style: TextStyle(color: Color(0xFF64748B)),
     ),
   );
 }
