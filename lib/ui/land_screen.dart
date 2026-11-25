@@ -77,6 +77,8 @@ class _LandScreenState extends State<LandScreen> {
       } catch (_) {}
     }
 
+    int selectedTabletIndex = 0;
+
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -88,71 +90,62 @@ class _LandScreenState extends State<LandScreen> {
             final rs = context.rs;
             final bottomInset = MediaQuery.of(context).padding.bottom;
 
-            return Align(
-              alignment: Alignment.bottomCenter,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: rs.sheetMaxWidth,
-                  maxHeight: rs.height * 0.90,
-                ),
-                child: Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF8FAFC),
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(24)),
+            final name = profileController?.profileName.value.isNotEmpty == true
+                ? profileController!.profileName.value
+                : (SessionManager.username?.isNotEmpty == true
+                    ? SessionManager.username!
+                    : 'Anees Irshad');
+
+            final email = profileController?.profileEmail.value.isNotEmpty == true
+                ? profileController!.profileEmail.value
+                : (SessionManager.email?.isNotEmpty == true
+                    ? SessionManager.email!
+                    : 'anees.irshad@berrinex.com');
+
+            final plan = profileController?.profilePlan.value ?? 'Standard Plan';
+            final imageUrl = profileController?.profileImageUrl.value ?? '';
+
+            if (rs.isPhone) {
+              // MOBILE BOTTOM SHEET (UNDISTURBED)
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: rs.sheetMaxWidth,
+                    maxHeight: rs.height * 0.90,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 12),
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD7DDE5),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Flexible(
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.fromLTRB(
-                            rs.s(16),
-                            rs.s(4),
-                            rs.s(16),
-                            rs.s(20) + bottomInset,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF8FAFC),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 12),
+                        Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD7DDE5),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // 1. User Profile Header Card
-                              Obx(() {
-                                final name = profileController
-                                                ?.profileName.value.isNotEmpty ==
-                                            true
-                                    ? profileController!.profileName.value
-                                    : (SessionManager.username?.isNotEmpty ==
-                                            true
-                                        ? SessionManager.username!
-                                        : 'Anees Irshad');
-
-                                final email = profileController
-                                                ?.profileEmail.value.isNotEmpty ==
-                                            true
-                                    ? profileController!.profileEmail.value
-                                    : (SessionManager.email?.isNotEmpty == true
-                                        ? SessionManager.email!
-                                        : 'anees.irshad@berrinex.com');
-
-                                final plan =
-                                    profileController?.profilePlan.value ??
-                                        'Standard Plan';
-                                final imageUrl =
-                                    profileController?.profileImageUrl.value ??
-                                        '';
-
-                                return _UserProfileCard(
+                        ),
+                        const SizedBox(height: 12),
+                        Flexible(
+                          child: SingleChildScrollView(
+                            padding: EdgeInsets.fromLTRB(
+                              rs.s(16),
+                              rs.s(4),
+                              rs.s(16),
+                              rs.s(20) + bottomInset,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _UserProfileCard(
                                   name: name,
                                   email: email,
                                   plan: plan,
@@ -161,197 +154,492 @@ class _LandScreenState extends State<LandScreen> {
                                     Navigator.pop(context);
                                     Get.toNamed('/ProfileScreen');
                                   },
-                                );
-                              }),
+                                ),
+                                SizedBox(height: rs.s(16)),
+                                const _MoreSectionHeader(
+                                    title: 'BUSINESS OPERATIONS'),
+                                _MoreGroupCard(
+                                  children: [
+                                    _MoreMenuItem(
+                                      icon: Icons.grid_view_rounded,
+                                      title: 'Inventory',
+                                      subtitle:
+                                          'Stock addition, adjustments & reports',
+                                      iconBgColor: const Color(0xFFE0F2FE),
+                                      iconColor: const Color(0xFF0284C7),
+                                      isTop: true,
+                                      trailing: AnimatedRotation(
+                                        turns: _inventoryExpanded ? 0.5 : 0,
+                                        duration:
+                                            const Duration(milliseconds: 220),
+                                        child: const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: Color(0xFF94A3B8),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      onTap: () {
+                                        setSheetState(() {
+                                          _inventoryExpanded =
+                                              !_inventoryExpanded;
+                                        });
+                                      },
+                                    ),
+                                    _ExpandableSubMenu(
+                                      expanded: _inventoryExpanded,
+                                      items: [
+                                        _SubMenuItem(
+                                          icon: Icons.add_box_outlined,
+                                          title: 'Products',
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            Get.toNamed('/CatalogsScreen');
+                                          },
+                                        ),
+                                        _SubMenuItem(
+                                          icon: Icons.tune_rounded,
+                                          title: 'Stock Adjustment',
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            Get.toNamed('/StockAdjustmentScreen');
+                                          },
+                                        ),
+                                        _SubMenuItem(
+                                          icon: Icons.assessment_outlined,
+                                          title: 'Stock Reports',
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            Get.toNamed('/StockReportScreen');
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    const Divider(
+                                        height: 1,
+                                        thickness: 1,
+                                        color: Color(0xFFF1F5F9)),
+                                    _MoreMenuItem(
+                                      icon: Icons.people_rounded,
+                                      title: 'Customers',
+                                      subtitle: 'Manage your customers',
+                                      iconBgColor: const Color(0xFFDCFCE7),
+                                      iconColor: const Color(0xFF16A34A),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        Get.toNamed('/CustomersScreen');
+                                      },
+                                    ),
+                                    const Divider(
+                                        height: 1,
+                                        thickness: 1,
+                                        color: Color(0xFFF1F5F9)),
+                                    _MoreMenuItem(
+                                      icon: Icons.verified_outlined,
+                                      title: 'Assets',
+                                      subtitle:
+                                          'Fixed assets, inventory & vehicles',
+                                      iconBgColor: const Color(0xFFF3E8FF),
+                                      iconColor: const Color(0xFF7C3AED),
+                                      isBottom: !_assetsExpanded,
+                                      trailing: AnimatedRotation(
+                                        turns: _assetsExpanded ? 0.5 : 0,
+                                        duration:
+                                            const Duration(milliseconds: 220),
+                                        child: const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: Color(0xFF94A3B8),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      onTap: () {
+                                        setSheetState(() {
+                                          _assetsExpanded = !_assetsExpanded;
+                                        });
+                                      },
+                                    ),
+                                    _ExpandableSubMenu(
+                                      expanded: _assetsExpanded,
+                                      items: [
+                                        _SubMenuItem(
+                                          icon: Icons.computer_rounded,
+                                          title: 'Fixed Assets',
+                                          onTap: () => _openAssetRoute(
+                                              '/FixedAssetsScreen'),
+                                        ),
+                                        _SubMenuItem(
+                                          icon: Icons.directions_car_outlined,
+                                          title: 'Vehicles & Logbook',
+                                          onTap: () => _openAssetRoute(
+                                              '/VehiclesLogbookScreen'),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: rs.s(16)),
+                                const _MoreSectionHeader(
+                                    title: 'ACCOUNT & PREFERENCES'),
+                                _MoreGroupCard(
+                                  children: [
+                                    _MoreMenuItem(
+                                      icon: Icons.person_outline_rounded,
+                                      title: 'Company Profile',
+                                      subtitle: 'Manage your company profile',
+                                      iconBgColor: const Color(0xFFE0F2FE),
+                                      iconColor: const Color(0xFF0284C7),
+                                      isTop: true,
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        Get.toNamed('/ProfileScreen');
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: rs.s(14)),
+                                _LogoutCard(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    _logout();
+                                  },
+                                ),
+                                SizedBox(height: rs.s(20)),
+                                const _MoreFooter(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
 
-                              SizedBox(height: rs.s(16)),
-
-                              // 2. Section: BUSINESS OPERATIONS
-                              const _MoreSectionHeader(
-                                  title: 'BUSINESS OPERATIONS'),
-                              _MoreGroupCard(
+            // TABLET MASTER-DETAIL DIALOG (MATCHING SCREENSHOT #2)
+            return Center(
+              child: Dialog(
+                backgroundColor: Colors.transparent,
+                insetPadding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                child: Container(
+                  width: rs.width * 0.85 > 780 ? 780 : rs.width * 0.85,
+                  height: rs.height * 0.72 > 540 ? 540 : rs.height * 0.72,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.10),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      // LEFT MASTER COLUMN
+                      Container(
+                        width: 280,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF8FAFC),
+                          borderRadius:
+                              BorderRadius.horizontal(left: Radius.circular(24)),
+                          border: Border(right: BorderSide(color: Color(0xFFE2E8F0))),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Profile Tile
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                                Get.toNamed('/ProfileScreen');
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Row(
                                 children: [
-                                  // Inventory
-                                  _MoreMenuItem(
-                                    icon: Icons.grid_view_rounded,
-                                    title: 'Inventory',
-                                    subtitle:
-                                        'Stock addition, adjustments & reports',
-                                    iconBgColor: const Color(0xFFE0F2FE),
-                                    iconColor: const Color(0xFF0284C7),
-                                    isTop: true,
-                                    trailing: AnimatedRotation(
-                                      turns: _inventoryExpanded ? 0.5 : 0,
-                                      duration:
-                                          const Duration(milliseconds: 220),
-                                      child: const Icon(
-                                        Icons.keyboard_arrow_down_rounded,
-                                        color: Color(0xFF94A3B8),
-                                        size: 24,
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1B365D),
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: imageUrl.isNotEmpty
+                                          ? DecorationImage(
+                                              image: NetworkImage(imageUrl),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : null,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: imageUrl.isEmpty
+                                        ? Text(
+                                            _getInitialsHelper(name),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                name,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF1E293B),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            const Icon(Icons.verified,
+                                                color: Color(0xFFF97316), size: 14),
+                                          ],
+                                        ),
+                                        Text(
+                                          email,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // BUSINESS OPERATIONS
+                            const Text(
+                              'BUSINESS OPERATIONS',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF94A3B8),
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+
+                            _tabletMenuItem(
+                              icon: Icons.grid_view_rounded,
+                              title: 'Inventory',
+                              isSelected: selectedTabletIndex == 0,
+                              onTap: () => setSheetState(
+                                  () => selectedTabletIndex = 0),
+                            ),
+                            _tabletMenuItem(
+                              icon: Icons.people_rounded,
+                              title: 'Customers',
+                              isSelected: selectedTabletIndex == 1,
+                              onTap: () => setSheetState(
+                                  () => selectedTabletIndex = 1),
+                            ),
+                            _tabletMenuItem(
+                              icon: Icons.verified_outlined,
+                              title: 'Assets',
+                              isSelected: selectedTabletIndex == 2,
+                              onTap: () => setSheetState(
+                                  () => selectedTabletIndex = 2),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // ACCOUNT
+                            const Text(
+                              'ACCOUNT',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF94A3B8),
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+
+                            _tabletMenuItem(
+                              icon: Icons.person_outline_rounded,
+                              title: 'Profile',
+                              isSelected: selectedTabletIndex == 3,
+                              onTap: () => setSheetState(
+                                  () => selectedTabletIndex = 3),
+                            ),
+                            _tabletMenuItem(
+                              icon: Icons.settings_outlined,
+                              title: 'Settings & Security',
+                              isSelected: selectedTabletIndex == 4,
+                              onTap: () => setSheetState(
+                                  () => selectedTabletIndex = 4),
+                            ),
+
+                            const Spacer(),
+
+                            // Logout
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                                _logout();
+                              },
+                              borderRadius: BorderRadius.circular(10),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 8),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.logout_rounded,
+                                        color: Color(0xFFEF4444), size: 18),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Logout',
+                                      style: TextStyle(
+                                        color: Color(0xFFEF4444),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
                                       ),
                                     ),
-                                    onTap: () {
-                                      setSheetState(() {
-                                        _inventoryExpanded =
-                                            !_inventoryExpanded;
-                                      });
-                                    },
-                                  ),
-                                  _ExpandableSubMenu(
-                                    expanded: _inventoryExpanded,
-                                    items: [
-                                      _SubMenuItem(
-                                        icon: Icons.add_box_outlined,
-                                        title: 'Products',
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          Get.toNamed('/CatalogsScreen');
-                                        },
-                                      ),
-                                      _SubMenuItem(
-                                        icon: Icons.tune_rounded,
-                                        title: 'Stock Adjustment',
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          Get.toNamed('/StockAdjustmentScreen');
-                                        },
-                                      ),
-                                      _SubMenuItem(
-                                        icon: Icons.assessment_outlined,
-                                        title: 'Stock Reports',
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          Get.toNamed('/StockReportScreen');
-                                        },
-                                      ),
-                                    ],
-                                  ),
+                                    Spacer(),
+                                    Icon(Icons.chevron_right_rounded,
+                                        color: Color(0xFFFCA5A5), size: 18),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
-                                  const Divider(
-                                      height: 1,
-                                      thickness: 1,
-                                      color: Color(0xFFF1F5F9)),
-
-                                  // Customers
-                                  _MoreMenuItem(
-                                    icon: Icons.people_rounded,
-                                    title: 'Customers',
-                                    subtitle: 'Manage your customers',
-                                    iconBgColor: const Color(0xFFDCFCE7),
-                                    iconColor: const Color(0xFF16A34A),
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      Get.toNamed('/CustomersScreen');
-                                    },
-                                  ),
-
-                                  const Divider(
-                                      height: 1,
-                                      thickness: 1,
-                                      color: Color(0xFFF1F5F9)),
-
-                                  // Assets
-                                  _MoreMenuItem(
-                                    icon: Icons.verified_outlined,
-                                    title: 'Assets',
-                                    subtitle:
-                                        'Fixed assets, inventory & vehicles',
-                                    iconBgColor: const Color(0xFFF3E8FF),
-                                    iconColor: const Color(0xFF7C3AED),
-                                    isBottom: !_assetsExpanded,
-                                    trailing: AnimatedRotation(
-                                      turns: _assetsExpanded ? 0.5 : 0,
-                                      duration:
-                                          const Duration(milliseconds: 220),
-                                      child: const Icon(
-                                        Icons.keyboard_arrow_down_rounded,
-                                        color: Color(0xFF94A3B8),
-                                        size: 24,
+                      // RIGHT DETAIL PANEL
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Top Badges Row
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE0F2FE),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Text(
+                                      'Client Portal',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0284C7),
                                       ),
                                     ),
-                                    onTap: () {
-                                      setSheetState(() {
-                                        _assetsExpanded = !_assetsExpanded;
-                                      });
-                                    },
                                   ),
-                                  _ExpandableSubMenu(
-                                    expanded: _assetsExpanded,
-                                    items: [
-                                      _SubMenuItem(
-                                        icon: Icons.computer_rounded,
-                                        title: 'Fixed Assets',
-                                        onTap: () => _openAssetRoute(
-                                            '/FixedAssetsScreen'),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFDCFCE7),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      plan,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF16A34A),
                                       ),
-                                      _SubMenuItem(
-                                        icon: Icons.directions_car_outlined,
-                                        title: 'Vehicles & Logbook',
-                                        onTap: () => _openAssetRoute(
-                                            '/VehiclesLogbookScreen'),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF10B981),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      const Text(
+                                        'Cloud Sync Active',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF64748B),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
 
-                              SizedBox(height: rs.s(16)),
+                              const SizedBox(height: 20),
 
-                              // 3. Section: ACCOUNT & PREFERENCES
-                              const _MoreSectionHeader(
-                                  title: 'ACCOUNT & PREFERENCES'),
-                              _MoreGroupCard(
+                              // Selected Detail Header & Sub-items
+                              _buildTabletDetailPanel(
+                                  selectedTabletIndex, context),
+
+                              const Spacer(),
+
+                              // Detail Panel Footer
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  // Profile
-                                  _MoreMenuItem(
-                                    icon: Icons.person_outline_rounded,
-                                    title: 'Company Profile',
-                                    subtitle: 'Manage your company profile',
-                                    iconBgColor: const Color(0xFFE0F2FE),
-                                    iconColor: const Color(0xFF0284C7),
-                                    isTop: true,
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      Get.toNamed('/ProfileScreen');
-                                    },
+                                  const Text(
+                                    'DocElix Mobile Suite - v2.4.1',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xFF94A3B8),
+                                    ),
                                   ),
-
-                                  const Divider(
-                                      height: 1,
-                                      thickness: 1,
-                                      color: Color(0xFFF1F5F9)),
-
-                                  // Settings & Security
-                                  /*_MoreMenuItem(
-                                    icon: Icons.settings_outlined,
-                                    title: 'Settings & Security',
-                                    subtitle:
-                                        'App preferences, currency & security',
-                                    iconBgColor: const Color(0xFFF1F5F9),
-                                    iconColor: const Color(0xFF475569),
-                                    isBottom: true,
+                                  InkWell(
                                     onTap: () {
                                       Navigator.pop(context);
-                                      Get.toNamed('/ProfileScreen');
+                                      _openTabletFooterRoute(
+                                          selectedTabletIndex);
                                     },
-                                  ),*/
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          _getTabletFooterLabel(
+                                              selectedTabletIndex),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF063C70),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Icon(
+                                            Icons.arrow_forward_rounded,
+                                            size: 14,
+                                            color: Color(0xFF063C70)),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
-
-                              SizedBox(height: rs.s(14)),
-
-                              // 4. Logout Card
-                              _LogoutCard(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  _logout();
-                                },
-                              ),
-
-                              SizedBox(height: rs.s(20)),
-
-                              // 5. Footer Info
-                              const _MoreFooter(),
                             ],
                           ),
                         ),
@@ -365,6 +653,273 @@ class _LandScreenState extends State<LandScreen> {
         );
       },
     );
+  }
+
+  String _getInitialsHelper(String input) {
+    if (input.trim().isEmpty) return 'AI';
+    final parts = input.trim().split(RegExp(r'\s+'));
+    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+    }
+    return 'AI';
+  }
+
+  Widget _tabletMenuItem({
+    required IconData icon,
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        margin: const EdgeInsets.only(bottom: 2),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFEFF6FF) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF334155),
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: isSelected ? const Color(0xFF0284C7) : const Color(0xFF94A3B8),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletDetailPanel(int index, BuildContext context) {
+    switch (index) {
+      case 0:
+        return _buildTabletSectionContent(
+          icon: Icons.grid_view_rounded,
+          title: 'Inventory',
+          subtitle: 'Stock addition, adjustments & reports',
+          items: [
+            _TabletSubItem('Stock Addition', Icons.add_box_outlined, () {
+              Navigator.pop(context);
+              Get.toNamed('/CatalogsScreen');
+            }),
+            _TabletSubItem('Stock Adjustments', Icons.tune_rounded, () {
+              Navigator.pop(context);
+              Get.toNamed('/StockAdjustmentScreen');
+            }),
+            _TabletSubItem('Inventory Reports', Icons.assessment_outlined, () {
+              Navigator.pop(context);
+              Get.toNamed('/StockReportScreen');
+            }),
+          ],
+        );
+      case 1:
+        return _buildTabletSectionContent(
+          icon: Icons.people_rounded,
+          title: 'Customers',
+          subtitle: 'Manage, track, and organize your customers',
+          items: [
+            _TabletSubItem('View Customers List', Icons.people_outline_rounded, () {
+              Navigator.pop(context);
+              Get.toNamed('/CustomersScreen');
+            }),
+            _TabletSubItem('Add New Customer', Icons.person_add_outlined, () {
+              Navigator.pop(context);
+              Get.toNamed('/AddCustomersScreen');
+            }),
+          ],
+        );
+      case 2:
+        return _buildTabletSectionContent(
+          icon: Icons.verified_outlined,
+          title: 'Assets',
+          subtitle: 'Fixed assets, inventory & vehicles logbook',
+          items: [
+            _TabletSubItem('Fixed Assets', Icons.computer_rounded, () {
+              Navigator.pop(context);
+              Get.toNamed('/FixedAssetsScreen');
+            }),
+            _TabletSubItem('Vehicles & Logbook', Icons.directions_car_outlined, () {
+              Navigator.pop(context);
+              Get.toNamed('/VehiclesLogbookScreen');
+            }),
+          ],
+        );
+      case 3:
+        return _buildTabletSectionContent(
+          icon: Icons.person_outline_rounded,
+          title: 'Company Profile',
+          subtitle: 'Manage your company profile and preferences',
+          items: [
+            _TabletSubItem('Company Profile', Icons.business_outlined, () {
+              Navigator.pop(context);
+              Get.toNamed('/ProfileScreen');
+            }),
+            _TabletSubItem('Notifications', Icons.notifications_none_rounded, () {
+              Navigator.pop(context);
+              Get.toNamed('/NotificationScreen');
+            }),
+          ],
+        );
+      case 4:
+        return _buildTabletSectionContent(
+          icon: Icons.settings_outlined,
+          title: 'Settings & Security',
+          subtitle: 'App preferences, currency & security',
+          items: [
+            _TabletSubItem('Company Profile', Icons.business_outlined, () {
+              Navigator.pop(context);
+              Get.toNamed('/ProfileScreen');
+            }),
+            _TabletSubItem('Notification Settings', Icons.notifications_none_rounded, () {
+              Navigator.pop(context);
+              Get.toNamed('/NotificationScreen');
+            }),
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildTabletSectionContent({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required List<_TabletSubItem> items,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE0F2FE),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: const Color(0xFF0284C7), size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+        const SizedBox(height: 8),
+
+        ...items.map((subItem) {
+          return Column(
+            children: [
+              InkWell(
+                onTap: subItem.onTap,
+                borderRadius: BorderRadius.circular(10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(subItem.icon, size: 18, color: const Color(0xFF64748B)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          subItem.title,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF334155),
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right_rounded, size: 18, color: Color(0xFF94A3B8)),
+                    ],
+                  ),
+                ),
+              ),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  String _getTabletFooterLabel(int index) {
+    switch (index) {
+      case 0:
+        return 'Open Inventory';
+      case 1:
+        return 'Open Customers';
+      case 2:
+        return 'Open Assets';
+      case 3:
+        return 'Open Profile';
+      case 4:
+        return 'Open Settings';
+      default:
+        return 'Open';
+    }
+  }
+
+  void _openTabletFooterRoute(int index) {
+    switch (index) {
+      case 0:
+        Get.toNamed('/CatalogsScreen');
+        break;
+      case 1:
+        Get.toNamed('/CustomersScreen');
+        break;
+      case 2:
+        Get.toNamed('/FixedAssetsScreen');
+        break;
+      case 3:
+      case 4:
+        Get.toNamed('/ProfileScreen');
+        break;
+    }
   }
 
   @override
@@ -1257,4 +1812,12 @@ class _ScanBottomButton extends StatelessWidget {
       );
     });
   }
+}
+
+class _TabletSubItem {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  _TabletSubItem(this.title, this.icon, this.onTap);
 }
