@@ -49,6 +49,11 @@ class SupplierDetailsController extends GetxController {
     }
   }
 
+  Future<void> refreshSupplierData() async {
+    await fetchSupplierPurchases();
+    await fetchSupplierLedger();
+  }
+
   Future<void> openEditSupplier() async {
     final currentSupplier = supplier.value;
     if (currentSupplier == null) return;
